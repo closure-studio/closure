@@ -1,5 +1,6 @@
 import { useColorScheme } from '@/components/useColorScheme';
 import { useProtectedRoute } from '@/hooks/auth/useProtectedRoute';
+import { SystemProvider } from '@/providers/system';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -8,6 +9,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StrictMode, useEffect } from 'react';
 import 'react-native-reanimated';
 import "../global.css";
+import { DataProvider } from '@/providers/data';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -46,14 +48,24 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
+const DependentProviders = ({ children }: { children: React.ReactNode }) => (
+  <StrictMode>
+    <SystemProvider>
+      <DataProvider>
+        {children}
+      </DataProvider>
+    </SystemProvider>
+  </StrictMode>
+);
+
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  
+
   // 添加路由保护
   useProtectedRoute();
 
   return (
-    <StrictMode>
+    <DependentProviders>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="login" options={{ headerShown: false }} />
@@ -61,6 +73,6 @@ function RootLayoutNav() {
           <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         </Stack>
       </ThemeProvider>
-    </StrictMode>
+    </DependentProviders>
   );
 }

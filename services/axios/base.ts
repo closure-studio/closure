@@ -138,16 +138,37 @@ abstract class ServerBase {
         return resp;
     }
 
-    setBaseURL(newHost: string) {
+    /**
+     * 更新 axios 实例的 baseURL
+     * @param newHost 新的 host 地址
+     */
+    public setBaseURL(newHost: string) {
+        this.log.info(`Updating baseURL to: ${newHost}`);
         this.instance.defaults.baseURL = newHost;
     }
 
-    setAuthToken(newToken: string) {
+    /**
+     * 更新 axios 实例的 Authorization header
+     * @param newToken 新的 token
+     */
+    public setAuthToken(newToken: string) {
         const authValue = `Bearer ${newToken}`;
+        this.log.info('Updating Authorization token');
         this.instance.defaults.headers.common['Authorization'] = authValue;
     }
 
-    getInstance(): AxiosInstance {
+    /**
+     * 移除 Authorization header
+     */
+    public removeAuthToken() {
+        this.log.info('Removing Authorization token');
+        delete this.instance.defaults.headers.common['Authorization'];
+    }
+
+    /**
+     * 获取 axios 实例
+     */
+    public getInstance(): AxiosInstance {
         return this.instance;
     }
 }

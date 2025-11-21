@@ -1,18 +1,18 @@
 import { useColorScheme } from '@/components/useColorScheme';
-import { useAuthStore } from '@/store/authStore';
+import { useData } from '@/providers/data';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -20,13 +20,11 @@ export default function LoginScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, isLoading } = useData();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
-    // 清除之前的错误
-    clearError();
 
     // 验证输入
     if (!email.trim() || !password.trim()) {
@@ -42,8 +40,8 @@ export default function LoginScreen() {
     }
 
     try {
-      await login({ email, password });
-      
+      // await login({ email, password });
+
       // 登录成功后导航到主页
       router.replace('/(tabs)');
     } catch (err: any) {
@@ -53,13 +51,13 @@ export default function LoginScreen() {
 
   return (
     <>
-      <Stack.Screen 
+      <Stack.Screen
         options={{
           headerShown: false,
-        }} 
+        }}
       />
       <StatusBar style="auto" />
-      
+
       <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#111827' : '#ffffff' }]}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -128,7 +126,7 @@ export default function LoginScreen() {
             </View>
 
             {/* Forgot Password Link */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.forgotPassword}
               disabled={isLoading}
             >

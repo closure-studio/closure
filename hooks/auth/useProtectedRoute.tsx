@@ -1,4 +1,3 @@
-import { useAuthStore } from '@/store/authStore';
 import { useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 
@@ -9,8 +8,8 @@ import { useEffect } from 'react';
 export function useProtectedRoute() {
   const segments = useSegments();
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
-
+  // const { isAuthenticated } = useAuth();
+  const isAuthenticated = false;
   useEffect(() => {
     const inAuthGroup = segments[0] === '(tabs)';
 

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "PRTS",
+    "name": "可露希尔",
     "slug": "closure-prts",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,7 +14,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jackjieyyy.closureprts"
     },
     "android": {
       "adaptiveIcon": {
