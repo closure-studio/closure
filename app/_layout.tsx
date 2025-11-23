@@ -1,5 +1,6 @@
 import { useColorScheme } from '@/components/useColorScheme';
 import { useProtectedRoute } from '@/hooks/auth/useProtectedRoute';
+import { ClosureProvider } from '@/providers/services/useClosure';
 import { SystemProvider } from '@/providers/system';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -9,7 +10,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StrictMode, useEffect } from 'react';
 import 'react-native-reanimated';
 import "../global.css";
-import { DataProvider } from '@/providers/data';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -51,9 +51,9 @@ export default function RootLayout() {
 const DependentProviders = ({ children }: { children: React.ReactNode }) => (
   <StrictMode>
     <SystemProvider>
-      <DataProvider>
+      <ClosureProvider>
         {children}
-      </DataProvider>
+      </ClosureProvider>
     </SystemProvider>
   </StrictMode>
 );

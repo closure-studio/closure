@@ -1,6 +1,5 @@
-
-import { IAuthLoginResponse } from "@/types/auth";
-import { IApiResponse, IServiceConfig } from "@/types/axios";
+import { ILoginResponse } from "@/types/auth";
+import { IAPIResponse, IServiceConfig } from "@/types/axios";
 import ServerBase from "./base";
 import { ID_SERVER_CONSTANTS } from "./constants";
 /**
@@ -17,10 +16,10 @@ class IdServerClient extends ServerBase {
     /**
      * 处理 API 响应
      */
-    protected async handleResponse<T>(promise: Promise<any>): Promise<IApiResponse<T>> {
+    protected async handleResponse<T>(promise: Promise<any>): Promise<IAPIResponse<T>> {
         try {
             const resp = await promise;
-            return resp.data as IApiResponse<T>;
+            return resp.data as IAPIResponse<T>;
         } catch (error: any) {
             if (error.response) {
                 return {
@@ -46,11 +45,11 @@ class IdServerClient extends ServerBase {
      * @param password 用户密码
      * @returns 登录响应，包含 token
      */
-    async login(email: string, password: string): Promise<IApiResponse<IAuthLoginResponse>> {
+    async login(email: string, password: string): Promise<IAPIResponse<ILoginResponse>> {
         const option = { ...ID_SERVER_CONSTANTS.LOGIN };
         option.data = { email, password };
         option.isPublic = true; // 登录接口是公开的，不需要 token
-        return this.post<IAuthLoginResponse>(option.endPoint, option);
+        return this.post<ILoginResponse>(option.endPoint, option);
     }
 }
 export default IdServerClient;

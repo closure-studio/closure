@@ -1,5 +1,5 @@
 
-import { IApiResponse, IServiceConfig } from "@/types/axios";
+import { IAPIResponse, IServiceConfig } from "@/types/axios";
 import ServerBase from "./base";
 
 
@@ -17,10 +17,10 @@ class ArkQuotaClient extends ServerBase {
     /**
      * 处理 API 响应
      */
-    protected async handleResponse<T>(promise: Promise<any>): Promise<IApiResponse<T>> {
+    protected async handleResponse<T>(promise: Promise<any>): Promise<IAPIResponse<T>> {
         try {
             const resp = await promise;
-            return resp.data as IApiResponse<T>;
+            return resp.data as IAPIResponse<T>;
         } catch (error: any) {
             if (error.response) {
                 return {

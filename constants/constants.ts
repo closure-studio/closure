@@ -1,3 +1,5 @@
+
+import { IAPPConfig } from "@/types/storage";
 import { IServiceConfigs } from "../types/axios";
 
 const CLARITY_NATIVE_PROD_ID = "t0eiarz3dw";
@@ -12,9 +14,12 @@ interface IConstants {
   TOAST: {
     DURATION: number;
   };
+  STORAGE_KEYS: {
+    DEFAULT_STORAGE_KEY: string;
+  };
 }
 
-export const DEFAULT_CONSTANTS: IConstants = {
+export const CONSTANTS: IConstants = {
   CLARITY: {
     NATIVE_PREVIEW_ID: CLARITY_NATIVE_PREVIEW_ID,
     NATIVE_PROD_ID: CLARITY_NATIVE_PROD_ID,
@@ -33,4 +38,15 @@ export const DEFAULT_CONSTANTS: IConstants = {
   TOAST: {
     DURATION: 1500,
   },
+  STORAGE_KEYS: {
+    DEFAULT_STORAGE_KEY: 'default_mmkv_storage',
+  },
 } as const satisfies IConstants;
+
+export const DEFAULT_APP_CONFIG: IAPPConfig = {
+  apiConfigs: {
+    serviceConfigs: CONSTANTS.SERVICE_CONFIGS,
+  },
+  currentCredentialUUID: null,
+  credentialRecord: {},
+};

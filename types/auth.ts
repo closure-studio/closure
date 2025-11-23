@@ -1,20 +1,27 @@
-export interface IAuthCredentials {
+export type UUID = string;
+export interface ILoginCredential {
     email?: string;
     password?: string;
-    token?: string;
+    token?: string; // JWT token
 }
 
-export interface IAuthLoginResponse {
-    token: string;
+export interface ILoginResponse {
+    token: string; // JWT token
     available_slot: number; // deprecated
 }
 
-export interface IAuthInfo {
+export interface IJWTPayload {
     createdAt: number;
     email: string;
     exp: number;
     isAdmin: boolean;
     permission: number;
     status: number;
-    uuid: string;
+    uuid: UUID;
 }
+
+export interface IAuthSession {
+    credential: ILoginCredential;
+    payload?: IJWTPayload;
+}
+

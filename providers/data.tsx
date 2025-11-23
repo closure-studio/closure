@@ -1,17 +1,25 @@
+import { CONSTANTS, DEFAULT_APP_CONFIG } from '@/constants/constants';
+import { IAPIClients, useAPI } from '@/hooks/api/useAPI';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { IAuthSession } from '@/types/auth';
+import { IAPPConfig } from '@/types/storage';
 import { LOG } from '@/utils/logger/logger';
-import React, { createContext, ReactNode, useContext, useMemo } from 'react';
-import { AuthState } from './auth';
+import { storage } from '@/utils/mmkv/mmkv';
+import { produce } from 'immer';
+import React, { createContext, ReactNode, useContext, useEffect } from 'react';
 import { useSystem } from './system';
 
 /**
  * 全局数据 Context
  * 集成所有全局状态：认证、配置、设置等
  */
-interface DataContextType extends AuthState {
+interface DataContextType {
   // 在这里可以添加其他全局数据类型
   // 例如：
   // config: ConfigState;
   // settings: SettingsState;
+  updateAppConfig: (updater: (draft: IAPPConfig) => void) => void;
+  apiClients: IAPIClients;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -19,39 +27,45 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 interface DataProviderProps {
   children: ReactNode;
 }
-
+const log = LOG.extend('DataProvider');
 /**
  * 全局数据 Provider
  * 集中管理所有全局状态
  */
 const DataProvider = ({ children }: DataProviderProps) => {
-  const log = LOG.extend('DataProvider');
-  // 使用认证 hook
-  // const auth = useAuthState();
 
-  // 这里可以添加其他全局状态 hooks
-  // const config = useConfigState();
-  // const settings = useSettingsState();
-  const { config } = useSystem();
-  log.info('DataProvider initialized with config', config);
+  const { initAppConfig } = useSystem();
+  const [appConfig, setAppConfig] = React.useState<IAPPConfig>(initAppConfig ?? DEFAULT_APP_CONFIG);
+  const authState = useAuth({
+    credentialList: appConfig.credentialRecord,
+    currentCredentialUUID: appConfig.currentCredentialUUID,
+  });
 
-  const values: DataContextType = useMemo(() => ({
-    user: null,
-    token: null,
-    isLoading: false,
-    isAuthenticated: false,
-    login: function (email: string, password: string): Promise<void> {
-      throw new Error('Function not implemented.');
-    },
-    logout: function (): Promise<void> {
-      throw new Error('Function not implemented.');
-    },
-    refreshUserInfo: function (): Promise<void> {
+
+  const apiClients = useAPI({
+    serviceConfigs: appConfig.apiConfigs.serviceConfigs,
+    authSession: authState.currentAuthSession,
+    setAuthSession: function (session: IAuthSession): void {
       throw new Error('Function not implemented.');
     }
-  }), [config]);
+  })
 
-  return <DataContext.Provider value={values}>{children}</DataContext.Provider>;
+  useEffect(() => {
+    storage.setObject(CONSTANTS.STORAGE_KEYS.DEFAULT_STORAGE_KEY, appConfig);
+  }, [appConfig]);
+
+// use immer to update app config
+const updateAppConfig = (updater: (draft: IAPPConfig) => void) => {
+  setAppConfig((currentConfig) => produce(currentConfig, updater));
+};
+
+log.info('DataProvider initialized with config', appConfig);
+
+const values: DataContextType = {
+  updateAppConfig,
+  apiClients,
+};
+return <DataContext.Provider value={values}>{children}</DataContext.Provider>;
 };
 
 /**

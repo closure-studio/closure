@@ -22,7 +22,7 @@ export interface ApiCallOptions {
 }
 
 
-export interface IApiResponse<T> {
+export interface IAPIResponse<T> {
     code: number;
     data?: T;
     message: string;

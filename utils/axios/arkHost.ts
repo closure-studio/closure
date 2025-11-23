@@ -1,5 +1,5 @@
 import { GameStatusData, IArkHostConfig } from "@/types/arkHost";
-import { IApiResponse, IServiceConfig } from "@/types/axios";
+import { IAPIResponse, IServiceConfig } from "@/types/axios";
 import ServerBase from "./base";
 import { ARK_HOST_CONSTANTS } from "./constants";
 
@@ -18,10 +18,10 @@ class ArkHostClient extends ServerBase {
     /**
      * 处理 API 响应
      */
-    protected async handleResponse<T>(promise: Promise<any>): Promise<IApiResponse<T>> {
+    protected async handleResponse<T>(promise: Promise<any>): Promise<IAPIResponse<T>> {
         try {
             const resp = await promise;
-            return resp as IApiResponse<T>;
+            return resp as IAPIResponse<T>;
         } catch (error: any) {
             if (error.response) {
                 return {
@@ -45,7 +45,7 @@ class ArkHostClient extends ServerBase {
     /**
      * 查询游戏状态
      */
-    queryGamesStatus(): Promise<IApiResponse<GameStatusData[]>> {
+    queryGamesStatus(): Promise<IAPIResponse<GameStatusData[]>> {
         const option = ARK_HOST_CONSTANTS.GAME;
         return this.post<GameStatusData[]>(option.endPoint, option);
     }
@@ -53,7 +53,7 @@ class ArkHostClient extends ServerBase {
     /**
      * 查询配置信息
      */
-    queryConfig(): Promise<IApiResponse<IArkHostConfig>> {
+    queryConfig(): Promise<IAPIResponse<IArkHostConfig>> {
         const option = ARK_HOST_CONSTANTS.CONFIG;
         return this.get<IArkHostConfig>(option.endPoint, option);
     }

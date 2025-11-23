@@ -1,10 +1,12 @@
+import { CONSTANTS } from '@/constants/constants';
+import { IAPPConfig } from '@/types/storage';
 import { LOG } from '@/utils/logger/logger';
-import { STORAGE_KEYS, storageUtils } from '@/utils/storage';
+import { storage } from '@/utils/mmkv/mmkv';
 import React, { createContext, ReactNode, useContext } from 'react';
 
 
 interface SystemContextType {
-  config: any;
+  initAppConfig: IAPPConfig | null;
 }
 
 const SystemContext = createContext<SystemContextType | undefined>(undefined);
@@ -14,7 +16,7 @@ interface SystemProviderProps {
 }
 
 // 直接从 MMKV 读取持久化数据（同步操作）
-const config = storageUtils.getObject(STORAGE_KEYS.SERVICE_CONFIGS) || { aa: 'bb' };
+const initAppConfig = storage.getObject<IAPPConfig>(CONSTANTS.STORAGE_KEYS.DEFAULT_STORAGE_KEY);
 
 /**
  * 全局数据 Provider
@@ -25,10 +27,7 @@ const SystemProvider = ({ children }: SystemProviderProps) => {
 
 
   const values: SystemContextType = {
-    // 展开所有认证相关字段
-    config,
-    // 这里可以添加其他全局数据
-    // settings,
+    initAppConfig,
   }
   return <SystemContext.Provider value={values}>{children}</SystemContext.Provider>;
 };
