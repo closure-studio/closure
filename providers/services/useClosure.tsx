@@ -3,7 +3,7 @@ import { IAuthSession, IJWTPayload, ILoginResponse, UUID } from "@/types/auth";
 import { IAPIResponse } from "@/types/axios";
 import { LOG } from "@/utils/logger/logger";
 import { jwtDecode } from "jwt-decode";
-import React, { createContext, ReactNode, useContext } from "react";
+import React, { createContext, ReactNode, useContext, useEffect } from "react";
 import { useData } from "../data";
 
 // UI -> dataProvider -> 业务逻辑 -> useAPI -> api
@@ -47,8 +47,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       }
 
       const response = await idServerClient.login(email, password);
-
-      if (response.code !== 200 && response.code !== 0) {
+      if (response.code !== 1) {
         return {
           code: 0,
           message: response.message || MESSAGES.AUTH.LOGIN_FAILED,
@@ -56,13 +55,14 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       }
 
       if (!response.data) {
+        log.error("Invalid response data");
         return {
           code: 0,
           message: MESSAGES.AUTH.INVALID_RESPONSE,
         };
       }
-
-      LOG.info(MESSAGES.AUTH.LOGIN_SUCCESS, { email });
+      log.info(MESSAGES.AUTH.LOGIN_SUCCESS, { email });
+      log.debug("Login response data:", response.data);
       // decode token to get payload
       const payload = jwtDecode<IJWTPayload>(response.data.token);
       session.credential.token = response.data.token;
@@ -100,7 +100,6 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       throw error;
     }
   };
-
   const values: ClosureContextType = {
     login,
     logout,

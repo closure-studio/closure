@@ -27,6 +27,7 @@
     "expo-web-browser": "~15.0.9",
     "immer": "^10.2.0",
     "jwt-decode": "^4.0.0",
+    "lint": "^0.8.19",
     "nativewind": "5.0.0-preview.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -45,6 +46,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
     "@types/react": "~19.1.0",
+    "eslint": "^9.39.1",
     "eslint-config-expo": "~10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",

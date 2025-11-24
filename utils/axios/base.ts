@@ -93,6 +93,7 @@ abstract class ServerBase {
     const resp = await this.handleResponse<T>(
       this.getInstance().post(url, data, axiosConfig),
     );
+    this.log.debug("POST Response:", resp);
     if (!resp.data) {
       this.log.error(`${errorPrefix || "POST Request"} failed:`, resp.message);
     }
@@ -110,6 +111,7 @@ abstract class ServerBase {
     const resp = await this.handleResponse<T>(
       this.getInstance().get(url, axiosConfig),
     );
+    this.log.debug("GET Response:", resp);
     if (!resp.data) {
       this.log.error(`${errorPrefix || "GET Request"} failed:`, resp.message);
     }
@@ -127,6 +129,7 @@ abstract class ServerBase {
     const resp = await this.handleResponse<T>(
       this.getInstance().put(url, data, axiosConfig),
     );
+    this.log.debug("PUT Response:", resp);
     if (!resp.data) {
       this.log.error(`${errorPrefix || "PUT Request"} failed:`, resp.message);
     }
@@ -144,6 +147,7 @@ abstract class ServerBase {
     const resp = await this.handleResponse<T>(
       this.getInstance().delete(url, axiosConfig),
     );
+    this.log.debug("DELETE Response:", resp);
     if (!resp.data) {
       this.log.error(
         `${errorPrefix || "DELETE Request"} failed:`,

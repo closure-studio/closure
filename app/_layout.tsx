@@ -1,5 +1,6 @@
 import { useColorScheme } from "@/components/useColorScheme";
 import { useProtectedRoute } from "@/hooks/auth/useProtectedRoute";
+import { DataProvider } from "@/providers/data";
 import { ClosureProvider } from "@/providers/services/useClosure";
 import { SystemProvider } from "@/providers/system";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -55,26 +56,34 @@ export default function RootLayout() {
 const DependentProviders = ({ children }: { children: React.ReactNode }) => (
   <StrictMode>
     <SystemProvider>
-      <ClosureProvider>{children}</ClosureProvider>
+      <DataProvider>
+        <ClosureProvider>{children}</ClosureProvider>
+      </DataProvider>
     </SystemProvider>
   </StrictMode>
 );
 
-function RootLayoutNav() {
+const NavigationContent = () => {
   const colorScheme = useColorScheme();
 
-  // 添加路由保护
+  // 添加路由保护 - 现在在 DataProvider 内部
   useProtectedRoute();
 
   return (
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <Stack>
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+      </Stack>
+    </ThemeProvider>
+  );
+};
+
+function RootLayoutNav() {
+  return (
     <DependentProviders>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-        </Stack>
-      </ThemeProvider>
+      <NavigationContent />
     </DependentProviders>
   );
 }

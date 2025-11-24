@@ -1,6 +1,6 @@
 import { useColorScheme } from "@/components/useColorScheme";
-import { useData } from "@/providers/data";
 import { useClosure } from "@/providers/services/useClosure";
+import { IAuthSession } from "@/types/auth";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
@@ -39,14 +39,25 @@ export default function LoginScreen() {
       Alert.alert("错误", "请输入有效的邮箱地址");
       return;
     }
+    if (isLoading) return;
+
+    setIsLoading(true);
 
     try {
-      // await login({ email, password });
+      const session: IAuthSession = {
+        credential: {
+          email,
+          password,
+        },
+      };
+      await login(session);
 
       // 登录成功后导航到主页
       router.replace("/(tabs)");
     } catch (err: any) {
       Alert.alert("登录失败", err.message || "邮箱或密码错误，请重试");
+    } finally {
+      setIsLoading(false);
     }
   };
 

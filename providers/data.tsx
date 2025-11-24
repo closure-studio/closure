@@ -9,6 +9,7 @@ import { produce } from "immer";
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -66,9 +67,13 @@ const DataProvider = ({ children }: DataProviderProps) => {
   }, [appConfig]);
 
   // use immer to update app config
-  const updateAppConfig = (updater: (draft: IAPPConfig) => void) => {
-    setAppConfig((currentConfig) => produce(currentConfig, updater));
-  };
+  const updateAppConfig = useCallback(
+    (updater: (draft: IAPPConfig) => void) => {
+      log.info("Updating app config");
+      setAppConfig((currentConfig) => produce(currentConfig, updater));
+    },
+    [],
+  );
 
   log.info("DataProvider initialized with config", appConfig);
 
@@ -79,6 +84,10 @@ const DataProvider = ({ children }: DataProviderProps) => {
       );
     }
     return null;
+  }, [appConfig]);
+
+  useEffect(() => {
+    log.info("appconfig changed: ", appConfig);
   }, [appConfig]);
 
   const values: DataContextType = {
