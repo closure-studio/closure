@@ -1,4 +1,3 @@
-
 import { IAPPConfig } from "@/types/storage";
 import { IServiceConfigs } from "../types/axios";
 
@@ -26,20 +25,20 @@ export const CONSTANTS: IConstants = {
   },
   SERVICE_CONFIGS: {
     ARK_HOST: {
-      HOST: `https://api-tunnel.arknights.app`
+      HOST: `https://api-tunnel.arknights.app`,
     },
     ARK_QUOTA: {
-      HOST: `https://registry.ltsc.vip`
+      HOST: `https://registry.ltsc.vip`,
     },
     ID_SERVER: {
-      HOST: `https://passport.ltsc.vip`
+      HOST: `https://passport.ltsc.vip`,
     },
   },
   TOAST: {
     DURATION: 1500,
   },
   STORAGE_KEYS: {
-    DEFAULT_STORAGE_KEY: 'default_mmkv_storage',
+    DEFAULT_STORAGE_KEY: "default_mmkv_storage",
   },
 } as const satisfies IConstants;
 

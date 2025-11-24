@@ -3,34 +3,33 @@ import { IAPPConfig } from "@/types/storage";
 import { useMemo } from "react";
 
 interface IUseAuthParams {
-    credentialList: Record<UUID, IAuthSession>;
-    currentCredentialUUID: UUID | null;
-
+  credentialList: Record<UUID, IAuthSession>;
+  currentCredentialUUID: UUID | null;
 }
 
 interface IUseAuthReturn {
-    isLogin: boolean;
-    currentAuthSession: IAuthSession | null;
+  isLogin: boolean;
+  currentAuthSession: IAuthSession | null;
 }
 
 export const useAuth = (props: IUseAuthParams): IUseAuthReturn => {
-    const { credentialList, currentCredentialUUID } = props;
+  const { credentialList, currentCredentialUUID } = props;
 
-    const currentAuthSession = useMemo(() => {
-        if (currentCredentialUUID && credentialList[currentCredentialUUID]) {
-            return credentialList[currentCredentialUUID];
-        }
-        return null;
-    }, [credentialList, currentCredentialUUID]);
+  const currentAuthSession = useMemo(() => {
+    if (currentCredentialUUID && credentialList[currentCredentialUUID]) {
+      return credentialList[currentCredentialUUID];
+    }
+    return null;
+  }, [credentialList, currentCredentialUUID]);
 
-    const isLogin = useMemo(() => {
-        return currentCredentialUUID !== null && !!credentialList[currentCredentialUUID];
-    }, [credentialList, currentCredentialUUID]);
+  const isLogin = useMemo(() => {
+    return (
+      currentCredentialUUID !== null && !!credentialList[currentCredentialUUID]
+    );
+  }, [credentialList, currentCredentialUUID]);
 
-
-    return {
-        isLogin,
-        currentAuthSession,
-    };
-
+  return {
+    isLogin,
+    currentAuthSession,
+  };
 };

@@ -1,11 +1,8 @@
 import { storage } from "@/utils/mmkv/mmkv";
 
-interface IUseStorageParams {
-
-}
+interface IUseStorageParams {}
 
 export const useStorage = (props: IUseStorageParams) => {
-    const myStorage = storage;
-    return { storage: myStorage };
-
+  const myStorage = storage;
+  return { storage: myStorage };
 };
