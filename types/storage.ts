@@ -1,6 +1,6 @@
-import { IAssetItems, IAssetStages } from "./assets";
-import { IAuthSession, UUID } from "./auth";
-import { IServiceConfigs } from "./axios";
+import { IAssetItems, IAssetStages } from "./assets.js";
+import { IAuthSession, UUID } from "./auth.js";
+import { IServiceConfigs } from "./axios.js";
 
 export interface IAPIConfigs {
   serviceConfigs: IServiceConfigs;

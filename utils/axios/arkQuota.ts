@@ -1,5 +1,5 @@
-import { IAPIResponse, IServiceConfig } from "@/types/axios";
-import ServerBase from "./base";
+import { IAPIResponse } from "@/types/axios.js";
+import ServerBase from "./base.js";
 
 /**
  * ArkQuotaClient

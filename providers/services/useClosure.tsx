@@ -1,8 +1,13 @@
 import { MESSAGES } from "@/constants/messages";
-import { IAssetItems, IAssetStages } from "@/types/assets";
-import { IAuthSession, IJWTPayload, ILoginResponse, UUID } from "@/types/auth";
-import { IAPIResponse } from "@/types/axios";
-import { LOG } from "@/utils/logger/logger";
+import { IAssetItems, IAssetStages } from "@/types/assets.js";
+import {
+  IAuthSession,
+  IJWTPayload,
+  ILoginResponse,
+  UUID,
+} from "@/types/auth.js";
+import { IAPIResponse } from "@/types/axios.js";
+import { LOG } from "@/utils/logger/logger.js";
 import { jwtDecode } from "jwt-decode";
 import React, { createContext, ReactNode, useContext } from "react";
 import { useData } from "../data";

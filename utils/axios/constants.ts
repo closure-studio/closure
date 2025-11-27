@@ -1,4 +1,4 @@
-import { ApiCallOptions } from "@/types/axios";
+import { ApiCallOptions } from "@/types/axios.js";
 
 interface IIDServerConstants {
   LOGIN: ApiCallOptions;

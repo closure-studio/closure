@@ -1,5 +1,5 @@
 import { IAPPConfig } from "@/types/storage";
-import { IServiceConfigs } from "../types/axios";
+import { IServiceConfigs } from "../types/axios.js";
 
 const CLARITY_NATIVE_PROD_ID = "t0eiarz3dw";
 const CLARITY_NATIVE_PREVIEW_ID = "syvx7716cr";

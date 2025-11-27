@@ -1,7 +1,7 @@
-import { GameStatusData, IArkHostConfig } from "@/types/arkHost";
-import { IAPIResponse } from "@/types/axios";
-import ServerBase from "./base";
-import { ARK_HOST_CONSTANTS } from "./constants";
+import { GameStatusData, IArkHostConfig } from "@/types/arkHost.js";
+import { IAPIResponse } from "@/types/axios.js";
+import ServerBase from "./base.js";
+import { ARK_HOST_CONSTANTS } from "./constants.js";
 
 /**
  * ArkHostClient

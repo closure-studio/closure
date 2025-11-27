@@ -1,7 +1,7 @@
 import { CONSTANTS } from "@/constants/constants";
-import { IAPPConfig } from "@/types/storage";
-import { LOG } from "@/utils/logger/logger";
-import { storage } from "@/utils/mmkv/mmkv";
+import { IAPPConfig } from "@/types/storage.js";
+import { LOG } from "@/utils/logger/logger.js";
+import { storage } from "@/utils/mmkv/mmkv.js";
 import React, { createContext, ReactNode, useContext } from "react";
 
 interface SystemContextType {

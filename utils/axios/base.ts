@@ -1,7 +1,7 @@
-import { ApiCallOptions, IAPIResponse, IServiceConfig } from "@/types/axios";
-import { LOG } from "@/utils/logger/logger";
+import { ApiCallOptions, IAPIResponse, IServiceConfig } from "@/types/axios.js";
 
 import axios, { AxiosInstance } from "axios";
+import { LOG } from "../logger/logger.js";
 
 abstract class ServerBase {
   log = LOG.extend("AxiosBase");

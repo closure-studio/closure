@@ -1,10 +1,10 @@
 import { CONSTANTS, DEFAULT_APP_CONFIG } from "@/constants/constants";
 import { IAPIClients, useAPI } from "@/hooks/api/useAPI";
 import { useAuth } from "@/hooks/auth/useAuth";
-import { IAuthSession } from "@/types/auth";
-import { IAPPConfig } from "@/types/storage";
-import { LOG } from "@/utils/logger/logger";
-import { storage } from "@/utils/mmkv/mmkv";
+import { IAuthSession } from "@/types/auth.js";
+import { IAPPConfig } from "@/types/storage.js";
+import { LOG } from "@/utils/logger/logger.js";
+import { storage } from "@/utils/mmkv/mmkv.js";
 import { produce } from "immer";
 import React, {
   createContext,
