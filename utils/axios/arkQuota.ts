@@ -8,10 +8,6 @@ import ServerBase from "./base";
  * 只负责 API 调用和返回响应，不处理业务逻辑
  */
 class ArkQuotaClient extends ServerBase {
-  constructor(config: IServiceConfig) {
-    super(config);
-  }
-
   /**
    * 处理 API 响应
    */

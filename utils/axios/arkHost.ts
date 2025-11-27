@@ -1,5 +1,5 @@
 import { GameStatusData, IArkHostConfig } from "@/types/arkHost";
-import { IAPIResponse, IServiceConfig } from "@/types/axios";
+import { IAPIResponse } from "@/types/axios";
 import ServerBase from "./base";
 import { ARK_HOST_CONSTANTS } from "./constants";
 
@@ -10,10 +10,6 @@ import { ARK_HOST_CONSTANTS } from "./constants";
  * 只负责 API 调用和返回响应，不处理业务逻辑
  */
 class ArkHostClient extends ServerBase {
-  constructor(config: IServiceConfig) {
-    super(config);
-  }
-
   /**
    * 处理 API 响应
    */

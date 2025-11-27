@@ -1,5 +1,5 @@
 import { ILoginResponse } from "@/types/auth";
-import { IAPIResponse, IServiceConfig } from "@/types/axios";
+import { IAPIResponse } from "@/types/axios";
 import ServerBase from "./base";
 import { ID_SERVER_CONSTANTS } from "./constants";
 /**
@@ -9,10 +9,6 @@ import { ID_SERVER_CONSTANTS } from "./constants";
  * 只负责 API 调用和返回响应，不处理业务逻辑
  */
 class IdServerClient extends ServerBase {
-  constructor(config: IServiceConfig) {
-    super(config);
-  }
-
   /**
    * 处理 API 响应
    */
