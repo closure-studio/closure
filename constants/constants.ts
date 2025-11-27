@@ -33,6 +33,9 @@ export const CONSTANTS: IConstants = {
     ID_SERVER: {
       HOST: `https://passport.ltsc.vip`,
     },
+    ASSETS_SERVER: {
+      HOST: `https://closure.ltsc.vip`,
+    },
   },
   TOAST: {
     DURATION: 1500,
@@ -48,4 +51,6 @@ export const DEFAULT_APP_CONFIG: IAPPConfig = {
   },
   currentCredentialUUID: null,
   credentialRecord: {},
+  assetItems: {},
+  assetStages: {},
 };

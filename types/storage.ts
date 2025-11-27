@@ -1,3 +1,4 @@
+import { IAssetItems, IAssetStages } from "./assets";
 import { IAuthSession, UUID } from "./auth";
 import { IServiceConfigs } from "./axios";
 
@@ -12,4 +13,6 @@ export interface IAPPConfig {
   // 登陆凭证 key 是 UUID
   credentialRecord: Record<UUID, IAuthSession>;
   // 资源文件
+  assetItems: IAssetItems;
+  assetStages: IAssetStages;
 }

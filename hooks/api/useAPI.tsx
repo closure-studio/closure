@@ -5,6 +5,7 @@ import { IAuthSession, IJWTPayload } from "@/types/auth";
 import { IServiceConfigs } from "@/types/axios";
 import ArkHostClient from "@/utils/axios/arkHost";
 import ArkQuotaClient from "@/utils/axios/arkQuota";
+import AssetsClient from "@/utils/axios/assetsClient";
 import IdServerClient from "@/utils/axios/idServer";
 import { LOG } from "@/utils/logger/logger";
 import { jwtDecode } from "jwt-decode";
@@ -21,6 +22,7 @@ export interface IAPIClients {
   arkHostClient: ArkHostClient;
   idServerClient: IdServerClient;
   arkQuotaClient: ArkQuotaClient;
+  assetsClient: AssetsClient;
 }
 
 const log = LOG.extend("useAPI");
@@ -33,6 +35,7 @@ export const useAPI = (props: IUseAPIParams): IAPIClients => {
   const arkHostClient = useMemo(() => new ArkHostClient({ HOST: "" }), []);
   const idServerClient = useMemo(() => new IdServerClient({ HOST: "" }), []);
   const arkQuotaClient = useMemo(() => new ArkQuotaClient({ HOST: "" }), []);
+  const assetsClient = useMemo(() => new AssetsClient({ HOST: "" }), []);
 
   // Token refresh function
   const refreshToken = useCallback(async (): Promise<void> => {
@@ -71,7 +74,14 @@ export const useAPI = (props: IUseAPIParams): IAPIClients => {
     arkHostClient.setBaseURL(serviceConfigs.ARK_HOST.HOST);
     idServerClient.setBaseURL(serviceConfigs.ID_SERVER.HOST);
     arkQuotaClient.setBaseURL(serviceConfigs.ARK_QUOTA.HOST);
-  }, [serviceConfigs, arkHostClient, idServerClient, arkQuotaClient]);
+    assetsClient.setBaseURL(serviceConfigs.ASSETS_SERVER.HOST);
+  }, [
+    arkHostClient,
+    arkQuotaClient,
+    assetsClient,
+    idServerClient,
+    serviceConfigs,
+  ]);
 
   // Setup token refresh logic and auth tokens when authSession changes
   useEffect(() => {
@@ -112,5 +122,6 @@ export const useAPI = (props: IUseAPIParams): IAPIClients => {
     arkHostClient,
     idServerClient,
     arkQuotaClient,
+    assetsClient,
   };
 };

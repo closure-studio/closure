@@ -1,9 +1,10 @@
 import { MESSAGES } from "@/constants/messages";
+import { IAssetItems, IAssetStages } from "@/types/assets";
 import { IAuthSession, IJWTPayload, ILoginResponse, UUID } from "@/types/auth";
 import { IAPIResponse } from "@/types/axios";
 import { LOG } from "@/utils/logger/logger";
 import { jwtDecode } from "jwt-decode";
-import React, { createContext, ReactNode, useContext, useEffect } from "react";
+import React, { createContext, ReactNode, useContext } from "react";
 import { useData } from "../data";
 
 // UI -> dataProvider -> 业务逻辑 -> useAPI -> api
@@ -16,6 +17,9 @@ import { useData } from "../data";
 interface ClosureContextType {
   login: (session: IAuthSession) => Promise<IAPIResponse<ILoginResponse>>;
   logout: (uuid: UUID) => Promise<void>;
+  // to do: should be wrapped in a single fetchAssets function
+  fetchAssetItems: () => Promise<IAPIResponse<IAssetItems>>;
+  fetchAssetStages: () => Promise<IAPIResponse<IAssetStages>>;
 }
 
 const ClosureContext = createContext<ClosureContextType | undefined>(undefined);
@@ -27,7 +31,7 @@ const log = LOG.extend("ClosureProvider");
 
 const ClosureProvider = ({ children }: ClosureProviderProps) => {
   const { apiClients, updateAppConfig } = useData();
-  const { idServerClient } = apiClients;
+  const { idServerClient, assetsClient } = apiClients;
 
   const login = async (session: IAuthSession) => {
     try {
@@ -100,9 +104,54 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       throw error;
     }
   };
+
+  const fetchAssetItems = async (): Promise<IAPIResponse<IAssetItems>> => {
+    try {
+      const response = await assetsClient.getItems();
+      if (response.code === 1 && response.data) {
+        updateAppConfig((draft) => {
+          draft.assetItems = response.data || {};
+        });
+        log.info("Asset items fetched successfully");
+        return response;
+      }
+      log.error("Failed to fetch asset items:", response.message);
+      return response;
+    } catch (error) {
+      log.error("Error fetching asset items:", error);
+      return {
+        code: 0,
+        message: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  };
+
+  const fetchAssetStages = async (): Promise<IAPIResponse<IAssetStages>> => {
+    try {
+      const response = await assetsClient.getStages();
+      if (response.code === 1 && response.data) {
+        updateAppConfig((draft) => {
+          draft.assetStages = response.data || {};
+        });
+        log.info("Asset stages fetched successfully");
+        return response;
+      }
+      log.error("Failed to fetch asset stages:", response.message);
+      return response;
+    } catch (error) {
+      log.error("Error fetching asset stages:", error);
+      return {
+        code: 0,
+        message: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  };
+
   const values: ClosureContextType = {
     login,
     logout,
+    fetchAssetItems,
+    fetchAssetStages,
   };
 
   return (
