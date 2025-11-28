@@ -1,7 +1,8 @@
-import { ILoginResponse } from "@/types/auth.js";
-import { IAPIResponse } from "@/types/axios.js";
-import ServerBase from "./base.js";
-import { ID_SERVER_CONSTANTS } from "./constants.js";
+import { ILoginResponse } from "@/types/auth";
+import { IAPIResponse } from "@/types/axios";
+import ServerBase from "./base";
+import { ID_SERVER_CONSTANTS } from "./constants";
+
 /**
  * IdServerClient
  *

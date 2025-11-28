@@ -1,7 +1,6 @@
-import { ApiCallOptions, IAPIResponse, IServiceConfig } from "@/types/axios.js";
-
+import { IServiceConfig, ApiCallOptions, IAPIResponse } from "@/types/axios";
 import axios, { AxiosInstance } from "axios";
-import { LOG } from "../logger/logger.js";
+import { LOG } from "../logger/logger";
 
 abstract class ServerBase {
   log = LOG.extend("AxiosBase");
@@ -111,7 +110,6 @@ abstract class ServerBase {
     const resp = await this.handleResponse<T>(
       this.getInstance().get(url, axiosConfig),
     );
-    this.log.debug("GET Response:", resp);
     if (!resp.data) {
       this.log.error(`${errorPrefix || "GET Request"} failed:`, resp.message);
     }
@@ -171,7 +169,9 @@ abstract class ServerBase {
    * @param newToken 新的 token
    */
   public setAuthToken(newToken: string) {
-    const authValue = `Bearer ${newToken}`;
+    let authValue = `Bearer ${newToken}`;
+    // only 1 bearer
+    authValue = authValue.replace(/Bearer\s+Bearer\s+/i, "Bearer ");
     this.log.info("Updating Authorization token");
     this.instance.defaults.headers.common["Authorization"] = authValue;
   }

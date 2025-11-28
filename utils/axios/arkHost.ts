@@ -1,7 +1,7 @@
-import { GameStatusData, IArkHostConfig } from "@/types/arkHost.js";
-import { IAPIResponse } from "@/types/axios.js";
-import ServerBase from "./base.js";
-import { ARK_HOST_CONSTANTS } from "./constants.js";
+import { IGameData, IArkHostConfig } from "@/types/arkHost";
+import { IAPIResponse } from "@/types/axios";
+import ServerBase from "./base";
+import { ARK_HOST_CONSTANTS } from "./constants";
 
 /**
  * ArkHostClient
@@ -42,9 +42,9 @@ class ArkHostClient extends ServerBase {
   /**
    * 查询游戏状态
    */
-  queryGamesStatus(): Promise<IAPIResponse<GameStatusData[]>> {
+  queryGamesStatus(): Promise<IAPIResponse<IGameData[]>> {
     const option = ARK_HOST_CONSTANTS.GAME;
-    return this.post<GameStatusData[]>(option.endPoint, option);
+    return this.get<IGameData[]>(option.endPoint, option);
   }
 
   /**

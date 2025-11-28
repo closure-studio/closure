@@ -1,11 +1,11 @@
-import { CONSTANTS } from "@/constants/constants";
-import { IAPPConfig } from "@/types/storage.js";
-import { LOG } from "@/utils/logger/logger.js";
-import { storage } from "@/utils/mmkv/mmkv.js";
+import { CONSTANTS, DEFAULT_APP_STATES } from "@/constants/constants";
+import { IAPPStates } from "@/types/storage";
+import { LOG } from "@/utils/logger/logger";
+import { storage } from "@/utils/mmkv/mmkv";
+import { merge } from "es-toolkit";
 import React, { createContext, ReactNode, useContext } from "react";
-
 interface SystemContextType {
-  initAppConfig: IAPPConfig | null;
+  initAppStates: IAPPStates | null;
 }
 
 const SystemContext = createContext<SystemContextType | undefined>(undefined);
@@ -13,11 +13,22 @@ const SystemContext = createContext<SystemContextType | undefined>(undefined);
 interface SystemProviderProps {
   children: ReactNode;
 }
-
 // 直接从 MMKV 读取持久化数据（同步操作）
-const initAppConfig = storage.getObject<IAPPConfig>(
-  CONSTANTS.STORAGE_KEYS.DEFAULT_STORAGE_KEY,
-);
+const init = (): IAPPStates => {
+  const initAppStates = storage.getObject<IAPPStates>(
+    CONSTANTS.STORAGE_KEYS.DEFAULT_STORAGE_KEY,
+  );
+  // 如果没有数据，直接返回默认值
+  if (!initAppStates) {
+    return DEFAULT_APP_STATES;
+  }
+
+  // 使用 merge 深度合并，initAppStates 会覆盖 DEFAULT_APP_STATES
+  // 但 undefined 的字段会从 DEFAULT_APP_STATES 补全
+  return merge(DEFAULT_APP_STATES, initAppStates);
+};
+
+const initAppStates = init();
 
 /**
  * 全局数据 Provider
@@ -27,7 +38,7 @@ const SystemProvider = ({ children }: SystemProviderProps) => {
   const log = LOG.extend("SystemProvider");
 
   const values: SystemContextType = {
-    initAppConfig,
+    initAppStates,
   };
   return (
     <SystemContext.Provider value={values}>{children}</SystemContext.Provider>

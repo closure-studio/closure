@@ -14,15 +14,14 @@ export interface IArkHostConfig {
   };
   apiVersion: string | null;
 }
-
 // 头像信息接口
-interface Avatar {
+interface IAvatar {
   type: string;
   id: string;
 }
 
 // 账户状态接口
-interface AccountStatus {
+interface IAccountStatus {
   account: string;
   password: string;
   platform: number;
@@ -31,14 +30,14 @@ interface AccountStatus {
   text: string;
   nick_name: string;
   level: number;
-  avatar: Avatar;
+  avatar: IAvatar;
   created_at: number;
   is_verify: boolean;
   ap: number;
 }
 
 // 验证码信息接口
-interface CaptchaInfo {
+interface ICaptchaInfo {
   challenge: string;
   gt: string;
   created: number;
@@ -46,7 +45,7 @@ interface CaptchaInfo {
 }
 
 // 游戏配置接口
-interface GameConfig {
+interface IGameConfig {
   account: string;
   accelerate_slot: string;
   accelerate_slot_cn: string;
@@ -61,9 +60,9 @@ interface GameConfig {
   allow_login_assist: boolean;
 }
 
-// 游戏状态数据接口
-export interface GameStatusData {
-  status: AccountStatus;
-  captcha_info: CaptchaInfo;
-  game_config: GameConfig;
+// 主接口 - 这是你缺少的根级别接口
+export interface IGameData {
+  status: IAccountStatus;
+  captcha_info: ICaptchaInfo;
+  game_config: IGameConfig;
 }

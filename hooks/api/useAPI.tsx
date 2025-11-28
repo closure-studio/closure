@@ -105,7 +105,9 @@ export const useAPI = (props: IUseAPIParams): IAPIClients => {
 
     // update jwt token
     if (authSession?.credential.token) {
-      const authValue = `Bearer ${authSession.credential.token}`;
+      let authValue = `Bearer ${authSession.credential.token}`;
+      // only 1 bearer
+      authValue = authValue.replace(/Bearer\s+Bearer\s+/i, "Bearer ");
       idServerClient.setAuthToken(authValue);
       arkQuotaClient.setAuthToken(authValue);
       arkHostClient.setAuthToken(authValue);

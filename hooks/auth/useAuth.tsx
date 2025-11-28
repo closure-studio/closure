@@ -1,5 +1,4 @@
 import { IAuthSession, UUID } from "@/types/auth";
-import { IAPPConfig } from "@/types/storage";
 import { useMemo } from "react";
 
 interface IUseAuthParams {

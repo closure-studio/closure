@@ -1,4 +1,4 @@
-import { IAPPConfig } from "@/types/storage";
+import { IAPPStates } from "@/types/storage";
 import { IServiceConfigs } from "../types/axios.js";
 
 const CLARITY_NATIVE_PROD_ID = "t0eiarz3dw";
@@ -45,7 +45,7 @@ export const CONSTANTS: IConstants = {
   },
 } as const satisfies IConstants;
 
-export const DEFAULT_APP_CONFIG: IAPPConfig = {
+export const DEFAULT_APP_STATES: IAPPStates = {
   apiConfigs: {
     serviceConfigs: CONSTANTS.SERVICE_CONFIGS,
   },
@@ -53,4 +53,5 @@ export const DEFAULT_APP_CONFIG: IAPPConfig = {
   credentialRecord: {},
   assetItems: {},
   assetStages: {},
+  gamesData: {},
 };

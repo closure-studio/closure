@@ -1,15 +1,10 @@
 import { MESSAGES } from "@/constants/messages";
-import { IAssetItems, IAssetStages } from "@/types/assets.js";
-import {
-  IAuthSession,
-  IJWTPayload,
-  ILoginResponse,
-  UUID,
-} from "@/types/auth.js";
-import { IAPIResponse } from "@/types/axios.js";
-import { LOG } from "@/utils/logger/logger.js";
+import { IAssetItems, IAssetStages } from "@/types/assets";
+import { IAuthSession, IJWTPayload, ILoginResponse, UUID } from "@/types/auth";
+import { IAPIResponse } from "@/types/axios";
+import { LOG } from "@/utils/logger/logger";
 import { jwtDecode } from "jwt-decode";
-import React, { createContext, ReactNode, useContext } from "react";
+import React, { createContext, ReactNode, useContext, useEffect } from "react";
 import { useData } from "../data";
 
 // UI -> dataProvider -> 业务逻辑 -> useAPI -> api
@@ -35,8 +30,8 @@ interface ClosureProviderProps {
 const log = LOG.extend("ClosureProvider");
 
 const ClosureProvider = ({ children }: ClosureProviderProps) => {
-  const { apiClients, updateAppConfig } = useData();
-  const { idServerClient, assetsClient } = apiClients;
+  const { apiClients, updateAppStates, currentAuthSession } = useData();
+  const { idServerClient, assetsClient, arkHostClient } = apiClients;
 
   const login = async (session: IAuthSession) => {
     try {
@@ -76,8 +71,8 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       const payload = jwtDecode<IJWTPayload>(response.data.token);
       session.credential.token = response.data.token;
       session.payload = payload;
-      // update response data to app config
-      updateAppConfig((draft) => {
+      // update response data to app states
+      updateAppStates((draft) => {
         draft.currentCredentialUUID = session.payload?.uuid || null;
         draft.credentialRecord[session.payload?.uuid || ""] = session;
       });
@@ -99,7 +94,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
 
   const logout = async (uuid: UUID): Promise<void> => {
     try {
-      updateAppConfig((draft) => {
+      updateAppStates((draft) => {
         draft.currentCredentialUUID = null;
         delete draft.credentialRecord[uuid];
       });
@@ -114,7 +109,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     try {
       const response = await assetsClient.getItems();
       if (response.code === 1 && response.data) {
-        updateAppConfig((draft) => {
+        updateAppStates((draft) => {
           draft.assetItems = response.data || {};
         });
         log.info("Asset items fetched successfully");
@@ -135,7 +130,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     try {
       const response = await assetsClient.getStages();
       if (response.code === 1 && response.data) {
-        updateAppConfig((draft) => {
+        updateAppStates((draft) => {
           draft.assetStages = response.data || {};
         });
         log.info("Asset stages fetched successfully");
@@ -151,6 +146,46 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       };
     }
   };
+
+  // 后台轮询游戏状态
+  useEffect(() => {
+    // 只有在用户已登录时才启动轮询
+    if (!currentAuthSession || !currentAuthSession.credential?.token) {
+      return;
+    }
+
+    log.info("Starting games status polling");
+
+    const queryGamesStatus = async () => {
+      try {
+        if (!currentAuthSession.payload?.uuid === undefined) {
+          return;
+        }
+        const response = await arkHostClient.queryGamesStatus();
+        if (response.code === 1 && response.data) {
+          updateAppStates((draft) => {
+            draft.gamesData[currentAuthSession.payload?.uuid || ""] =
+              response.data || [];
+          });
+          log.debug("Games status updated");
+        }
+      } catch (error) {
+        log.error("Error querying games status:", error);
+      }
+    };
+
+    // 立即执行一次
+    queryGamesStatus();
+
+    // 设置定时器，每3秒执行一次
+    const intervalId = setInterval(queryGamesStatus, 3000);
+
+    // 清理函数：组件卸载或依赖变化时清除定时器
+    return () => {
+      log.info("Stopping games status polling");
+      clearInterval(intervalId);
+    };
+  }, [currentAuthSession, arkHostClient, updateAppStates]);
 
   const values: ClosureContextType = {
     login,

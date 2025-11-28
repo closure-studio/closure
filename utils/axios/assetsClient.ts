@@ -1,7 +1,7 @@
-import { IAssetItems, IAssetStages } from "@/types/assets.js";
-import { IAPIResponse } from "@/types/axios.js";
-import ServerBase from "./base.js";
-import { ASSETS_CONSTANTS } from "./constants.js";
+import { IAssetItems, IAssetStages } from "@/types/assets";
+import { IAPIResponse } from "@/types/axios";
+import ServerBase from "./base";
+import { ASSETS_CONSTANTS } from "./constants";
 
 /**
  * assetsClient
