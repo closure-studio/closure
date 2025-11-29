@@ -6,7 +6,6 @@ import { LOG } from "@/utils/logger/logger";
 import { jwtDecode } from "jwt-decode";
 import React, { createContext, ReactNode, useContext, useEffect } from "react";
 import { useData } from "../data";
-import Toast from "react-native-toast-message";
 import { useSystem } from "../system";
 
 // UI -> dataProvider -> 业务逻辑 -> useAPI -> api
@@ -190,7 +189,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       log.info("Stopping games status polling");
       clearInterval(intervalId);
     };
-  }, [currentAuthSession, arkHostClient, updateAppStates]);
+  }, [currentAuthSession, arkHostClient, updateAppStates, toast]);
 
   const values: ClosureContextType = {
     login,

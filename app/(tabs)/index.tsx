@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import { StyleSheet } from "react-native";
 import PagerView from "react-native-pager-view";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import EditScreenInfo from "@/components/EditScreenInfo";
 import { Text, View } from "@/components/Themed";
