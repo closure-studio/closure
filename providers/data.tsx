@@ -69,13 +69,13 @@ const DataProvider = ({ children }: DataProviderProps) => {
   // use immer to update app states
   const updateAppStates = useCallback(
     (updater: (draft: IAPPStates) => void) => {
-      log.info("Updating app states");
       setAppStates((currentStates) => produce(currentStates, updater));
     },
     [],
   );
-
-  log.info("DataProvider initialized with states", appStates);
+  useEffect(() => {
+    log.info("DataProvider initialized");
+  }, []);
 
   const currentAuthSession = useMemo(() => {
     if (appStates.currentCredentialUUID) {

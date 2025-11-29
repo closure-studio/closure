@@ -31,6 +31,7 @@ interface ClosureProviderProps {
 const log = LOG.extend("ClosureProvider");
 
 const ClosureProvider = ({ children }: ClosureProviderProps) => {
+  const { toast } = useSystem();
   const { apiClients, updateAppStates, currentAuthSession } = useData();
   const { idServerClient, assetsClient, arkHostClient } = apiClients;
 
@@ -163,13 +164,12 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
           return;
         }
         const response = await arkHostClient.queryGamesStatus();
-        log.debug("response.code:", response.code);
         if (response.code === 1 && response.data) {
           updateAppStates((draft) => {
             draft.gamesData[currentAuthSession.payload?.uuid || ""] =
               response.data || [];
           });
-          log.debug("Games status updated");
+          toast.success("Games status updated");
         }
       } catch (error) {
         log.error("Error querying games status:", error);

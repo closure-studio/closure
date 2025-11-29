@@ -12,13 +12,16 @@ export function useProtectedRoute() {
   const { currentAuthSession } = useData();
   useEffect(() => {
     const inAuthGroup = segments[0] === "(tabs)";
+    const isModal = segments[0] === "modal";
+    const isLogin = segments[0] === "login";
 
     if (!currentAuthSession && inAuthGroup) {
       // 用户未登录但试图访问受保护的页面，重定向到登录页
       router.replace("/login");
-    } else if (currentAuthSession && !inAuthGroup) {
+    } else if (currentAuthSession && isLogin) {
       // 用户已登录但在登录页，重定向到主页
       router.replace("/(tabs)");
     }
+    // 允许访问 modal，不进行重定向
   }, [currentAuthSession, segments, router]);
 }

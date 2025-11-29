@@ -22,10 +22,14 @@ export default function HomeScreen() {
         />
         <EditScreenInfo path="app/(tabs)/home.tsx" />
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/modal")}
+          onPress={(e) => {
+            e.stopPropagation();
+            router.push("/modal");
+          }}
+          style={styles.linkButton}
+          activeOpacity={0.7}
         >
-          <Text style={styles.buttonText}>打开 Modal</Text>
+          <Text style={styles.link}>Open modal</Text>
         </TouchableOpacity>
         <Text style={styles.hintText}>向下滑动查看详细内容</Text>
       </View>
@@ -119,5 +123,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  link: {
+    paddingTop: 20,
+    fontSize: 20,
+  },
+  linkButton: {
+    paddingTop: 20,
   },
 });
