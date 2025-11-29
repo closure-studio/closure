@@ -87,7 +87,10 @@ const NavigationContent = () => {
       <Stack>
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+        <Stack.Screen
+          name="modal"
+          options={{ presentation: "modal", headerShown: false }}
+        />
       </Stack>
     </ThemeProvider>
   );
@@ -120,7 +123,12 @@ function RootLayoutNav() {
       <DependentProviders>
         <NavigationContent />
       </DependentProviders>
-      <Toast topOffset={top} config={toastConfig} />
+      <Toast
+        topOffset={top}
+        config={toastConfig}
+        position="top"
+        visibilityTime={2000}
+      />
     </>
   );
 }
