@@ -1,5 +1,6 @@
+import { useRouter } from "expo-router";
 import { useRef } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import PagerView from "react-native-pager-view";
 
 import EditScreenInfo from "@/components/EditScreenInfo";
@@ -7,6 +8,7 @@ import { Text, View } from "@/components/Themed";
 
 export default function HomeScreen() {
   const pagerRef = useRef<PagerView>(null);
+  const router = useRouter();
 
   // 第一个View - 主页
   const HomeView = () => (
@@ -19,6 +21,12 @@ export default function HomeScreen() {
           darkColor="rgba(255,255,255,0.1)"
         />
         <EditScreenInfo path="app/(tabs)/home.tsx" />
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push("/modal")}
+        >
+          <Text style={styles.buttonText}>打开 Modal</Text>
+        </TouchableOpacity>
         <Text style={styles.hintText}>向下滑动查看详细内容</Text>
       </View>
     </View>
@@ -99,5 +107,17 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 30,
     fontStyle: "italic",
+  },
+  button: {
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
