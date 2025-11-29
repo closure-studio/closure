@@ -86,10 +86,6 @@ const DataProvider = ({ children }: DataProviderProps) => {
     return null;
   }, [appStates]);
 
-  useEffect(() => {
-    log.info("app states changed: ", appStates);
-  }, [appStates]);
-
   const values: DataContextType = {
     currentAuthSession,
     updateAppStates,
