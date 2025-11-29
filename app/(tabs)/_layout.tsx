@@ -1,11 +1,11 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import React from "react";
-import { Pressable } from "react-native";
 
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
+import { useData } from "@/providers/data";
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -17,6 +17,8 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { currentAuthSession } = useData();
+  const isAdmin = false;
 
   return (
     <Tabs
@@ -24,10 +26,10 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         // Disable the static render of the header on web
         // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
+        headerShown: useClientOnlyValue(false, false),
       }}
     >
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="index"
         options={{
           title: "Tab One",
@@ -47,19 +49,34 @@ export default function TabLayout() {
             </Link>
           ),
         }}
+      /> */}
+      <Tabs.Screen
+        name="setting"
+        options={{
+          title: "setting",
+          tabBarIcon: ({ color }) => <TabBarIcon name="gear" color={color} />,
+        }}
       />
       <Tabs.Screen
-        name="two"
+        name="index"
         options={{
-          title: "Tab Two",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: "home",
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: "我的",
+          title: "My",
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="admin"
+        options={{
+          title: "Admin",
+          tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
+          href: isAdmin ? "/admin" : null, // 关键：非管理员时设为 null
         }}
       />
     </Tabs>

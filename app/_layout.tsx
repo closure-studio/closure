@@ -15,6 +15,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StrictMode, useEffect } from "react";
 import "react-native-reanimated";
 import "../global.css";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -55,11 +56,13 @@ export default function RootLayout() {
 
 const DependentProviders = ({ children }: { children: React.ReactNode }) => (
   <StrictMode>
-    <SystemProvider>
-      <DataProvider>
-        <ClosureProvider>{children}</ClosureProvider>
-      </DataProvider>
-    </SystemProvider>
+    <SafeAreaProvider>
+      <SystemProvider>
+        <DataProvider>
+          <ClosureProvider>{children}</ClosureProvider>
+        </DataProvider>
+      </SystemProvider>
+    </SafeAreaProvider>
   </StrictMode>
 );
 

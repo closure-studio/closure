@@ -1,33 +1,109 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useRef } from "react";
+import { StyleSheet } from "react-native";
+import PagerView from "react-native-pager-view";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import EditScreenInfo from "@/components/EditScreenInfo";
-export default function TabOneScreen() {
-  return (
-    <View style={styles.container}>
-      <View className="flex-1 items-center justify-center bg-red">
-        <Text className="text-xl font-bold text-blue-500">
-          Welcome to Nativewind!
-        </Text>
+import { Text, View } from "@/components/Themed";
+
+export default function HomeScreen() {
+  const pagerRef = useRef<PagerView>(null);
+
+  // 第一个View - 主页
+  const HomeView = () => (
+    <View style={styles.pageContainer}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Home</Text>
+        <View
+          style={styles.separator}
+          lightColor="#eee"
+          darkColor="rgba(255,255,255,0.1)"
+        />
+        <EditScreenInfo path="app/(tabs)/home.tsx" />
+        <Text style={styles.hintText}>向下滑动查看详细内容</Text>
       </View>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
     </View>
+  );
+
+  // 第二个View - 具体内容
+  const ContentView = () => (
+    <View style={styles.pageContainer}>
+      <View style={styles.container}>
+        <Text style={styles.title}>详细内容</Text>
+        <View
+          style={styles.separator}
+          lightColor="#eee"
+          darkColor="rgba(255,255,255,0.1)"
+        />
+        <Text style={styles.contentText}>
+          这是详细内容页面。您可以在这里显示更多信息。
+        </Text>
+        <Text style={styles.hintText}>向上滑动返回主页</Text>
+      </View>
+    </View>
+  );
+
+  return (
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: "#fff" }]}
+      edges={["top", "left", "right"]}
+    >
+      <PagerView
+        ref={pagerRef}
+        style={styles.pagerView}
+        initialPage={0}
+        orientation="vertical"
+      >
+        <View key="0">
+          <HomeView />
+        </View>
+        <View key="1">
+          <ContentView />
+        </View>
+      </PagerView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  pagerView: {
+    flex: 1,
+  },
+  pageContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
+    marginBottom: 20,
   },
   separator: {
     marginVertical: 30,
     height: 1,
     width: "80%",
+  },
+  contentText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginVertical: 20,
+    paddingHorizontal: 20,
+    lineHeight: 24,
+  },
+  hintText: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 30,
+    fontStyle: "italic",
   },
 });
