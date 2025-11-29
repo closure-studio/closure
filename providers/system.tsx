@@ -1,11 +1,13 @@
 import { CONSTANTS, DEFAULT_APP_STATES } from "@/constants/constants";
+import { ToastMethods, useToast } from "@/hooks/useToast";
 import { IAPPStates } from "@/types/storage";
-import { LOG } from "@/utils/logger/logger";
 import { storage } from "@/utils/mmkv/mmkv";
 import { merge } from "es-toolkit";
 import React, { createContext, ReactNode, useContext } from "react";
+
 interface SystemContextType {
   initAppStates: IAPPStates | null;
+  toast: ToastMethods;
 }
 
 const SystemContext = createContext<SystemContextType | undefined>(undefined);
@@ -35,10 +37,11 @@ const initAppStates = init();
  * 提供系统级别的全局状态
  */
 const SystemProvider = ({ children }: SystemProviderProps) => {
-  const log = LOG.extend("SystemProvider");
+  const toast = useToast();
 
   const values: SystemContextType = {
     initAppStates,
+    toast,
   };
   return (
     <SystemContext.Provider value={values}>{children}</SystemContext.Provider>

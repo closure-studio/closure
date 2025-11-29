@@ -44,24 +44,19 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView
-      style={[styles.safeArea, { backgroundColor: "#fff" }]}
-      edges={["top", "left", "right"]}
+    <PagerView
+      ref={pagerRef}
+      style={styles.pagerView}
+      initialPage={0}
+      orientation="vertical"
     >
-      <PagerView
-        ref={pagerRef}
-        style={styles.pagerView}
-        initialPage={0}
-        orientation="vertical"
-      >
-        <View key="0">
-          <HomeView />
-        </View>
-        <View key="1">
-          <ContentView />
-        </View>
-      </PagerView>
-    </SafeAreaView>
+      <View key="0">
+        <HomeView />
+      </View>
+      <View key="1">
+        <ContentView />
+      </View>
+    </PagerView>
   );
 }
 

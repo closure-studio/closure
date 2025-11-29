@@ -18,7 +18,11 @@ class ArkHostClient extends ServerBase {
   ): Promise<IAPIResponse<T>> {
     try {
       const resp = await promise;
-      return resp as IAPIResponse<T>;
+      return {
+        code: 1,
+        message: "success",
+        data: resp.data as T,
+      };
     } catch (error: any) {
       if (error.response) {
         return {
@@ -42,9 +46,10 @@ class ArkHostClient extends ServerBase {
   /**
    * 查询游戏状态
    */
-  queryGamesStatus(): Promise<IAPIResponse<IGameData[]>> {
+  async queryGamesStatus(): Promise<IAPIResponse<IGameData[]>> {
     const option = ARK_HOST_CONSTANTS.GAME;
-    return this.get<IGameData[]>(option.endPoint, option);
+    const response = await this.get<IGameData[]>(option.endPoint, option);
+    return response;
   }
 
   /**

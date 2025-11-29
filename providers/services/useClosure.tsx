@@ -6,6 +6,8 @@ import { LOG } from "@/utils/logger/logger";
 import { jwtDecode } from "jwt-decode";
 import React, { createContext, ReactNode, useContext, useEffect } from "react";
 import { useData } from "../data";
+import Toast from "react-native-toast-message";
+import { useSystem } from "../system";
 
 // UI -> dataProvider -> 业务逻辑 -> useAPI -> api
 // 这里是业务逻辑层，负责整合多个 API 调用，提供给上层使用
@@ -30,6 +32,7 @@ interface ClosureProviderProps {
 const log = LOG.extend("ClosureProvider");
 
 const ClosureProvider = ({ children }: ClosureProviderProps) => {
+  const { toast } = useSystem();
   const { apiClients, updateAppStates, currentAuthSession } = useData();
   const { idServerClient, assetsClient, arkHostClient } = apiClients;
 
@@ -162,12 +165,14 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
           return;
         }
         const response = await arkHostClient.queryGamesStatus();
+        log.debug("response.code:", response.code);
         if (response.code === 1 && response.data) {
           updateAppStates((draft) => {
             draft.gamesData[currentAuthSession.payload?.uuid || ""] =
               response.data || [];
           });
           log.debug("Games status updated");
+          toast.success("Games status updated");
         }
       } catch (error) {
         log.error("Error querying games status:", error);

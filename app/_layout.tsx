@@ -14,8 +14,13 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StrictMode, useEffect } from "react";
 import "react-native-reanimated";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import Toast, { BaseToast } from "react-native-toast-message";
 import "../global.css";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -57,11 +62,16 @@ export default function RootLayout() {
 const DependentProviders = ({ children }: { children: React.ReactNode }) => (
   <StrictMode>
     <SafeAreaProvider>
-      <SystemProvider>
-        <DataProvider>
-          <ClosureProvider>{children}</ClosureProvider>
-        </DataProvider>
-      </SystemProvider>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#fff" }}
+        edges={["top", "left", "right"]}
+      >
+        <SystemProvider>
+          <DataProvider>
+            <ClosureProvider>{children}</ClosureProvider>
+          </DataProvider>
+        </SystemProvider>
+      </SafeAreaView>
     </SafeAreaProvider>
   </StrictMode>
 );
@@ -84,9 +94,33 @@ const NavigationContent = () => {
 };
 
 function RootLayoutNav() {
+  const { top } = useSafeAreaInsets();
+
+  // 自定义Toast配置，包括warning类型
+  const toastConfig = {
+    warning: (props: any) => (
+      <BaseToast
+        {...props}
+        style={{ borderLeftColor: "#FFA500" }}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
+        text1Style={{
+          fontSize: 20,
+          fontWeight: "600",
+        }}
+        text2Style={{
+          fontSize: 18,
+          fontWeight: "500",
+        }}
+      />
+    ),
+  };
+
   return (
-    <DependentProviders>
-      <NavigationContent />
-    </DependentProviders>
+    <>
+      <DependentProviders>
+        <NavigationContent />
+      </DependentProviders>
+      <Toast topOffset={top} config={toastConfig} />
+    </>
   );
 }
