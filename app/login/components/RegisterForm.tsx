@@ -123,86 +123,91 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   };
 
   return (
-    <View style={styles.form}>
+    <>
       <SkadiWebView />
-      <Input
-        label="可露希尔通行证"
-        value={email}
-        onChangeText={setEmail}
-        placeholder="请输入通行证"
-        keyboardType="email-address"
-        editable={!isLoading}
-      />
-      <Input
-        label="密码"
-        value={password}
-        onChangeText={setPassword}
-        placeholder="请输入密码"
-        secureTextEntry
-        editable={!isLoading}
-      />
-      <Input
-        label="验证码"
-        value={code}
-        onChangeText={setCode}
-        placeholder="请输入验证码"
-        editable={!isLoading}
-        rightComponent={
-          <CodeButton
-            countdown={codeCountdown}
-            onPress={handleSendCode}
-            disabled={isSendingCode}
-          />
-        }
-      />
-      <View style={styles.termsContainer}>
-        <Checkbox
-          label=""
-          checked={agreedToTerms}
-          onPress={() => setAgreedToTerms(!agreedToTerms)}
-          disabled={isLoading}
+      <View style={styles.form}>
+        <Input
+          label="可露希尔通行证"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="请输入通行证"
+          keyboardType="email-address"
+          editable={!isLoading}
         />
-        <Text
-          style={[styles.termsText, { color: isDark ? "#D1D5DB" : "#374151" }]}
-        >
-          我已阅读理解可露希尔小卖部{" "}
-        </Text>
+        <Input
+          label="密码"
+          value={password}
+          onChangeText={setPassword}
+          placeholder="请输入密码"
+          secureTextEntry
+          editable={!isLoading}
+        />
+        <Input
+          label="验证码"
+          value={code}
+          onChangeText={setCode}
+          placeholder="请输入验证码"
+          editable={!isLoading}
+          rightComponent={
+            <CodeButton
+              countdown={codeCountdown}
+              onPress={handleSendCode}
+              disabled={isSendingCode}
+            />
+          }
+        />
+        <View style={styles.termsContainer}>
+          <Checkbox
+            label=""
+            checked={agreedToTerms}
+            onPress={() => setAgreedToTerms(!agreedToTerms)}
+            disabled={isLoading}
+          />
+          <Text
+            style={[
+              styles.termsText,
+              { color: isDark ? "#D1D5DB" : "#374151" },
+            ]}
+          >
+            我已阅读理解可露希尔小卖部{" "}
+          </Text>
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert("提示", "用户协议");
+            }}
+            disabled={isLoading}
+          >
+            <Text style={styles.termsLink}>用户协议</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.faqLinkContainer}>
+          <Text
+            style={[styles.faqText, { color: isDark ? "#9CA3AF" : "#6B7280" }]}
+          >
+            登录&注册有问题?点击查看{" "}
+          </Text>
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert("提示", "常见问题");
+            }}
+            disabled={isLoading}
+          >
+            <Text style={styles.faqLink}>常见问题</Text>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity
-          onPress={() => {
-            Alert.alert("提示", "用户协议");
-          }}
+          style={styles.submitButton}
+          onPress={handleRegister}
           disabled={isLoading}
         >
-          <Text style={styles.termsLink}>用户协议</Text>
+          {isLoading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={styles.submitButtonText}>注册</Text>
+          )}
         </TouchableOpacity>
       </View>
-      <View style={styles.faqLinkContainer}>
-        <Text
-          style={[styles.faqText, { color: isDark ? "#9CA3AF" : "#6B7280" }]}
-        >
-          登录&注册有问题?点击查看{" "}
-        </Text>
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert("提示", "常见问题");
-          }}
-          disabled={isLoading}
-        >
-          <Text style={styles.faqLink}>常见问题</Text>
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity
-        style={styles.submitButton}
-        onPress={handleRegister}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <ActivityIndicator color="white" />
-        ) : (
-          <Text style={styles.submitButtonText}>注册</Text>
-        )}
-      </TouchableOpacity>
-    </View>
+    </>
   );
 };
 

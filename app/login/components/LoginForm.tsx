@@ -5,12 +5,12 @@ import { IAuthSession } from "@/types/auth";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Checkbox, Input } from "./SharedComponents";
 
@@ -120,10 +120,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         )}
       </TouchableOpacity>
       <View style={styles.recoveryLinks}>
-        <TouchableOpacity
-          onPress={onNavigateToRecover}
-          disabled={isLoading}
-        >
+        <TouchableOpacity onPress={onNavigateToRecover} disabled={isLoading}>
           <Text style={styles.recoveryLink}>忘记了通行证账号?</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={onNavigateToReset} disabled={isLoading}>
@@ -175,4 +172,3 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
 });
-

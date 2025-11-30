@@ -1,6 +1,12 @@
 import { useColorScheme } from "@/components/useColorScheme";
 import React from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface InputProps {
   label: string;
@@ -359,4 +365,3 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
-
