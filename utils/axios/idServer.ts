@@ -1,4 +1,9 @@
-import { ILoginResponse } from "@/types/auth";
+import {
+  ILoginResponse,
+  IRegisterCodeResponse,
+  IRegisterRequest,
+  IRegisterResponse,
+} from "@/types/auth";
 import { IAPIResponse } from "@/types/axios";
 import ServerBase from "./base";
 import { ID_SERVER_CONSTANTS } from "./constants";
@@ -52,6 +57,36 @@ class IdServerClient extends ServerBase {
     option.data = { email, password };
     option.isPublic = true; // 登录接口是公开的，不需要 token
     return this.post<ILoginResponse>(option.endPoint, option);
+  }
+
+  /**
+   * 发送注册验证码
+   * @param email 用户邮箱
+   * @returns 发送验证码响应，包含邮箱地址
+   */
+  async sendRegisterCode(
+    email: string,
+  ): Promise<IAPIResponse<IRegisterCodeResponse>> {
+    const option = { ...ID_SERVER_CONSTANTS.REGISTER_CODE };
+    option.data = { email };
+    option.isPublic = true; // 注册验证码接口是公开的，不需要 token
+    return this.post<IRegisterCodeResponse>(option.endPoint, option);
+  }
+
+  async register(
+    registerData: IRegisterRequest,
+  ): Promise<IAPIResponse<IRegisterResponse>> {
+    try {
+      const option = { ...ID_SERVER_CONSTANTS.REGISTER };
+      option.data = registerData;
+      option.isPublic = true; // 注册接口是公开的，不需要 token
+      return this.post<IRegisterResponse>(option.endPoint, option);
+    } catch (error: any) {
+      return {
+        code: 0,
+        message: error.message || "Failed to calculate noise and sign",
+      };
+    }
   }
 }
 export default IdServerClient;

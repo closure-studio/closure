@@ -2,6 +2,8 @@ import { ApiCallOptions } from "@/types/axios";
 
 interface IIDServerConstants {
   LOGIN: ApiCallOptions;
+  REGISTER_CODE: ApiCallOptions;
+  REGISTER: ApiCallOptions;
 }
 
 interface IArkHostConstants {
@@ -16,6 +18,14 @@ interface IAssetsConstants {
 export const ID_SERVER_CONSTANTS: IIDServerConstants = {
   LOGIN: {
     endPoint: "/api/v1/login",
+    method: "POST",
+  },
+  REGISTER_CODE: {
+    endPoint: "/api/v1/mail/register/code",
+    method: "POST",
+  },
+  REGISTER: {
+    endPoint: "/api/v1/register",
     method: "POST",
   },
 } as const satisfies IIDServerConstants;

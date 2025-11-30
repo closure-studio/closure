@@ -1,6 +1,14 @@
 import { MESSAGES } from "@/constants/messages";
 import { IAssetItems, IAssetStages } from "@/types/assets";
-import { IAuthSession, IJWTPayload, ILoginResponse, UUID } from "@/types/auth";
+import {
+  IAuthSession,
+  IJWTPayload,
+  ILoginResponse,
+  IRegisterCodeResponse,
+  IRegisterRequest,
+  IRegisterResponse,
+  UUID,
+} from "@/types/auth";
 import { IAPIResponse } from "@/types/axios";
 import { LOG } from "@/utils/logger/logger";
 import { jwtDecode } from "jwt-decode";
@@ -18,6 +26,12 @@ import { useSystem } from "../system";
 interface ClosureContextType {
   login: (session: IAuthSession) => Promise<IAPIResponse<ILoginResponse>>;
   logout: (uuid: UUID) => Promise<void>;
+  sendRegisterCode: (
+    email: string,
+  ) => Promise<IAPIResponse<IRegisterCodeResponse>>;
+  register: (
+    registerData: IRegisterRequest,
+  ) => Promise<IAPIResponse<IRegisterResponse>>;
   // to do: should be wrapped in a single fetchAssets function
   fetchAssetItems: () => Promise<IAPIResponse<IAssetItems>>;
   fetchAssetStages: () => Promise<IAPIResponse<IAssetStages>>;
@@ -107,6 +121,55 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     }
   };
 
+  const sendRegisterCode = async (
+    email: string,
+  ): Promise<IAPIResponse<IRegisterCodeResponse>> => {
+    try {
+      if (!email) {
+        return {
+          code: 0,
+          message: MESSAGES.AUTH.EMAIL_PASSWORD_REQUIRED,
+        };
+      }
+
+      const response = await idServerClient.sendRegisterCode(email);
+      if (response.code === 1) {
+        log.info("Register code sent successfully", { email });
+        return response;
+      }
+      log.error("Failed to send register code:", response.message);
+      return response;
+    } catch (error) {
+      LOG.error("Error sending register code:", error);
+      return {
+        code: 0,
+        message:
+          error instanceof Error ? error.message : MESSAGES.AUTH.UNKNOWN_ERROR,
+      };
+    }
+  };
+
+  const register = async (
+    registerData: IRegisterRequest,
+  ): Promise<IAPIResponse<IRegisterResponse>> => {
+    try {
+      const response = await idServerClient.register(registerData);
+      if (response.code === 1) {
+        log.info("Register successful", { registerData });
+        return response;
+      }
+      log.error("Failed to register:", response.message);
+      return response;
+    } catch (error) {
+      LOG.error("Error registering:", error);
+      return {
+        code: 0,
+        message:
+          error instanceof Error ? error.message : MESSAGES.AUTH.UNKNOWN_ERROR,
+      };
+    }
+  };
+
   const fetchAssetItems = async (): Promise<IAPIResponse<IAssetItems>> => {
     try {
       const response = await assetsClient.getItems();
@@ -192,6 +255,8 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
   const values: ClosureContextType = {
     login,
     logout,
+    sendRegisterCode,
+    register,
     fetchAssetItems,
     fetchAssetStages,
   };
