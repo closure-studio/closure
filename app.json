@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "可露希尔",
-    "slug": "closure-prts",
+    "slug": "closure",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "closureprts",
+    "scheme": "closure",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "assetBundlePatterns": [
@@ -19,7 +19,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jackjieyyy.closureprts"
+      "bundleIdentifier": "com.closure.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,7 +28,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.jackjieyyy.closureprts"
+      "package": "com.closure.app"
     },
     "web": {
       "bundler": "metro",

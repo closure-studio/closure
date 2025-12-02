@@ -52,10 +52,7 @@ export const RecoverForm: React.FC<RecoverFormProps> = ({
         editable={!isLoading}
       />
       <Text
-        style={[
-          styles.serverLabel,
-          { color: isDark ? "#D1D5DB" : "#374151" },
-        ]}
+        style={[styles.serverLabel, { color: isDark ? "#D1D5DB" : "#374151" }]}
       >
         服务器选择
       </Text>
@@ -116,4 +113,3 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
-
