@@ -1,5 +1,6 @@
 import { useColorScheme } from "@/components/useColorScheme";
 import { useProtectedRoute } from "@/hooks/auth/useProtectedRoute";
+import { useOTA } from "@/hooks/ota/useOTA";
 import { DataProvider } from "@/providers/data";
 import { ClosureProvider } from "@/providers/services/useClosure";
 import { SystemProvider } from "@/providers/system";
@@ -12,7 +13,6 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import * as Updates from "expo-updates";
 import { StrictMode, useEffect } from "react";
 import "react-native-reanimated";
 import {
@@ -99,23 +99,6 @@ const NavigationContent = () => {
 
 function RootLayoutNav() {
   const { top } = useSafeAreaInsets();
-  useEffect(() => {
-    async function checkForUpdates() {
-      try {
-        const update = await Updates.checkForUpdateAsync();
-
-        if (update.isAvailable) {
-          await Updates.fetchUpdateAsync();
-          // 提示用户重启应用
-          await Updates.reloadAsync();
-        }
-      } catch (error) {
-        console.error("检查更新失败:", error);
-      }
-    }
-
-    checkForUpdates();
-  }, []);
 
   // 自定义Toast配置，包括warning类型
   const toastConfig = {

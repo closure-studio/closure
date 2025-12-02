@@ -73,14 +73,6 @@ export default function LoginScreen() {
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.content}>
-              <Text
-                style={[
-                  styles.pageTitle,
-                  { color: isDark ? "#9333EA" : "#9333EA" },
-                ]}
-              >
-                OTA更新大成功
-              </Text>
               {/* Title */}
               <Text
                 style={[

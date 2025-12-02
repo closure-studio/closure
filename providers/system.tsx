@@ -1,4 +1,5 @@
 import { CONSTANTS, DEFAULT_APP_STATES } from "@/constants/constants";
+import { useOTA } from "@/hooks/ota/useOTA";
 import { ToastMethods, useToast } from "@/hooks/useToast";
 import { IAPPStates } from "@/types/storage";
 import { LOG } from "@/utils/logger/logger";
@@ -38,6 +39,8 @@ const log = LOG.extend("SystemProvider");
  * 提供系统级别的全局状态
  */
 const SystemProvider = ({ children }: SystemProviderProps) => {
+  // 处理 OTA 更新
+  useOTA();
   const toast = useToast();
   const values: SystemContextType = {
     initAppStates,
