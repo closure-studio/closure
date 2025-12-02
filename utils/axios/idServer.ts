@@ -3,6 +3,8 @@ import {
   IRegisterCodeResponse,
   IRegisterRequest,
   IRegisterResponse,
+  IResetPasswordRequest,
+  IResetPasswordResponse,
 } from "@/types/auth";
 import { IAPIResponse } from "@/types/axios";
 import ServerBase from "./base";
@@ -87,6 +89,20 @@ class IdServerClient extends ServerBase {
         message: error.message || "Failed to calculate noise and sign",
       };
     }
+  }
+
+  /**
+   * 重置密码
+   * @param resetData 重置密码数据，包含邮箱、验证码和新密码
+   * @returns 重置密码响应
+   */
+  async resetPassword(
+    resetData: IResetPasswordRequest,
+  ): Promise<IAPIResponse<IResetPasswordResponse>> {
+    const option = { ...ID_SERVER_CONSTANTS.FORGET_PASSWORD };
+    option.data = resetData;
+    option.isPublic = true; // 重置密码接口是公开的，不需要 token
+    return this.post<IResetPasswordResponse>(option.endPoint, option);
   }
 }
 export default IdServerClient;

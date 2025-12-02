@@ -22,6 +22,14 @@ export interface IRegisterRequest {
 
 export type IRegisterResponse = boolean; // 注册响应，成功为 true，失败为 false
 
+export interface IResetPasswordRequest {
+  email: string;
+  code: string;
+  newPasswd: string;
+}
+
+export type IResetPasswordResponse = boolean; // 重置密码响应，成功为 true，失败为 false
+
 export interface IJWTPayload {
   createdAt: number;
   email: string;

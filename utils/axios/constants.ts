@@ -4,6 +4,7 @@ interface IIDServerConstants {
   LOGIN: ApiCallOptions;
   REGISTER_CODE: ApiCallOptions;
   REGISTER: ApiCallOptions;
+  FORGET_PASSWORD: ApiCallOptions;
 }
 
 interface IArkHostConstants {
@@ -26,6 +27,10 @@ export const ID_SERVER_CONSTANTS: IIDServerConstants = {
   },
   REGISTER: {
     endPoint: "/api/v1/register",
+    method: "POST",
+  },
+  FORGET_PASSWORD: {
+    endPoint: "/api/v1/forget",
     method: "POST",
   },
 } as const satisfies IIDServerConstants;

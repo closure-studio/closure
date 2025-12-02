@@ -1,7 +1,8 @@
+import { useClosure } from "@/providers/services/useClosure";
+import { useSystem } from "@/providers/system";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -18,11 +19,15 @@ export const ResetForm: React.FC<ResetFormProps> = ({
   onNavigateToLogin,
   onResetSuccess,
 }) => {
+  const { toast } = useSystem();
+  const { resetPassword, sendRegisterCode } = useClosure();
+
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [codeCountdown, setCodeCountdown] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
 
   const startCountdown = () => {
     setCodeCountdown(60);
@@ -39,43 +44,64 @@ export const ResetForm: React.FC<ResetFormProps> = ({
 
   const handleSendCode = async () => {
     if (!email.trim()) {
-      Alert.alert("错误", "请输入邮箱地址");
+      toast.error("请输入邮箱地址");
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      Alert.alert("错误", "请输入有效的邮箱地址");
+      toast.error("请输入有效的邮箱地址");
       return;
     }
     if (codeCountdown > 0) return;
+    if (isSendingCode) return;
 
-    // TODO: 调用发送验证码API
-    Alert.alert("提示", "验证码已发送到您的邮箱");
-    startCountdown();
+    setIsSendingCode(true);
+    try {
+      const response = await sendRegisterCode(email);
+      if (response.code === 1) {
+        toast.success("验证码已发送到您的邮箱");
+        startCountdown();
+      } else {
+        toast.error(response.message || "发送验证码失败，请重试");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "发送验证码失败，请重试");
+    } finally {
+      setIsSendingCode(false);
+    }
   };
 
   const handleResetPassword = async () => {
     if (!email.trim() || !code.trim() || !password.trim()) {
-      Alert.alert("错误", "请填写完整信息");
+      toast.error("请填写完整信息");
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      Alert.alert("错误", "请输入有效的邮箱地址");
+      toast.error("请输入有效的邮箱地址");
       return;
     }
     if (isLoading) return;
 
     setIsLoading(true);
     try {
-      // TODO: 调用密码重置API
-      Alert.alert("成功", "密码重置成功，请登录");
-      if (onResetSuccess) {
-        onResetSuccess(email);
+      const response = await resetPassword({
+        email: email.trim(),
+        code: code.trim(),
+        newPasswd: password.trim(),
+      });
+
+      if (response.code === 1) {
+        toast.success("密码重置成功，请登录");
+        if (onResetSuccess) {
+          onResetSuccess(email);
+        }
+        onNavigateToLogin();
+      } else {
+        toast.error(response.message || "密码重置失败，请重试");
       }
-      onNavigateToLogin();
     } catch (err: any) {
-      Alert.alert("失败", err.message || "密码重置失败，请重试");
+      toast.error(err.message || "密码重置失败，请重试");
     } finally {
       setIsLoading(false);
     }
@@ -89,19 +115,19 @@ export const ResetForm: React.FC<ResetFormProps> = ({
         onChangeText={setEmail}
         placeholder="请输入通行证"
         keyboardType="email-address"
-        editable={!isLoading}
+        editable={!isLoading && !isSendingCode}
       />
       <Input
         label="验证码"
         value={code}
         onChangeText={setCode}
         placeholder="请输入验证码"
-        editable={!isLoading}
+        editable={!isLoading && !isSendingCode}
         rightComponent={
           <CodeButton
             countdown={codeCountdown}
             onPress={handleSendCode}
-            disabled={isLoading}
+            disabled={isLoading || isSendingCode}
           />
         }
       />
@@ -111,12 +137,15 @@ export const ResetForm: React.FC<ResetFormProps> = ({
         onChangeText={setPassword}
         placeholder="请输入新密码"
         secureTextEntry
-        editable={!isLoading}
+        editable={!isLoading && !isSendingCode}
       />
       <TouchableOpacity
-        style={styles.submitButton}
+        style={[
+          styles.submitButton,
+          (isLoading || isSendingCode) && styles.submitButtonDisabled,
+        ]}
         onPress={handleResetPassword}
-        disabled={isLoading}
+        disabled={isLoading || isSendingCode}
       >
         {isLoading ? (
           <ActivityIndicator color="white" />
@@ -138,6 +167,9 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: "center",
     marginTop: 8,
+  },
+  submitButtonDisabled: {
+    opacity: 0.5,
   },
   submitButtonText: {
     color: "#ffffff",

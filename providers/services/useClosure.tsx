@@ -7,6 +7,8 @@ import {
   IRegisterCodeResponse,
   IRegisterRequest,
   IRegisterResponse,
+  IResetPasswordRequest,
+  IResetPasswordResponse,
   UUID,
 } from "@/types/auth";
 import { IAPIResponse } from "@/types/axios";
@@ -32,6 +34,9 @@ interface ClosureContextType {
   register: (
     registerData: IRegisterRequest,
   ) => Promise<IAPIResponse<IRegisterResponse>>;
+  resetPassword: (
+    resetData: IResetPasswordRequest,
+  ) => Promise<IAPIResponse<IResetPasswordResponse>>;
   // to do: should be wrapped in a single fetchAssets function
   fetchAssetItems: () => Promise<IAPIResponse<IAssetItems>>;
   fetchAssetStages: () => Promise<IAPIResponse<IAssetStages>>;
@@ -170,6 +175,34 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     }
   };
 
+  const resetPassword = async (
+    resetData: IResetPasswordRequest,
+  ): Promise<IAPIResponse<IResetPasswordResponse>> => {
+    try {
+      if (!resetData.email || !resetData.code || !resetData.newPasswd) {
+        return {
+          code: 0,
+          message: "邮箱、验证码和新密码不能为空",
+        };
+      }
+
+      const response = await idServerClient.resetPassword(resetData);
+      if (response.code === 1) {
+        log.info("Reset password successful", { email: resetData.email });
+        return response;
+      }
+      log.error("Failed to reset password:", response.message);
+      return response;
+    } catch (error) {
+      LOG.error("Error resetting password:", error);
+      return {
+        code: 0,
+        message:
+          error instanceof Error ? error.message : MESSAGES.AUTH.UNKNOWN_ERROR,
+      };
+    }
+  };
+
   const fetchAssetItems = async (): Promise<IAPIResponse<IAssetItems>> => {
     try {
       const response = await assetsClient.getItems();
@@ -257,6 +290,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     logout,
     sendRegisterCode,
     register,
+    resetPassword,
     fetchAssetItems,
     fetchAssetStages,
   };
