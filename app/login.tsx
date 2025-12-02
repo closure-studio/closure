@@ -84,18 +84,30 @@ export default function LoginScreen() {
                 {getPageTitle()}
               </Text>
 
-              {/* Top Button */}
-              {currentPage === "login" ? (
-                <TopButton
-                  text="没有账号?点击注册!"
-                  onPress={() => setCurrentPage("register")}
-                />
-              ) : (
-                <TopButton
-                  text="使用通行证登录"
-                  onPress={() => setCurrentPage("login")}
-                />
-              )}
+              {/* Navigation Buttons */}
+              <View style={styles.navigationButtons}>
+                {currentPage === "login" ? (
+                  <>
+                    <TopButton
+                      text="没有账号?点击注册!"
+                      onPress={() => setCurrentPage("register")}
+                    />
+                    <TopButton
+                      text="忘记了通行证账号?"
+                      onPress={() => setCurrentPage("recover")}
+                    />
+                    <TopButton
+                      text="忘记了通行证密码?"
+                      onPress={() => setCurrentPage("reset")}
+                    />
+                  </>
+                ) : (
+                  <TopButton
+                    text="使用通行证登录"
+                    onPress={() => setCurrentPage("login")}
+                  />
+                )}
+              </View>
 
               {/* Separator */}
               <Separator />
@@ -157,5 +169,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 24,
+  },
+  navigationButtons: {
+    gap: 0,
   },
 });

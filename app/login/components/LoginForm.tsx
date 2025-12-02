@@ -119,14 +119,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           <Text style={styles.submitButtonText}>登录</Text>
         )}
       </TouchableOpacity>
-      <View style={styles.recoveryLinks}>
-        <TouchableOpacity onPress={onNavigateToRecover} disabled={isLoading}>
-          <Text style={styles.recoveryLink}>忘记了通行证账号?</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={onNavigateToReset} disabled={isLoading}>
-          <Text style={styles.recoveryLink}>忘记了通行证密码?</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
@@ -160,15 +152,5 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",
-  },
-  recoveryLinks: {
-    marginTop: 16,
-    alignItems: "center",
-    gap: 8,
-  },
-  recoveryLink: {
-    fontSize: 14,
-    color: "#9333EA",
-    textDecorationLine: "underline",
   },
 });

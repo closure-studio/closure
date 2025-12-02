@@ -124,7 +124,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
   return (
     <>
-      <SkadiWebView />
       <View style={styles.form}>
         <Input
           label="可露希尔通行证"
@@ -198,14 +197,17 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <TouchableOpacity
           style={styles.submitButton}
           onPress={handleRegister}
-          disabled={isLoading}
+          disabled={isLoading || !isSkadiReady}
         >
           {isLoading ? (
             <ActivityIndicator color="white" />
-          ) : (
+          ) : isSkadiReady ? (
             <Text style={styles.submitButtonText}>注册</Text>
+          ) : (
+            <Text style={styles.submitButtonText}>加载中...</Text>
           )}
         </TouchableOpacity>
+        <SkadiWebView />
       </View>
     </>
   );
