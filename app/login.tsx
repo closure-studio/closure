@@ -18,7 +18,6 @@ import {
   ResetForm,
 } from "./login/components";
 import { Separator, TopButton } from "./login/components/SharedComponents";
-
 type PageType = "login" | "register" | "recover" | "reset";
 
 export default function LoginScreen() {
@@ -74,6 +73,14 @@ export default function LoginScreen() {
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.content}>
+              <Text
+                style={[
+                  styles.pageTitle,
+                  { color: isDark ? "#9333EA" : "#9333EA" },
+                ]}
+              >
+                OTA更新大成功
+              </Text>
               {/* Title */}
               <Text
                 style={[
