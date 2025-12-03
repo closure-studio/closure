@@ -1,6 +1,6 @@
 import { useColorScheme } from "@/components/useColorScheme";
 import { useProtectedRoute } from "@/hooks/auth/useProtectedRoute";
-import { DataProvider, useData } from "@/providers/data";
+import { DataProvider } from "@/providers/data";
 import { ClosureProvider } from "@/providers/services/useClosure";
 import { SystemProvider } from "@/providers/system";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -10,7 +10,7 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack, useSegments } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StrictMode, useEffect } from "react";
 import "react-native-reanimated";
@@ -78,20 +78,11 @@ const DependentProviders = ({ children }: { children: React.ReactNode }) => (
 
 const NavigationContent = () => {
   const colorScheme = useColorScheme();
-  const segments = useSegments();
-  const { currentAuthSession } = useData();
 
-  // 添加路由保护 - 现在在 DataProvider 内部
+  // 路由保护：根据登录状态自动重定向
+  // 注意：不要在这里使用 early return null，否则会卸载 Stack navigator
+  // 导致 useProtectedRoute 中的 router.replace 无法工作
   useProtectedRoute();
-
-  // 检查是否需要重定向，如果是则不渲染导航，避免闪烁
-  const inAuthGroup = segments[0] === "(tabs)";
-  const isLogin = segments[0] === "login";
-
-  // 如果用户未登录但在受保护页面，或已登录但在登录页，先不渲染，等待重定向
-  if ((!currentAuthSession && inAuthGroup) || (currentAuthSession && isLogin)) {
-    return null;
-  }
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

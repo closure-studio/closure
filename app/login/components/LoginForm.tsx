@@ -1,8 +1,6 @@
 import { useColorScheme } from "@/components/useColorScheme";
 import { useClosure } from "@/providers/services/useClosure";
-import { useSystem } from "@/providers/system";
 import { IAuthSession } from "@/types/auth";
-import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -12,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Checkbox, Input } from "./SharedComponents";
+import { Input } from "./SharedComponents";
 
 interface LoginFormProps {
   onNavigateToRegister: () => void;
@@ -25,15 +23,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onNavigateToRecover,
   onNavigateToReset,
 }) => {
-  const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const { toast } = useSystem();
   const { login } = useClosure();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [savePassword, setSavePassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -58,7 +53,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       };
       const response = await login(session);
       if (response.code === 1) {
-        router.replace("/(tabs)");
+        // 登录成功后，useProtectedRoute 会自动处理重定向到 (tabs)
+        // 不需要手动调用 router.replace，避免导航时序问题
       } else {
         Alert.alert("登录失败", response.message || "邮箱或密码错误，请重试");
       }
@@ -86,12 +82,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         placeholder="请输入密码"
         secureTextEntry
         editable={!isLoading}
-      />
-      <Checkbox
-        label="保存密码 (请勿在公共设备上保存)"
-        checked={savePassword}
-        onPress={() => setSavePassword(!savePassword)}
-        disabled={isLoading}
       />
       <View style={styles.faqLinkContainer}>
         <Text
