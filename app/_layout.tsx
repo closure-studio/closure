@@ -3,7 +3,7 @@ import { useProtectedRoute } from "@/hooks/auth/useProtectedRoute";
 import { DataProvider } from "@/providers/data";
 import { ClosureProvider } from "@/providers/services/useClosure";
 import { SystemProvider } from "@/providers/system";
-import { rgbToColor, ThemeProvider, useTheme } from "@/providers/theme";
+import { ThemeProvider, useTheme } from "@/providers/theme";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
   DarkTheme,
@@ -63,15 +63,12 @@ export default function RootLayout() {
 
 /**
  * 应用主题样式的根容器
- * 使用 Direct Style 方式应用主题颜色
  */
 const ThemedRoot = ({ children }: { children: React.ReactNode }) => {
-  const { colors } = useTheme();
+  const { c } = useTheme();
 
   return (
-    <View style={{ flex: 1, backgroundColor: rgbToColor(colors.background) }}>
-      {children}
-    </View>
+    <View style={{ flex: 1, backgroundColor: c.background }}>{children}</View>
   );
 };
 
@@ -79,11 +76,11 @@ const ThemedRoot = ({ children }: { children: React.ReactNode }) => {
  * SafeAreaView 包装器，使用主题背景色
  */
 const ThemedSafeArea = ({ children }: { children: React.ReactNode }) => {
-  const { colors } = useTheme();
+  const { c } = useTheme();
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: rgbToColor(colors.background) }}
+      style={{ flex: 1, backgroundColor: c.background }}
       edges={["top", "left", "right"]}
     >
       {children}

@@ -1,16 +1,15 @@
-import { rgbToColor, useTheme } from "@/providers/theme";
+import { alpha, rgbToColor, useTheme } from "@/providers/theme";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 // 主题选择器组件
 function ThemeSwitcher() {
-  const { availableThemes, themeId, setTheme, colors, colorMode } = useTheme();
+  const { availableThemes, themeId, setTheme, c, colorMode } = useTheme();
 
   return (
     <View style={{ marginBottom: 24 }}>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
         {availableThemes.map((theme) => {
           const isActive = theme.id === themeId;
-          // 使用当前颜色模式的主题色预览
           const previewColors = colorMode === "dark" ? theme.dark : theme.light;
 
           return (
@@ -23,15 +22,10 @@ function ThemeSwitcher() {
                 borderRadius: 16,
                 padding: 16,
                 borderWidth: 2,
-                borderColor: isActive
-                  ? rgbToColor(colors.primary)
-                  : rgbToColor(colors.border),
-                backgroundColor: isActive
-                  ? rgbToColor(colors.primary, 0.1)
-                  : rgbToColor(colors.card),
+                borderColor: isActive ? c.primary : c.border,
+                backgroundColor: isActive ? alpha(c.primary, 0.1) : c.card,
               }}
             >
-              {/* 颜色预览圆点 */}
               <View
                 style={{
                   flexDirection: "row",
@@ -51,7 +45,7 @@ function ThemeSwitcher() {
                   <View
                     style={{
                       marginLeft: 8,
-                      backgroundColor: rgbToColor(colors.primary),
+                      backgroundColor: c.primary,
                       paddingHorizontal: 8,
                       paddingVertical: 2,
                       borderRadius: 9999,
@@ -59,7 +53,7 @@ function ThemeSwitcher() {
                   >
                     <Text
                       style={{
-                        color: rgbToColor(colors["primary-foreground"]),
+                        color: c.primaryFg,
                         fontSize: 12,
                         fontWeight: "500",
                       }}
@@ -73,20 +67,12 @@ function ThemeSwitcher() {
                 style={{
                   fontWeight: "600",
                   fontSize: 16,
-                  color: isActive
-                    ? rgbToColor(colors.primary)
-                    : rgbToColor(colors["card-foreground"]),
+                  color: isActive ? c.primary : c.cardFg,
                 }}
               >
                 {theme.name}
               </Text>
-              <Text
-                style={{
-                  color: rgbToColor(colors["muted-foreground"]),
-                  fontSize: 12,
-                  marginTop: 4,
-                }}
-              >
+              <Text style={{ color: c.mutedFg, fontSize: 12, marginTop: 4 }}>
                 {theme.description}
               </Text>
             </Pressable>
@@ -99,7 +85,7 @@ function ThemeSwitcher() {
 
 // 按钮预览组件
 function ButtonPreview() {
-  const { colors } = useTheme();
+  const { c } = useTheme();
 
   return (
     <View
@@ -112,88 +98,57 @@ function ButtonPreview() {
     >
       <Pressable
         style={{
-          backgroundColor: rgbToColor(colors.primary),
+          backgroundColor: c.primary,
           paddingHorizontal: 20,
           paddingVertical: 12,
           borderRadius: 12,
         }}
       >
-        <Text
-          style={{
-            color: rgbToColor(colors["primary-foreground"]),
-            fontWeight: "600",
-          }}
-        >
-          Primary
-        </Text>
+        <Text style={{ color: c.primaryFg, fontWeight: "600" }}>Primary</Text>
       </Pressable>
       <Pressable
         style={{
-          backgroundColor: rgbToColor(colors.secondary),
+          backgroundColor: c.secondary,
           paddingHorizontal: 20,
           paddingVertical: 12,
           borderRadius: 12,
         }}
       >
-        <Text
-          style={{
-            color: rgbToColor(colors["secondary-foreground"]),
-            fontWeight: "600",
-          }}
-        >
+        <Text style={{ color: c.secondaryFg, fontWeight: "600" }}>
           Secondary
         </Text>
       </Pressable>
       <Pressable
         style={{
-          backgroundColor: rgbToColor(colors.accent),
+          backgroundColor: c.accent,
           paddingHorizontal: 20,
           paddingVertical: 12,
           borderRadius: 12,
         }}
       >
-        <Text
-          style={{
-            color: rgbToColor(colors["accent-foreground"]),
-            fontWeight: "600",
-          }}
-        >
-          Accent
-        </Text>
+        <Text style={{ color: c.accentFg, fontWeight: "600" }}>Accent</Text>
       </Pressable>
       <Pressable
         style={{
-          backgroundColor: rgbToColor(colors.destructive),
+          backgroundColor: c.destructive,
           paddingHorizontal: 20,
           paddingVertical: 12,
           borderRadius: 12,
         }}
       >
-        <Text
-          style={{
-            color: rgbToColor(colors["destructive-foreground"]),
-            fontWeight: "600",
-          }}
-        >
+        <Text style={{ color: c.destructiveFg, fontWeight: "600" }}>
           Destructive
         </Text>
       </Pressable>
       <Pressable
         style={{
-          backgroundColor: rgbToColor(colors.muted),
+          backgroundColor: c.muted,
           paddingHorizontal: 20,
           paddingVertical: 12,
           borderRadius: 12,
         }}
       >
-        <Text
-          style={{
-            color: rgbToColor(colors["muted-foreground"]),
-            fontWeight: "600",
-          }}
-        >
-          Muted
-        </Text>
+        <Text style={{ color: c.mutedFg, fontWeight: "600" }}>Muted</Text>
       </Pressable>
     </View>
   );
@@ -201,36 +156,34 @@ function ButtonPreview() {
 
 // 输入框预览
 function InputPreview() {
-  const { colors } = useTheme();
+  const { c } = useTheme();
 
   return (
     <View style={{ marginBottom: 24 }}>
       <View
         style={{
-          backgroundColor: rgbToColor(colors.input),
+          backgroundColor: c.input,
           borderRadius: 12,
           paddingHorizontal: 16,
           paddingVertical: 12,
           borderWidth: 1,
-          borderColor: rgbToColor(colors.border),
+          borderColor: c.border,
           marginBottom: 12,
         }}
       >
-        <Text style={{ color: rgbToColor(colors.foreground) }}>输入框预览</Text>
+        <Text style={{ color: c.foreground }}>输入框预览</Text>
       </View>
       <View
         style={{
-          backgroundColor: rgbToColor(colors.input),
+          backgroundColor: c.input,
           borderRadius: 12,
           paddingHorizontal: 16,
           paddingVertical: 12,
           borderWidth: 2,
-          borderColor: rgbToColor(colors.ring),
+          borderColor: c.ring,
         }}
       >
-        <Text style={{ color: rgbToColor(colors.foreground) }}>
-          聚焦状态 (带 Ring)
-        </Text>
+        <Text style={{ color: c.foreground }}>聚焦状态 (带 Ring)</Text>
       </View>
     </View>
   );
@@ -238,22 +191,22 @@ function InputPreview() {
 
 // 卡片预览
 function CardPreview() {
-  const { colors } = useTheme();
+  const { c } = useTheme();
 
   return (
     <View
       style={{
-        backgroundColor: rgbToColor(colors.card),
+        backgroundColor: c.card,
         borderRadius: 16,
         padding: 20,
         marginBottom: 24,
         borderWidth: 1,
-        borderColor: rgbToColor(colors.border),
+        borderColor: c.border,
       }}
     >
       <Text
         style={{
-          color: rgbToColor(colors["card-foreground"]),
+          color: c.cardFg,
           fontSize: 20,
           fontWeight: "bold",
           marginBottom: 8,
@@ -261,66 +214,43 @@ function CardPreview() {
       >
         卡片标题
       </Text>
-      <Text
-        style={{
-          color: rgbToColor(colors["card-foreground"], 0.8),
-          marginBottom: 16,
-        }}
-      >
+      <Text style={{ color: alpha(c.cardFg, 0.8), marginBottom: 16 }}>
         这是一个卡片组件示例，展示卡片背景色和前景色的搭配效果。
       </Text>
       <View style={{ flexDirection: "row", gap: 8 }}>
         <View
           style={{
-            backgroundColor: rgbToColor(colors.primary, 0.2),
+            backgroundColor: alpha(c.primary, 0.2),
             paddingHorizontal: 12,
             paddingVertical: 4,
             borderRadius: 9999,
           }}
         >
-          <Text
-            style={{
-              color: rgbToColor(colors.primary),
-              fontSize: 14,
-              fontWeight: "500",
-            }}
-          >
+          <Text style={{ color: c.primary, fontSize: 14, fontWeight: "500" }}>
             标签 1
           </Text>
         </View>
         <View
           style={{
-            backgroundColor: rgbToColor(colors.secondary, 0.2),
+            backgroundColor: alpha(c.secondary, 0.2),
             paddingHorizontal: 12,
             paddingVertical: 4,
             borderRadius: 9999,
           }}
         >
-          <Text
-            style={{
-              color: rgbToColor(colors.secondary),
-              fontSize: 14,
-              fontWeight: "500",
-            }}
-          >
+          <Text style={{ color: c.secondary, fontSize: 14, fontWeight: "500" }}>
             标签 2
           </Text>
         </View>
         <View
           style={{
-            backgroundColor: rgbToColor(colors.accent, 0.2),
+            backgroundColor: alpha(c.accent, 0.2),
             paddingHorizontal: 12,
             paddingVertical: 4,
             borderRadius: 9999,
           }}
         >
-          <Text
-            style={{
-              color: rgbToColor(colors.accent),
-              fontSize: 14,
-              fontWeight: "500",
-            }}
-          >
+          <Text style={{ color: c.accent, fontSize: 14, fontWeight: "500" }}>
             标签 3
           </Text>
         </View>
@@ -331,62 +261,50 @@ function CardPreview() {
 
 // Popover 预览
 function PopoverPreview() {
-  const { colors } = useTheme();
+  const { c } = useTheme();
 
   return (
     <View
       style={{
-        backgroundColor: rgbToColor(colors.popover),
+        backgroundColor: c.popover,
         borderRadius: 12,
         padding: 16,
         marginBottom: 24,
         borderWidth: 1,
-        borderColor: rgbToColor(colors.border),
+        borderColor: c.border,
       }}
     >
-      <Text
-        style={{
-          color: rgbToColor(colors["popover-foreground"]),
-          fontWeight: "600",
-          marginBottom: 8,
-        }}
-      >
+      <Text style={{ color: c.popoverFg, fontWeight: "600", marginBottom: 8 }}>
         弹出菜单 / 下拉框
       </Text>
       <View
         style={{
-          backgroundColor: rgbToColor(colors.background, 0.5),
+          backgroundColor: alpha(c.background, 0.5),
           borderRadius: 8,
           padding: 12,
           marginBottom: 8,
         }}
       >
-        <Text style={{ color: rgbToColor(colors["popover-foreground"]) }}>
-          选项 1
-        </Text>
+        <Text style={{ color: c.popoverFg }}>选项 1</Text>
       </View>
       <View
         style={{
-          backgroundColor: rgbToColor(colors.primary, 0.1),
+          backgroundColor: alpha(c.primary, 0.1),
           borderRadius: 8,
           padding: 12,
           marginBottom: 8,
         }}
       >
-        <Text style={{ color: rgbToColor(colors["popover-foreground"]) }}>
-          选项 2 (选中)
-        </Text>
+        <Text style={{ color: c.popoverFg }}>选项 2 (选中)</Text>
       </View>
       <View
         style={{
-          backgroundColor: rgbToColor(colors.background, 0.5),
+          backgroundColor: alpha(c.background, 0.5),
           borderRadius: 8,
           padding: 12,
         }}
       >
-        <Text style={{ color: rgbToColor(colors["popover-foreground"]) }}>
-          选项 3
-        </Text>
+        <Text style={{ color: c.popoverFg }}>选项 3</Text>
       </View>
     </View>
   );
@@ -394,80 +312,92 @@ function PopoverPreview() {
 
 // 颜色调色板展示
 function ColorPalette() {
-  const { colors } = useTheme();
+  const { c, colors } = useTheme();
 
   const colorItems = [
     {
       name: "Background",
       desc: "主背景色",
-      color: colors.background,
-      textColor: colors.foreground,
+      bg: c.background,
+      fg: c.foreground,
+      rgb: colors.background,
     },
     {
       name: "Foreground",
-      desc: "主前景色/文字",
-      color: colors.foreground,
-      textColor: colors.background,
+      desc: "主前景色",
+      bg: c.foreground,
+      fg: c.background,
+      rgb: colors.foreground,
     },
     {
       name: "Primary",
-      desc: "主要操作/品牌色",
-      color: colors.primary,
-      textColor: colors["primary-foreground"],
+      desc: "主要操作",
+      bg: c.primary,
+      fg: c.primaryFg,
+      rgb: colors.primary,
     },
     {
       name: "Secondary",
       desc: "次要操作",
-      color: colors.secondary,
-      textColor: colors["secondary-foreground"],
+      bg: c.secondary,
+      fg: c.secondaryFg,
+      rgb: colors.secondary,
     },
     {
       name: "Accent",
-      desc: "强调/高亮",
-      color: colors.accent,
-      textColor: colors["accent-foreground"],
+      desc: "强调高亮",
+      bg: c.accent,
+      fg: c.accentFg,
+      rgb: colors.accent,
     },
     {
       name: "Muted",
-      desc: "禁用/次要文字",
-      color: colors.muted,
-      textColor: colors["muted-foreground"],
+      desc: "禁用状态",
+      bg: c.muted,
+      fg: c.mutedFg,
+      rgb: colors.muted,
     },
     {
       name: "Destructive",
-      desc: "危险操作/错误",
-      color: colors.destructive,
-      textColor: colors["destructive-foreground"],
+      desc: "危险操作",
+      bg: c.destructive,
+      fg: c.destructiveFg,
+      rgb: colors.destructive,
     },
     {
       name: "Card",
-      desc: "卡片",
-      color: colors.card,
-      textColor: colors["card-foreground"],
+      desc: "卡片背景",
+      bg: c.card,
+      fg: c.cardFg,
+      rgb: colors.card,
     },
     {
       name: "Popover",
       desc: "弹出层",
-      color: colors.popover,
-      textColor: colors["popover-foreground"],
+      bg: c.popover,
+      fg: c.popoverFg,
+      rgb: colors.popover,
     },
     {
       name: "Border",
       desc: "边框",
-      color: colors.border,
-      textColor: colors.foreground,
+      bg: c.border,
+      fg: c.foreground,
+      rgb: colors.border,
     },
     {
       name: "Input",
       desc: "输入框",
-      color: colors.input,
-      textColor: colors.foreground,
+      bg: c.input,
+      fg: c.foreground,
+      rgb: colors.input,
     },
     {
       name: "Ring",
       desc: "焦点环",
-      color: colors.ring,
-      textColor: colors.foreground,
+      bg: c.ring,
+      fg: c.foreground,
+      rgb: colors.ring,
     },
   ];
 
@@ -477,29 +407,19 @@ function ColorPalette() {
         <View
           key={item.name}
           style={{
-            backgroundColor: rgbToColor(item.color),
+            backgroundColor: item.bg,
             borderRadius: 16,
             padding: 16,
             marginBottom: 12,
           }}
         >
-          <Text
-            style={{
-              color: rgbToColor(item.textColor),
-              fontSize: 18,
-              fontWeight: "600",
-            }}
-          >
+          <Text style={{ color: item.fg, fontSize: 18, fontWeight: "600" }}>
             {item.name}
           </Text>
           <Text
-            style={{
-              color: rgbToColor(item.textColor, 0.7),
-              fontSize: 12,
-              marginTop: 4,
-            }}
+            style={{ color: alpha(item.fg, 0.7), fontSize: 12, marginTop: 4 }}
           >
-            {item.desc} · RGB: {item.color}
+            {item.desc} · RGB: {item.rgb}
           </Text>
         </View>
       ))}
@@ -509,22 +429,22 @@ function ColorPalette() {
 
 // 排版预览
 function TypographyPreview() {
-  const { colors } = useTheme();
+  const { c } = useTheme();
 
   return (
     <View
       style={{
         marginBottom: 24,
-        backgroundColor: rgbToColor(colors.card),
+        backgroundColor: c.card,
         borderRadius: 16,
         padding: 20,
         borderWidth: 1,
-        borderColor: rgbToColor(colors.border),
+        borderColor: c.border,
       }}
     >
       <Text
         style={{
-          color: rgbToColor(colors.foreground),
+          color: c.foreground,
           fontSize: 30,
           fontWeight: "bold",
           marginBottom: 8,
@@ -534,7 +454,7 @@ function TypographyPreview() {
       </Text>
       <Text
         style={{
-          color: rgbToColor(colors.foreground),
+          color: c.foreground,
           fontSize: 24,
           fontWeight: "600",
           marginBottom: 8,
@@ -544,7 +464,7 @@ function TypographyPreview() {
       </Text>
       <Text
         style={{
-          color: rgbToColor(colors.foreground),
+          color: c.foreground,
           fontSize: 20,
           fontWeight: "500",
           marginBottom: 8,
@@ -552,31 +472,13 @@ function TypographyPreview() {
       >
         Heading 3
       </Text>
-      <Text
-        style={{
-          color: rgbToColor(colors.foreground),
-          fontSize: 16,
-          marginBottom: 8,
-        }}
-      >
+      <Text style={{ color: c.foreground, fontSize: 16, marginBottom: 8 }}>
         Body text - 这是正文文本，用于展示基础的阅读体验。
       </Text>
-      <Text
-        style={{
-          color: rgbToColor(colors["muted-foreground"]),
-          fontSize: 14,
-          marginBottom: 8,
-        }}
-      >
+      <Text style={{ color: c.mutedFg, fontSize: 14, marginBottom: 8 }}>
         Muted text - 这是次要文本，用于辅助信息。
       </Text>
-      <Text
-        style={{
-          color: rgbToColor(colors.primary),
-          fontSize: 16,
-          fontWeight: "500",
-        }}
-      >
+      <Text style={{ color: c.primary, fontSize: 16, fontWeight: "500" }}>
         Primary link text
       </Text>
     </View>
@@ -584,11 +486,11 @@ function TypographyPreview() {
 }
 
 export default function ThemePreviewScreen() {
-  const { currentTheme, colorMode, colors } = useTheme();
+  const { currentTheme, colorMode, c } = useTheme();
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: rgbToColor(colors.background) }}
+      style={{ flex: 1, backgroundColor: c.background }}
       contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
       showsVerticalScrollIndicator={false}
     >
@@ -596,7 +498,7 @@ export default function ThemePreviewScreen() {
       <View style={{ paddingVertical: 24 }}>
         <Text
           style={{
-            color: rgbToColor(colors.foreground),
+            color: c.foreground,
             fontSize: 30,
             fontWeight: "bold",
             marginBottom: 8,
@@ -604,60 +506,51 @@ export default function ThemePreviewScreen() {
         >
           🎨 主题预览
         </Text>
-        <Text
-          style={{
-            color: rgbToColor(colors["muted-foreground"]),
-            fontSize: 16,
-          }}
-        >
+        <Text style={{ color: c.mutedFg, fontSize: 16 }}>
           当前主题: {currentTheme.name} ·{" "}
           {colorMode === "dark" ? "深色模式" : "浅色模式"}
         </Text>
       </View>
 
       {/* Section: Theme Switcher */}
-      <SectionHeader title="选择主题" colors={colors} />
+      <SectionHeader title="选择主题" />
       <ThemeSwitcher />
 
       {/* Section: Buttons */}
-      <SectionHeader title="按钮" colors={colors} />
+      <SectionHeader title="按钮" />
       <ButtonPreview />
 
       {/* Section: Inputs */}
-      <SectionHeader title="输入框" colors={colors} />
+      <SectionHeader title="输入框" />
       <InputPreview />
 
       {/* Section: Card */}
-      <SectionHeader title="卡片" colors={colors} />
+      <SectionHeader title="卡片" />
       <CardPreview />
 
       {/* Section: Popover */}
-      <SectionHeader title="弹出层" colors={colors} />
+      <SectionHeader title="弹出层" />
       <PopoverPreview />
 
       {/* Section: Typography */}
-      <SectionHeader title="排版" colors={colors} />
+      <SectionHeader title="排版" />
       <TypographyPreview />
 
       {/* Section: Color Palette */}
-      <SectionHeader title="调色板" colors={colors} />
+      <SectionHeader title="调色板" />
       <ColorPalette />
     </ScrollView>
   );
 }
 
 // 区块标题组件
-function SectionHeader({
-  title,
-  colors,
-}: {
-  title: string;
-  colors: ReturnType<typeof useTheme>["colors"];
-}) {
+function SectionHeader({ title }: { title: string }) {
+  const { c } = useTheme();
+
   return (
     <Text
       style={{
-        color: rgbToColor(colors.foreground),
+        color: c.foreground,
         fontSize: 20,
         fontWeight: "600",
         marginBottom: 16,
