@@ -122,7 +122,7 @@ export const ResetForm: React.FC<ResetFormProps> = ({
         value={code}
         onChangeText={setCode}
         placeholder="请输入验证码"
-        editable={isLoading || isSendingCode}
+        editable={true}
         rightComponent={
           <CodeButton
             countdown={codeCountdown}
