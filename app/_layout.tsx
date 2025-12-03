@@ -3,16 +3,18 @@ import { useProtectedRoute } from "@/hooks/auth/useProtectedRoute";
 import { DataProvider } from "@/providers/data";
 import { ClosureProvider } from "@/providers/services/useClosure";
 import { SystemProvider } from "@/providers/system";
+import { rgbToColor, ThemeProvider, useTheme } from "@/providers/theme";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
   DarkTheme,
   DefaultTheme,
-  ThemeProvider,
+  ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StrictMode, useEffect } from "react";
+import { View } from "react-native";
 import "react-native-reanimated";
 import {
   SafeAreaProvider,
@@ -59,19 +61,50 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
+/**
+ * 应用主题样式的根容器
+ * 使用 Direct Style 方式应用主题颜色
+ */
+const ThemedRoot = ({ children }: { children: React.ReactNode }) => {
+  const { colors } = useTheme();
+
+  return (
+    <View style={{ flex: 1, backgroundColor: rgbToColor(colors.background) }}>
+      {children}
+    </View>
+  );
+};
+
+/**
+ * SafeAreaView 包装器，使用主题背景色
+ */
+const ThemedSafeArea = ({ children }: { children: React.ReactNode }) => {
+  const { colors } = useTheme();
+
+  return (
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: rgbToColor(colors.background) }}
+      edges={["top", "left", "right"]}
+    >
+      {children}
+    </SafeAreaView>
+  );
+};
+
 const DependentProviders = ({ children }: { children: React.ReactNode }) => (
   <StrictMode>
     <SafeAreaProvider>
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#fff" }}
-        edges={["top", "left", "right"]}
-      >
-        <SystemProvider>
-          <DataProvider>
-            <ClosureProvider>{children}</ClosureProvider>
-          </DataProvider>
-        </SystemProvider>
-      </SafeAreaView>
+      <ThemeProvider>
+        <ThemedRoot>
+          <ThemedSafeArea>
+            <SystemProvider>
+              <DataProvider>
+                <ClosureProvider>{children}</ClosureProvider>
+              </DataProvider>
+            </SystemProvider>
+          </ThemedSafeArea>
+        </ThemedRoot>
+      </ThemeProvider>
     </SafeAreaProvider>
   </StrictMode>
 );
@@ -85,7 +118,9 @@ const NavigationContent = () => {
   useProtectedRoute();
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <NavigationThemeProvider
+      value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+    >
       <Stack>
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -94,7 +129,7 @@ const NavigationContent = () => {
           options={{ presentation: "modal", headerShown: false }}
         />
       </Stack>
-    </ThemeProvider>
+    </NavigationThemeProvider>
   );
 };
 
