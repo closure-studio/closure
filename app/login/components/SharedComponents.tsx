@@ -164,7 +164,7 @@ export const CodeButton: React.FC<CodeButtonProps> = ({
     <TouchableOpacity
       style={[
         styles.codeButton,
-        countdown > 0 ? styles.codeButtonDisabled : null,
+        countdown > 0 || disabled ? styles.codeButtonDisabled : null,
       ]}
       onPress={onPress}
       disabled={countdown > 0 || disabled}
