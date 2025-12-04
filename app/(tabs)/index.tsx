@@ -1,134 +1,268 @@
 import { useRouter } from "expo-router";
-import { useRef } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { useEffect, useRef } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import PagerView from "react-native-pager-view";
 
-import EditScreenInfo from "@/components/EditScreenInfo";
-import { Text, View } from "@/components/Themed";
+import { Announcement } from "@/components/Announcement";
+import { useData } from "@/providers/data";
+import { useClosure } from "@/providers/services/useClosure";
+import { useTheme } from "@/providers/theme";
 
 export default function HomeScreen() {
   const pagerRef = useRef<PagerView>(null);
   const router = useRouter();
+  const { c } = useTheme();
+  const { currentAuthSession, appStates } = useData();
+  const { fetchArkHostConfig } = useClosure();
+  const { arkHostConfig } = appStates;
 
-  // 第一个View - 主页
-  const HomeView = () => (
-    <View style={styles.pageContainer}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Home</Text>
-        <View
-          style={styles.separator}
-          lightColor="#eee"
-          darkColor="rgba(255,255,255,0.1)"
-        />
-        <EditScreenInfo path="app/(tabs)/home.tsx" />
-        <TouchableOpacity
-          onPress={(e) => {
-            e.stopPropagation();
-            router.push("/modal");
-          }}
-          style={styles.linkButton}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.link}>Open modal</Text>
-        </TouchableOpacity>
-        <Text style={styles.hintText}>向下滑动查看详细内容</Text>
-      </View>
-    </View>
-  );
+  useEffect(() => {
+    const token = currentAuthSession?.credential?.token;
+    if (!token) return;
+    fetchArkHostConfig();
+  }, [currentAuthSession?.credential?.token]);
 
-  // 第二个View - 具体内容
-  const ContentView = () => (
-    <View style={styles.pageContainer}>
-      <View style={styles.container}>
-        <Text style={styles.title}>详细内容</Text>
-        <View
-          style={styles.separator}
-          lightColor="#eee"
-          darkColor="rgba(255,255,255,0.1)"
-        />
-        <Text style={styles.contentText}>
-          这是详细内容页面。您可以在这里显示更多信息。
-        </Text>
-        <Text style={styles.hintText}>向上滑动返回主页</Text>
-      </View>
-    </View>
-  );
+  useEffect(() => {
+    console.log("arkHostConfig:", JSON.stringify(arkHostConfig, null, 2));
+    console.log("announcement:", arkHostConfig?.announcement);
+  }, [arkHostConfig]);
 
   return (
     <PagerView
       ref={pagerRef}
-      style={styles.pagerView}
+      style={{ flex: 1, backgroundColor: c.background }}
       initialPage={0}
       orientation="vertical"
     >
-      <View key="0">
-        <HomeView />
+      {/* 第一页 - 主页 */}
+      <View key="0" style={{ flex: 1 }}>
+        <ScrollView
+          style={{ flex: 1, backgroundColor: c.background }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            paddingBottom: 100,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* 系统公告 */}
+          <Announcement
+            content={arkHostConfig?.announcement}
+            title="今日特价"
+            maxHeight={140}
+          />
+
+          {/* 欢迎区域 */}
+          <View
+            style={{
+              marginTop: 20,
+              backgroundColor: c.card,
+              borderRadius: 16,
+              padding: 20,
+              borderWidth: 1,
+              borderColor: c.border,
+            }}
+          >
+            <Text
+              style={{
+                color: c.cardFg,
+                fontSize: 24,
+                fontWeight: "bold",
+                marginBottom: 8,
+              }}
+            >
+              欢迎回来 👋
+            </Text>
+            <Text style={{ color: c.mutedFg, fontSize: 14, lineHeight: 22 }}>
+              {currentAuthSession?.payload?.email
+                ? `你好，${currentAuthSession.payload.email}`
+                : "请登录以使用完整功能"}
+            </Text>
+          </View>
+
+          {/* 快捷操作区域 */}
+          <View style={{ marginTop: 20 }}>
+            <Text
+              style={{
+                color: c.foreground,
+                fontSize: 18,
+                fontWeight: "600",
+                marginBottom: 12,
+              }}
+            >
+              快捷操作
+            </Text>
+            <View style={{ flexDirection: "row", gap: 12 }}>
+              <Pressable
+                onPress={() => router.push("/modal")}
+                style={{
+                  flex: 1,
+                  backgroundColor: c.primary,
+                  borderRadius: 12,
+                  padding: 16,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ fontSize: 24, marginBottom: 8 }}>📋</Text>
+                <Text style={{ color: c.primaryFg, fontWeight: "600" }}>
+                  打开弹窗
+                </Text>
+              </Pressable>
+              <Pressable
+                style={{
+                  flex: 1,
+                  backgroundColor: c.secondary,
+                  borderRadius: 12,
+                  padding: 16,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ fontSize: 24, marginBottom: 8 }}>⚙️</Text>
+                <Text style={{ color: c.secondaryFg, fontWeight: "600" }}>
+                  设置
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* 状态信息 */}
+          <View
+            style={{
+              marginTop: 20,
+              backgroundColor: c.card,
+              borderRadius: 16,
+              padding: 16,
+              borderWidth: 1,
+              borderColor: c.border,
+            }}
+          >
+            <Text
+              style={{
+                color: c.cardFg,
+                fontSize: 16,
+                fontWeight: "600",
+                marginBottom: 12,
+              }}
+            >
+              服务状态
+            </Text>
+            <View style={{ gap: 8 }}>
+              <StatusItem
+                label="维护状态"
+                value={arkHostConfig?.isUnderMaintenance ? "维护中" : "正常"}
+                isGood={!arkHostConfig?.isUnderMaintenance}
+              />
+              <StatusItem
+                label="游戏登录"
+                value={arkHostConfig?.allowGameLogin ? "允许" : "禁止"}
+                isGood={arkHostConfig?.allowGameLogin}
+              />
+              <StatusItem
+                label="API 版本"
+                value={arkHostConfig?.apiVersion || "未知"}
+              />
+            </View>
+          </View>
+
+          {/* 提示信息 */}
+          <View style={{ marginTop: 20, alignItems: "center" }}>
+            <Text
+              style={{ color: c.mutedFg, fontSize: 14, fontStyle: "italic" }}
+            >
+              向下滑动查看更多内容
+            </Text>
+          </View>
+        </ScrollView>
       </View>
-      <View key="1">
-        <ContentView />
+
+      {/* 第二页 - 详细内容 */}
+      <View key="1" style={{ flex: 1 }}>
+        <ScrollView
+          style={{ flex: 1, backgroundColor: c.background }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingHorizontal: 16,
+            paddingTop: 24,
+            paddingBottom: 100,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View
+            style={{
+              backgroundColor: c.card,
+              borderRadius: 16,
+              padding: 20,
+              borderWidth: 1,
+              borderColor: c.border,
+            }}
+          >
+            <Text
+              style={{
+                color: c.cardFg,
+                fontSize: 22,
+                fontWeight: "bold",
+                marginBottom: 16,
+              }}
+            >
+              详细内容
+            </Text>
+            <Text style={{ color: c.cardFg, fontSize: 16, lineHeight: 26 }}>
+              这是详细内容页面。您可以在这里显示更多信息。
+            </Text>
+          </View>
+
+          <View style={{ marginTop: 20, alignItems: "center" }}>
+            <Text
+              style={{ color: c.mutedFg, fontSize: 14, fontStyle: "italic" }}
+            >
+              向上滑动返回主页
+            </Text>
+          </View>
+        </ScrollView>
       </View>
     </PagerView>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  pagerView: {
-    flex: 1,
-  },
-  pageContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
-  },
-  contentText: {
-    fontSize: 16,
-    textAlign: "center",
-    marginVertical: 20,
-    paddingHorizontal: 20,
-    lineHeight: 24,
-  },
-  hintText: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 30,
-    fontStyle: "italic",
-  },
-  button: {
-    backgroundColor: "#007AFF",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 20,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  link: {
-    paddingTop: 20,
-    fontSize: 20,
-  },
-  linkButton: {
-    paddingTop: 20,
-  },
-});
+// 状态项组件
+function StatusItem({
+  label,
+  value,
+  isGood,
+}: {
+  label: string;
+  value: string;
+  isGood?: boolean;
+}) {
+  const { c } = useTheme();
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: c.border,
+      }}
+    >
+      <Text style={{ color: c.mutedFg, fontSize: 14 }}>{label}</Text>
+      <Text
+        style={{
+          color:
+            isGood === undefined
+              ? c.cardFg
+              : isGood
+                ? c.primary
+                : c.destructive,
+          fontSize: 14,
+          fontWeight: "500",
+        }}
+      >
+        {value}
+      </Text>
+    </View>
+  );
+}

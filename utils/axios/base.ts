@@ -110,9 +110,6 @@ abstract class ServerBase {
     const resp = await this.handleResponse<T>(
       this.getInstance().get(url, axiosConfig),
     );
-    if (!resp.data) {
-      this.log.error(`${errorPrefix || "GET Request"} failed:`, resp.message);
-    }
     return resp;
   }
 

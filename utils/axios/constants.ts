@@ -39,7 +39,6 @@ export const ARK_HOST_CONSTANTS: IArkHostConstants = {
   CONFIG: {
     endPoint: "/system/config",
     method: "GET",
-    isPublic: true,
   },
   GAME: {
     endPoint: "/game",

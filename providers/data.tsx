@@ -9,7 +9,6 @@ import { produce } from "immer";
 import React, {
   createContext,
   ReactNode,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -22,6 +21,7 @@ import { useSystem } from "./system";
  */
 interface DataContextType {
   currentAuthSession: IAuthSession | null;
+  appStates: IAPPStates;
   updateAppStates: (updater: (draft: IAPPStates) => void) => void;
   apiClients: IAPIClients;
 }
@@ -82,6 +82,7 @@ const DataProvider = ({ children }: DataProviderProps) => {
 
   const values: DataContextType = {
     currentAuthSession,
+    appStates,
     updateAppStates,
     apiClients,
   };

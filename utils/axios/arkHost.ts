@@ -1,4 +1,4 @@
-import { IGameData, IArkHostConfig } from "@/types/arkHost";
+import { IArkHostConfig, IGameData } from "@/types/arkHost";
 import { IAPIResponse } from "@/types/axios";
 import ServerBase from "./base";
 import { ARK_HOST_CONSTANTS } from "./constants";
@@ -12,17 +12,14 @@ import { ARK_HOST_CONSTANTS } from "./constants";
 class ArkHostClient extends ServerBase {
   /**
    * 处理 API 响应
+   * 与 IdServerClient 保持一致，直接返回 API 响应
    */
   protected async handleResponse<T>(
     promise: Promise<any>,
   ): Promise<IAPIResponse<T>> {
     try {
       const resp = await promise;
-      return {
-        code: 1,
-        message: "success",
-        data: resp.data as T,
-      };
+      return resp.data as IAPIResponse<T>;
     } catch (error: any) {
       if (error.response) {
         return {
@@ -36,7 +33,7 @@ class ArkHostClient extends ServerBase {
         };
       } else {
         return {
-          code: 500,
+          code: 0,
           message: error.message || "Unknown error",
         };
       }
@@ -53,11 +50,12 @@ class ArkHostClient extends ServerBase {
   }
 
   /**
-   * 查询配置信息
+   * 查询系统配置信息
    */
-  queryConfig(): Promise<IAPIResponse<IArkHostConfig>> {
+  async queryConfig(): Promise<IAPIResponse<IArkHostConfig>> {
     const option = ARK_HOST_CONSTANTS.CONFIG;
-    return this.get<IArkHostConfig>(option.endPoint, option);
+    const response = await this.get<IArkHostConfig>(option.endPoint, option);
+    return response;
   }
 }
 

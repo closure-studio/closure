@@ -5,18 +5,9 @@ import {
   ThemeDefinition,
   themes,
 } from "@/constants/themes";
-import { storage } from "@/utils/mmkv/mmkv";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 import { useColorScheme } from "react-native";
-
-// 添加存储键
-const THEME_STORAGE_KEY = "app_theme_id";
+import { useData } from "./data";
 
 /**
  * 预计算的 RGBA 颜色值（可直接用于 style）
@@ -104,11 +95,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const colorMode: "light" | "dark" =
     systemColorScheme === "dark" ? "dark" : "light";
 
-  // 从存储加载主题 ID
-  const [themeId, setThemeId] = useState<string>(() => {
-    const savedThemeId = storage.getString(THEME_STORAGE_KEY);
-    return savedThemeId || DEFAULT_THEME_ID;
-  });
+  // 从 appStates 获取主题 ID
+  const { appStates, updateAppStates } = useData();
+  const themeId = appStates.themeId || DEFAULT_THEME_ID;
 
   // 获取当前主题定义
   const currentTheme = useMemo(() => {
@@ -123,14 +112,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // 预计算的颜色值（可直接用于 style）
   const c = useMemo(() => computeColors(colors), [colors]);
 
-  // 切换主题
-  const setTheme = useCallback((newThemeId: string) => {
-    const theme = getThemeById(newThemeId);
-    if (theme) {
-      setThemeId(newThemeId);
-      storage.setString(THEME_STORAGE_KEY, newThemeId);
-    }
-  }, []);
+  // 切换主题 - 更新 appStates
+  const setTheme = useCallback(
+    (newThemeId: string) => {
+      const theme = getThemeById(newThemeId);
+      if (theme) {
+        updateAppStates((draft) => {
+          draft.themeId = newThemeId;
+        });
+      }
+    },
+    [updateAppStates],
+  );
 
   const value: ThemeContextType = useMemo(
     () => ({

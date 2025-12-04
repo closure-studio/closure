@@ -1,4 +1,5 @@
 import { MESSAGES } from "@/constants/messages";
+import { IArkHostConfig } from "@/types/arkHost";
 import { IAssetItems, IAssetStages } from "@/types/assets";
 import {
   IAuthSession,
@@ -40,6 +41,7 @@ interface ClosureContextType {
   // to do: should be wrapped in a single fetchAssets function
   fetchAssetItems: () => Promise<IAPIResponse<IAssetItems>>;
   fetchAssetStages: () => Promise<IAPIResponse<IAssetStages>>;
+  fetchArkHostConfig: () => Promise<IAPIResponse<IArkHostConfig>>;
 }
 
 const ClosureContext = createContext<ClosureContextType | undefined>(undefined);
@@ -245,6 +247,29 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     }
   };
 
+  const fetchArkHostConfig = async (): Promise<
+    IAPIResponse<IArkHostConfig>
+  > => {
+    try {
+      const response = await arkHostClient.queryConfig();
+      if (response.code === 1 && response.data) {
+        log.info("Config data:", JSON.stringify(response.data, null, 2));
+        updateAppStates((draft) => {
+          draft.arkHostConfig = response.data || null;
+        });
+        return response;
+      }
+      log.error("Failed to fetch system config:", response.message);
+      return response;
+    } catch (error) {
+      log.error("Error fetching system config:", error);
+      return {
+        code: 0,
+        message: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  };
+
   // 后台轮询游戏状态
   useEffect(() => {
     // 只有在用户已登录时才启动轮询
@@ -265,7 +290,6 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
             draft.gamesData[currentAuthSession.payload?.uuid || ""] =
               response.data || [];
           });
-          toast.success("Games status updated");
         }
       } catch (error) {
         log.error("Error querying games status:", error);
@@ -293,6 +317,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     resetPassword,
     fetchAssetItems,
     fetchAssetStages,
+    fetchArkHostConfig,
   };
 
   return (

@@ -1,4 +1,4 @@
-import { IGameData } from "./arkHost.js";
+import { IArkHostConfig, IGameData } from "./arkHost.js";
 import { IAssetItems, IAssetStages } from "./assets.js";
 import { IAuthSession, UUID } from "./auth.js";
 import { IServiceConfigs } from "./axios.js";
@@ -18,4 +18,8 @@ export interface IAPPStates {
   assetStages: IAssetStages;
   // 游戏信息
   gamesData: Record<UUID, IGameData[]>;
+  // 系统配置
+  arkHostConfig: IArkHostConfig | null;
+  // 主题 ID
+  themeId: string;
 }
