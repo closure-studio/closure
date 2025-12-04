@@ -91,17 +91,17 @@ const ThemedSafeArea = ({ children }: { children: React.ReactNode }) => {
 const DependentProviders = ({ children }: { children: React.ReactNode }) => (
   <StrictMode>
     <SafeAreaProvider>
-      <SystemProvider>
-        <DataProvider>
+        <SystemProvider>
+          <DataProvider>
           <ThemeProvider>
             <ThemedRoot>
               <ThemedSafeArea>
-                <ClosureProvider>{children}</ClosureProvider>
+            <ClosureProvider>{children}</ClosureProvider>
               </ThemedSafeArea>
             </ThemedRoot>
           </ThemeProvider>
-        </DataProvider>
-      </SystemProvider>
+          </DataProvider>
+        </SystemProvider>
     </SafeAreaProvider>
   </StrictMode>
 );

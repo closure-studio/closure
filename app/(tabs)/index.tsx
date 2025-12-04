@@ -4,9 +4,11 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import PagerView from "react-native-pager-view";
 
 import { Announcement } from "@/components/Announcement";
+import { GameDataList } from "@/components/GameDataCard";
 import { useData } from "@/providers/data";
 import { useClosure } from "@/providers/services/useClosure";
 import { useTheme } from "@/providers/theme";
+import { IGameData } from "@/types/arkHost";
 
 export default function HomeScreen() {
   const pagerRef = useRef<PagerView>(null);
@@ -181,7 +183,7 @@ export default function HomeScreen() {
         </ScrollView>
       </View>
 
-      {/* 第二页 - 详细内容 */}
+      {/* 第二页 - 游戏数据 */}
       <View key="1" style={{ flex: 1 }}>
         <ScrollView
           style={{ flex: 1, backgroundColor: c.background }}
@@ -193,30 +195,37 @@ export default function HomeScreen() {
           }}
           showsVerticalScrollIndicator={false}
         >
-          <View
-            style={{
-              backgroundColor: c.card,
-              borderRadius: 16,
-              padding: 20,
-              borderWidth: 1,
-              borderColor: c.border,
-            }}
-          >
+          {/* 页面标题 */}
+          <View style={{ marginBottom: 20 }}>
             <Text
               style={{
-                color: c.cardFg,
-                fontSize: 22,
+                color: c.foreground,
+                fontSize: 24,
                 fontWeight: "bold",
-                marginBottom: 16,
+                marginBottom: 4,
               }}
             >
-              详细内容
+              我的游戏
             </Text>
-            <Text style={{ color: c.cardFg, fontSize: 16, lineHeight: 26 }}>
-              这是详细内容页面。您可以在这里显示更多信息。
+            <Text style={{ color: c.mutedFg, fontSize: 14 }}>
+              {currentGamesData?.length || 0} 个游戏账号
             </Text>
           </View>
 
+          {/* 游戏数据列表 */}
+          <GameDataList
+            games={currentGamesData || []}
+            onPause={(game: IGameData) => {
+              console.log("暂停游戏:", game.status.nick_name);
+              // TODO: 实现暂停逻辑
+            }}
+            onDelete={(game: IGameData) => {
+              console.log("删除游戏:", game.status.nick_name);
+              // TODO: 实现删除逻辑
+            }}
+          />
+
+          {/* 提示信息 */}
           <View style={{ marginTop: 20, alignItems: "center" }}>
             <Text
               style={{ color: c.mutedFg, fontSize: 14, fontStyle: "italic" }}
