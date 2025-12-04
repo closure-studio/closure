@@ -49,12 +49,8 @@ export function Announcement({
     [maxHeight],
   );
 
-  // 调试日志
-  console.log("[Announcement] content:", content, "type:", typeof content);
-
   // 如果没有公告内容，不显示
   if (!content || (typeof content === "string" && content.trim() === "")) {
-    console.log("[Announcement] Not rendering - content is empty or falsy");
     return null;
   }
 
