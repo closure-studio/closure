@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import PagerView from "react-native-pager-view";
 
@@ -14,7 +14,12 @@ export default function HomeScreen() {
   const { c } = useTheme();
   const { currentAuthSession, appStates } = useData();
   const { fetchArkHostConfig } = useClosure();
-  const { arkHostConfig } = appStates;
+  const { arkHostConfig, gamesData } = appStates;
+
+  const currentGamesData = useMemo(() => {
+    if (!currentAuthSession?.payload?.uuid) return [];
+    return gamesData[currentAuthSession.payload.uuid];
+  }, [gamesData, currentAuthSession?.payload?.uuid]);
 
   useEffect(() => {
     const token = currentAuthSession?.credential?.token;
