@@ -1,5 +1,5 @@
 import { MESSAGES } from "@/constants/messages";
-import { IArkHostConfig } from "@/types/arkHost";
+import { IArkHostConfig, IGameDetail, IGameLogResponse } from "@/types/arkHost";
 import { IAssetItems, IAssetStages } from "@/types/assets";
 import {
   IAuthSession,
@@ -42,6 +42,11 @@ interface ClosureContextType {
   fetchAssetItems: () => Promise<IAPIResponse<IAssetItems>>;
   fetchAssetStages: () => Promise<IAPIResponse<IAssetStages>>;
   fetchArkHostConfig: () => Promise<IAPIResponse<IArkHostConfig>>;
+  fetchGameDetail: (gameId: string) => Promise<IAPIResponse<IGameDetail>>;
+  fetchGameLogs: (
+    gameId: string,
+    page?: number,
+  ) => Promise<IAPIResponse<IGameLogResponse>>;
 }
 
 const ClosureContext = createContext<ClosureContextType | undefined>(undefined);
@@ -270,6 +275,82 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     }
   };
 
+  const fetchGameDetail = async (
+    gameId: string,
+  ): Promise<IAPIResponse<IGameDetail>> => {
+    try {
+      const response = await arkHostClient.queryGameDetail(gameId);
+      if (response.code === 1 && response.data) {
+        const uuid = currentAuthSession?.payload?.uuid;
+        if (uuid) {
+          updateAppStates((draft) => {
+            const games = draft.gamesData[uuid] || [];
+            const gameIndex = games.findIndex(
+              (game) => game.status.account === gameId,
+            );
+            if (gameIndex !== -1) {
+              games[gameIndex].detail = response.data;
+            }
+          });
+        }
+        log.info("Game detail fetched successfully", { gameId });
+        return response;
+      }
+      log.error("Failed to fetch game detail:", response.message);
+      return response;
+    } catch (error) {
+      log.error("Error fetching game detail:", error);
+      return {
+        code: 0,
+        message: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  };
+
+  const fetchGameLogs = async (
+    gameId: string,
+    page: number = 0,
+  ): Promise<IAPIResponse<IGameLogResponse>> => {
+    const MAX_LOGS = 1000;
+    try {
+      const response = await arkHostClient.queryGameLogs(gameId, page);
+      if (response.code === 1 && response.data) {
+        const uuid = currentAuthSession?.payload?.uuid;
+        if (uuid) {
+          updateAppStates((draft) => {
+            const games = draft.gamesData[uuid] || [];
+            const gameIndex = games.findIndex(
+              (game) => game.status.account === gameId,
+            );
+            if (gameIndex !== -1) {
+              const existingLogs = games[gameIndex].logs?.logs || [];
+              const newLogs = response.data?.logs || [];
+              // 合并日志：page 0 时替换，否则追加
+              const mergedLogs =
+                page === 0 ? newLogs : [...existingLogs, ...newLogs];
+              // 限制最多保存 1000 条记录
+              const limitedLogs = mergedLogs.slice(0, MAX_LOGS);
+              games[gameIndex].logs = {
+                logs: limitedLogs,
+                hasMore: response.data?.hasMore ?? false,
+              };
+            }
+          });
+        }
+        log.info("Game logs fetched successfully", { gameId, page });
+        return response;
+      }
+      log.error("Failed to fetch game logs:", response.message);
+      return response;
+    } catch (error) {
+      log.error("Error fetching game logs:", error);
+      return {
+        code: 0,
+        message: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  };
+
   // 后台轮询游戏状态
   useEffect(() => {
     // 只有在用户已登录时才启动轮询
@@ -318,6 +399,8 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     fetchAssetItems,
     fetchAssetStages,
     fetchArkHostConfig,
+    fetchGameDetail,
+    fetchGameLogs,
   };
 
   return (

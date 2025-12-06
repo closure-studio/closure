@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { Href, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import PagerView from "react-native-pager-view";
@@ -215,6 +215,10 @@ export default function HomeScreen() {
           {/* 游戏数据列表 */}
           <GameDataList
             games={currentGamesData || []}
+            onPress={(_game: IGameData, index: number) => {
+              // 导航到游戏详情页，传递索引
+              router.push(`/game-detail?index=${index}` as Href);
+            }}
             onPause={(game: IGameData) => {
               console.log("暂停游戏:", game.status.nick_name);
               // TODO: 实现暂停逻辑

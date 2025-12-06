@@ -91,17 +91,17 @@ const ThemedSafeArea = ({ children }: { children: React.ReactNode }) => {
 const DependentProviders = ({ children }: { children: React.ReactNode }) => (
   <StrictMode>
     <SafeAreaProvider>
-        <SystemProvider>
-          <DataProvider>
+      <SystemProvider>
+        <DataProvider>
           <ThemeProvider>
             <ThemedRoot>
               <ThemedSafeArea>
-            <ClosureProvider>{children}</ClosureProvider>
+                <ClosureProvider>{children}</ClosureProvider>
               </ThemedSafeArea>
             </ThemedRoot>
           </ThemeProvider>
-          </DataProvider>
-        </SystemProvider>
+        </DataProvider>
+      </SystemProvider>
     </SafeAreaProvider>
   </StrictMode>
 );
@@ -118,12 +118,27 @@ const NavigationContent = () => {
     <NavigationThemeProvider
       value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
     >
-      <Stack>
+      <Stack
+        screenOptions={{
+          gestureEnabled: true,
+          gestureDirection: "horizontal",
+          fullScreenGestureEnabled: true,
+        }}
+      >
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="modal"
           options={{ presentation: "modal", headerShown: false }}
+        />
+        <Stack.Screen
+          name="game-detail"
+          options={{
+            headerShown: false,
+            animation: "slide_from_right",
+            gestureEnabled: true,
+            fullScreenGestureEnabled: true,
+          }}
         />
       </Stack>
     </NavigationThemeProvider>

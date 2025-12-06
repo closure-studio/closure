@@ -65,4 +65,54 @@ export interface IGameData {
   status: IAccountStatus;
   captcha_info: ICaptchaInfo;
   game_config: IGameConfig;
+  // 可选字段 - 游戏详情
+  detail?: IGameDetail;
+  // 可选字段 - 游戏日志
+  logs?: IGameLogResponse;
+}
+
+// 游戏详情状态接口
+interface IGameDetailStatus {
+  androidDiamond: number;
+  ap: number;
+  avatar: IAvatar;
+  avatarId: string;
+  diamondShard: number;
+  gachaTicket: number;
+  gold: number;
+  lastApAddTime: number;
+  level: number;
+  maxAp: number;
+  nickName: string;
+  recruitLicense: number;
+  secretary: string;
+  secretarySkinId: string;
+  socialPoint: number;
+  tenGachaTicket: number;
+}
+
+// 游戏详情接口
+export interface IGameDetail {
+  config: IGameConfig;
+  consumable: unknown | null;
+  inventory: unknown | null;
+  lastFreshTs: number;
+  screenshot: string | null;
+  status: IGameDetailStatus;
+  troop: unknown | null;
+}
+
+// 游戏日志条目接口
+export interface IGameLog {
+  id: number;
+  ts: number;
+  name: string;
+  logLevel: number;
+  content: string;
+}
+
+// 游戏日志响应接口
+export interface IGameLogResponse {
+  logs: IGameLog[];
+  hasMore: boolean;
 }

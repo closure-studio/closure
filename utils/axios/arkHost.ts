@@ -1,4 +1,9 @@
-import { IArkHostConfig, IGameData } from "@/types/arkHost";
+import {
+  IArkHostConfig,
+  IGameData,
+  IGameDetail,
+  IGameLogResponse,
+} from "@/types/arkHost";
 import { IAPIResponse } from "@/types/axios";
 import ServerBase from "./base";
 import { ARK_HOST_CONSTANTS } from "./constants";
@@ -55,6 +60,36 @@ class ArkHostClient extends ServerBase {
   async queryConfig(): Promise<IAPIResponse<IArkHostConfig>> {
     const option = ARK_HOST_CONSTANTS.CONFIG;
     const response = await this.get<IArkHostConfig>(option.endPoint, option);
+    return response;
+  }
+
+  /**
+   * 查询单个游戏详情
+   * @param gameId 游戏账号ID (如 G18928069156)
+   */
+  async queryGameDetail(gameId: string): Promise<IAPIResponse<IGameDetail>> {
+    const option = ARK_HOST_CONSTANTS.GAME_DETAIL;
+    const response = await this.get<IGameDetail>(
+      `${option.endPoint}/${gameId}`,
+      option,
+    );
+    return response;
+  }
+
+  /**
+   * 查询游戏日志
+   * @param gameId 游戏账号ID (如 G18928069156)
+   * @param page 页码 (从0开始)
+   */
+  async queryGameLogs(
+    gameId: string,
+    page: number = 0,
+  ): Promise<IAPIResponse<IGameLogResponse>> {
+    const option = ARK_HOST_CONSTANTS.GAME_LOG;
+    const response = await this.get<IGameLogResponse>(
+      `${option.endPoint}/${gameId}/${page}`,
+      option,
+    );
     return response;
   }
 }

@@ -10,6 +10,8 @@ import {
 
 interface GameDataCardProps {
   data: IGameData;
+  index?: number;
+  onPress?: () => void;
   onPause?: () => void;
   onDelete?: () => void;
 }
@@ -27,7 +29,13 @@ const STATUS_ICONS = ["⚡", "🎯", "🎮", "🔧"];
  * 游戏数据卡片组件
  * 展示游戏账号的基本信息、状态和操作按钮
  */
-export function GameDataCard({ data, onPause, onDelete }: GameDataCardProps) {
+export function GameDataCard({
+  data,
+  index,
+  onPress,
+  onPause,
+  onDelete,
+}: GameDataCardProps) {
   const { c } = useTheme();
   const { width } = useWindowDimensions();
   const { status, game_config } = data;
@@ -50,15 +58,18 @@ export function GameDataCard({ data, onPause, onDelete }: GameDataCardProps) {
     : null;
 
   return (
-    <View
-      style={{
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
         width: cardWidth,
         backgroundColor: c.card,
         borderRadius: 16,
         padding: 16,
         borderWidth: 1,
         borderColor: c.border,
-      }}
+        opacity: pressed ? 0.9 : 1,
+        transform: [{ scale: pressed ? 0.98 : 1 }],
+      })}
     >
       {/* 顶部区域：头像、等级、平台 */}
       <View
@@ -251,7 +262,10 @@ export function GameDataCard({ data, onPause, onDelete }: GameDataCardProps) {
       >
         {/* 暂停按钮 */}
         <Pressable
-          onPress={onPause}
+          onPress={(e) => {
+            e.stopPropagation();
+            onPause?.();
+          }}
           style={{
             flex: 1,
             paddingVertical: 14,
@@ -274,7 +288,10 @@ export function GameDataCard({ data, onPause, onDelete }: GameDataCardProps) {
 
         {/* 删除按钮 */}
         <Pressable
-          onPress={onDelete}
+          onPress={(e) => {
+            e.stopPropagation();
+            onDelete?.();
+          }}
           style={{
             flex: 1,
             paddingVertical: 14,
@@ -295,7 +312,7 @@ export function GameDataCard({ data, onPause, onDelete }: GameDataCardProps) {
           </Text>
         </Pressable>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -305,11 +322,17 @@ export function GameDataCard({ data, onPause, onDelete }: GameDataCardProps) {
  */
 interface GameDataListProps {
   games: IGameData[];
+  onPress?: (game: IGameData, index: number) => void;
   onPause?: (game: IGameData) => void;
   onDelete?: (game: IGameData) => void;
 }
 
-export function GameDataList({ games, onPause, onDelete }: GameDataListProps) {
+export function GameDataList({
+  games,
+  onPress,
+  onPause,
+  onDelete,
+}: GameDataListProps) {
   const { c } = useTheme();
 
   if (!games || games.length === 0) {
@@ -346,6 +369,8 @@ export function GameDataList({ games, onPause, onDelete }: GameDataListProps) {
           <GameDataCard
             key={game.status.uuid || index}
             data={game}
+            index={index}
+            onPress={() => onPress?.(game, index)}
             onPause={() => onPause?.(game)}
             onDelete={() => onDelete?.(game)}
           />

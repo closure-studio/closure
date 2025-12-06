@@ -10,6 +10,8 @@ interface IIDServerConstants {
 interface IArkHostConstants {
   CONFIG: ApiCallOptions;
   GAME: ApiCallOptions;
+  GAME_DETAIL: ApiCallOptions;
+  GAME_LOG: ApiCallOptions;
 }
 interface IAssetsConstants {
   ITEMS: ApiCallOptions;
@@ -42,6 +44,14 @@ export const ARK_HOST_CONSTANTS: IArkHostConstants = {
   },
   GAME: {
     endPoint: "/game",
+    method: "GET",
+  },
+  GAME_DETAIL: {
+    endPoint: "/game",
+    method: "GET",
+  },
+  GAME_LOG: {
+    endPoint: "/game/log",
     method: "GET",
   },
 } as const satisfies IArkHostConstants;
