@@ -317,6 +317,8 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       if (response.code === 1 && response.data) {
         const uuid = currentAuthSession?.payload?.uuid;
         if (uuid) {
+          // 使用 Immer produce 进行批量更新，无论有多少条 log，
+          // 都只会触发一次状态更新和一次 storage 写入
           updateAppStates((draft) => {
             const games = draft.gamesData[uuid] || [];
             const gameIndex = games.findIndex(
