@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 /**
  * useOTA - 处理应用的 OTA (Over-The-Air) 更新
- * 
+ *
  * 该 Hook 会在生产环境中自动检查并应用可用的更新
  * 在开发环境中不会执行任何操作
  */
@@ -29,4 +29,3 @@ export function useOTA() {
     checkForUpdates();
   }, []);
 }
-
