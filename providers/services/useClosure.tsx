@@ -1,5 +1,10 @@
 import { MESSAGES } from "@/constants/messages";
-import { IArkHostConfig, IGameDetail, IGameLogResponse } from "@/types/arkHost";
+import {
+  IArkHostConfig,
+  IGameDetail,
+  IGameLoginResponse,
+  IGameLogResponse,
+} from "@/types/arkHost";
 import { IAssetItems, IAssetStages } from "@/types/assets";
 import {
   IAuthSession,
@@ -47,6 +52,10 @@ interface ClosureContextType {
     gameId: string,
     page?: number,
   ) => Promise<IAPIResponse<IGameLogResponse>>;
+  startGame: (
+    gameId: string,
+    recaptchaToken: string,
+  ) => Promise<IAPIResponse<IGameLoginResponse>>;
 }
 
 const ClosureContext = createContext<ClosureContextType | undefined>(undefined);
@@ -353,6 +362,34 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     }
   };
 
+  const startGame = async (
+    gameId: string,
+    recaptchaToken: string,
+  ): Promise<IAPIResponse<IGameLoginResponse>> => {
+    try {
+      if (!gameId || !recaptchaToken) {
+        return {
+          code: 0,
+          message: "游戏ID和reCAPTCHA token不能为空",
+        };
+      }
+
+      const response = await arkHostClient.gameLogin(gameId, recaptchaToken);
+      if (response.code === 1) {
+        log.info("Game started successfully", { gameId });
+        return response;
+      }
+      log.error("Failed to start game:", response.message);
+      return response;
+    } catch (error) {
+      log.error("Error starting game:", error);
+      return {
+        code: 0,
+        message: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  };
+
   // 后台轮询游戏状态
   useEffect(() => {
     // 只有在用户已登录时才启动轮询
@@ -403,6 +440,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     fetchArkHostConfig,
     fetchGameDetail,
     fetchGameLogs,
+    startGame,
   };
 
   return (

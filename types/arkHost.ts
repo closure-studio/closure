@@ -116,3 +116,8 @@ export interface IGameLogResponse {
   logs: IGameLog[];
   hasMore: boolean;
 }
+
+// 游戏登录响应接口
+export interface IGameLoginResponse {
+  // 响应数据为 null
+}

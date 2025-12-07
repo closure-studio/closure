@@ -1,6 +1,11 @@
+import { useRecaptcha } from "@/hooks/auth/useRecaptcha";
+import { useClosure } from "@/providers/services/useClosure";
+import { useSystem } from "@/providers/system";
 import { useTheme } from "@/providers/theme";
 import { IGameData } from "@/types/arkHost";
+import { useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   Pressable,
   Text,
@@ -37,8 +42,45 @@ export function GameDataCard({
   onDelete,
 }: GameDataCardProps) {
   const { c } = useTheme();
+  const { toast } = useSystem();
   const { width } = useWindowDimensions();
   const { status, game_config } = data;
+  const { startGame } = useClosure();
+  const {
+    getRecaptchaToken,
+    RecaptchaWebView,
+    isReady: isRecaptchaReady,
+  } = useRecaptcha();
+  const [isStarting, setIsStarting] = useState(false);
+
+  // 启动游戏
+  const handleStart = async () => {
+    if (isStarting) return;
+    if (!isRecaptchaReady) {
+      toast.error("reCAPTCHA 正在加载，请稍后再试");
+      return;
+    }
+
+    setIsStarting(true);
+    try {
+      const { token, error } = await getRecaptchaToken();
+      if (error) {
+        toast.error(error);
+        return;
+      }
+
+      const response = await startGame(status.account, token);
+      if (response.code === 1) {
+        toast.success(response.message || "启动成功");
+      } else {
+        toast.error(response.message || "启动失败");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "启动失败，请重试");
+    } finally {
+      setIsStarting(false);
+    }
+  };
 
   // 计算卡片宽度（两侧留 16px padding）
   const cardWidth = width - 32;
@@ -260,30 +302,38 @@ export function GameDataCard({
           marginTop: 8,
         }}
       >
-        {/* 暂停按钮 */}
+        {/* 启动按钮 - 当游戏已停止时显示 */}
+
         <Pressable
           onPress={(e) => {
             e.stopPropagation();
-            onPause?.();
+            handleStart();
           }}
+          disabled={isStarting || !isRecaptchaReady}
           style={{
             flex: 1,
             paddingVertical: 14,
             borderRadius: 12,
             borderWidth: 2,
-            borderColor: c.primary,
+            borderColor: isStarting || !isRecaptchaReady ? c.muted : c.primary,
+            backgroundColor:
+              isStarting || !isRecaptchaReady ? c.muted : "transparent",
             alignItems: "center",
           }}
         >
-          <Text
-            style={{
-              color: c.primary,
-              fontSize: 16,
-              fontWeight: "600",
-            }}
-          >
-            {game_config.is_stopped ? "恢复" : "暂停"}
-          </Text>
+          {isStarting ? (
+            <ActivityIndicator color={c.primary} size="small" />
+          ) : (
+            <Text
+              style={{
+                color: isRecaptchaReady ? c.primary : c.mutedFg,
+                fontSize: 16,
+                fontWeight: "600",
+              }}
+            >
+              {isRecaptchaReady ? "启动" : "加载中..."}
+            </Text>
+          )}
         </Pressable>
 
         {/* 删除按钮 */}
@@ -312,6 +362,9 @@ export function GameDataCard({
           </Text>
         </Pressable>
       </View>
+
+      {/* 隐藏的 reCAPTCHA WebView */}
+      <RecaptchaWebView />
     </Pressable>
   );
 }

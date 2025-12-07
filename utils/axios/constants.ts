@@ -12,6 +12,7 @@ interface IArkHostConstants {
   GAME: ApiCallOptions;
   GAME_DETAIL: ApiCallOptions;
   GAME_LOG: ApiCallOptions;
+  GAME_LOGIN: ApiCallOptions;
 }
 interface IAssetsConstants {
   ITEMS: ApiCallOptions;
@@ -53,6 +54,10 @@ export const ARK_HOST_CONSTANTS: IArkHostConstants = {
   GAME_LOG: {
     endPoint: "/game/log",
     method: "GET",
+  },
+  GAME_LOGIN: {
+    endPoint: "/game/login",
+    method: "POST",
   },
 } as const satisfies IArkHostConstants;
 

@@ -2,6 +2,7 @@ import {
   IArkHostConfig,
   IGameData,
   IGameDetail,
+  IGameLoginResponse,
   IGameLogResponse,
 } from "@/types/arkHost";
 import { IAPIResponse } from "@/types/axios";
@@ -89,6 +90,28 @@ class ArkHostClient extends ServerBase {
     const response = await this.get<IGameLogResponse>(
       `${option.endPoint}/${gameId}/${page}`,
       option,
+    );
+    return response;
+  }
+
+  /**
+   * 游戏登录（启动游戏）
+   * @param gameId 游戏账号ID (如 G18928069156)
+   * @param recaptchaToken reCAPTCHA token
+   */
+  async gameLogin(
+    gameId: string,
+    recaptchaToken: string,
+  ): Promise<IAPIResponse<IGameLoginResponse>> {
+    const option = ARK_HOST_CONSTANTS.GAME_LOGIN;
+    const response = await this.post<IGameLoginResponse>(
+      `${option.endPoint}/${gameId}`,
+      {
+        ...option,
+        headers: {
+          token: recaptchaToken,
+        },
+      },
     );
     return response;
   }
