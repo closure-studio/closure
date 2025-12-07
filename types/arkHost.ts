@@ -45,7 +45,7 @@ interface ICaptchaInfo {
 }
 
 // 游戏配置接口
-interface IGameConfig {
+export interface IGameConfig {
   account: string;
   accelerate_slot: string;
   accelerate_slot_cn: string;
@@ -58,6 +58,16 @@ interface IGameConfig {
   recruit_reserve: number;
   map_id: string;
   allow_login_assist: boolean;
+}
+
+// 更新游戏配置请求接口
+export interface IUpdateGameConfigRequest {
+  config: Partial<IGameConfig>;
+}
+
+// 更新游戏配置响应接口
+export interface IUpdateGameConfigResponse {
+  // 响应数据为 null
 }
 
 // 主接口 - 这是你缺少的根级别接口

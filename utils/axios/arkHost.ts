@@ -1,9 +1,11 @@
 import {
   IArkHostConfig,
+  IGameConfig,
   IGameData,
   IGameDetail,
   IGameLoginResponse,
   IGameLogResponse,
+  IUpdateGameConfigResponse,
 } from "@/types/arkHost";
 import { IAPIResponse } from "@/types/axios";
 import ServerBase from "./base";
@@ -111,6 +113,26 @@ class ArkHostClient extends ServerBase {
         headers: {
           token: recaptchaToken,
         },
+      },
+    );
+    return response;
+  }
+
+  /**
+   * 更新游戏配置
+   * @param gameId 游戏账号ID (如 G18928069156)
+   * @param config 要更新的配置项（部分更新）
+   */
+  async updateGameConfig(
+    gameId: string,
+    config: Partial<IGameConfig>,
+  ): Promise<IAPIResponse<IUpdateGameConfigResponse>> {
+    const option = ARK_HOST_CONSTANTS.GAME_CONFIG;
+    const response = await this.post<IUpdateGameConfigResponse>(
+      `${option.endPoint}/${gameId}`,
+      {
+        ...option,
+        data: { config },
       },
     );
     return response;

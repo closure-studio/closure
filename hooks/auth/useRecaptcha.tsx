@@ -15,6 +15,8 @@ interface UseRecaptchaReturn {
 
 const GOOGLE_RECAPTCHA_SITE_KEY = "6LfrMU0mAAAAADoo9vRBTLwrt5mU0HvykuR3l8uN";
 const RECAPTCHA_SCRIPT_URL = `https://www.recaptcha.net/recaptcha/api.js?render=${GOOGLE_RECAPTCHA_SITE_KEY}`;
+// reCAPTCHA 需要正确的 baseUrl 来生成有效的 token
+const RECAPTCHA_BASE_URL = "https://closure.ltsc.vip";
 
 export const useRecaptcha = (): UseRecaptchaReturn => {
   const webViewRef = useRef<WebView>(null);
@@ -178,13 +180,15 @@ export const useRecaptcha = (): UseRecaptchaReturn => {
     () => (
       <WebView
         ref={webViewRef}
-        source={{ html: htmlContent }}
+        source={{ html: htmlContent, baseUrl: RECAPTCHA_BASE_URL }}
         onLoad={handleWebViewLoad}
         onMessage={handleMessage}
         onError={handleWebViewError}
         style={{ height: 0, width: 0, opacity: 0 }}
         javaScriptEnabled={true}
         originWhitelist={["*"]}
+        // 设置 User-Agent 模拟正常浏览器
+        userAgent="Mozilla/5.0 (Linux; Android 10; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
       />
     ),
     [htmlContent, handleWebViewLoad, handleMessage, handleWebViewError],

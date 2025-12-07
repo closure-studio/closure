@@ -1,10 +1,13 @@
 import { MESSAGES } from "@/constants/messages";
 import {
   IArkHostConfig,
+  IGameConfig,
   IGameDetail,
   IGameLoginResponse,
   IGameLogResponse,
+  IUpdateGameConfigResponse,
 } from "@/types/arkHost";
+import { IDeleteGameResponse } from "@/types/arkQuota";
 import { IAssetItems, IAssetStages } from "@/types/assets";
 import {
   IAuthSession,
@@ -56,6 +59,14 @@ interface ClosureContextType {
     gameId: string,
     recaptchaToken: string,
   ) => Promise<IAPIResponse<IGameLoginResponse>>;
+  updateGameConfig: (
+    gameId: string,
+    config: Partial<IGameConfig>,
+  ) => Promise<IAPIResponse<IUpdateGameConfigResponse>>;
+  deleteGame: (
+    gameUuid: string,
+    recaptchaToken: string,
+  ) => Promise<IAPIResponse<IDeleteGameResponse>>;
 }
 
 const ClosureContext = createContext<ClosureContextType | undefined>(undefined);
@@ -68,7 +79,8 @@ const log = LOG.extend("ClosureProvider");
 const ClosureProvider = ({ children }: ClosureProviderProps) => {
   const { toast } = useSystem();
   const { apiClients, updateAppStates, currentAuthSession } = useData();
-  const { idServerClient, assetsClient, arkHostClient } = apiClients;
+  const { idServerClient, assetsClient, arkHostClient, arkQuotaClient } =
+    apiClients;
 
   const login = async (session: IAuthSession) => {
     try {
@@ -390,6 +402,62 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     }
   };
 
+  const updateGameConfig = async (
+    gameId: string,
+    config: Partial<IGameConfig>,
+  ): Promise<IAPIResponse<IUpdateGameConfigResponse>> => {
+    try {
+      if (!gameId) {
+        return {
+          code: 0,
+          message: "游戏ID不能为空",
+        };
+      }
+
+      const response = await arkHostClient.updateGameConfig(gameId, config);
+      if (response.code === 1) {
+        log.info("Game config updated successfully", { gameId, config });
+        return response;
+      }
+      log.error("Failed to update game config:", response.message);
+      return response;
+    } catch (error) {
+      log.error("Error updating game config:", error);
+      return {
+        code: 0,
+        message: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  };
+
+  const deleteGame = async (
+    gameUuid: string,
+    recaptchaToken: string,
+  ): Promise<IAPIResponse<IDeleteGameResponse>> => {
+    try {
+      if (!gameUuid || !recaptchaToken) {
+        return {
+          code: 0,
+          message: "游戏UUID和reCAPTCHA token不能为空",
+        };
+      }
+
+      const response = await arkQuotaClient.deleteGame(gameUuid, recaptchaToken);
+      if (response.code === 1) {
+        log.info("Game deleted successfully", { gameUuid });
+        return response;
+      }
+      log.error("Failed to delete game:", response.message);
+      return response;
+    } catch (error) {
+      log.error("Error deleting game:", error);
+      return {
+        code: 0,
+        message: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  };
+
   // 后台轮询游戏状态
   useEffect(() => {
     // 只有在用户已登录时才启动轮询
@@ -441,6 +509,8 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     fetchGameDetail,
     fetchGameLogs,
     startGame,
+    updateGameConfig,
+    deleteGame,
   };
 
   return (

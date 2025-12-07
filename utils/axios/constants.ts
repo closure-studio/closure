@@ -13,10 +13,15 @@ interface IArkHostConstants {
   GAME_DETAIL: ApiCallOptions;
   GAME_LOG: ApiCallOptions;
   GAME_LOGIN: ApiCallOptions;
+  GAME_CONFIG: ApiCallOptions;
 }
 interface IAssetsConstants {
   ITEMS: ApiCallOptions;
   STAGES: ApiCallOptions;
+}
+
+interface IArkQuotaConstants {
+  DELETE_GAME: ApiCallOptions;
 }
 
 export const ID_SERVER_CONSTANTS: IIDServerConstants = {
@@ -59,6 +64,10 @@ export const ARK_HOST_CONSTANTS: IArkHostConstants = {
     endPoint: "/game/login",
     method: "POST",
   },
+  GAME_CONFIG: {
+    endPoint: "/game/config",
+    method: "POST",
+  },
 } as const satisfies IArkHostConstants;
 
 export const ASSETS_CONSTANTS: IAssetsConstants = {
@@ -73,3 +82,10 @@ export const ASSETS_CONSTANTS: IAssetsConstants = {
     isPublic: true,
   },
 } as const satisfies IAssetsConstants;
+
+export const ARK_QUOTA_CONSTANTS: IArkQuotaConstants = {
+  DELETE_GAME: {
+    endPoint: "/api/slots/gameAccount",
+    method: "POST",
+  },
+} as const satisfies IArkQuotaConstants;

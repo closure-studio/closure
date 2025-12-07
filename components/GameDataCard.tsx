@@ -3,9 +3,7 @@ import { useClosure } from "@/providers/services/useClosure";
 import { useSystem } from "@/providers/system";
 import { useTheme } from "@/providers/theme";
 import { IGameData } from "@/types/arkHost";
-import { useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   Pressable,
   Text,
@@ -19,6 +17,7 @@ interface GameDataCardProps {
   onPress?: () => void;
   onPause?: () => void;
   onDelete?: () => void;
+  onChangePassword?: () => void;
 }
 
 // 平台映射
@@ -40,28 +39,26 @@ export function GameDataCard({
   onPress,
   onPause,
   onDelete,
+  onChangePassword,
 }: GameDataCardProps) {
   const { c } = useTheme();
   const { toast } = useSystem();
   const { width } = useWindowDimensions();
   const { status, game_config } = data;
-  const { startGame } = useClosure();
+  const { startGame, updateGameConfig, deleteGame } = useClosure();
   const {
     getRecaptchaToken,
     RecaptchaWebView,
     isReady: isRecaptchaReady,
   } = useRecaptcha();
-  const [isStarting, setIsStarting] = useState(false);
 
   // 启动游戏
   const handleStart = async () => {
-    if (isStarting) return;
     if (!isRecaptchaReady) {
       toast.error("reCAPTCHA 正在加载，请稍后再试");
       return;
     }
 
-    setIsStarting(true);
     try {
       const { token, error } = await getRecaptchaToken();
       if (error) {
@@ -77,8 +74,47 @@ export function GameDataCard({
       }
     } catch (err: any) {
       toast.error(err.message || "启动失败，请重试");
-    } finally {
-      setIsStarting(false);
+    }
+  };
+
+  // 暂停托管
+  const handlePause = async () => {
+    try {
+      const response = await updateGameConfig(status.account, {
+        is_stopped: true,
+      });
+      if (response.code === 1) {
+        toast.success(response.message || "暂停成功");
+      } else {
+        toast.error(response.message || "暂停失败");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "暂停失败，请重试");
+    }
+  };
+
+  // 删除游戏
+  const handleDelete = async () => {
+    if (!isRecaptchaReady) {
+      toast.error("reCAPTCHA 正在加载，请稍后再试");
+      return;
+    }
+
+    try {
+      const { token, error } = await getRecaptchaToken();
+      if (error) {
+        toast.error(error);
+        return;
+      }
+
+      const response = await deleteGame(status.uuid, token);
+      if (response.code === 1) {
+        toast.success(response.message || "删除成功");
+      } else {
+        toast.error(response.message || "删除失败");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "删除失败，请重试");
     }
   };
 
@@ -298,56 +334,81 @@ export function GameDataCard({
       <View
         style={{
           flexDirection: "row",
+          flexWrap: "wrap",
           gap: 12,
           marginTop: 8,
         }}
       >
-        {/* 启动按钮 - 当游戏已停止时显示 */}
-
+        {/* 启动按钮 */}
         <Pressable
           onPress={(e) => {
             e.stopPropagation();
             handleStart();
           }}
-          disabled={isStarting || !isRecaptchaReady}
           style={{
             flex: 1,
+            minWidth: "45%",
             paddingVertical: 14,
             borderRadius: 12,
             borderWidth: 2,
-            borderColor: isStarting || !isRecaptchaReady ? c.muted : c.primary,
-            backgroundColor:
-              isStarting || !isRecaptchaReady ? c.muted : "transparent",
+            borderColor: c.primary,
+            backgroundColor: "transparent",
             alignItems: "center",
           }}
         >
-          {isStarting ? (
-            <ActivityIndicator color={c.primary} size="small" />
-          ) : (
-            <Text
-              style={{
-                color: isRecaptchaReady ? c.primary : c.mutedFg,
-                fontSize: 16,
-                fontWeight: "600",
-              }}
-            >
-              {isRecaptchaReady ? "启动" : "加载中..."}
-            </Text>
-          )}
+          <Text
+            style={{
+              color: c.primary,
+              fontSize: 16,
+              fontWeight: "600",
+            }}
+          >
+            启动
+          </Text>
+        </Pressable>
+
+        {/* 暂停按钮 */}
+        <Pressable
+          onPress={(e) => {
+            e.stopPropagation();
+            handlePause();
+          }}
+          style={{
+            flex: 1,
+            minWidth: "45%",
+            paddingVertical: 14,
+            borderRadius: 12,
+            borderWidth: 2,
+            borderColor: c.accent,
+            backgroundColor: "transparent",
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: c.accent,
+              fontSize: 16,
+              fontWeight: "600",
+            }}
+          >
+            暂停
+          </Text>
         </Pressable>
 
         {/* 删除按钮 */}
         <Pressable
           onPress={(e) => {
             e.stopPropagation();
-            onDelete?.();
+            handleDelete();
           }}
           style={{
             flex: 1,
+            minWidth: "45%",
             paddingVertical: 14,
             borderRadius: 12,
             borderWidth: 2,
             borderColor: c.destructive,
+            backgroundColor: "transparent",
             alignItems: "center",
           }}
         >
@@ -359,6 +420,34 @@ export function GameDataCard({
             }}
           >
             删除
+          </Text>
+        </Pressable>
+
+        {/* 修改密码按钮 */}
+        <Pressable
+          onPress={(e) => {
+            e.stopPropagation();
+            onChangePassword?.();
+          }}
+          style={{
+            flex: 1,
+            minWidth: "45%",
+            paddingVertical: 14,
+            borderRadius: 12,
+            borderWidth: 2,
+            borderColor: c.secondary,
+            backgroundColor: "transparent",
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: c.secondary,
+              fontSize: 16,
+              fontWeight: "600",
+            }}
+          >
+            修改密码
           </Text>
         </Pressable>
       </View>
@@ -378,6 +467,7 @@ interface GameDataListProps {
   onPress?: (game: IGameData, index: number) => void;
   onPause?: (game: IGameData) => void;
   onDelete?: (game: IGameData) => void;
+  onChangePassword?: (game: IGameData) => void;
 }
 
 export function GameDataList({
@@ -385,6 +475,7 @@ export function GameDataList({
   onPress,
   onPause,
   onDelete,
+  onChangePassword,
 }: GameDataListProps) {
   const { c } = useTheme();
 
@@ -426,6 +517,7 @@ export function GameDataList({
             onPress={() => onPress?.(game, index)}
             onPause={() => onPause?.(game)}
             onDelete={() => onDelete?.(game)}
+            onChangePassword={() => onChangePassword?.(game)}
           />
         ))}
     </View>
