@@ -1,13 +1,16 @@
 import { MESSAGES } from "@/constants/messages";
 import {
   IArkHostConfig,
+  ICreateGameRequest,
+  ICreateGameResponse,
+  IDeleteGameResponse,
   IGameConfig,
   IGameDetail,
   IGameLoginResponse,
   IGameLogResponse,
   IUpdateGameConfigResponse,
 } from "@/types/arkHost";
-import { IDeleteGameResponse } from "@/types/arkQuota";
+import { IQuotaUser } from "@/types/arkQuota";
 import { IAssetItems, IAssetStages } from "@/types/assets";
 import {
   IAuthSession,
@@ -67,6 +70,12 @@ interface ClosureContextType {
     gameUuid: string,
     recaptchaToken: string,
   ) => Promise<IAPIResponse<IDeleteGameResponse>>;
+  createGame: (
+    slotUuid: string,
+    gameData: ICreateGameRequest,
+    recaptchaToken: string,
+  ) => Promise<IAPIResponse<ICreateGameResponse>>;
+  fetchQuotaUser: () => Promise<IAPIResponse<IQuotaUser>>;
 }
 
 const ClosureContext = createContext<ClosureContextType | undefined>(undefined);
@@ -443,14 +452,110 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       }
 
       const response = await arkQuotaClient.deleteGame(gameUuid, recaptchaToken);
-      if (response.code === 1) {
+      // ArkQuota API 返回 { available: true } 表示成功
+      if (response.data?.available) {
         log.info("Game deleted successfully", { gameUuid });
-        return response;
+        return {
+          code: 1,
+          message: "删除成功",
+          data: response.data,
+        };
       }
       log.error("Failed to delete game:", response.message);
-      return response;
+      return {
+        code: 0,
+        message: response.message || "删除失败",
+        data: response.data,
+      };
     } catch (error) {
       log.error("Error deleting game:", error);
+      return {
+        code: 0,
+        message: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  };
+
+  const createGame = async (
+    slotUuid: string,
+    gameData: ICreateGameRequest,
+    recaptchaToken: string,
+  ): Promise<IAPIResponse<ICreateGameResponse>> => {
+    try {
+      if (!slotUuid || !recaptchaToken) {
+        return {
+          code: 0,
+          message: "槽位UUID和reCAPTCHA token不能为空",
+        };
+      }
+
+      if (!gameData.account || !gameData.password) {
+        return {
+          code: 0,
+          message: "账号和密码不能为空",
+        };
+      }
+
+      const response = await arkQuotaClient.createGame(
+        slotUuid,
+        gameData,
+        recaptchaToken,
+      );
+      // ArkQuota API 返回 { available: true } 表示成功
+      if (response.data?.available) {
+        log.info("Game created successfully", { slotUuid, account: gameData.account });
+        return {
+          code: 1,
+          message: "创建成功",
+          data: response.data,
+        };
+      }
+      log.error("Failed to create game:", response.message);
+      return {
+        code: 0,
+        message: response.message || "创建失败",
+        data: response.data,
+      };
+    } catch (error) {
+      log.error("Error creating game:", error);
+      return {
+        code: 0,
+        message: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  };
+
+  const fetchQuotaUser = async (): Promise<IAPIResponse<IQuotaUser>> => {
+    try {
+      const response = await arkQuotaClient.getCurrentUser();
+
+      // ArkQuota 返回的结构可能直接是用户对象，也可能在 data 中
+      const user =
+        (response as any)?.uuid !== undefined
+          ? (response as unknown as IQuotaUser)
+          : (response as any)?.data;
+
+      if (user?.uuid) {
+        const uuid = currentAuthSession?.payload?.uuid;
+        if (uuid) {
+          updateAppStates((draft) => {
+            draft.quotaUsers[uuid] = user;
+          });
+        }
+        return {
+          code: 1,
+          message: "获取用户信息成功",
+          data: user,
+        };
+      }
+
+      return {
+        code: 0,
+        message: (response as any)?.message || "获取用户信息失败",
+        data: user,
+      };
+    } catch (error) {
+      log.error("Error fetching quota user:", error);
       return {
         code: 0,
         message: error instanceof Error ? error.message : "Unknown error",
@@ -511,6 +616,8 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     startGame,
     updateGameConfig,
     deleteGame,
+    createGame,
+    fetchQuotaUser,
   };
 
   return (

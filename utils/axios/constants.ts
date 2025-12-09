@@ -22,6 +22,8 @@ interface IAssetsConstants {
 
 interface IArkQuotaConstants {
   DELETE_GAME: ApiCallOptions;
+  CREATE_GAME: ApiCallOptions;
+  USER_ME: ApiCallOptions;
 }
 
 export const ID_SERVER_CONSTANTS: IIDServerConstants = {
@@ -87,5 +89,13 @@ export const ARK_QUOTA_CONSTANTS: IArkQuotaConstants = {
   DELETE_GAME: {
     endPoint: "/api/slots/gameAccount",
     method: "POST",
+  },
+  CREATE_GAME: {
+    endPoint: "/api/slots/gameAccount",
+    method: "POST",
+  },
+  USER_ME: {
+    endPoint: "/api/users/me",
+    method: "GET",
   },
 } as const satisfies IArkQuotaConstants;

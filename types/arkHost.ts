@@ -1,3 +1,9 @@
+// 游戏平台枚举
+export enum GamePlatform {
+  Official = 1, // 官服
+  Bilibili = 2, // B服
+}
+
 export interface IArkHostConfig {
   isUnderMaintenance: boolean;
   isDebugMode: boolean;
@@ -130,4 +136,23 @@ export interface IGameLogResponse {
 // 游戏登录响应接口
 export interface IGameLoginResponse {
   // 响应数据为 null
+}
+
+// 删除游戏响应接口 (ArkQuota)
+export interface IDeleteGameResponse {
+  available: boolean;
+  results: Record<string, unknown>;
+}
+
+// 创建游戏请求接口 (ArkQuota)
+export interface ICreateGameRequest {
+  account: string;
+  password: string;
+  platform: GamePlatform;
+}
+
+// 创建游戏响应接口 (ArkQuota)
+export interface ICreateGameResponse {
+  available: boolean;
+  results: Record<string, unknown>;
 }

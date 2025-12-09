@@ -1,4 +1,9 @@
-import { IDeleteGameResponse } from "@/types/arkQuota";
+import {
+  ICreateGameRequest,
+  ICreateGameResponse,
+  IDeleteGameResponse,
+} from "@/types/arkHost";
+import { IQuotaUser } from "@/types/arkQuota";
 import { IAPIResponse } from "@/types/axios";
 import ServerBase from "./base";
 import { ARK_QUOTA_CONSTANTS } from "./constants";
@@ -12,24 +17,12 @@ import { ARK_QUOTA_CONSTANTS } from "./constants";
 class ArkQuotaClient extends ServerBase {
   /**
    * 处理 API 响应
-   * 注意：arkQuota 的响应格式与其他服务不同
-   * 成功时返回 { available: true, results: {} }
    */
   protected async handleResponse<T>(
     promise: Promise<any>,
   ): Promise<IAPIResponse<T>> {
     try {
       const resp = await promise;
-      const data = resp.data;
-      // arkQuota 返回格式: { available: true, results: {} }
-      // 转换为统一的 IAPIResponse 格式
-      if (data && "available" in data) {
-        return {
-          code: data.available ? 1 : 0,
-          message: data.available ? "操作成功" : "操作失败",
-          data: data as T,
-        };
-      }
       return resp.data as IAPIResponse<T>;
     } catch (error: any) {
       if (error.response) {
@@ -53,7 +46,7 @@ class ArkQuotaClient extends ServerBase {
 
   /**
    * 删除游戏账号
-   * @param gameUuid 游戏账号UUID (如 a6e8ca52-b6ab-40b5-80cc-d36a8c9f2b68)
+   * @param gameUuid 游戏UUID (如 a6e8ca52-b6ab-40b5-80cc-d36a8c9f2b68)
    * @param recaptchaToken reCAPTCHA token
    */
   async deleteGame(
@@ -71,6 +64,40 @@ class ArkQuotaClient extends ServerBase {
         data: { account: null },
       },
     );
+    return response;
+  }
+
+  /**
+   * 创建游戏账号
+   * @param slotUuid 槽位UUID (如 64c38763-8cea-42c1-b6c9-8d29cc06b698)
+   * @param gameData 游戏账号数据
+   * @param recaptchaToken reCAPTCHA token
+   */
+  async createGame(
+    slotUuid: string,
+    gameData: ICreateGameRequest,
+    recaptchaToken: string,
+  ): Promise<IAPIResponse<ICreateGameResponse>> {
+    const option = ARK_QUOTA_CONSTANTS.CREATE_GAME;
+    const response = await this.post<ICreateGameResponse>(
+      `${option.endPoint}?uuid=${slotUuid}`,
+      {
+        ...option,
+        headers: {
+          token: recaptchaToken,
+        },
+        data: gameData,
+      },
+    );
+    return response;
+  }
+
+  /**
+   * 获取当前用户信息（含 slots）
+   */
+  async getCurrentUser(): Promise<IAPIResponse<IQuotaUser>> {
+    const option = ARK_QUOTA_CONSTANTS.USER_ME;
+    const response = await this.get<IQuotaUser>(option.endPoint, option);
     return response;
   }
 }
