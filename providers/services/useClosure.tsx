@@ -5,6 +5,7 @@ import {
   ICreateGameResponse,
   IDeleteGameResponse,
   IGameConfig,
+  IGameData,
   IGameDetail,
   IGameLoginResponse,
   IGameLogResponse,
@@ -88,8 +89,13 @@ const log = LOG.extend("ClosureProvider");
 const ClosureProvider = ({ children }: ClosureProviderProps) => {
   const { toast } = useSystem();
   const { apiClients, updateAppStates, currentAuthSession } = useData();
-  const { idServerClient, assetsClient, arkHostClient, arkQuotaClient } =
-    apiClients;
+  const {
+    idServerClient,
+    assetsClient,
+    arkHostClient,
+    arkQuotaClient,
+    sseClient,
+  } = apiClients;
 
   const login = async (session: IAuthSession) => {
     try {
@@ -451,7 +457,10 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
         };
       }
 
-      const response = await arkQuotaClient.deleteGame(gameUuid, recaptchaToken);
+      const response = await arkQuotaClient.deleteGame(
+        gameUuid,
+        recaptchaToken,
+      );
       // ArkQuota API 返回 { available: true } 表示成功
       if (response.data?.available) {
         log.info("Game deleted successfully", { gameUuid });
@@ -503,7 +512,10 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       );
       // ArkQuota API 返回 { available: true } 表示成功
       if (response.data?.available) {
-        log.info("Game created successfully", { slotUuid, account: gameData.account });
+        log.info("Game created successfully", {
+          slotUuid,
+          account: gameData.account,
+        });
         return {
           code: 1,
           message: "创建成功",
@@ -563,44 +575,136 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     }
   };
 
-  // 后台轮询游戏状态
+  // 使用 SSE 实时获取游戏状态
   useEffect(() => {
-    // 只有在用户已登录时才启动轮询
+    // 只有在用户已登录时才启动 SSE
     if (!currentAuthSession || !currentAuthSession.credential?.token) {
       return;
     }
 
-    log.info("Starting games status polling");
+    const uuid = currentAuthSession.payload?.uuid;
+    if (!uuid) {
+      return;
+    }
 
-    const queryGamesStatus = async () => {
-      try {
-        if (!currentAuthSession.payload?.uuid === undefined) {
-          return;
+    log.info("Starting SSE connection for real-time game updates");
+
+    // 设置 SSE 事件处理器（业务逻辑）
+    sseClient.setEventHandlers({
+      onMessage: (eventType, data) => {
+        try {
+          // 根据事件类型处理不同的业务逻辑
+          switch (eventType) {
+            case "game": {
+              const gameData = JSON.parse(data) as IGameData[];
+              log.debug("SSE: Received game data:", gameData.length, "games");
+              updateAppStates((draft) => {
+                draft.gamesData[uuid] = gameData;
+              });
+              break;
+            }
+
+            case "log": {
+              const logData = JSON.parse(data) as { content: string };
+              log.debug("SSE: Received log:", logData.content);
+              toast.success({
+                text1: "日志",
+                text2: logData.content,
+              });
+              break;
+            }
+
+            case "close": {
+              log.warn("SSE: Server requested connection close");
+              toast.warning({
+                text1: "连接关闭",
+                text2: "你已在其他窗口或设备访问，本页面暂停更新",
+              });
+              sseClient.stop();
+              break;
+            }
+
+            case "ssr": {
+              const ssrData = JSON.parse(data) ?? [];
+              log.debug("SSE: Received SSR data:", ssrData.length, "items");
+              // TODO: 处理 SSR 数据（6星抽卡通知）
+              // 这里需要根据你的应用逻辑来处理 SSR 数据
+              // 比如显示一个通知或对话框
+              if (ssrData.length > 0) {
+                toast.info({
+                  text1: "SSR 通知",
+                  text2: "可露希尔又双叒叕抽到 6 星干员啦!!!",
+                });
+              }
+              break;
+            }
+
+            default:
+              log.debug("SSE: Received unknown event type:", eventType);
+              break;
+          }
+        } catch (error) {
+          log.error("SSE: Error parsing message:", error);
         }
-        const response = await arkHostClient.queryGamesStatus();
-        if (response.code === 1 && response.data) {
-          updateAppStates((draft) => {
-            draft.gamesData[currentAuthSession.payload?.uuid || ""] =
-              response.data || [];
-          });
-        }
-      } catch (error) {
-        log.error("Error querying games status:", error);
+      },
+
+      onOpen: () => {
+        log.info("SSE: Connection opened");
+      },
+
+      onClose: () => {
+        log.info("SSE: Connection closed by server");
+      },
+
+      onError: (error) => {
+        log.error("SSE: Connection error:", error);
+        // 不在这里显示错误提示，避免过于频繁的提示
+        // 可以根据需要添加重连逻辑
+      },
+    });
+
+    // 启动 SSE 连接
+    const startConnection = async () => {
+      const success = await sseClient.start();
+      if (!success) {
+        log.error("Failed to start SSE connection, falling back to polling");
+
+        // SSE 连接失败，回退到轮询模式
+        const queryGamesStatus = async () => {
+          try {
+            const response = await arkHostClient.queryGamesStatus();
+            if (response.code === 1 && response.data) {
+              updateAppStates((draft) => {
+                draft.gamesData[uuid] = response.data || [];
+              });
+            }
+          } catch (error) {
+            log.error("Error querying games status:", error);
+          }
+        };
+
+        // 立即执行一次
+        queryGamesStatus();
+
+        // 设置定时器，每3秒执行一次
+        const intervalId = setInterval(queryGamesStatus, 3000);
+
+        // 返回清理函数
+        return () => {
+          log.info("Stopping games status polling");
+          clearInterval(intervalId);
+        };
       }
     };
 
-    // 立即执行一次
-    queryGamesStatus();
+    startConnection();
 
-    // 设置定时器，每3秒执行一次
-    const intervalId = setInterval(queryGamesStatus, 3000);
-
-    // 清理函数：组件卸载或依赖变化时清除定时器
+    // 清理函数：组件卸载或依赖变化时停止 SSE 连接
     return () => {
-      log.info("Stopping games status polling");
-      clearInterval(intervalId);
+      log.info("Stopping SSE connection");
+      sseClient.stop();
     };
-  }, [currentAuthSession, arkHostClient, updateAppStates]);
+  }, [currentAuthSession, arkHostClient, sseClient, updateAppStates, toast]);
 
   const values: ClosureContextType = {
     login,

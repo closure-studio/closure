@@ -8,6 +8,8 @@ import ArkQuotaClient from "@/utils/axios/arkQuota";
 import AssetsClient from "@/utils/axios/assetsClient";
 import IdServerClient from "@/utils/axios/idServer";
 import { LOG } from "@/utils/logger/logger";
+import SSEClient from "@/utils/sse/sse";
+import { ARK_HOST_SSE_CONSTANTS } from "@/utils/sse/constants";
 import { jwtDecode } from "jwt-decode";
 import { useCallback, useEffect, useMemo } from "react";
 import { isTokenExpired } from "./utils";
@@ -23,6 +25,7 @@ export interface IAPIClients {
   idServerClient: IdServerClient;
   arkQuotaClient: ArkQuotaClient;
   assetsClient: AssetsClient;
+  sseClient: SSEClient;
 }
 
 const log = LOG.extend("useAPI");
@@ -36,6 +39,14 @@ export const useAPI = (props: IUseAPIParams): IAPIClients => {
   const idServerClient = useMemo(() => new IdServerClient({ HOST: "" }), []);
   const arkQuotaClient = useMemo(() => new ArkQuotaClient({ HOST: "" }), []);
   const assetsClient = useMemo(() => new AssetsClient({ HOST: "" }), []);
+  const sseClient = useMemo(
+    () =>
+      new SSEClient({
+        baseURL: "",
+        endpoint: ARK_HOST_SSE_CONSTANTS.GAMES.endPoint,
+      }),
+    [],
+  );
 
   // Token refresh function
   const refreshToken = useCallback(async (): Promise<void> => {
@@ -60,6 +71,9 @@ export const useAPI = (props: IUseAPIParams): IAPIClients => {
         authSession.credential.token = resp.data.token;
         authSession.payload = payload;
         setAuthSession(authSession);
+
+        // 更新 SSE 客户端的 token（作为查询参数）
+        sseClient.updateQueryParam("token", resp.data.token);
         return;
       }
       return;
@@ -67,7 +81,7 @@ export const useAPI = (props: IUseAPIParams): IAPIClients => {
       console.error("Token refresh failed:", error);
       return;
     }
-  }, [authSession, credential, idServerClient, setAuthSession]);
+  }, [authSession, credential, idServerClient, setAuthSession, sseClient]);
 
   // Update base URLs when serviceConfigs changes
   useEffect(() => {
@@ -75,11 +89,13 @@ export const useAPI = (props: IUseAPIParams): IAPIClients => {
     idServerClient.setBaseURL(serviceConfigs.ID_SERVER.HOST);
     arkQuotaClient.setBaseURL(serviceConfigs.ARK_QUOTA.HOST);
     assetsClient.setBaseURL(serviceConfigs.ASSETS_SERVER.HOST);
+    sseClient.setBaseURL(serviceConfigs.ARK_HOST.HOST);
   }, [
     arkHostClient,
     arkQuotaClient,
     assetsClient,
     idServerClient,
+    sseClient,
     serviceConfigs,
   ]);
 
@@ -111,12 +127,17 @@ export const useAPI = (props: IUseAPIParams): IAPIClients => {
       idServerClient.setAuthToken(authValue);
       arkQuotaClient.setAuthToken(authValue);
       arkHostClient.setAuthToken(authValue);
+
+      // SSE 客户端使用 token 作为查询参数（不需要 Bearer 前缀）
+      const token = authSession.credential.token.replace(/^Bearer\s+/i, "");
+      sseClient.setQueryParams({ token });
     }
   }, [
     arkHostClient,
     arkQuotaClient,
     authSession,
     idServerClient,
+    sseClient,
     refreshToken,
   ]);
 
@@ -125,5 +146,6 @@ export const useAPI = (props: IUseAPIParams): IAPIClients => {
     idServerClient,
     arkQuotaClient,
     assetsClient,
+    sseClient,
   };
 };
