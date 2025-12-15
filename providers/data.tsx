@@ -9,6 +9,7 @@ import { produce } from "immer";
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -67,9 +68,12 @@ const DataProvider = ({ children }: DataProviderProps) => {
   }, [appStates]);
 
   // use immer to update app states
-  const updateAppStates = (updater: (draft: IAPPStates) => void) => {
-    setAppStates((currentStates) => produce(currentStates, updater));
-  };
+  const updateAppStates = useCallback(
+    (updater: (draft: IAPPStates) => void) => {
+      setAppStates((currentStates) => produce(currentStates, updater));
+    },
+    [],
+  );
 
   const currentAuthSession = useMemo(() => {
     if (appStates.currentCredentialUUID) {

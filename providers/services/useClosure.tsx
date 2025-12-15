@@ -27,7 +27,13 @@ import {
 import { IAPIResponse } from "@/types/axios";
 import { LOG } from "@/utils/logger/logger";
 import { jwtDecode } from "jwt-decode";
-import React, { createContext, ReactNode, useContext, useEffect } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import { useData } from "../data";
 import { useSystem } from "../system";
 
@@ -88,7 +94,8 @@ const log = LOG.extend("ClosureProvider");
 
 const ClosureProvider = ({ children }: ClosureProviderProps) => {
   const { toast } = useSystem();
-  const { apiClients, updateAppStates, currentAuthSession } = useData();
+  const { apiClients, updateAppStates, currentAuthSession, appStates } =
+    useData();
   const {
     idServerClient,
     assetsClient,
@@ -288,7 +295,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     }
   };
 
-  const fetchArkHostConfig = async (): Promise<
+  const fetchArkHostConfig = React.useCallback(async (): Promise<
     IAPIResponse<IArkHostConfig>
   > => {
     try {
@@ -309,7 +316,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
         message: error instanceof Error ? error.message : "Unknown error",
       };
     }
-  };
+  }, [arkHostClient, updateAppStates]);
 
   const fetchGameDetail = async (
     gameId: string,
@@ -575,10 +582,22 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     }
   };
 
+  // 使用 ref 跟踪连接状态，避免重复连接
+  const connectionStartedRef = useRef(false);
+  const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
+
   // 使用 SSE 实时获取游戏状态
   useEffect(() => {
     // 只有在用户已登录时才启动 SSE
     if (!currentAuthSession || !currentAuthSession.credential?.token) {
+      // 如果用户未登录，清理连接
+      if (connectionStartedRef.current) {
+        log.info("User logged out, stopping SSE connection");
+        sseClient.stop();
+        connectionStartedRef.current = false;
+      }
       return;
     }
 
@@ -587,7 +606,21 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       return;
     }
 
+    // 检查 baseURL 是否已设置
+    const baseURL = appStates.apiConfigs.serviceConfigs.ARK_HOST.HOST;
+    if (!baseURL || !sseClient.hasBaseURL()) {
+      log.warn("SSE baseURL not set yet, skipping connection");
+      return;
+    }
+
+    // 如果已经连接，跳过
+    if (connectionStartedRef.current || sseClient.isConnectionActive()) {
+      log.debug("SSE connection already active, skipping");
+      return;
+    }
+
     log.info("Starting SSE connection for real-time game updates");
+    connectionStartedRef.current = true;
 
     // 设置 SSE 事件处理器（业务逻辑）
     sseClient.setEventHandlers({
@@ -596,8 +629,10 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
           // 根据事件类型处理不同的业务逻辑
           switch (eventType) {
             case "game": {
-              const gameData = JSON.parse(data) as IGameData[];
-              log.debug("SSE: Received game data:", gameData.length, "games");
+              const gameData = JSON.parse(data) as IGameData[] | null;
+              if (!gameData || !Array.isArray(gameData)) {
+                break;
+              }
               updateAppStates((draft) => {
                 draft.gamesData[uuid] = gameData;
               });
@@ -605,8 +640,10 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
             }
 
             case "log": {
-              const logData = JSON.parse(data) as { content: string };
-              log.debug("SSE: Received log:", logData.content);
+              const logData = JSON.parse(data) as { content: string } | null;
+              if (!logData || !logData.content) {
+                break;
+              }
               toast.success({
                 text1: "日志",
                 text2: logData.content,
@@ -615,18 +652,18 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
             }
 
             case "close": {
-              log.warn("SSE: Server requested connection close");
               toast.warning({
                 text1: "连接关闭",
                 text2: "你已在其他窗口或设备访问，本页面暂停更新",
               });
+              connectionStartedRef.current = false;
               sseClient.stop();
               break;
             }
 
             case "ssr": {
-              const ssrData = JSON.parse(data) ?? [];
-              log.debug("SSE: Received SSR data:", ssrData.length, "items");
+              const parsedData = JSON.parse(data);
+              const ssrData = Array.isArray(parsedData) ? parsedData : [];
               // TODO: 处理 SSR 数据（6星抽卡通知）
               // 这里需要根据你的应用逻辑来处理 SSR 数据
               // 比如显示一个通知或对话框
@@ -650,14 +687,20 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
 
       onOpen: () => {
         log.info("SSE: Connection opened");
+        // 连接建立后，注册业务相关的自定义事件监听器
+        // 这些是业务逻辑相关的事件类型，应该在业务层定义
+        const businessEvents = ["game", "log", "close", "ssr"];
+        sseClient.registerEventListeners(businessEvents);
       },
 
       onClose: () => {
         log.info("SSE: Connection closed by server");
+        connectionStartedRef.current = false;
       },
 
       onError: (error) => {
         log.error("SSE: Connection error:", error);
+        connectionStartedRef.current = false;
         // 不在这里显示错误提示，避免过于频繁的提示
         // 可以根据需要添加重连逻辑
       },
@@ -668,6 +711,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       const success = await sseClient.start();
       if (!success) {
         log.error("Failed to start SSE connection, falling back to polling");
+        connectionStartedRef.current = false;
 
         // SSE 连接失败，回退到轮询模式
         const queryGamesStatus = async () => {
@@ -687,14 +731,12 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
         queryGamesStatus();
 
         // 设置定时器，每3秒执行一次
-        const intervalId = setInterval(queryGamesStatus, 3000);
-
-        // 返回清理函数
-        return () => {
-          log.info("Stopping games status polling");
-          clearInterval(intervalId);
-        };
+        pollingIntervalRef.current = setInterval(queryGamesStatus, 3000);
+        return;
       }
+
+      // 注意：自定义事件监听器会在 onOpen 回调中注册
+      // 这样可以确保连接完全建立后再注册事件
     };
 
     startConnection();
@@ -702,9 +744,21 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     // 清理函数：组件卸载或依赖变化时停止 SSE 连接
     return () => {
       log.info("Stopping SSE connection");
+      connectionStartedRef.current = false;
       sseClient.stop();
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
     };
-  }, [currentAuthSession, arkHostClient, sseClient, updateAppStates, toast]);
+  }, [
+    currentAuthSession,
+    appStates.apiConfigs.serviceConfigs.ARK_HOST.HOST,
+    arkHostClient,
+    sseClient,
+    updateAppStates,
+    toast,
+  ]);
 
   const values: ClosureContextType = {
     login,

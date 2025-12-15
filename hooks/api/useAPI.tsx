@@ -8,8 +8,8 @@ import ArkQuotaClient from "@/utils/axios/arkQuota";
 import AssetsClient from "@/utils/axios/assetsClient";
 import IdServerClient from "@/utils/axios/idServer";
 import { LOG } from "@/utils/logger/logger";
-import SSEClient from "@/utils/sse/sse";
 import { ARK_HOST_SSE_CONSTANTS } from "@/utils/sse/constants";
+import SSEClient from "@/utils/sse/sse";
 import { jwtDecode } from "jwt-decode";
 import { useCallback, useEffect, useMemo } from "react";
 import { isTokenExpired } from "./utils";
@@ -42,7 +42,7 @@ export const useAPI = (props: IUseAPIParams): IAPIClients => {
   const sseClient = useMemo(
     () =>
       new SSEClient({
-        baseURL: "",
+        baseURL: serviceConfigs.ARK_HOST.HOST,
         endpoint: ARK_HOST_SSE_CONSTANTS.GAMES.endPoint,
       }),
     [],
@@ -68,9 +68,15 @@ export const useAPI = (props: IUseAPIParams): IAPIClients => {
       const resp = await idServerClient.login(email, password);
       if (resp?.data?.token) {
         const payload = jwtDecode<IJWTPayload>(resp.data.token);
-        authSession.credential.token = resp.data.token;
-        authSession.payload = payload;
-        setAuthSession(authSession);
+        const updatedSession: IAuthSession = {
+          ...authSession,
+          credential: {
+            ...authSession.credential,
+            token: resp.data.token,
+          },
+          payload,
+        };
+        setAuthSession(updatedSession);
 
         // 更新 SSE 客户端的 token（作为查询参数）
         sseClient.updateQueryParam("token", resp.data.token);

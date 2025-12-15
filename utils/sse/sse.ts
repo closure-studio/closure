@@ -1,8 +1,12 @@
 import { LOG } from "@/utils/logger/logger";
-import {
-  EventSourceMessage,
-  fetchEventSource,
-} from "@microsoft/fetch-event-source";
+import EventSource, {
+  ErrorEvent,
+  EventSourceListener,
+  ExceptionEvent,
+  MessageEvent,
+  OpenEvent,
+  TimeoutEvent,
+} from "react-native-sse";
 
 const log = LOG.extend("SSEClient");
 
@@ -37,16 +41,17 @@ export interface SSEEventHandlers {
  * SSEClient - 通用 SSE 客户端
  *
  * 提供通用的 SSE 连接管理，不包含业务逻辑
- * 使用 @microsoft/fetch-event-source 替代原生 EventSource
+ * 使用 react-native-sse 库实现
  */
 class SSEClient {
   private baseURL: string = "";
   private endpoint: string = "";
   private queryParams: Record<string, string> = {};
-  private abortController: AbortController | null = null;
   private handlers: SSEEventHandlers = {};
   private isConnected: boolean = false;
   private connectionTimeout: number = 5000; // 5秒超时
+  private eventSource: EventSource<string> | null = null;
+  private registeredEvents: Set<string> = new Set();
 
   constructor(config?: { baseURL?: string; endpoint?: string }) {
     if (config?.baseURL) {
@@ -97,10 +102,73 @@ class SSEClient {
   }
 
   /**
+   * 注册自定义事件监听器
+   * 允许业务层动态注册需要监听的事件类型
+   * @param eventType 事件类型名称
+   */
+  registerEventListener(eventType: string): void {
+    if (!this.eventSource) {
+      log.warn(
+        `Cannot register event listener for "${eventType}": SSE connection not started`
+      );
+      return;
+    }
+
+    if (this.registeredEvents.has(eventType)) {
+      log.debug(`Event listener for "${eventType}" already registered`);
+      return;
+    }
+
+    // 标准事件类型不需要注册（open, message, error）
+    if (
+      eventType === "open" ||
+      eventType === "message" ||
+      eventType === "error"
+    ) {
+      log.debug(
+        `Event "${eventType}" is a standard event, no need to register`
+      );
+      return;
+    }
+
+    const customEventListener: EventSourceListener<string, string> = (
+      event: any
+    ) => {
+      if (event.data) {
+        this.handleMessage({
+          event: eventType,
+          data: event.data,
+        });
+      }
+    };
+
+    this.eventSource.addEventListener(eventType, customEventListener);
+    this.registeredEvents.add(eventType);
+    log.debug(`Registered custom event listener for: "${eventType}"`);
+  }
+
+  /**
+   * 批量注册自定义事件监听器
+   * @param eventTypes 事件类型数组
+   */
+  registerEventListeners(eventTypes: string[]): void {
+    eventTypes.forEach((eventType) => {
+      this.registerEventListener(eventType);
+    });
+  }
+
+  /**
    * 获取连接状态
    */
   isConnectionActive(): boolean {
     return this.isConnected;
+  }
+
+  /**
+   * 检查 baseURL 是否已设置
+   */
+  hasBaseURL(): boolean {
+    return !!this.baseURL;
   }
 
   /**
@@ -119,13 +187,13 @@ class SSEClient {
       return false;
     }
 
-    if (this.isConnected) {
-      log.warn("SSE connection already active");
-      return true;
+    // 如果已经连接，先关闭旧连接
+    if (this.isConnected || this.eventSource) {
+      log.warn(
+        "SSE connection already active, closing existing connection first"
+      );
+      this.stop();
     }
-
-    // 创建新的 AbortController
-    this.abortController = new AbortController();
 
     // 构建查询字符串
     const queryString = Object.entries(this.queryParams)
@@ -144,76 +212,67 @@ class SSEClient {
         }
       }, this.connectionTimeout);
 
-      await fetchEventSource(url, {
-        signal: this.abortController.signal,
-
-        onopen: async (response) => {
-          clearTimeout(timeoutId);
-
-          if (response.ok) {
-            this.isConnected = true;
-            log.info("SSE connection opened successfully");
-            this.handlers.onOpen?.();
-            return;
-          }
-
-          if (
-            response.status >= 400 &&
-            response.status < 500 &&
-            response.status !== 429
-          ) {
-            // 客户端错误，不重试
-            log.error("Client error:", response.status, response.statusText);
-            this.handlers.onError?.(
-              new Error(`Client error: ${response.status}`),
-            );
-            throw new Error(`Client error: ${response.status}`);
-          } else {
-            // 服务器错误或429，会自动重试
-            log.warn(
-              "Server error, will retry:",
-              response.status,
-              response.statusText,
-            );
-            throw new Error(`Server error: ${response.status}`);
-          }
-        },
-
-        onmessage: (event: EventSourceMessage) => {
-          this.handleMessage(event);
-        },
-
-        onerror: (error) => {
-          log.error("SSE connection error:", error);
-          this.isConnected = false;
-
-          // 如果连接被主动关闭，不报错
-          if (this.abortController?.signal.aborted) {
-            return;
-          }
-
-          this.handlers.onError?.(
-            error instanceof Error ? error : new Error(String(error)),
-          );
-          throw error; // 抛出错误以停止重连
-        },
-
-        onclose: () => {
-          log.info("SSE connection closed");
-          this.isConnected = false;
-          this.handlers.onClose?.();
-        },
-
-        // 配置重连
-        openWhenHidden: false, // 页面隐藏时不打开新连接
+      // 使用 react-native-sse
+      // 设置 lineEndingCharacter 为 \n（标准 SSE 格式）
+      this.eventSource = new EventSource<string>(url, {
+        lineEndingCharacter: "\n",
       });
+
+      clearTimeout(timeoutId);
+
+      // 监听 open 事件
+      const openListener: EventSourceListener<string, "open"> = (
+        event: OpenEvent
+      ) => {
+        this.isConnected = true;
+        log.info("SSE connection opened successfully");
+        // 连接建立后，触发 onOpen 回调
+        // 业务层可以在此回调中注册自定义事件监听器
+        this.handlers.onOpen?.();
+      };
+
+      // 监听 message 事件（通用消息事件）
+      const messageListener: EventSourceListener<string, "message"> = (
+        event: MessageEvent
+      ) => {
+        if (event.data) {
+          this.handleMessage({
+            event: "message",
+            data: event.data,
+          });
+        }
+      };
+
+      // 监听 error 事件
+      const errorListener: EventSourceListener<string, "error"> = (
+        event: ErrorEvent | TimeoutEvent | ExceptionEvent
+      ) => {
+        if (event.type === "error") {
+          log.error("SSE connection error:", event.message);
+          this.isConnected = false;
+          this.handlers.onError?.(new Error(event.message));
+        } else if (event.type === "timeout") {
+          log.error("SSE connection timeout");
+          this.isConnected = false;
+          this.handlers.onError?.(new Error("Connection timeout"));
+        } else if (event.type === "exception") {
+          log.error("SSE exception:", event.message, event.error);
+          this.isConnected = false;
+          this.handlers.onError?.(event.error);
+        }
+      };
+
+      // 注册标准事件监听器
+      this.eventSource.addEventListener("open", openListener);
+      this.eventSource.addEventListener("message", messageListener);
+      this.eventSource.addEventListener("error", errorListener);
 
       return true;
     } catch (error) {
       log.error("Failed to start SSE connection:", error);
       this.isConnected = false;
       this.handlers.onError?.(
-        error instanceof Error ? error : new Error(String(error)),
+        error instanceof Error ? error : new Error(String(error))
       );
       return false;
     }
@@ -222,15 +281,15 @@ class SSEClient {
   /**
    * 处理收到的消息（通用，不包含业务逻辑）
    */
-  private handleMessage(event: EventSourceMessage): void {
-    const { event: eventType, data } = event;
+  private handleMessage(event: { event?: string; data?: string }): void {
+    const eventType = event.event || "message";
+    const data = event.data;
 
     if (!data) {
       return;
     }
 
     // 直接传递原始数据给处理器，由业务层决定如何处理
-    log.debug("Received SSE event:", eventType, "data length:", data.length);
     this.handlers.onMessage?.(eventType, data);
   }
 
@@ -238,11 +297,13 @@ class SSEClient {
    * 停止 SSE 连接
    */
   stop(): void {
-    if (this.abortController) {
+    if (this.eventSource) {
       log.info("Stopping SSE connection");
-      this.abortController.abort();
-      this.abortController = null;
+      this.eventSource.removeAllEventListeners();
+      this.eventSource.close();
+      this.eventSource = null;
       this.isConnected = false;
+      this.registeredEvents.clear();
     }
   }
 

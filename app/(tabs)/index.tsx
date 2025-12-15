@@ -33,7 +33,7 @@ export default function HomeScreen() {
 
   const currentGamesData = useMemo(() => {
     if (!currentAuthSession?.payload?.uuid) return [];
-    return gamesData[currentAuthSession.payload.uuid];
+    return gamesData[currentAuthSession.payload.uuid] || [];
   }, [gamesData, currentAuthSession?.payload?.uuid]);
 
   const { slotEntries, standaloneGames } = useMemo(() => {
@@ -51,21 +51,24 @@ export default function HomeScreen() {
       }) || [];
 
     visibleSlots.forEach((slot) => {
-      const game = currentGamesData?.find(
-        (g) => g.game_config?.account === slot.gameAccount,
-      );
+      const game = Array.isArray(currentGamesData)
+        ? currentGamesData.find(
+            (g) => g.game_config?.account === slot.gameAccount,
+          )
+        : undefined;
       if (game?.game_config?.account) {
         matchedAccounts.add(game.game_config.account);
       }
       entries.push({ slot, game });
     });
 
-    const remainingGames =
-      currentGamesData?.filter((game) => {
-        const account = game.game_config?.account;
-        if (!account) return false;
-        return !matchedAccounts.has(account);
-      }) || [];
+    const remainingGames = Array.isArray(currentGamesData)
+      ? currentGamesData.filter((game) => {
+          const account = game.game_config?.account;
+          if (!account) return false;
+          return !matchedAccounts.has(account);
+        })
+      : [];
 
     return { slotEntries: entries, standaloneGames: remainingGames };
   }, [currentGamesData, quotaUser?.slots]);
@@ -75,11 +78,6 @@ export default function HomeScreen() {
     if (!token) return;
     fetchArkHostConfig();
   }, [currentAuthSession?.credential?.token, fetchArkHostConfig]);
-
-  useEffect(() => {
-    console.log("arkHostConfig:", JSON.stringify(arkHostConfig, null, 2));
-    console.log("announcement:", arkHostConfig?.announcement);
-  }, [arkHostConfig]);
 
   return (
     <PagerView

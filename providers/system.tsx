@@ -46,7 +46,6 @@ const SystemProvider = ({ children }: SystemProviderProps) => {
     initAppStates,
     toast,
   };
-  log.info("SystemProvider initialized", { initAppStates });
   return (
     <SystemContext.Provider value={values}>{children}</SystemContext.Provider>
   );
