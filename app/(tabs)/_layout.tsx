@@ -5,7 +5,6 @@ import React from "react";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
-import { useData } from "@/providers/data";
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -17,7 +16,7 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const { currentAuthSession } = useData();
+  // const { currentAuthSession } = useData();
   const isAdmin = false;
 
   return (
@@ -51,13 +50,6 @@ export default function TabLayout() {
         }}
       /> */}
       <Tabs.Screen
-        name="setting"
-        options={{
-          title: "setting",
-          tabBarIcon: ({ color }) => <TabBarIcon name="gear" color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="index"
         options={{
           title: "home",
@@ -71,6 +63,14 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="setting"
+        options={{
+          title: "setting",
+          tabBarIcon: ({ color }) => <TabBarIcon name="gear" color={color} />,
+        }}
+      />
+
       <Tabs.Screen
         name="admin"
         options={{
