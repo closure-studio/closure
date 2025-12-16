@@ -1,7 +1,8 @@
 import { Href, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import PagerView from "react-native-pager-view";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Announcement } from "@/components/Announcement";
 import { EmptySlotCard } from "@/components/EmptySlotCard";
@@ -11,17 +12,18 @@ import { useClosure } from "@/providers/services/useClosure";
 import { useTheme } from "@/providers/theme";
 import { IGameData } from "@/types/arkHost";
 import { IQuotaUserSlot, QuotaRuleFlag } from "@/types/arkQuota";
-import { LOG } from "@/utils/logger/logger";
-
-const log = LOG.extend("HomeScreen");
 
 export default function HomeScreen() {
   const pagerRef = useRef<PagerView>(null);
   const router = useRouter();
   const { c } = useTheme();
+  const insets = useSafeAreaInsets();
   const { currentAuthSession, appStates } = useData();
   const { fetchArkHostConfig } = useClosure();
   const { arkHostConfig, gamesData } = appStates;
+
+  // 计算底部 padding：tabs 栏高度（约 60px）+ 安全区域 + 额外空间
+  const bottomPadding = 60 + insets.bottom + 20;
 
   const quotaUser = useMemo(() => {
     const uuid = currentAuthSession?.payload?.uuid;
@@ -75,7 +77,10 @@ export default function HomeScreen() {
         })
       : [];
 
-    return { slotEntries: entries, standaloneGames: remainingGames };
+    return {
+      slotEntries: entries,
+      standaloneGames: remainingGames,
+    };
   }, [currentGamesData, quotaUser?.slots]);
 
   useEffect(() => {
@@ -99,7 +104,7 @@ export default function HomeScreen() {
             flexGrow: 1,
             paddingHorizontal: 16,
             paddingTop: 16,
-            paddingBottom: 100,
+            paddingBottom: bottomPadding,
           }}
           showsVerticalScrollIndicator={false}
         >
@@ -196,7 +201,7 @@ export default function HomeScreen() {
             flexGrow: 1,
             paddingHorizontal: 16,
             paddingTop: 24,
-            paddingBottom: 100,
+            paddingBottom: bottomPadding,
           }}
           showsVerticalScrollIndicator={false}
         >
@@ -220,14 +225,24 @@ export default function HomeScreen() {
           {/* 游戏数据列表 & 托管槽 */}
           {slotEntries.length > 0 ? (
             <View style={{ gap: 16 }}>
-              {slotEntries.map((entry, index) =>
-                entry.game ? (
+              {slotEntries.map((entry, index) => {
+                if (!entry.game) {
+                  return (
+                    <EmptySlotCard
+                      key={entry.slot.uuid || `empty-${index}`}
+                      slot={entry.slot}
+                    />
+                  );
+                }
+                // 使用 account 作为唯一标识
+                const gameAccount = entry.game?.status.account;
+                return (
                   <GameDataCard
                     key={entry.slot.uuid || index}
                     data={entry.game}
                     index={index}
                     onPress={() =>
-                      router.push(`/game-detail?index=${index}` as Href)
+                      router.push(`/game-detail?account=${gameAccount}` as Href)
                     }
                     onPause={() =>
                       console.log("暂停游戏:", entry.game?.status.account)
@@ -236,24 +251,20 @@ export default function HomeScreen() {
                       console.log("删除游戏:", entry.game?.status.account)
                     }
                   />
-                ) : (
-                  <EmptySlotCard
-                    key={entry.slot.uuid || `empty-${index}`}
-                    slot={entry.slot}
-                  />
-                ),
-              )}
+                );
+              })}
 
               {/* 未绑定槽位但仍需展示的游戏 */}
               {standaloneGames.map((game, idx) => {
-                const cardIndex = slotEntries.length + idx;
+                // 使用 account 作为唯一标识
+                const gameAccount = game.status.account;
                 return (
                   <GameDataCard
                     key={game.status.uuid || `orphan-${idx}`}
                     data={game}
-                    index={cardIndex}
+                    index={slotEntries.length + idx}
                     onPress={() =>
-                      router.push(`/game-detail?index=${cardIndex}` as Href)
+                      router.push(`/game-detail?account=${gameAccount}` as Href)
                     }
                     onPause={() =>
                       console.log("暂停游戏:", game.status.account)
@@ -268,9 +279,11 @@ export default function HomeScreen() {
           ) : (
             <GameDataList
               games={currentGamesData || []}
-              onPress={(_game: IGameData, index: number) => {
-                // 导航到游戏详情页，传递索引
-                router.push(`/game-detail?index=${index}` as Href);
+              onPress={(game: IGameData, _index: number) => {
+                // 导航到游戏详情页，传递 account
+                router.push(
+                  `/game-detail?account=${game.status.account}` as Href,
+                );
               }}
               onPause={(game: IGameData) => {
                 console.log("暂停游戏:", game.status.nick_name);

@@ -1,8 +1,9 @@
 import { useData } from "@/providers/data";
 import { useTheme } from "@/providers/theme";
 import { IGameData } from "@/types/arkHost";
+import { IQuotaUserSlot, QuotaRuleFlag } from "@/types/arkQuota";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import PagerView from "react-native-pager-view";
 import { useSharedValue } from "react-native-reanimated";
@@ -24,17 +25,94 @@ export default function GameDetailScreen() {
   const { c } = useTheme();
   const router = useRouter();
   const { currentAuthSession, appStates } = useData();
-  const { gamesData } = appStates;
+  const { gamesData, quotaUsers } = appStates;
 
   // 获取路由参数
-  const { index: indexParam } = useLocalSearchParams<{ index: string }>();
-  const initialIndex = parseInt(indexParam || "0", 10);
+  const { account: accountParam } = useLocalSearchParams<{ account: string }>();
 
-  // 获取当前用户的游戏数据
-  const games = useMemo(() => {
+  // 获取当前用户的游戏数据和配额信息
+  const currentGamesData = useMemo(() => {
     if (!currentAuthSession?.payload?.uuid) return [];
     return gamesData[currentAuthSession.payload.uuid] || [];
   }, [gamesData, currentAuthSession?.payload?.uuid]);
+
+  const quotaUser = useMemo(() => {
+    const uuid = currentAuthSession?.payload?.uuid;
+    if (!uuid) return undefined;
+    return quotaUsers?.[uuid] || undefined;
+  }, [quotaUsers, currentAuthSession?.payload?.uuid]);
+
+  // 构建与列表页相同的扁平游戏列表
+  const games = useMemo(() => {
+    if (!currentAuthSession?.payload?.uuid) return [];
+
+    const entries: { slot: IQuotaUserSlot; game?: IGameData }[] = [];
+    const matchedAccounts = new Set<string>();
+
+    const visibleSlots =
+      quotaUser?.slots?.filter((slot) => {
+        const flags = slot.ruleFlags || [];
+        const hidePhoneSlot =
+          !slot.gameAccount &&
+          flags.includes(QuotaRuleFlag.SlotAccountFormatIsPhone) &&
+          flags.includes(QuotaRuleFlag.SlotAccountSMSVerified);
+        return !hidePhoneSlot;
+      }) || [];
+
+    visibleSlots.forEach((slot) => {
+      const game = Array.isArray(currentGamesData)
+        ? currentGamesData.find(
+            (g) => g.game_config?.account === slot.gameAccount,
+          )
+        : undefined;
+      if (game?.game_config?.account) {
+        matchedAccounts.add(game.game_config.account);
+      }
+      entries.push({ slot, game });
+    });
+
+    // 排序：有游戏的slots排在前面，空白的slots排在后面
+    entries.sort((a, b) => {
+      if (a.game && !b.game) return -1;
+      if (!a.game && b.game) return 1;
+      return 0;
+    });
+
+    const remainingGames = Array.isArray(currentGamesData)
+      ? currentGamesData.filter((game) => {
+          const account = game.game_config?.account;
+          if (!account) return false;
+          return !matchedAccounts.has(account);
+        })
+      : [];
+
+    // 构建扁平的游戏列表，与渲染顺序一致
+    const flatGames: IGameData[] = [];
+    entries.forEach((entry) => {
+      if (entry.game) {
+        flatGames.push(entry.game);
+      }
+    });
+    remainingGames.forEach((game) => {
+      flatGames.push(game);
+    });
+
+    // 如果没有配额用户或没有槽位，直接返回原始游戏列表
+    if (!quotaUser || visibleSlots.length === 0) {
+      return currentGamesData;
+    }
+
+    return flatGames;
+  }, [currentGamesData, quotaUser, currentAuthSession?.payload?.uuid]);
+
+  // 根据 account 找到对应的游戏索引
+  const initialIndex = useMemo(() => {
+    if (!accountParam) return 0;
+    const foundIndex = games.findIndex(
+      (g) => g.status.account === accountParam,
+    );
+    return foundIndex >= 0 ? foundIndex : 0;
+  }, [accountParam, games]);
 
   // 当前显示的游戏索引
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -42,6 +120,14 @@ export default function GameDetailScreen() {
 
   // 动画值
   const pageOffset = useSharedValue(0);
+
+  // 当 initialIndex 变化时，更新当前索引（用于处理 account 参数变化）
+  useEffect(() => {
+    setCurrentIndex(initialIndex);
+    if (pagerRef.current) {
+      pagerRef.current.setPage(initialIndex);
+    }
+  }, [initialIndex]);
 
   // 处理页面切换 - hooks 必须在条件返回之前
   const onPageSelected = useCallback(
