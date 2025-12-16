@@ -1,21 +1,19 @@
 import { Href, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef } from "react";
-import {
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import PagerView from "react-native-pager-view";
 
 import { Announcement } from "@/components/Announcement";
+import { EmptySlotCard } from "@/components/EmptySlotCard";
 import { GameDataCard, GameDataList } from "@/components/GameDataCard";
 import { useData } from "@/providers/data";
 import { useClosure } from "@/providers/services/useClosure";
 import { useTheme } from "@/providers/theme";
 import { IGameData } from "@/types/arkHost";
 import { IQuotaUserSlot, QuotaRuleFlag } from "@/types/arkQuota";
+import { LOG } from "@/utils/logger/logger";
+
+const log = LOG.extend("HomeScreen");
 
 export default function HomeScreen() {
   const pagerRef = useRef<PagerView>(null);
@@ -60,6 +58,13 @@ export default function HomeScreen() {
         matchedAccounts.add(game.game_config.account);
       }
       entries.push({ slot, game });
+    });
+
+    // 排序：有游戏的slots排在前面，空白的slots排在后面
+    entries.sort((a, b) => {
+      if (a.game && !b.game) return -1; // a有游戏，b没有，a排前面
+      if (!a.game && b.game) return 1; // a没有游戏，b有，b排前面
+      return 0; // 都有或都没有，保持原顺序
     });
 
     const remainingGames = Array.isArray(currentGamesData)
@@ -131,51 +136,6 @@ export default function HomeScreen() {
                 ? `你好，${currentAuthSession.payload.email}`
                 : "请登录以使用完整功能"}
             </Text>
-          </View>
-
-          {/* 快捷操作区域 */}
-          <View style={{ marginTop: 20 }}>
-            <Text
-              style={{
-                color: c.foreground,
-                fontSize: 18,
-                fontWeight: "600",
-                marginBottom: 12,
-              }}
-            >
-              快捷操作
-            </Text>
-            <View style={{ flexDirection: "row", gap: 12 }}>
-              <Pressable
-                onPress={() => router.push("/modal")}
-                style={{
-                  flex: 1,
-                  backgroundColor: c.primary,
-                  borderRadius: 12,
-                  padding: 16,
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ fontSize: 24, marginBottom: 8 }}>📋</Text>
-                <Text style={{ color: c.primaryFg, fontWeight: "600" }}>
-                  打开弹窗
-                </Text>
-              </Pressable>
-              <Pressable
-                style={{
-                  flex: 1,
-                  backgroundColor: c.secondary,
-                  borderRadius: 12,
-                  padding: 16,
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ fontSize: 24, marginBottom: 8 }}>⚙️</Text>
-                <Text style={{ color: c.secondaryFg, fontWeight: "600" }}>
-                  设置
-                </Text>
-              </Pressable>
-            </View>
           </View>
 
           {/* 状态信息 */}
@@ -279,9 +239,7 @@ export default function HomeScreen() {
                 ) : (
                   <EmptySlotCard
                     key={entry.slot.uuid || `empty-${index}`}
-                    onPress={() =>
-                      console.log("添加游戏到托管槽:", entry.slot.uuid || index)
-                    }
+                    slot={entry.slot}
                   />
                 ),
               )}
@@ -377,50 +335,5 @@ function StatusItem({
         {value}
       </Text>
     </View>
-  );
-}
-
-// 空白托管槽组件
-function EmptySlotCard({ onPress }: { onPress?: () => void }) {
-  const { c } = useTheme();
-  const { width } = useWindowDimensions();
-  const cardWidth = width - 32;
-
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => ({
-        width: cardWidth,
-        backgroundColor: c.card,
-        borderRadius: 16,
-        paddingVertical: 36,
-        borderWidth: 1,
-        borderColor: c.border,
-        alignItems: "center",
-        justifyContent: "center",
-        opacity: pressed ? 0.9 : 1,
-        transform: [{ scale: pressed ? 0.98 : 1 }],
-      })}
-    >
-      <Text
-        style={{
-          color: c.primary,
-          fontSize: 36,
-          fontWeight: "bold",
-          marginBottom: 8,
-        }}
-      >
-        +
-      </Text>
-      <Text
-        style={{
-          color: c.primary,
-          fontSize: 18,
-          fontWeight: "600",
-        }}
-      >
-        添加游戏托管
-      </Text>
-    </Pressable>
   );
 }

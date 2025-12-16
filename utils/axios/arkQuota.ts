@@ -1,7 +1,7 @@
 import {
-    ICreateGameRequest,
-    ICreateGameResponse,
-    IDeleteGameResponse,
+  ICreateGameRequest,
+  ICreateGameResponse,
+  IDeleteGameResponse,
 } from "@/types/arkHost";
 import { IQuotaUser } from "@/types/arkQuota";
 import { IAPIResp } from "@/types/axios";
@@ -23,7 +23,11 @@ class ArkQuotaClient extends ServerBase {
   ): Promise<IAPIResp<T>> {
     try {
       const resp = await promise;
-      return resp.data as IAPIResp<T>;
+      return {
+        code: 1,
+        message: "success",
+        data: resp.data as T,
+      };
     } catch (error: any) {
       if (error.response) {
         return {
@@ -59,6 +63,7 @@ class ArkQuotaClient extends ServerBase {
       {
         ...option,
         headers: {
+          "x-platform": "app",
           token: recaptchaToken,
         },
         data: { account: null },
@@ -84,6 +89,7 @@ class ArkQuotaClient extends ServerBase {
       {
         ...option,
         headers: {
+          "x-platform": "app",
           token: recaptchaToken,
         },
         data: gameData,

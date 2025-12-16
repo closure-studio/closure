@@ -15,6 +15,7 @@ import React, {
   useMemo,
 } from "react";
 import { useSystem } from "./system";
+import { IQuotaUser } from "@/types/arkQuota";
 
 /**
  * 全局数据 Context
@@ -22,6 +23,7 @@ import { useSystem } from "./system";
  */
 interface DataContextType {
   currentAuthSession: IAuthSession | null;
+  currentQuotaUser: IQuotaUser | null;
   appStates: IAPPStates;
   updateAppStates: (updater: (draft: IAPPStates) => void) => void;
   apiClients: IAPIClients;
@@ -84,8 +86,16 @@ const DataProvider = ({ children }: DataProviderProps) => {
     return null;
   }, [appStates]);
 
+  const currentQuotaUser = useMemo(() => {
+    if (currentAuthSession?.payload?.uuid) {
+      return appStates.quotaUsers[currentAuthSession.payload.uuid] || null;
+    }
+    return null;
+  }, [currentAuthSession, appStates]);
+
   const values: DataContextType = {
     currentAuthSession,
+    currentQuotaUser,
     appStates,
     updateAppStates,
     apiClients,

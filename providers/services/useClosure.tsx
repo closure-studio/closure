@@ -59,6 +59,7 @@ interface ClosureContextType {
   fetchAssetItems: () => Promise<IAPIResp<IAssetItems>>;
   fetchAssetStages: () => Promise<IAPIResp<IAssetStages>>;
   fetchArkHostConfig: () => Promise<IAPIResp<IArkHostConfig>>;
+  fetchGamesStatus: () => Promise<IAPIResp<IGameData[]>>;
   fetchGameDetail: (gameId: string) => Promise<IAPIResp<IGameDetail>>;
   fetchGameLogs: (
     gameId: string,
@@ -169,12 +170,21 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     [idServerClient, updateAppStates],
   );
 
+  const stopSSE = useCallback(() => {
+    log.info("Stopping SSE connection");
+    connectionStartedRef.current = false;
+    sseClient.stop();
+  }, [sseClient]);
+
   const logout = useCallback(
     async (uuid: UUID): Promise<void> => {
       try {
+        stopSSE();
         updateAppStates((draft) => {
           draft.currentCredentialUUID = null;
           delete draft.credentialRecord[uuid];
+          delete draft.quotaUsers[uuid];
+          delete draft.gamesData[uuid];
         });
         LOG.info("Logout successful");
       } catch (error) {
@@ -182,7 +192,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
         throw error;
       }
     },
-    [updateAppStates],
+    [updateAppStates, stopSSE],
   );
 
   const sendRegisterCode = useCallback(
@@ -547,12 +557,13 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
             message: "账号和密码不能为空",
           };
         }
-
+        console.log("createGame", slotUuid, gameData, recaptchaToken);
         const response = await arkQuotaClient.createGame(
           slotUuid,
           gameData,
           recaptchaToken,
         );
+        console.log("createGame response", response);
         // ArkQuota API 返回 { available: true } 表示成功
         if (response.data?.available) {
           log.info("Game created successfully", {
@@ -651,12 +662,6 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
       };
     }
   }, [arkHostClient, currentAuthSession, updateAppStates]);
-
-  const stopSSE = useCallback(() => {
-    log.info("Stopping SSE connection");
-    connectionStartedRef.current = false;
-    sseClient.stop();
-  }, [sseClient]);
 
   const handleSSEMessage = useCallback(
     (eventType: string, data: string) => {
@@ -818,6 +823,7 @@ const ClosureProvider = ({ children }: ClosureProviderProps) => {
     fetchAssetItems,
     fetchAssetStages,
     fetchArkHostConfig,
+    fetchGamesStatus,
     fetchGameDetail,
     fetchGameLogs,
     startGame,

@@ -132,6 +132,14 @@ const NavigationContent = () => {
           options={{ presentation: "modal", headerShown: false }}
         />
         <Stack.Screen
+          name="create-game"
+          options={{
+            presentation: "transparentModal",
+            headerShown: false,
+            animation: "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
           name="game-detail"
           options={{
             headerShown: false,

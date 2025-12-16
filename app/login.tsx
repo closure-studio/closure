@@ -24,15 +24,6 @@ export default function LoginScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const [currentPage, setCurrentPage] = useState<PageType>("login");
-  const [loginEmail, setLoginEmail] = useState("");
-
-  const handleRegisterSuccess = (email: string) => {
-    setLoginEmail(email);
-  };
-
-  const handleResetSuccess = (email: string) => {
-    setLoginEmail(email);
-  };
 
   const getPageTitle = () => {
     switch (currentPage) {
@@ -123,7 +114,6 @@ export default function LoginScreen() {
               {currentPage === "register" && (
                 <RegisterForm
                   onNavigateToLogin={() => setCurrentPage("login")}
-                  onRegisterSuccess={handleRegisterSuccess}
                 />
               )}
 
@@ -134,10 +124,7 @@ export default function LoginScreen() {
               )}
 
               {currentPage === "reset" && (
-                <ResetForm
-                  onNavigateToLogin={() => setCurrentPage("login")}
-                  onResetSuccess={handleResetSuccess}
-                />
+                <ResetForm onNavigateToLogin={() => setCurrentPage("login")} />
               )}
             </View>
           </ScrollView>
