@@ -7,7 +7,7 @@ import {
   IGameLogResponse,
   IUpdateGameConfigResponse,
 } from "@/types/arkHost";
-import { IAPIResponse } from "@/types/axios";
+import { IAPIResp } from "@/types/axios";
 import ServerBase from "./base";
 import { ARK_HOST_CONSTANTS } from "./constants";
 
@@ -24,10 +24,10 @@ class ArkHostClient extends ServerBase {
    */
   protected async handleResponse<T>(
     promise: Promise<any>,
-  ): Promise<IAPIResponse<T>> {
+  ): Promise<IAPIResp<T>> {
     try {
       const resp = await promise;
-      return resp.data as IAPIResponse<T>;
+      return resp.data as IAPIResp<T>;
     } catch (error: any) {
       if (error.response) {
         return {
@@ -51,7 +51,7 @@ class ArkHostClient extends ServerBase {
   /**
    * 查询游戏状态
    */
-  async queryGamesStatus(): Promise<IAPIResponse<IGameData[]>> {
+  async queryGamesStatus(): Promise<IAPIResp<IGameData[]>> {
     const option = ARK_HOST_CONSTANTS.GAME;
     const response = await this.get<IGameData[]>(option.endPoint, option);
     return response;
@@ -60,7 +60,7 @@ class ArkHostClient extends ServerBase {
   /**
    * 查询系统配置信息
    */
-  async queryConfig(): Promise<IAPIResponse<IArkHostConfig>> {
+  async queryConfig(): Promise<IAPIResp<IArkHostConfig>> {
     const option = ARK_HOST_CONSTANTS.CONFIG;
     const response = await this.get<IArkHostConfig>(option.endPoint, option);
     return response;
@@ -70,7 +70,7 @@ class ArkHostClient extends ServerBase {
    * 查询单个游戏详情
    * @param gameId 游戏账号ID (如 G18928069156)
    */
-  async queryGameDetail(gameId: string): Promise<IAPIResponse<IGameDetail>> {
+  async queryGameDetail(gameId: string): Promise<IAPIResp<IGameDetail>> {
     const option = ARK_HOST_CONSTANTS.GAME_DETAIL;
     const response = await this.get<IGameDetail>(
       `${option.endPoint}/${gameId}`,
@@ -87,7 +87,7 @@ class ArkHostClient extends ServerBase {
   async queryGameLogs(
     gameId: string,
     page: number = 0,
-  ): Promise<IAPIResponse<IGameLogResponse>> {
+  ): Promise<IAPIResp<IGameLogResponse>> {
     const option = ARK_HOST_CONSTANTS.GAME_LOG;
     const response = await this.get<IGameLogResponse>(
       `${option.endPoint}/${gameId}/${page}`,
@@ -104,7 +104,7 @@ class ArkHostClient extends ServerBase {
   async gameLogin(
     gameId: string,
     recaptchaToken: string,
-  ): Promise<IAPIResponse<IGameLoginResponse>> {
+  ): Promise<IAPIResp<IGameLoginResponse>> {
     const option = ARK_HOST_CONSTANTS.GAME_LOGIN;
     const response = await this.post<IGameLoginResponse>(
       `${option.endPoint}/${gameId}`,
@@ -126,7 +126,7 @@ class ArkHostClient extends ServerBase {
   async updateGameConfig(
     gameId: string,
     config: Partial<IGameConfig>,
-  ): Promise<IAPIResponse<IUpdateGameConfigResponse>> {
+  ): Promise<IAPIResp<IUpdateGameConfigResponse>> {
     const option = ARK_HOST_CONSTANTS.GAME_CONFIG;
     const response = await this.post<IUpdateGameConfigResponse>(
       `${option.endPoint}/${gameId}`,

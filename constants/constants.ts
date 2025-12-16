@@ -54,6 +54,7 @@ export const DEFAULT_APP_STATES: IAPPStates = {
   assetItems: {},
   assetStages: {},
   gamesData: {},
+  quotaUsers: {},
   arkHostConfig: null,
   themeId: "red", // 默认主题
 };

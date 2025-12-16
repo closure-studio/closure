@@ -52,6 +52,10 @@ class SSEClient {
   private connectionTimeout: number = 5000; // 5秒超时
   private eventSource: EventSource<string> | null = null;
   private registeredEvents: Set<string> = new Set();
+  private customEventListeners: Map<
+    string,
+    EventSourceListener<string, string>
+  > = new Map();
 
   constructor(config?: { baseURL?: string; endpoint?: string }) {
     if (config?.baseURL) {
@@ -109,13 +113,8 @@ class SSEClient {
   registerEventListener(eventType: string): void {
     if (!this.eventSource) {
       log.warn(
-        `Cannot register event listener for "${eventType}": SSE connection not started`
+        `Cannot register event listener for "${eventType}": SSE connection not started`,
       );
-      return;
-    }
-
-    if (this.registeredEvents.has(eventType)) {
-      log.debug(`Event listener for "${eventType}" already registered`);
       return;
     }
 
@@ -126,13 +125,22 @@ class SSEClient {
       eventType === "error"
     ) {
       log.debug(
-        `Event "${eventType}" is a standard event, no need to register`
+        `Event "${eventType}" is a standard event, no need to register`,
       );
       return;
     }
 
+    // 如果已存在同名监听器，先移除再覆盖
+    const existingListener = this.customEventListeners.get(eventType);
+    if (existingListener) {
+      this.eventSource.removeEventListener(eventType, existingListener);
+      this.customEventListeners.delete(eventType);
+      this.registeredEvents.delete(eventType);
+      log.debug(`Overriding existing listener for "${eventType}"`);
+    }
+
     const customEventListener: EventSourceListener<string, string> = (
-      event: any
+      event: any,
     ) => {
       if (event.data) {
         this.handleMessage({
@@ -144,6 +152,7 @@ class SSEClient {
 
     this.eventSource.addEventListener(eventType, customEventListener);
     this.registeredEvents.add(eventType);
+    this.customEventListeners.set(eventType, customEventListener);
     log.debug(`Registered custom event listener for: "${eventType}"`);
   }
 
@@ -190,7 +199,7 @@ class SSEClient {
     // 如果已经连接，先关闭旧连接
     if (this.isConnected || this.eventSource) {
       log.warn(
-        "SSE connection already active, closing existing connection first"
+        "SSE connection already active, closing existing connection first",
       );
       this.stop();
     }
@@ -222,7 +231,7 @@ class SSEClient {
 
       // 监听 open 事件
       const openListener: EventSourceListener<string, "open"> = (
-        event: OpenEvent
+        event: OpenEvent,
       ) => {
         this.isConnected = true;
         log.info("SSE connection opened successfully");
@@ -233,7 +242,7 @@ class SSEClient {
 
       // 监听 message 事件（通用消息事件）
       const messageListener: EventSourceListener<string, "message"> = (
-        event: MessageEvent
+        event: MessageEvent,
       ) => {
         if (event.data) {
           this.handleMessage({
@@ -245,7 +254,7 @@ class SSEClient {
 
       // 监听 error 事件
       const errorListener: EventSourceListener<string, "error"> = (
-        event: ErrorEvent | TimeoutEvent | ExceptionEvent
+        event: ErrorEvent | TimeoutEvent | ExceptionEvent,
       ) => {
         if (event.type === "error") {
           log.error("SSE connection error:", event.message);
@@ -272,7 +281,7 @@ class SSEClient {
       log.error("Failed to start SSE connection:", error);
       this.isConnected = false;
       this.handlers.onError?.(
-        error instanceof Error ? error : new Error(String(error))
+        error instanceof Error ? error : new Error(String(error)),
       );
       return false;
     }
@@ -304,6 +313,7 @@ class SSEClient {
       this.eventSource = null;
       this.isConnected = false;
       this.registeredEvents.clear();
+      this.customEventListeners.clear();
     }
   }
 

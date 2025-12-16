@@ -21,7 +21,7 @@ export interface ApiCallOptions {
   [key: string]: any;
 }
 
-export interface IAPIResponse<T> {
+export interface IAPIResp<T> {
   code: number;
   data?: T;
   message: string;

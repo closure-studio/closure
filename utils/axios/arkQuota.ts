@@ -1,10 +1,10 @@
 import {
-  ICreateGameRequest,
-  ICreateGameResponse,
-  IDeleteGameResponse,
+    ICreateGameRequest,
+    ICreateGameResponse,
+    IDeleteGameResponse,
 } from "@/types/arkHost";
 import { IQuotaUser } from "@/types/arkQuota";
-import { IAPIResponse } from "@/types/axios";
+import { IAPIResp } from "@/types/axios";
 import ServerBase from "./base";
 import { ARK_QUOTA_CONSTANTS } from "./constants";
 
@@ -20,10 +20,10 @@ class ArkQuotaClient extends ServerBase {
    */
   protected async handleResponse<T>(
     promise: Promise<any>,
-  ): Promise<IAPIResponse<T>> {
+  ): Promise<IAPIResp<T>> {
     try {
       const resp = await promise;
-      return resp.data as IAPIResponse<T>;
+      return resp.data as IAPIResp<T>;
     } catch (error: any) {
       if (error.response) {
         return {
@@ -52,7 +52,7 @@ class ArkQuotaClient extends ServerBase {
   async deleteGame(
     gameUuid: string,
     recaptchaToken: string,
-  ): Promise<IAPIResponse<IDeleteGameResponse>> {
+  ): Promise<IAPIResp<IDeleteGameResponse>> {
     const option = ARK_QUOTA_CONSTANTS.DELETE_GAME;
     const response = await this.post<IDeleteGameResponse>(
       `${option.endPoint}?uuid=${gameUuid}`,
@@ -77,7 +77,7 @@ class ArkQuotaClient extends ServerBase {
     slotUuid: string,
     gameData: ICreateGameRequest,
     recaptchaToken: string,
-  ): Promise<IAPIResponse<ICreateGameResponse>> {
+  ): Promise<IAPIResp<ICreateGameResponse>> {
     const option = ARK_QUOTA_CONSTANTS.CREATE_GAME;
     const response = await this.post<ICreateGameResponse>(
       `${option.endPoint}?uuid=${slotUuid}`,
@@ -95,7 +95,7 @@ class ArkQuotaClient extends ServerBase {
   /**
    * 获取当前用户信息（含 slots）
    */
-  async getCurrentUser(): Promise<IAPIResponse<IQuotaUser>> {
+  async getCurrentUser(): Promise<IAPIResp<IQuotaUser>> {
     const option = ARK_QUOTA_CONSTANTS.USER_ME;
     const response = await this.get<IQuotaUser>(option.endPoint, option);
     return response;

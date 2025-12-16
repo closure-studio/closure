@@ -6,7 +6,7 @@ import {
   IResetPasswordRequest,
   IResetPasswordResponse,
 } from "@/types/auth";
-import { IAPIResponse } from "@/types/axios";
+import { IAPIResp } from "@/types/axios";
 import ServerBase from "./base";
 import { ID_SERVER_CONSTANTS } from "./constants";
 
@@ -22,10 +22,10 @@ class IdServerClient extends ServerBase {
    */
   protected async handleResponse<T>(
     promise: Promise<any>,
-  ): Promise<IAPIResponse<T>> {
+  ): Promise<IAPIResp<T>> {
     try {
       const resp = await promise;
-      return resp.data as IAPIResponse<T>;
+      return resp.data as IAPIResp<T>;
     } catch (error: any) {
       if (error.response) {
         return {
@@ -54,7 +54,7 @@ class IdServerClient extends ServerBase {
   async login(
     email: string,
     password: string,
-  ): Promise<IAPIResponse<ILoginResponse>> {
+  ): Promise<IAPIResp<ILoginResponse>> {
     const option = { ...ID_SERVER_CONSTANTS.LOGIN };
     option.data = { email, password };
     option.isPublic = true; // 登录接口是公开的，不需要 token
@@ -68,7 +68,7 @@ class IdServerClient extends ServerBase {
    */
   async sendRegisterCode(
     email: string,
-  ): Promise<IAPIResponse<IRegisterCodeResponse>> {
+  ): Promise<IAPIResp<IRegisterCodeResponse>> {
     const option = { ...ID_SERVER_CONSTANTS.REGISTER_CODE };
     option.data = { email };
     option.isPublic = true; // 注册验证码接口是公开的，不需要 token
@@ -77,7 +77,7 @@ class IdServerClient extends ServerBase {
 
   async register(
     registerData: IRegisterRequest,
-  ): Promise<IAPIResponse<IRegisterResponse>> {
+  ): Promise<IAPIResp<IRegisterResponse>> {
     try {
       const option = { ...ID_SERVER_CONSTANTS.REGISTER };
       option.data = registerData;
@@ -98,7 +98,7 @@ class IdServerClient extends ServerBase {
    */
   async resetPassword(
     resetData: IResetPasswordRequest,
-  ): Promise<IAPIResponse<IResetPasswordResponse>> {
+  ): Promise<IAPIResp<IResetPasswordResponse>> {
     const option = { ...ID_SERVER_CONSTANTS.FORGET_PASSWORD };
     option.data = resetData;
     option.isPublic = true; // 重置密码接口是公开的，不需要 token

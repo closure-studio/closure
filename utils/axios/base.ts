@@ -1,4 +1,4 @@
-import { IServiceConfig, ApiCallOptions, IAPIResponse } from "@/types/axios";
+import { ApiCallOptions, IAPIResp, IServiceConfig } from "@/types/axios";
 import axios, { AxiosInstance } from "axios";
 import { LOG } from "../logger/logger";
 
@@ -79,13 +79,13 @@ abstract class ServerBase {
   // 抽象方法，子类必须实现
   protected abstract handleResponse<T>(
     promise: Promise<any>,
-  ): Promise<IAPIResponse<T>>;
+  ): Promise<IAPIResp<T>>;
 
   // 通用POST方法
   protected async post<T>(
     url: string,
     options?: ApiCallOptions,
-  ): Promise<IAPIResponse<T>> {
+  ): Promise<IAPIResp<T>> {
     await this.checkTokenIfNeeded(options);
     const { data, errorPrefix, ...axiosConfig } = options || {};
 
@@ -103,7 +103,7 @@ abstract class ServerBase {
   protected async get<T>(
     url: string,
     options?: ApiCallOptions,
-  ): Promise<IAPIResponse<T>> {
+  ): Promise<IAPIResp<T>> {
     await this.checkTokenIfNeeded(options);
     const { errorPrefix, ...axiosConfig } = options || {};
 
@@ -117,7 +117,7 @@ abstract class ServerBase {
   protected async put<T>(
     url: string,
     options?: ApiCallOptions,
-  ): Promise<IAPIResponse<T>> {
+  ): Promise<IAPIResp<T>> {
     await this.checkTokenIfNeeded(options);
     const { data, errorPrefix, ...axiosConfig } = options || {};
 
@@ -135,7 +135,7 @@ abstract class ServerBase {
   protected async delete<T>(
     url: string,
     options?: ApiCallOptions,
-  ): Promise<IAPIResponse<T>> {
+  ): Promise<IAPIResp<T>> {
     await this.checkTokenIfNeeded(options);
     const { errorPrefix, ...axiosConfig } = options || {};
 

@@ -1,5 +1,5 @@
 import { IAssetItems, IAssetStages } from "@/types/assets";
-import { IAPIResponse } from "@/types/axios";
+import { IAPIResp } from "@/types/axios";
 import ServerBase from "./base";
 import { ASSETS_CONSTANTS } from "./constants";
 
@@ -11,7 +11,7 @@ import { ASSETS_CONSTANTS } from "./constants";
 class AssetsClient extends ServerBase {
   protected async handleResponse<T>(
     promise: Promise<any>,
-  ): Promise<IAPIResponse<T>> {
+  ): Promise<IAPIResp<T>> {
     try {
       const resp = await promise;
       return {
@@ -46,7 +46,7 @@ class AssetsClient extends ServerBase {
    * 获取items数据
    * @returns items响应
    */
-  async getItems(): Promise<IAPIResponse<IAssetItems>> {
+  async getItems(): Promise<IAPIResp<IAssetItems>> {
     const option = { ...ASSETS_CONSTANTS.ITEMS };
     return this.get<IAssetItems>(option.endPoint, option);
   }
@@ -55,7 +55,7 @@ class AssetsClient extends ServerBase {
    * 获取stages数据
    * @returns stages响应
    */
-  async getStages(): Promise<IAPIResponse<IAssetStages>> {
+  async getStages(): Promise<IAPIResp<IAssetStages>> {
     const option = { ...ASSETS_CONSTANTS.STAGES };
     return this.get<IAssetStages>(option.endPoint, option);
   }
