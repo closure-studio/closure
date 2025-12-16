@@ -33,14 +33,8 @@ const STATUS_ICONS = ["⚡", "🎯", "🎮", "🔧"];
  * 游戏数据卡片组件
  * 展示游戏账号的基本信息、状态和操作按钮
  */
-export function GameDataCard({
-  data,
-  index,
-  onPress,
-  onPause,
-  onDelete,
-  onChangePassword,
-}: GameDataCardProps) {
+export function GameDataCard(props: GameDataCardProps) {
+  const { data, index, onPress, onPause, onDelete, onChangePassword } = props;
   const { c } = useTheme();
   const { toast } = useSystem();
   const { width } = useWindowDimensions();

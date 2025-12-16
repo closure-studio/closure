@@ -36,11 +36,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       Alert.alert("错误", "请输入邮箱和密码");
       return;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert("错误", "请输入有效的邮箱地址");
-      return;
-    }
     if (isLoading) return;
 
     setIsLoading(true);
