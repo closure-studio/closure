@@ -151,6 +151,14 @@ const NavigationContent = () => {
             fullScreenGestureEnabled: true,
           }}
         />
+        <Stack.Screen
+          name="edit-game-config"
+          options={{
+            presentation: "transparentModal",
+            headerShown: false,
+            animation: "slide_from_bottom",
+          }}
+        />
       </Stack>
     </NavigationThemeProvider>
   );
