@@ -2,14 +2,8 @@ import { useColorScheme } from "@/components/useColorScheme";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   LoginForm,
@@ -55,80 +49,73 @@ export default function LoginScreen() {
           { backgroundColor: isDark ? "#111827" : "#ffffff" },
         ]}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardView}
+        <KeyboardAwareScrollView
+          bottomOffset={50}
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
         >
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.content}>
-              {/* Title */}
-              <Text
-                style={[
-                  styles.pageTitle,
-                  { color: isDark ? "#9333EA" : "#9333EA" },
-                ]}
-              >
-                {getPageTitle()}
-              </Text>
+          <View style={styles.content}>
+            {/* Title */}
+            <Text
+              style={[
+                styles.pageTitle,
+                { color: isDark ? "#9333EA" : "#9333EA" },
+              ]}
+            >
+              {getPageTitle()}
+            </Text>
 
-              {/* Navigation Buttons */}
-              <View style={styles.navigationButtons}>
-                {currentPage === "login" ? (
-                  <>
-                    <TopButton
-                      text="没有账号?点击注册!"
-                      onPress={() => setCurrentPage("register")}
-                    />
-                    <TopButton
-                      text="忘记了通行证账号?"
-                      onPress={() => setCurrentPage("recover")}
-                    />
-                    <TopButton
-                      text="忘记了通行证密码?"
-                      onPress={() => setCurrentPage("reset")}
-                    />
-                  </>
-                ) : (
+            {/* Navigation Buttons */}
+            <View style={styles.navigationButtons}>
+              {currentPage === "login" ? (
+                <>
                   <TopButton
-                    text="使用通行证登录"
-                    onPress={() => setCurrentPage("login")}
+                    text="没有账号?点击注册!"
+                    onPress={() => setCurrentPage("register")}
                   />
-                )}
-              </View>
-
-              {/* Separator */}
-              <Separator />
-
-              {/* Forms */}
-              {currentPage === "login" && (
-                <LoginForm
-                  onNavigateToRegister={() => setCurrentPage("register")}
-                  onNavigateToRecover={() => setCurrentPage("recover")}
-                  onNavigateToReset={() => setCurrentPage("reset")}
+                  <TopButton
+                    text="忘记了通行证账号?"
+                    onPress={() => setCurrentPage("recover")}
+                  />
+                  <TopButton
+                    text="忘记了通行证密码?"
+                    onPress={() => setCurrentPage("reset")}
+                  />
+                </>
+              ) : (
+                <TopButton
+                  text="使用通行证登录"
+                  onPress={() => setCurrentPage("login")}
                 />
-              )}
-
-              {currentPage === "register" && (
-                <RegisterForm
-                  onNavigateToLogin={() => setCurrentPage("login")}
-                />
-              )}
-
-              {currentPage === "recover" && (
-                <RecoverForm
-                  onNavigateToLogin={() => setCurrentPage("login")}
-                />
-              )}
-
-              {currentPage === "reset" && (
-                <ResetForm onNavigateToLogin={() => setCurrentPage("login")} />
               )}
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+
+            {/* Separator */}
+            <Separator />
+
+            {/* Forms */}
+            {currentPage === "login" && (
+              <LoginForm
+                onNavigateToRegister={() => setCurrentPage("register")}
+                onNavigateToRecover={() => setCurrentPage("recover")}
+                onNavigateToReset={() => setCurrentPage("reset")}
+              />
+            )}
+
+            {currentPage === "register" && (
+              <RegisterForm onNavigateToLogin={() => setCurrentPage("login")} />
+            )}
+
+            {currentPage === "recover" && (
+              <RecoverForm onNavigateToLogin={() => setCurrentPage("login")} />
+            )}
+
+            {currentPage === "reset" && (
+              <ResetForm onNavigateToLogin={() => setCurrentPage("login")} />
+            )}
+          </View>
+        </KeyboardAwareScrollView>
       </SafeAreaView>
     </>
   );
@@ -141,14 +128,16 @@ const styles = StyleSheet.create({
   keyboardView: {
     flex: 1,
   },
+  scrollView: {
+    paddingHorizontal: 24,
+  },
   scrollContent: {
     flexGrow: 1,
+    paddingTop: 24,
+    paddingBottom: 24,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 40,
-    paddingBottom: 24,
   },
   pageTitle: {
     fontSize: 28,

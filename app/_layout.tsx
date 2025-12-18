@@ -15,6 +15,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StrictMode, useEffect } from "react";
 import { View } from "react-native";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import "react-native-reanimated";
 import {
   SafeAreaProvider,
@@ -91,17 +92,19 @@ const ThemedSafeArea = ({ children }: { children: React.ReactNode }) => {
 const DependentProviders = ({ children }: { children: React.ReactNode }) => (
   <StrictMode>
     <SafeAreaProvider>
-      <SystemProvider>
-        <DataProvider>
-          <ThemeProvider>
-            <ThemedRoot>
-              <ThemedSafeArea>
-                <ClosureProvider>{children}</ClosureProvider>
-              </ThemedSafeArea>
-            </ThemedRoot>
-          </ThemeProvider>
-        </DataProvider>
-      </SystemProvider>
+      <KeyboardProvider>
+        <SystemProvider>
+          <DataProvider>
+            <ThemeProvider>
+              <ThemedRoot>
+                <ThemedSafeArea>
+                  <ClosureProvider>{children}</ClosureProvider>
+                </ThemedSafeArea>
+              </ThemedRoot>
+            </ThemeProvider>
+          </DataProvider>
+        </SystemProvider>
+      </KeyboardProvider>
     </SafeAreaProvider>
   </StrictMode>
 );
