@@ -27,9 +27,8 @@ import Toast, { BaseToast } from "react-native-toast-message";
 import "../global.css";
 export {
   // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+  ErrorBoundary
 } from "expo-router";
-import { verifyInstallation } from "nativewind";
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: "(tabs)",

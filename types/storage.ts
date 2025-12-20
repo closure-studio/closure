@@ -25,4 +25,6 @@ export interface IAPPStates {
   arkHostConfig: IArkHostConfig | null;
   // 主题 ID
   themeId: string;
+  // NativeWind 主题 ID
+  nativeWindThemeId?: string;
 }

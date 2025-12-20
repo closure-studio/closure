@@ -1,9 +1,9 @@
 import {
-  DEFAULT_THEME_ID,
-  getThemeById,
-  ThemeColors,
-  ThemeDefinition,
-  themes,
+    DEFAULT_THEME_ID,
+    getThemeById,
+    ThemeColors,
+    ThemeDefinition,
+    themes,
 } from "@/constants/themes";
 import { createContext, useCallback, useContext, useMemo } from "react";
 import { useColorScheme } from "react-native";
