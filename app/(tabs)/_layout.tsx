@@ -79,15 +79,6 @@ export default function TabLayout() {
           href: isAdmin ? "/admin" : null, // 关键：非管理员时设为 null
         }}
       />
-      <Tabs.Screen
-        name="theme"
-        options={{
-          title: "Theme",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome name="paint-brush" size={28} color={color} />
-          ),
-        }}
-      />
     </Tabs>
   );
 }
