@@ -3,7 +3,7 @@ import { Pressable, Text, useWindowDimensions } from "react-native";
 
 import { useData } from "@/providers/data";
 import { useSystem } from "@/providers/system";
-import { useTheme } from "@/providers/theme";
+import { useColors } from "@/utils/colors";
 import { IQuotaUserSlot, QuotaRuleFlag } from "@/types/arkQuota";
 import { useCallback, useMemo } from "react";
 
@@ -15,7 +15,7 @@ export function EmptySlotCard(props: EmptySlotCardProps) {
   const { slot } = props;
   const router = useRouter();
   const { toast } = useSystem();
-  const { c } = useTheme();
+  const c = useColors();
   const { currentQuotaUser } = useData();
   const { width } = useWindowDimensions();
   const cardWidth = width - 32;

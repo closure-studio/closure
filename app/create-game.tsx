@@ -18,12 +18,12 @@ import { Input, RadioButton } from "@/app/login/components/SharedComponents";
 import { useRecaptcha } from "@/hooks/auth/useRecaptcha";
 import { useClosure } from "@/providers/services/useClosure";
 import { useSystem } from "@/providers/system";
-import { useTheme } from "@/providers/theme";
 import { GamePlatform } from "@/types/arkHost";
+import { useColors } from "@/utils/colors";
 
 export default function CreateGameModal() {
   const router = useRouter();
-  const { c } = useTheme();
+  const c = useColors();
   const { toast } = useSystem();
   const { createGame, fetchQuotaUser, fetchGamesStatus } = useClosure();
   const {

@@ -1,4 +1,4 @@
-import { alpha, useTheme } from "@/providers/theme";
+import { alpha, useColors } from "@/utils/colors";
 import { useCallback, useState } from "react";
 import {
   LayoutChangeEvent,
@@ -31,7 +31,7 @@ export function Announcement({
   maxHeight = 120,
   title = "今日特价",
 }: AnnouncementProps) {
-  const { c } = useTheme();
+  const c = useColors();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
 
@@ -257,7 +257,7 @@ export function Announcement({
  * 紧凑型公告横幅（单行滚动）
  */
 export function AnnouncementBanner({ content }: { content?: string }) {
-  const { c } = useTheme();
+  const c = useColors();
   const { width } = useWindowDimensions();
   const [isExpanded, setIsExpanded] = useState(false);
   const insets = useSafeAreaInsets();

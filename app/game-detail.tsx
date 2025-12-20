@@ -1,5 +1,5 @@
 import { useData } from "@/providers/data";
-import { useTheme } from "@/providers/theme";
+import { useColors } from "@/utils/colors";
 import { IGameData } from "@/types/arkHost";
 import { IQuotaUserSlot, QuotaRuleFlag } from "@/types/arkQuota";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -22,7 +22,7 @@ const PLATFORM_MAP: Record<number, string> = {
  * - 循环浏览游戏列表
  */
 export default function GameDetailScreen() {
-  const { c } = useTheme();
+  const c = useColors();
   const router = useRouter();
   const { currentAuthSession, appStates } = useData();
   const { gamesData, quotaUsers } = appStates;
@@ -202,7 +202,7 @@ export default function GameDetailScreen() {
  * 单个游戏详情页面
  */
 function GameDetailPage({ game }: { game: IGameData }) {
-  const { c } = useTheme();
+  const c = useColors();
   const router = useRouter();
   const { status, game_config } = game;
 
@@ -625,7 +625,7 @@ function DetailRow({
   icon?: string;
   valueColor?: string;
 }) {
-  const { c } = useTheme();
+  const c = useColors();
 
   return (
     <View

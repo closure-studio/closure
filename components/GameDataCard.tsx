@@ -1,7 +1,7 @@
 import { useRecaptcha } from "@/hooks/auth/useRecaptcha";
 import { useClosure } from "@/providers/services/useClosure";
 import { useSystem } from "@/providers/system";
-import { useTheme } from "@/providers/theme";
+import { useColors } from "@/utils/colors";
 import { IGameData } from "@/types/arkHost";
 import {
   Image,
@@ -35,7 +35,7 @@ const STATUS_ICONS = ["⚡", "🎯", "🎮", "🔧"];
  */
 export function GameDataCard(props: GameDataCardProps) {
   const { data, index, onPress, onPause, onDelete, onChangePassword } = props;
-  const { c } = useTheme();
+  const c = useColors();
   const { toast } = useSystem();
   const { width } = useWindowDimensions();
   const { status, game_config } = data;
@@ -471,7 +471,7 @@ export function GameDataList({
   onDelete,
   onChangePassword,
 }: GameDataListProps) {
-  const { c } = useTheme();
+  const c = useColors();
 
   if (!games || games.length === 0) {
     return (

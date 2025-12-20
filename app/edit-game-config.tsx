@@ -19,7 +19,7 @@ import Toast from "react-native-toast-message";
 import { useData } from "@/providers/data";
 import { useClosure } from "@/providers/services/useClosure";
 import { useSystem } from "@/providers/system";
-import { useTheme } from "@/providers/theme";
+import { useColors } from "@/utils/colors";
 import { IGameConfig } from "@/types/arkHost";
 
 // 基建无人机加速槽位配置
@@ -131,7 +131,7 @@ function BaseDesignSelector({
 
 export default function EditGameConfigModal() {
   const router = useRouter();
-  const { c } = useTheme();
+  const c = useColors();
   const { toast } = useSystem();
   const { updateGameConfig, fetchGamesStatus } = useClosure();
   const { currentAuthSession, appStates } = useData();

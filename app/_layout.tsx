@@ -3,7 +3,6 @@ import { useProtectedRoute } from "@/hooks/auth/useProtectedRoute";
 import { DataProvider } from "@/providers/data";
 import { ClosureProvider } from "@/providers/services/useClosure";
 import { SystemProvider } from "@/providers/system";
-import { ThemeProvider, useTheme } from "@/providers/theme";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
   DarkTheme,
@@ -14,7 +13,6 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StrictMode, useEffect } from "react";
-import { View } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import "react-native-reanimated";
 
@@ -61,46 +59,18 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
-/**
- * 应用主题样式的根容器
- */
-const ThemedRoot = ({ children }: { children: React.ReactNode }) => {
-  const { c } = useTheme();
-
-  return (
-    <View style={{ flex: 1, backgroundColor: c.background }}>{children}</View>
-  );
-};
-
-/**
- * SafeAreaView 包装器，使用主题背景色
- */
-const ThemedSafeArea = ({ children }: { children: React.ReactNode }) => {
-  const { c } = useTheme();
-
-  return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: c.background }}
-      edges={["top", "left", "right"]}
-    >
-      {children}
-    </SafeAreaView>
-  );
-};
-
 const DependentProviders = ({ children }: { children: React.ReactNode }) => (
   <StrictMode>
     <SafeAreaProvider>
       <KeyboardProvider>
         <SystemProvider>
           <DataProvider>
-            <ThemeProvider>
-              <ThemedRoot>
-                <ThemedSafeArea>
-                  <ClosureProvider>{children}</ClosureProvider>
-                </ThemedSafeArea>
-              </ThemedRoot>
-            </ThemeProvider>
+            <SafeAreaView
+              style={{ flex: 1 }}
+              edges={["top", "left", "right"]}
+            >
+              <ClosureProvider>{children}</ClosureProvider>
+            </SafeAreaView>
           </DataProvider>
         </SystemProvider>
       </KeyboardProvider>

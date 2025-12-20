@@ -9,14 +9,14 @@ import { EmptySlotCard } from "@/components/EmptySlotCard";
 import { GameDataCard, GameDataList } from "@/components/GameDataCard";
 import { useData } from "@/providers/data";
 import { useClosure } from "@/providers/services/useClosure";
-import { useTheme } from "@/providers/theme";
+import { useColors } from "@/utils/colors";
 import { IGameData } from "@/types/arkHost";
 import { IQuotaUserSlot, QuotaRuleFlag } from "@/types/arkQuota";
 
 export default function HomeScreen() {
   const pagerRef = useRef<PagerView>(null);
   const router = useRouter();
-  const { c } = useTheme();
+  const c = useColors();
   const insets = useSafeAreaInsets();
   const { currentAuthSession, appStates } = useData();
   const { fetchArkHostConfig } = useClosure();
@@ -319,7 +319,7 @@ function StatusItem({
   value: string;
   isGood?: boolean;
 }) {
-  const { c } = useTheme();
+  const c = useColors();
 
   return (
     <View
