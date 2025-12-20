@@ -17,6 +17,7 @@ import { StrictMode, useEffect } from "react";
 import { View } from "react-native";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import "react-native-reanimated";
+
 import {
   SafeAreaProvider,
   SafeAreaView,
@@ -24,12 +25,11 @@ import {
 } from "react-native-safe-area-context";
 import Toast, { BaseToast } from "react-native-toast-message";
 import "../global.css";
-
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from "expo-router";
-
+import { verifyInstallation } from "nativewind";
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: "(tabs)",

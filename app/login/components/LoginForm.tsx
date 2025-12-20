@@ -61,49 +61,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   return (
-    <View style={styles.form}>
-      <Input
-        label="可露希尔通行证"
-        value={email}
-        onChangeText={setEmail}
-        placeholder="请输入通行证"
-        keyboardType="email-address"
-        editable={!isLoading}
-      />
-      <Input
-        label="密码"
-        value={password}
-        onChangeText={setPassword}
-        placeholder="请输入密码"
-        secureTextEntry
-        editable={!isLoading}
-      />
-      <View style={styles.faqLinkContainer}>
-        <Text
-          style={[styles.faqText, { color: isDark ? "#9CA3AF" : "#6B7280" }]}
-        >
-          登录&注册有问题?点击查看{" "}
-        </Text>
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert("提示", "常见问题");
-          }}
-          disabled={isLoading}
-        >
-          <Text style={styles.faqLink}>常见问题</Text>
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity
-        style={styles.submitButton}
-        onPress={handleLogin}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <ActivityIndicator color="white" />
-        ) : (
-          <Text style={styles.submitButtonText}>登录</Text>
-        )}
-      </TouchableOpacity>
+    <View className="flex-1 items-center justify-center bg-white">
+      <Text className="text-xl font-bold text-red-500">
+        Welcome to Nativewind!
+      </Text>
     </View>
   );
 };

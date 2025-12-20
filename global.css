@@ -1,51 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  :root {
-    --background: 248 245 245;
-    --foreground: 6 4 4;
-    --card: 255 255 255;
-    --card-foreground: 15 2 2;
-    --popover: 250 238 238;
-    --popover-foreground: 15 2 2;
-    --primary: 212 30 30;
-    --primary-foreground: 253 242 242;
-    --secondary: 203 127 76;
-    --secondary-foreground: 79 45 23;
-    --muted: 219 210 210;
-    --muted-foreground: 85 68 68;
-    --accent: 205 191 101;
-    --accent-foreground: 77 70 25;
-    --destructive: 255 56 43;
-    --destructive-foreground: 255 255 255;
-    --border: 241 233 233;
-    --input: 223 205 205;
-    --ring: 241 233 233;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --background: 5 1 1;
-      --foreground: 254 247 247;
-      --card: 38 21 21;
-      --card-foreground: 254 247 247;
-      --popover: 46 39 39;
-      --popover-foreground: 254 247 247;
-      --primary: 227 57 57;
-      --primary-foreground: 255 255 255;
-      --secondary: 200 126 76;
-      --secondary-foreground: 78 46 24;
-      --muted: 219 210 210;
-      --muted-foreground: 85 68 68;
-      --accent: 203 189 101;
-      --accent-foreground: 76 69 26;
-      --destructive: 254 67 54;
-      --destructive-foreground: 255 255 255;
-      --border: 68 57 57;
-      --input: 82 69 69;
-      --ring: 68 57 57;
-    }
-  }
-}
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+ 
+@import "nativewind/theme";
