@@ -1,5 +1,91 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css";
- 
+
 @import "nativewind/theme";
+
+@source "./components/**/*.{js,ts,tsx}";
+@source "./app/**/*.{js,ts,tsx}";
+@source "./providers/**/*.{js,ts,tsx}";
+
+@theme {
+  /* Primary colors - default values (will be overridden by VariableContextProvider) */
+  --color-primary: lime;
+  --color-primary-focus: lime;
+  --color-primary-content: lime;
+  
+  /* Secondary colors */
+  --color-secondary: lime;
+  --color-secondary-focus: lime;
+  --color-secondary-content: lime;
+  
+  /* Accent colors */
+  --color-accent: lime;
+  --color-accent-focus: lime;
+  --color-accent-content: lime;
+  
+  /* Neutral colors */
+  --color-neutral: lime;
+  --color-neutral-focus: lime;
+  --color-neutral-content: lime;
+  
+  /* Base colors */
+  --color-base-100: lime;
+  --color-base-200: lime;
+  --color-base-300: lime;
+  --color-base-content: lime;
+  
+  /* Semantic colors */
+  --color-info: lime;
+  --color-success: lime;
+  --color-warning: lime;
+  --color-error: lime;
+  
+  /* Theme properties */
+  --rounded-box: 1rem;
+  --rounded-btn: 0.5rem;
+  --rounded-badge: 1.9rem;
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+}
+
+:root {
+  /* Primary colors - default values (will be overridden by VariableContextProvider) */
+  --color-primary: lime;
+  --color-primary-focus: lime;
+  --color-primary-content: lime;
+  
+  /* Secondary colors */
+  --color-secondary: lime;
+  --color-secondary-focus: lime;
+  --color-secondary-content: lime;
+  
+  /* Accent colors */
+  --color-accent: lime;
+  --color-accent-focus: lime;
+  --color-accent-content: lime;
+  
+  /* Neutral colors */
+  --color-neutral: lime;
+  --color-neutral-focus: lime;
+  --color-neutral-content: lime;
+  
+  /* Base colors */
+  --color-base-100: lime;
+  --color-base-200: lime;
+  --color-base-300: lime;
+  --color-base-content: lime;
+  
+  /* Semantic colors */
+  --color-info: lime;
+  --color-success: lime;
+  --color-warning: lime;
+  --color-error: lime;
+  
+  /* Theme properties */
+  --rounded-box: 1rem;
+  --rounded-btn: 0.5rem;
+  --rounded-badge: 1.9rem;
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+}

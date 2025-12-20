@@ -1,9 +1,7 @@
-import { useColorScheme } from "@/components/useColorScheme";
 import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -17,9 +15,6 @@ interface RecoverFormProps {
 export const RecoverForm: React.FC<RecoverFormProps> = ({
   onNavigateToLogin,
 }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-
   const [account, setAccount] = useState("");
   const [server, setServer] = useState<"official" | "bilibili">("official");
   const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +38,7 @@ export const RecoverForm: React.FC<RecoverFormProps> = ({
   };
 
   return (
-    <View style={styles.form}>
+    <View className="flex-1">
       <Input
         label="托管游戏账号"
         value={account}
@@ -51,12 +46,10 @@ export const RecoverForm: React.FC<RecoverFormProps> = ({
         placeholder="请输入您的游戏"
         editable={!isLoading}
       />
-      <Text
-        style={[styles.serverLabel, { color: isDark ? "#D1D5DB" : "#374151" }]}
-      >
+      <Text className="text-sm font-semibold mb-3 mt-1 text-base-content">
         服务器选择
       </Text>
-      <View style={styles.radioGroup}>
+      <View className="mb-5">
         <RadioButton
           label="官服 (安卓 / IOS)"
           value="official"
@@ -73,43 +66,18 @@ export const RecoverForm: React.FC<RecoverFormProps> = ({
         />
       </View>
       <TouchableOpacity
-        style={styles.submitButton}
+        className="bg-primary rounded-btn py-4 items-center mt-2 disabled:opacity-50"
         onPress={handleRecover}
         disabled={isLoading}
       >
         {isLoading ? (
           <ActivityIndicator color="white" />
         ) : (
-          <Text style={styles.submitButtonText}>查找!</Text>
+          <Text className="text-primary-content text-base font-semibold">
+            查找!
+          </Text>
         )}
       </TouchableOpacity>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  form: {
-    flex: 1,
-  },
-  serverLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 12,
-    marginTop: 4,
-  },
-  radioGroup: {
-    marginBottom: 20,
-  },
-  submitButton: {
-    backgroundColor: "#9333EA",
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  submitButtonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

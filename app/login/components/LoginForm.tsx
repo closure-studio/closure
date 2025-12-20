@@ -1,11 +1,9 @@
-import { useColorScheme } from "@/components/useColorScheme";
 import { useClosure } from "@/providers/services/useClosure";
 import { IAuthSession } from "@/types/auth";
 import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -23,8 +21,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onNavigateToRecover,
   onNavigateToReset,
 }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
   const { login } = useClosure();
 
   const [email, setEmail] = useState("");
@@ -61,7 +57,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   return (
-    <View style={styles.form}>
+    <View className="flex-1">
+      {/* 测试背景颜色 */}
+      <View className="bg-primary p-4 mb-4 rounded-btn">
+        <Text className="text-primary-content text-sm font-semibold">
+          测试: bg-primary 应该显示黄色背景
+        </Text>
+      </View>
+      <View className="bg-base-200 p-4 mb-4 rounded-btn">
+        <Text className="text-base-content text-sm">
+          测试: bg-base-200 应该显示浅灰色背景
+        </Text>
+      </View>
       <Input
         label="可露希尔通行证"
         value={email}
@@ -78,10 +85,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         secureTextEntry
         editable={!isLoading}
       />
-      <View style={styles.faqLinkContainer}>
-        <Text
-          style={[styles.faqText, { color: isDark ? "#9CA3AF" : "#6B7280" }]}
-        >
+      <View className="flex-row items-center justify-center mb-4">
+        <Text className="text-sm text-base-content/70">
           登录&注册有问题?点击查看{" "}
         </Text>
         <TouchableOpacity
@@ -90,52 +95,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           }}
           disabled={isLoading}
         >
-          <Text style={styles.faqLink}>常见问题</Text>
+          <Text className="text-sm text-primary underline">常见问题</Text>
         </TouchableOpacity>
       </View>
       <TouchableOpacity
-        style={styles.submitButton}
+        className="bg-primary rounded-btn py-4 items-center mt-2 disabled:opacity-50"
         onPress={handleLogin}
         disabled={isLoading}
       >
         {isLoading ? (
           <ActivityIndicator color="white" />
         ) : (
-          <Text style={styles.submitButtonText}>登录</Text>
+          <Text className="text-primary-content text-base font-semibold">
+            登录
+          </Text>
         )}
       </TouchableOpacity>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  form: {
-    flex: 1,
-  },
-  faqLinkContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  faqText: {
-    fontSize: 14,
-  },
-  faqLink: {
-    fontSize: 14,
-    color: "#9333EA",
-    textDecorationLine: "underline",
-  },
-  submitButton: {
-    backgroundColor: "#9333EA",
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  submitButtonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

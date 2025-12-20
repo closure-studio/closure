@@ -1,7 +1,5 @@
-import { useColorScheme } from "@/components/useColorScheme";
 import React from "react";
 import {
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -29,26 +27,18 @@ export const Input: React.FC<InputProps> = ({
   rightComponent,
   editable = true,
 }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-
   return (
-    <View style={styles.inputGroup}>
-      <Text style={[styles.label, { color: isDark ? "#D1D5DB" : "#374151" }]}>
+    <View className="mb-5">
+      <Text className="text-sm font-semibold mb-2 text-base-content">
         {label}
       </Text>
-      <View style={styles.inputRow}>
+      <View className="flex-row items-center gap-2">
         <TextInput
-          style={[
-            styles.input,
-            rightComponent ? styles.inputWithButton : null,
-            {
-              backgroundColor: isDark ? "#1F2937" : "#F3F4F6",
-              color: isDark ? "#ffffff" : "#111827",
-            },
-          ]}
+          className={`flex-1 rounded-btn px-4 py-3.5 text-base bg-base-200 text-base-content ${
+            rightComponent ? "" : ""
+          }`}
           placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor="rgb(156 163 175)"
           value={value}
           onChangeText={onChangeText}
           autoCapitalize="none"
@@ -76,35 +66,24 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   onPress,
   disabled = false,
 }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-
   return (
     <TouchableOpacity
-      style={styles.checkboxRow}
+      className="flex-row items-center mb-4 disabled:opacity-50"
       onPress={onPress}
       disabled={disabled}
     >
       <View
-        style={[
-          styles.checkbox,
-          checked && {
-            backgroundColor: "#9333EA",
-            borderColor: "#9333EA",
-          },
-          { borderColor: isDark ? "#4B5563" : "#D1D5DB" },
-        ]}
+        className={`w-5 h-5 rounded border-2 mr-2 items-center justify-center ${
+          checked
+            ? "bg-primary border-primary"
+            : "bg-transparent border-base-300"
+        }`}
       >
-        {checked && <Text style={styles.checkboxCheck}>✓</Text>}
+        {checked && (
+          <Text className="text-white text-xs font-bold">✓</Text>
+        )}
       </View>
-      <Text
-        style={[
-          styles.checkboxLabel,
-          { color: isDark ? "#D1D5DB" : "#374151" },
-        ]}
-      >
-        {label}
-      </Text>
+      <Text className="text-sm flex-1 text-base-content">{label}</Text>
     </TouchableOpacity>
   );
 };
@@ -123,28 +102,18 @@ export const RadioButton: React.FC<RadioButtonProps> = ({
   onPress,
   disabled = false,
 }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-
   return (
     <TouchableOpacity
-      style={styles.radioRow}
+      className="flex-row items-center mb-3 disabled:opacity-50"
       onPress={onPress}
       disabled={disabled}
     >
-      <View
-        style={[
-          styles.radioOuter,
-          { borderColor: isDark ? "#4B5563" : "#D1D5DB" },
-        ]}
-      >
-        {selected && <View style={styles.radioInner} />}
+      <View className="w-5 h-5 rounded-full border-2 mr-2 items-center justify-center border-base-300">
+        {selected && (
+          <View className="w-2.5 h-2.5 rounded-full bg-primary" />
+        )}
       </View>
-      <Text
-        style={[styles.radioLabel, { color: isDark ? "#D1D5DB" : "#374151" }]}
-      >
-        {label}
-      </Text>
+      <Text className="text-sm text-base-content">{label}</Text>
     </TouchableOpacity>
   );
 };
@@ -160,20 +129,19 @@ export const CodeButton: React.FC<CodeButtonProps> = ({
   onPress,
   disabled = false,
 }) => {
+  const isDisabled = countdown > 0 || disabled;
   return (
     <TouchableOpacity
-      style={[
-        styles.codeButton,
-        countdown > 0 || disabled ? styles.codeButtonDisabled : null,
-      ]}
+      className={`px-4 py-3.5 rounded-btn min-w-[100px] items-center ${
+        isDisabled ? "bg-base-300" : "bg-primary"
+      }`}
       onPress={onPress}
-      disabled={countdown > 0 || disabled}
+      disabled={isDisabled}
     >
       <Text
-        style={[
-          styles.codeButtonText,
-          countdown > 0 ? styles.codeButtonTextDisabled : null,
-        ]}
+        className={`text-sm font-semibold ${
+          isDisabled ? "text-base-content/50" : "text-primary-content"
+        }`}
       >
         {countdown > 0 ? `${countdown}秒` : "获取验证码"}
       </Text>
@@ -192,176 +160,25 @@ export const TopButton: React.FC<TopButtonProps> = ({
   onPress,
   disabled = false,
 }) => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-
   return (
     <TouchableOpacity
-      style={[
-        styles.topButton,
-        {
-          borderColor: isDark ? "#9333EA" : "#9333EA",
-          backgroundColor: isDark ? "#1F2937" : "#F9FAFB",
-        },
-      ]}
+      className="border border-primary rounded-btn py-3 px-4 items-center mb-4 bg-base-100 disabled:opacity-50"
       onPress={onPress}
       disabled={disabled}
     >
-      <Text
-        style={[
-          styles.topButtonText,
-          { color: isDark ? "#9333EA" : "#9333EA" },
-        ]}
-      >
-        {text}
-      </Text>
+      <Text className="text-sm font-semibold text-primary">{text}</Text>
     </TouchableOpacity>
   );
 };
 
 export const Separator: React.FC = () => {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-
   return (
-    <View style={styles.separatorContainer}>
-      <View
-        style={[
-          styles.separatorLine,
-          { backgroundColor: isDark ? "#374151" : "#E5E7EB" },
-        ]}
-      />
-      <Text
-        style={[
-          styles.separatorText,
-          { color: isDark ? "#9CA3AF" : "#6B7280" },
-        ]}
-      >
+    <View className="flex-row items-center mb-6">
+      <View className="flex-1 h-px bg-base-300" />
+      <Text className="mx-4 text-xs font-semibold text-base-content/60">
         OR
       </Text>
-      <View
-        style={[
-          styles.separatorLine,
-          { backgroundColor: isDark ? "#374151" : "#E5E7EB" },
-        ]}
-      />
+      <View className="flex-1 h-px bg-base-300" />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  inputGroup: {
-    marginBottom: 20,
-  },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  input: {
-    flex: 1,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-  },
-  inputWithButton: {
-    flex: 1,
-  },
-  codeButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 8,
-    backgroundColor: "#9333EA",
-    minWidth: 100,
-    alignItems: "center",
-  },
-  codeButtonDisabled: {
-    backgroundColor: "#6B7280",
-  },
-  codeButtonText: {
-    color: "#ffffff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  codeButtonTextDisabled: {
-    color: "#E5E7EB",
-  },
-  checkboxRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    marginRight: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkboxCheck: {
-    color: "#ffffff",
-    fontSize: 12,
-    fontWeight: "bold",
-  },
-  checkboxLabel: {
-    fontSize: 14,
-    flex: 1,
-  },
-  radioRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  radioOuter: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    marginRight: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  radioInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#9333EA",
-  },
-  radioLabel: {
-    fontSize: 14,
-  },
-  topButton: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  topButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  separatorContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  separatorLine: {
-    flex: 1,
-    height: 1,
-  },
-  separatorText: {
-    marginHorizontal: 16,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-});

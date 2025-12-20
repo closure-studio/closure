@@ -1,156 +1,79 @@
-import {
-    DEFAULT_NATIVEWIND_THEME_ID,
-    getNativeWindThemeById,
-    NativeWindThemeDefinition,
-    nativeWindThemes,
-} from "@/constants/nativewind-themes";
-import { VariableContextProvider } from "nativewind";
-import { createContext, useCallback, useContext, useMemo } from "react";
-import { useColorScheme } from "react-native";
-import { useData } from "./data";
-
-type ColorScheme = "light" | "dark";
-
-type NativeWindThemeContextType = {
-  /** 当前主题定义 */
-  currentTheme: NativeWindThemeDefinition;
-  /** 当前主题 ID */
-  themeId: string;
-  /** 当前颜色模式 (light/dark) */
-  colorMode: ColorScheme;
-  /** 所有可用主题 */
-  availableThemes: NativeWindThemeDefinition[];
-  /** 切换主题 */
-  setTheme: (themeId: string) => void;
-};
-
-const NativeWindThemeContext = createContext<NativeWindThemeContextType | null>(
-  null,
-);
+import { bumblebeeTheme } from "@/constants/nativewind-themes";
+import { VariableContextProvider, useColorScheme } from "nativewind";
 
 /**
- * 将主题颜色转换为 CSS 变量格式（用于 VariableContextProvider）
+ * 将 RGB 空格分隔格式转换为 hex 颜色
+ * @param rgb RGB 空格分隔格式，如 "249 215 47"
+ * @returns hex 颜色值，如 "#f9d72f"
  */
-function themeToVars(theme: NativeWindThemeDefinition) {
+function rgbToHex(rgb: string): string {
+  const [r, g, b] = rgb.split(" ").map(Number);
+  return `#${[r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/**
+ * 将主题颜色转换为 CSS 变量格式
+ * 返回的格式应该是 hex 颜色值，如 "#f9d72f"
+ */
+function themeToVars(theme: typeof bumblebeeTheme) {
   const colors = theme.colors;
   return {
-    // Primary colors
-    "--color-primary": colors["primary"],
-    "--color-primary-focus": colors["primary-focus"],
-    "--color-primary-content": colors["primary-content"],
-
-    // Secondary colors
-    "--color-secondary": colors["secondary"],
-    "--color-secondary-focus": colors["secondary-focus"],
-    "--color-secondary-content": colors["secondary-content"],
-
-    // Accent colors
-    "--color-accent": colors["accent"],
-    "--color-accent-focus": colors["accent-focus"],
-    "--color-accent-content": colors["accent-content"],
-
-    // Neutral colors
-    "--color-neutral": colors["neutral"],
-    "--color-neutral-focus": colors["neutral-focus"],
-    "--color-neutral-content": colors["neutral-content"],
-
-    // Base colors
-    "--color-base-100": colors["base-100"],
-    "--color-base-200": colors["base-200"],
-    "--color-base-300": colors["base-300"],
-    "--color-base-content": colors["base-content"],
-
-    // Semantic colors
-    "--color-info": colors["info"],
-    "--color-success": colors["success"],
-    "--color-warning": colors["warning"],
-    "--color-error": colors["error"],
-
-    // Theme properties
+    "--color-primary": rgbToHex(colors["primary"]),
+    "--color-primary-focus": rgbToHex(colors["primary-focus"]),
+    "--color-primary-content": rgbToHex(colors["primary-content"]),
+    "--color-secondary": rgbToHex(colors["secondary"]),
+    "--color-secondary-focus": rgbToHex(colors["secondary-focus"]),
+    "--color-secondary-content": rgbToHex(colors["secondary-content"]),
+    "--color-accent": rgbToHex(colors["accent"]),
+    "--color-accent-focus": rgbToHex(colors["accent-focus"]),
+    "--color-accent-content": rgbToHex(colors["accent-content"]),
+    "--color-neutral": rgbToHex(colors["neutral"]),
+    "--color-neutral-focus": rgbToHex(colors["neutral-focus"]),
+    "--color-neutral-content": rgbToHex(colors["neutral-content"]),
+    "--color-base-100": rgbToHex(colors["base-100"]),
+    "--color-base-200": rgbToHex(colors["base-200"]),
+    "--color-base-300": rgbToHex(colors["base-300"]),
+    "--color-base-content": rgbToHex(colors["base-content"]),
+    "--color-info": rgbToHex(colors["info"]),
+    "--color-success": rgbToHex(colors["success"]),
+    "--color-warning": rgbToHex(colors["warning"]),
+    "--color-error": rgbToHex(colors["error"]),
     "--rounded-box": colors["--rounded-box"],
     "--rounded-btn": colors["--rounded-btn"],
     "--rounded-badge": colors["--rounded-badge"],
     "--animation-btn": colors["--animation-btn"],
     "--animation-input": colors["--animation-input"],
-    "--btn-text-case": colors["--btn-text-case"],
-    "--navbar-padding": colors["--navbar-padding"],
-    "--border-btn": colors["--border-btn"],
   };
 }
 
 /**
- * NativeWind 主题提供者
- * 使用 NativeWind v5 的 VariableContextProvider 来管理主题
+ * 主题定义
  */
-export function NativeWindThemeProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const systemColorScheme = useColorScheme();
-  const colorMode: ColorScheme = systemColorScheme === "dark" ? "dark" : "light";
-
-  // 从 appStates 获取主题 ID，如果没有则使用默认值
-  const { appStates, updateAppStates } = useData();
-  const themeId = appStates.nativeWindThemeId || DEFAULT_NATIVEWIND_THEME_ID;
-
-  // 获取当前主题定义
-  const currentTheme = useMemo(() => {
-    return (
-      getNativeWindThemeById(themeId) ||
-      getNativeWindThemeById(DEFAULT_NATIVEWIND_THEME_ID)!
-    );
-  }, [themeId]);
-
-  // 切换主题
-  const setTheme = useCallback(
-    (newThemeId: string) => {
-      const theme = getNativeWindThemeById(newThemeId);
-      if (theme) {
-        updateAppStates((draft) => {
-          draft.nativeWindThemeId = newThemeId;
-        });
-      }
-    },
-    [updateAppStates],
-  );
-
-  // 根据当前主题和颜色模式生成变量
-  // 注意：由于现在 light 和 dark 使用同一种颜色，所以直接使用当前主题
-  const themeVars = useMemo(() => {
-    return themeToVars(currentTheme) as Record<`--${string}`, string>;
-  }, [currentTheme]);
-
-  const value: NativeWindThemeContextType = useMemo(
-    () => ({
-      currentTheme,
-      themeId,
-      colorMode,
-      availableThemes: nativeWindThemes,
-      setTheme,
-    }),
-    [currentTheme, themeId, colorMode, setTheme],
-  );
-
-  return (
-    <NativeWindThemeContext.Provider value={value}>
-      <VariableContextProvider value={themeVars}>
-        {children}
-      </VariableContextProvider>
-    </NativeWindThemeContext.Provider>
-  );
-}
+const themes = {
+  bumblebee: {
+    light: themeToVars(bumblebeeTheme),
+    dark: themeToVars(bumblebeeTheme),
+  },
+};
 
 /**
- * 使用 NativeWind 主题 Hook
+ * NativeWind 主题组件
  */
-export function useNativeWindTheme() {
-  const context = useContext(NativeWindThemeContext);
-  if (!context) {
-    throw new Error(
-      "useNativeWindTheme must be used within a NativeWindThemeProvider",
-    );
-  }
-  return context;
+export function NativeWindTheme({
+  name = "bumblebee",
+  children,
+}: {
+  name?: keyof typeof themes;
+  children: React.ReactNode;
+}) {
+  const { colorScheme } = useColorScheme();
+  const scheme = colorScheme === "dark" ? "dark" : "light";
+  const themeVars = themes[name]?.[scheme] || themes.bumblebee.light;
+
+  return (
+    <VariableContextProvider value={themeVars}>
+      {children}
+    </VariableContextProvider>
+  );
 }
 

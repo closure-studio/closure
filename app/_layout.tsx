@@ -4,11 +4,6 @@ import { DataProvider } from "@/providers/data";
 import { ClosureProvider } from "@/providers/services/useClosure";
 import { SystemProvider } from "@/providers/system";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider as NavigationThemeProvider,
-} from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -23,9 +18,10 @@ import {
 } from "react-native-safe-area-context";
 import Toast, { BaseToast } from "react-native-toast-message";
 import "../global.css";
+import { NativeWindTheme } from "@/providers/nativewind-theme";
 export {
   // Catch any errors thrown by the Layout component.
-  ErrorBoundary
+  ErrorBoundary,
 } from "expo-router";
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
@@ -61,20 +57,22 @@ export default function RootLayout() {
 
 const DependentProviders = ({ children }: { children: React.ReactNode }) => (
   <StrictMode>
-    <SafeAreaProvider>
-      <KeyboardProvider>
-        <SystemProvider>
-          <DataProvider>
-            <SafeAreaView
-              style={{ flex: 1 }}
-              edges={["top", "left", "right"]}
-            >
-              <ClosureProvider>{children}</ClosureProvider>
-            </SafeAreaView>
-          </DataProvider>
-        </SystemProvider>
-      </KeyboardProvider>
-    </SafeAreaProvider>
+    <NativeWindTheme>
+      <SafeAreaProvider>
+        <KeyboardProvider>
+          <SystemProvider>
+            <DataProvider>
+              <SafeAreaView
+                style={{ flex: 1 }}
+                edges={["top", "left", "right"]}
+              >
+                <ClosureProvider>{children}</ClosureProvider>
+              </SafeAreaView>
+            </DataProvider>
+          </SystemProvider>
+        </KeyboardProvider>
+      </SafeAreaProvider>
+    </NativeWindTheme>
   </StrictMode>
 );
 
@@ -87,49 +85,45 @@ const NavigationContent = () => {
   useProtectedRoute();
 
   return (
-    <NavigationThemeProvider
-      value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+    <Stack
+      screenOptions={{
+        gestureEnabled: true,
+        gestureDirection: "horizontal",
+        fullScreenGestureEnabled: true,
+      }}
     >
-      <Stack
-        screenOptions={{
+      <Stack.Screen name="login" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="modal"
+        options={{ presentation: "modal", headerShown: false }}
+      />
+      <Stack.Screen
+        name="create-game"
+        options={{
+          presentation: "transparentModal",
+          headerShown: false,
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
+        name="game-detail"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
           gestureEnabled: true,
-          gestureDirection: "horizontal",
           fullScreenGestureEnabled: true,
         }}
-      >
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: "modal", headerShown: false }}
-        />
-        <Stack.Screen
-          name="create-game"
-          options={{
-            presentation: "transparentModal",
-            headerShown: false,
-            animation: "slide_from_bottom",
-          }}
-        />
-        <Stack.Screen
-          name="game-detail"
-          options={{
-            headerShown: false,
-            animation: "slide_from_right",
-            gestureEnabled: true,
-            fullScreenGestureEnabled: true,
-          }}
-        />
-        <Stack.Screen
-          name="edit-game-config"
-          options={{
-            presentation: "transparentModal",
-            headerShown: false,
-            animation: "slide_from_bottom",
-          }}
-        />
-      </Stack>
-    </NavigationThemeProvider>
+      />
+      <Stack.Screen
+        name="edit-game-config"
+        options={{
+          presentation: "transparentModal",
+          headerShown: false,
+          animation: "slide_from_bottom",
+        }}
+      />
+    </Stack>
   );
 };
 

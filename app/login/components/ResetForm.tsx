@@ -3,7 +3,6 @@ import { useSystem } from "@/providers/system";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -108,7 +107,7 @@ export const ResetForm: React.FC<ResetFormProps> = ({
   };
 
   return (
-    <View style={styles.form}>
+    <View className="flex-1">
       <Input
         label="可露希尔通行证"
         value={email}
@@ -140,40 +139,18 @@ export const ResetForm: React.FC<ResetFormProps> = ({
         editable={!isLoading && !isSendingCode}
       />
       <TouchableOpacity
-        style={[
-          styles.submitButton,
-          (isLoading || isSendingCode) && styles.submitButtonDisabled,
-        ]}
+        className="bg-primary rounded-btn py-4 items-center mt-2 disabled:opacity-50"
         onPress={handleResetPassword}
         disabled={isLoading || isSendingCode}
       >
         {isLoading ? (
           <ActivityIndicator color="white" />
         ) : (
-          <Text style={styles.submitButtonText}>重置!</Text>
+          <Text className="text-primary-content text-base font-semibold">
+            重置!
+          </Text>
         )}
       </TouchableOpacity>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  form: {
-    flex: 1,
-  },
-  submitButton: {
-    backgroundColor: "#9333EA",
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});
