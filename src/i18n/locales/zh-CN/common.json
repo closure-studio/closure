@@ -1,0 +1,21 @@
+{
+  "actions": {
+    "add": "添加",
+    "cancel": "取消",
+    "close": "关闭",
+    "logout": "登出",
+    "logoutTerminal": "登出终端"
+  },
+  "accessibility": {
+    "hideAccessKey": "隐藏访问密钥",
+    "hidePassword": "隐藏密码",
+    "showAccessKey": "显示访问密钥",
+    "showPassword": "显示密码"
+  },
+  "notFound": {
+    "description": "请求的终端信道不可用。",
+    "eyebrow": "// 导航错误",
+    "returnHome": "返回主页",
+    "title": "未找到路由"
+  }
+}

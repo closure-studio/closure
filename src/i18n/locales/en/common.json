@@ -1,0 +1,21 @@
+{
+  "actions": {
+    "add": "Add",
+    "cancel": "Cancel",
+    "close": "Close",
+    "logout": "Log out",
+    "logoutTerminal": "Log out of terminal"
+  },
+  "accessibility": {
+    "hideAccessKey": "Hide access key",
+    "hidePassword": "Hide password",
+    "showAccessKey": "Show access key",
+    "showPassword": "Show password"
+  },
+  "notFound": {
+    "description": "The requested terminal channel is unavailable.",
+    "eyebrow": "// NAVIGATION ERROR",
+    "returnHome": "RETURN HOME",
+    "title": "ROUTE NOT FOUND"
+  }
+}

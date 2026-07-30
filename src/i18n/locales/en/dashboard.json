@@ -1,0 +1,94 @@
+{
+  "account": {
+    "accountIdentifierLabel": "GAME ACCOUNT / ACCOUNT",
+    "accountIdentifierPlaceholder": "Phone / email / username",
+    "bind": "Link account",
+    "credentialNotice": "// Credentials are encrypted and cached locally for terminal proxy login. Closure never uploads your game password.",
+    "passwordLabel": "GAME PASSWORD / PASSWORD",
+    "serverChannelLabel": "SERVER CHANNEL / CHANNEL",
+    "subtitle": "LINK ACCOUNT",
+    "required": "Enter your game account and password",
+    "title": "Add game account"
+  },
+  "inventory": {
+    "autoPlan": "AUTO PLAN",
+    "itemCount": "{{count}} ITEMS",
+    "shortage": "SHORT {{count}}",
+    "shortageSummary": "{{count}} materials are below target",
+    "synthesisPlanning": "SYNTHESIS PLAN",
+    "tier": "T{{tier}}",
+    "title": "Resources and inventory"
+  },
+  "marquee": {
+    "contract": "// Contingency Contract season 21 begins soon",
+    "maintenance": "// Version maintenance at 04:00 on 07-25",
+    "network": "// Stable connection · 24ms latency",
+    "recruitment": "// Limited Headhunting event now active"
+  },
+  "navigation": {
+    "brandSubtitle": "CLOSURE · STUDIO",
+    "brandTitle": "CLOSURE STUDIO",
+    "secureLink": "SECURE LINK",
+    "sections": {
+      "activityTimeline": { "label": "Timeline", "subtitle": "TIMELINE" },
+      "materialInventory": { "label": "Inventory", "subtitle": "DEPOT" },
+      "operatorRoster": { "label": "Operators", "subtitle": "OPERATORS" },
+      "overview": { "label": "Overview", "subtitle": "OVERVIEW" },
+      "routineTasks": { "label": "Routine", "subtitle": "ROUTINE" }
+    }
+  },
+  "operators": {
+    "close": "[CLOSE]",
+    "closeDetails": "Close operator details",
+    "detail": {
+      "elite": "Elite",
+      "level": "Level",
+      "potential": "Potential",
+      "proficiency": "Mastery",
+      "skill": "Skill",
+      "trust": "Trust"
+    },
+    "eliteLevel": "E{{level}}",
+    "accountLevel": "LV.{{level}}",
+    "level": "LV {{level}}/{{maxLevel}}",
+    "skillLevel": "SKILL L{{level}}",
+    "title": "Operator development",
+    "unitCount": "{{count}} UNITS",
+    "upgradeProgress": "UPGRADE PROGRESS"
+  },
+  "overview": {
+    "assets": "Assets",
+    "balances": {
+      "lmd": "LMD",
+      "originium": "Originium",
+      "orundum": "Orundum",
+      "recruitTickets": "Recruit permits"
+    },
+    "base": "Closure base",
+    "baseMetrics": {
+      "factoryLoad": "Factory load",
+      "mood": "Operator morale",
+      "trainingLoad": "Training progress"
+    },
+    "experience": "EXP",
+    "level": "LEVEL",
+    "operationMetrics": "Operation metrics",
+    "overflow": "OVERFLOW",
+    "profile": "// OPERATOR PROFILE",
+    "recoversAt": "FULL AT {{time}}",
+    "sanity": "Sanity"
+  },
+  "routine": {
+    "cadence": { "daily": "// DAILY", "weekly": "// WEEKLY" },
+    "progressToday": "TODAY'S PROGRESS",
+    "title": "Routine checklist"
+  },
+  "timeline": {
+    "title": "Events and notices",
+    "status": {
+      "active": "Active",
+      "ended": "Ended",
+      "upcoming": "Upcoming"
+    }
+  }
+}

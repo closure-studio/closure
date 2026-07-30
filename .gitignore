@@ -1,0 +1,75 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+public/canvaskit.wasm
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.keystore
+*.p8
+*.p12
+*.pfx
+*.key
+*.cer
+*.mobileprovision
+*.provisionprofile
+credentials.json
+google-service-account*.json
+GoogleService-Info.plist
+google-services.json
+
+# Metro
+.metro-health-check*
+
+# Tamagui
+.tamagui/
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env
+.env.*
+!.env.example
+
+# local package and network credentials
+/.npmrc
+/.netrc
+
+# typescript
+*.tsbuildinfo
+
+# editor / agent tooling scratch (shared configs above stay tracked)
+.vscode/.react/
+.claude/settings.local.json
+/.codex/
+.eas/
+
+# stray backups
+*.bak
+*.bak/
+
+# local prototypes, notes, and browser tooling artifacts
+/demo/
+/docs/
+/.playwright-mcp/
+/todo.md
+/.codegraph/
+# generated native folders
+/ios
+/android

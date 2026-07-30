@@ -1,0 +1,94 @@
+{
+  "account": {
+    "accountIdentifierLabel": "游戏账号 / ACCOUNT",
+    "accountIdentifierPlaceholder": "手机号 / 邮箱 / 用户名",
+    "bind": "绑定账号",
+    "credentialNotice": "// 凭证仅本地加密缓存,用于终端代理登录,可露希尔不会上传你的游戏密码。",
+    "passwordLabel": "游戏密码 / PASSWORD",
+    "serverChannelLabel": "服务器渠道 / CHANNEL",
+    "subtitle": "绑定账号",
+    "required": "请填写游戏账号与密码",
+    "title": "添加游戏账号"
+  },
+  "inventory": {
+    "autoPlan": "自动规划",
+    "itemCount": "{{count}} 项",
+    "shortage": "缺口 {{count}}",
+    "shortageSummary": "共 {{count}} 项素材存在缺口",
+    "synthesisPlanning": "合成规划",
+    "tier": "T{{tier}}",
+    "title": "资源与仓库"
+  },
+  "marquee": {
+    "contract": "// 危机合约第21期即将开启",
+    "maintenance": "// 07-25 04:00 版本维护",
+    "network": "// 系统连接稳定 · 延迟 24ms",
+    "recruitment": "// 限定寻访逐光图纪进行中"
+  },
+  "navigation": {
+    "brandSubtitle": "可露希尔 · 控制台",
+    "brandTitle": "可露希尔工作室",
+    "secureLink": "安全连接",
+    "sections": {
+      "activityTimeline": { "label": "日程", "subtitle": "时间线" },
+      "materialInventory": { "label": "仓库", "subtitle": "资源库" },
+      "operatorRoster": { "label": "干员", "subtitle": "干员列表" },
+      "overview": { "label": "总览", "subtitle": "概览" },
+      "routineTasks": { "label": "日常", "subtitle": "任务" }
+    }
+  },
+  "operators": {
+    "close": "[关闭]",
+    "closeDetails": "关闭干员详情",
+    "detail": {
+      "elite": "精英化",
+      "level": "等级",
+      "potential": "潜能",
+      "proficiency": "专精",
+      "skill": "技能",
+      "trust": "信赖"
+    },
+    "eliteLevel": "E{{level}}",
+    "accountLevel": "LV.{{level}}",
+    "level": "LV {{level}}/{{maxLevel}}",
+    "skillLevel": "技能 L{{level}}",
+    "title": "干员练度",
+    "unitCount": "{{count}} 名干员",
+    "upgradeProgress": "升级进度"
+  },
+  "overview": {
+    "assets": "资产",
+    "balances": {
+      "lmd": "龙门币",
+      "originium": "源石",
+      "orundum": "合成玉",
+      "recruitTickets": "招募券"
+    },
+    "base": "可露希尔基建",
+    "baseMetrics": {
+      "factoryLoad": "制造站负载",
+      "mood": "干员心情",
+      "trainingLoad": "训练室进度"
+    },
+    "experience": "经验",
+    "level": "等级",
+    "operationMetrics": "作战概览",
+    "overflow": "已溢出",
+    "profile": "// 博士档案",
+    "recoversAt": "回满 {{time}}",
+    "sanity": "理智"
+  },
+  "routine": {
+    "cadence": { "daily": "// 日常", "weekly": "// 周常" },
+    "progressToday": "今日完成度",
+    "title": "日常清单"
+  },
+  "timeline": {
+    "title": "活动与公告",
+    "status": {
+      "active": "进行中",
+      "ended": "已结束",
+      "upcoming": "即将开始"
+    }
+  }
+}
