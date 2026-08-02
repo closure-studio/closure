@@ -26,9 +26,8 @@
     "recruitment": "// 限定寻访逐光图纪进行中"
   },
   "navigation": {
-    "brandSubtitle": "可露希尔 · 控制台",
+    "brandSubtitle": "云端无人托管",
     "brandTitle": "可露希尔工作室",
-    "secureLink": "安全连接",
     "sections": {
       "activityTimeline": { "label": "日程", "subtitle": "时间线" },
       "materialInventory": { "label": "仓库", "subtitle": "资源库" },

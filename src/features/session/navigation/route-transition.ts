@@ -6,7 +6,7 @@ type ExcludeFunction<T> = T extends (...args: never[]) => unknown ? never : T;
 type JsStackScreenOptions = ExcludeFunction<NonNullable<ComponentProps<typeof JsStack>['screenOptions']>>;
 type CardStyleInterpolator = NonNullable<JsStackScreenOptions['cardStyleInterpolator']>;
 
-const TRANSITION_PHASE_DURATION_MS = 500;
+const TRANSITION_PHASE_DURATION_MS = 200;
 
 const timingTransition = {
   animation: 'timing',

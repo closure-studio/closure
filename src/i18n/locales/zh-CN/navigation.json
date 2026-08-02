@@ -1,0 +1,29 @@
+{
+  "marquee": {
+    "matrix": "// 控制矩阵 · 四个模块在线",
+    "network": "// 安全框架连接 · 延迟 18MS",
+    "recording": "// 当前 03 个录像频道正在运行",
+    "sync": "// 布局状态已同步"
+  },
+  "matrix": {
+    "close": "关闭设置并返回控制台",
+    "enter": "打开设置",
+    "label": "设置",
+    "off": "待机",
+    "on": "运行中",
+    "open": "打开设置",
+    "return": "控制台",
+    "returnToDashboard": "返回控制台",
+    "shortLabel": "设置"
+  },
+  "mobile": {
+    "avatarInitial": "博",
+    "avatarLabel": "博士档案"
+  },
+  "pages": {
+    "dashboard": { "label": "控制台", "subtitle": "本地作业" },
+    "records": { "label": "录像中心", "subtitle": "影像归档" },
+    "site": { "label": "网站设置", "subtitle": "布局系统" },
+    "system": { "label": "系统管理", "subtitle": "核心拓扑" }
+  }
+}

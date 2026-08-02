@@ -1,0 +1,24 @@
+{
+  "code": "MODULE 01 / SYS.ADMIN",
+  "description": "A live systems atlas for tracing infrastructure health, traffic and trust across the entire studio network.",
+  "eyebrow": "INFRASTRUCTURE CONTROL",
+  "integrity": "ALL TRUST CHAINS VERIFIED",
+  "lastHandshake": "LAST HANDSHAKE · 00:00:18 AGO",
+  "load": "NODE LOAD",
+  "metrics": {
+    "latency": "GLOBAL LATENCY",
+    "requests": "REQUESTS / 24H",
+    "uptime": "NETWORK UPTIME"
+  },
+  "nodes": {
+    "core": { "detail": "TASK ORCHESTRATION", "label": "Core Relay" },
+    "data": { "detail": "ARCHIVE CLUSTER", "label": "Data Vault" },
+    "edge": { "detail": "GLOBAL INGRESS", "label": "Edge Gate" },
+    "guard": { "detail": "IDENTITY LAYER", "label": "Trust Guard" }
+  },
+  "status": "SYSTEM NOMINAL / 04 NODES",
+  "title": "System / Atlas",
+  "topologyCode": "NET.01",
+  "topologySubtitle": "REAL-TIME SIGNAL PATH",
+  "topologyTitle": "Core Topology"
+}

@@ -1,0 +1,29 @@
+{
+  "blueprintCode": "界面.02",
+  "blueprintSubtitle": "实时框架投影",
+  "blueprintTitle": "界面蓝图",
+  "canvasPrimary": "主内容平面",
+  "code": "模块 02 / 网站配置",
+  "description": "用于统筹网站框架的空间控制室——将导航、跑马灯、内容轨道与响应式节奏视为一个生命系统。",
+  "eyebrow": "网站构成",
+  "guides": {
+    "content": "最大内容轨道",
+    "frame": "桌面框架",
+    "rhythm": "基线节奏",
+    "ticker": "信号跑马灯"
+  },
+  "guidesCode": "网格.04",
+  "guidesTitle": "布局基准",
+  "liveGrid": "实时网格 / 12 列",
+  "previewAddress": "closure.studio / 框架预览",
+  "status": "框架已同步",
+  "synced": "已同步",
+  "title": "网站 / 设置",
+  "viewportCode": "视口.03",
+  "viewportTitle": "视口中继",
+  "viewports": {
+    "desktop": "网站",
+    "mobile": "手机",
+    "tablet": "平板"
+  }
+}

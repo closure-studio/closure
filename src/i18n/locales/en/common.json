@@ -3,8 +3,7 @@
     "add": "Add",
     "cancel": "Cancel",
     "close": "Close",
-    "logout": "Log out",
-    "logoutTerminal": "Log out of terminal"
+    "logout": "Log out"
   },
   "accessibility": {
     "hideAccessKey": "Hide access key",

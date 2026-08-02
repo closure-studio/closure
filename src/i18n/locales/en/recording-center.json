@@ -1,0 +1,30 @@
+{
+  "captureActive": "CAPTURE ACTIVE / CH-03",
+  "code": "MODULE 03 / REC.CENTER",
+  "codec": "AV1 / 4K SOURCE MASTER",
+  "description": "A cinematic capture deck where live sessions, scene markers and archival signals converge on one continuous timeline.",
+  "eyebrow": "SIGNAL ARCHIVE",
+  "scan": "FRAME INTEGRITY 100%",
+  "sequence": "MASTER SEQUENCE / JUL-30",
+  "stats": {
+    "capacity": "ARCHIVE CAPACITY",
+    "capacityDetail": "12.8 TB REMAINING",
+    "live": "LIVE CHANNELS",
+    "liveDetail": "RECORDING NOW",
+    "stored": "STORED SESSIONS",
+    "storedDetail": "LAST 30 DAYS"
+  },
+  "status": "03 CHANNELS RECORDING",
+  "stream": "UPLINK STABLE / 48 MBPS",
+  "timecode": "TC 00:24:18:12",
+  "timelineCode": "SEQ.03",
+  "timelineSubtitle": "MULTI-SOURCE CAPTURE",
+  "timelineTitle": "Recording Timeline",
+  "title": "Recording / Center",
+  "tracks": {
+    "archive": "Archive Seal",
+    "briefing": "Operator Briefing",
+    "launch": "Opening Signal",
+    "operation": "Live Operation"
+  }
+}

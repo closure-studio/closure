@@ -13,8 +13,8 @@ describe('route transition', () => {
       animationTypeForReplace: 'push',
       cardStyleInterpolator: expect.any(Function),
       transitionSpec: {
-        open: { config: { duration: 1_000 } },
-        close: { config: { duration: 1_000 } },
+        open: { config: { duration: 400 } },
+        close: { config: { duration: 400 } },
       },
     });
   });
