@@ -1,0 +1,29 @@
+{
+  "blueprintCode": "UI.02",
+  "blueprintSubtitle": "LIVE FRAME PROJECTION",
+  "blueprintTitle": "Interface Blueprint",
+  "canvasPrimary": "PRIMARY CONTENT PLANE",
+  "code": "MODULE 02 / SITE.CONFIG",
+  "description": "A spatial control room for the site frame—navigation, ticker, content rails and responsive rhythm viewed as one living system.",
+  "eyebrow": "SITE COMPOSITION",
+  "guides": {
+    "content": "MAX CONTENT RAIL",
+    "frame": "DESKTOP FRAME",
+    "rhythm": "BASELINE RHYTHM",
+    "ticker": "SIGNAL TICKER"
+  },
+  "guidesCode": "GRID.04",
+  "guidesTitle": "Layout Guides",
+  "liveGrid": "LIVE GRID / 12 COL",
+  "previewAddress": "closure.studio / frame.preview",
+  "status": "FRAME SYNCHRONIZED",
+  "synced": "SYNCED",
+  "title": "Site / Settings",
+  "viewportCode": "VIEW.03",
+  "viewportTitle": "Viewport Relay",
+  "viewports": {
+    "desktop": "Website",
+    "mobile": "Mobile",
+    "tablet": "Tablet"
+  }
+}

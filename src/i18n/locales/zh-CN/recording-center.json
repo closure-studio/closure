@@ -1,0 +1,30 @@
+{
+  "captureActive": "正在录像 / 频道-03",
+  "code": "模块 03 / 录像中心",
+  "codec": "AV1 / 4K 源母版",
+  "description": "电影化影像控制台，让实时会话、场景标记与归档信号汇聚于一条连续时间线。",
+  "eyebrow": "信号归档",
+  "scan": "画面完整度 100%",
+  "sequence": "主序列 / 07-30",
+  "stats": {
+    "capacity": "归档容量",
+    "capacityDetail": "剩余 12.8 TB",
+    "live": "实时频道",
+    "liveDetail": "正在录制",
+    "stored": "已存会话",
+    "storedDetail": "最近 30 天"
+  },
+  "status": "03 个频道正在录制",
+  "stream": "上行稳定 / 48 MBPS",
+  "timecode": "时码 00:24:18:12",
+  "timelineCode": "序列.03",
+  "timelineSubtitle": "多源捕捉",
+  "timelineTitle": "录像时间线",
+  "title": "录像 / 中心",
+  "tracks": {
+    "archive": "归档封装",
+    "briefing": "干员简报",
+    "launch": "开场信号",
+    "operation": "实时作业"
+  }
+}

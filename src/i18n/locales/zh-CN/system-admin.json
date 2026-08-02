@@ -1,0 +1,24 @@
+{
+  "code": "模块 01 / 系统管理",
+  "description": "以实时系统图谱追踪整个工作室网络的基础设施健康度、流量与信任链。",
+  "eyebrow": "基础设施控制",
+  "integrity": "所有信任链验证通过",
+  "lastHandshake": "上次握手 · 00:00:18 前",
+  "load": "节点负载",
+  "metrics": {
+    "latency": "全局延迟",
+    "requests": "24 小时请求量",
+    "uptime": "网络在线率"
+  },
+  "nodes": {
+    "core": { "detail": "任务编排", "label": "核心中继" },
+    "data": { "detail": "归档集群", "label": "数据仓库" },
+    "edge": { "detail": "全局入口", "label": "边缘网关" },
+    "guard": { "detail": "身份层", "label": "信任守卫" }
+  },
+  "status": "系统正常 / 04 节点",
+  "title": "系统 / 图谱",
+  "topologyCode": "网络.01",
+  "topologySubtitle": "实时信号路径",
+  "topologyTitle": "核心拓扑"
+}

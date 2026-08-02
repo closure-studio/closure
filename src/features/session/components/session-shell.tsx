@@ -1,11 +1,14 @@
-import { createContext, useCallback, useContext, useState } from 'react';
-import type { PropsWithChildren } from 'react';
+import { BlurTargetView } from 'expo-blur';
+import { createContext, useCallback, useContext, useRef, useState } from 'react';
+import type { PropsWithChildren, RefObject } from 'react';
+import type { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { XStack, YStack, getTokens } from 'tamagui';
 
 import { TerminalBackdrop } from '@/components';
 
 type SessionBackdropContextValue = {
+  blurTarget: RefObject<View | null>;
   resetBackdropTint: () => void;
   setBackdropTint: (tint: string) => void;
 };
@@ -15,13 +18,14 @@ const SessionBackdropContext = createContext<SessionBackdropContextValue | null>
 export function SessionShell({ children }: PropsWithChildren) {
   const colors = getTokens().color;
   const defaultBackdropTint = colors.terminalCyan.val;
+  const blurTarget = useRef<View | null>(null);
   const [backdropTint, setBackdropTint] = useState(defaultBackdropTint);
   const resetBackdropTint = useCallback(() => {
     setBackdropTint(defaultBackdropTint);
   }, [defaultBackdropTint]);
 
   return (
-    <SessionBackdropContext.Provider value={{ resetBackdropTint, setBackdropTint }}>
+    <SessionBackdropContext.Provider value={{ blurTarget, resetBackdropTint, setBackdropTint }}>
       <XStack
         grow={1}
         justify="center"
@@ -41,7 +45,13 @@ export function SessionShell({ children }: PropsWithChildren) {
           bg="$terminalBg"
           $md={{ maxW: '100%', borderLeftWidth: 0, borderRightWidth: 0 }}
         >
-          <TerminalBackdrop tint={backdropTint} />
+          <BlurTargetView
+            ref={blurTarget}
+            pointerEvents="none"
+            style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+          >
+            <TerminalBackdrop tint={backdropTint} />
+          </BlurTargetView>
           <SafeAreaView style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
             <YStack grow={1} minH={0} height="100%" overflow="hidden">
               {children}
