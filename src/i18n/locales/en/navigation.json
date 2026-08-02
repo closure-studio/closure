@@ -1,29 +1,23 @@
 {
   "marquee": {
-    "matrix": "// CONTROL MATRIX · FOUR MODULES ONLINE",
+    "navigation": "// NAVIGATION SYSTEM · TWO DOMAINS ONLINE",
     "network": "// SECURE FRAME LINK · 18MS LATENCY",
     "recording": "// 03 CAPTURE CHANNELS CURRENTLY ACTIVE",
     "sync": "// LAYOUT STATE SYNCHRONIZED"
-  },
-  "matrix": {
-    "close": "Close settings and return to dashboard",
-    "enter": "OPEN SETTINGS",
-    "label": "SETTINGS",
-    "off": "STANDBY",
-    "on": "ACTIVE",
-    "open": "Open settings",
-    "return": "DASHBOARD",
-    "returnToDashboard": "Return to dashboard",
-    "shortLabel": "SETTINGS"
   },
   "mobile": {
     "avatarInitial": "D",
     "avatarLabel": "Doctor profile"
   },
   "pages": {
-    "dashboard": { "label": "Dashboard", "subtitle": "LOCAL OPERATIONS" },
-    "records": { "label": "Recording Center", "subtitle": "CAPTURE ARCHIVE" },
+    "recordings": { "label": "Recording Center", "subtitle": "CAPTURE ARCHIVE" },
     "site": { "label": "Site Settings", "subtitle": "LAYOUT SYSTEM" },
     "system": { "label": "System Admin", "subtitle": "CORE TOPOLOGY" }
+  },
+  "scopeSwitcher": {
+    "dashboard": "DASHBOARD",
+    "openSettings": "Open settings",
+    "returnToDashboard": "Return to dashboard",
+    "settings": "SETTINGS"
   }
 }

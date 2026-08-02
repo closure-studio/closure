@@ -2,7 +2,6 @@ import {
   Boxes,
   CalendarClock,
   Grid2X2,
-  LayoutDashboard,
   ListChecks,
   PanelsTopLeft,
   ServerCog,
@@ -10,40 +9,35 @@ import {
   Video,
 } from 'lucide-react-native';
 
-export const dashboardSections = [
-  { id: 'overview', icon: Grid2X2 },
-  { id: 'operatorRoster', icon: UsersRound },
-  { id: 'materialInventory', icon: Boxes },
-  { id: 'routineTasks', icon: ListChecks },
-  { id: 'activityTimeline', icon: CalendarClock },
-] as const;
+const dashboardPages = {
+  overview: { id: 'overview', route: '/dashboard/overview', icon: Grid2X2, sort: 10 },
+  operators: { id: 'operators', route: '/dashboard/operators', icon: UsersRound, sort: 20 },
+  inventory: { id: 'inventory', route: '/dashboard/inventory', icon: Boxes, sort: 30 },
+  tasks: { id: 'tasks', route: '/dashboard/tasks', icon: ListChecks, sort: 40 },
+  activity: { id: 'activity', route: '/dashboard/activity', icon: CalendarClock, sort: 50 },
+} as const;
 
-export const navigationPages = [
-  { id: 'dashboard', route: '/', icon: LayoutDashboard },
-  { id: 'system', route: '/system', icon: ServerCog },
-  { id: 'site', route: '/settings', icon: PanelsTopLeft },
-  { id: 'records', route: '/records', icon: Video },
-] as const;
+export const dashboardNavigation = {
+  defaultPage: dashboardPages.overview,
+  pages: dashboardPages,
+} as const;
 
-export type NavigationPageId = (typeof navigationPages)[number]['id'];
-export type NavigationPageRoute = (typeof navigationPages)[number]['route'];
-export type DashboardSectionId = (typeof dashboardSections)[number]['id'];
-export type NavigationMode = 'dashboard' | 'matrix';
+const settingsPages = {
+  site: { id: 'site', route: '/settings/site', icon: PanelsTopLeft, sort: 20 },
+  system: { id: 'system', route: '/settings/system', icon: ServerCog, sort: 10 },
+  recordings: { id: 'recordings', route: '/settings/recordings', icon: Video, sort: 30 },
+} as const;
 
-export type MatrixReturnAction =
-  | { kind: 'back' }
-  | { kind: 'replace'; route: '/' };
+export const settingsNavigation = {
+  defaultPage: settingsPages.site,
+  pages: settingsPages,
+} as const;
 
-export function getNavigationMode(pathname: string): NavigationMode {
-  return pathname === '/' ? 'dashboard' : 'matrix';
-}
+export type DashboardPageId = keyof typeof dashboardNavigation.pages;
+export type NavigationScope = 'dashboard' | 'settings';
 
-export function shouldShowMobileBottomNavigation(activePageId: NavigationPageId): boolean {
-  return activePageId !== 'site';
-}
-
-export function getMatrixReturnAction(enteredFromDashboard: boolean, canGoBack: boolean): MatrixReturnAction {
-  return enteredFromDashboard && canGoBack
-    ? { kind: 'back' }
-    : { kind: 'replace', route: '/' };
+export function getNavigationScope(pathname: string): NavigationScope {
+  return pathname === '/settings' || pathname.startsWith('/settings/')
+    ? 'settings'
+    : 'dashboard';
 }

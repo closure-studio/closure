@@ -1,5 +1,5 @@
 import { SiteSettingsScreen } from '@/features/site-settings';
 
-export default function SettingsRoute() {
+export default function SettingsSiteRoute() {
   return <SiteSettingsScreen />;
 }

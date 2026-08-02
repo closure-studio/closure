@@ -3,7 +3,7 @@ import { Stack as AppStack } from 'expo-router/js-stack';
 import { useReducedMotion } from 'react-native-reanimated';
 
 import { getRouteScreenOptions, useAuth, useSessionBackdrop } from '@/features/session';
-import { NavigationLayout, NavigationProvider } from '@/features/navigation';
+import { NavigationLayout } from '@/features/navigation';
 
 export default function AppLayout() {
   const pathname = usePathname();
@@ -23,14 +23,12 @@ export default function AppLayout() {
   };
 
   return (
-    <NavigationProvider>
-      <NavigationLayout
-        blurTarget={blurTarget}
-        onLogout={handleLogout}
-        onMatrixMode={resetBackdropTint}
-      >
-        <AppStack screenOptions={getRouteScreenOptions(reducedMotion)} />
-      </NavigationLayout>
-    </NavigationProvider>
+    <NavigationLayout
+      blurTarget={blurTarget}
+      onEnterSettings={resetBackdropTint}
+      onLogout={handleLogout}
+    >
+      <AppStack screenOptions={getRouteScreenOptions(reducedMotion)} />
+    </NavigationLayout>
   );
 }

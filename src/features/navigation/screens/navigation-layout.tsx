@@ -1,6 +1,6 @@
 import { ChevronLeft, LogOut, Orbit } from 'lucide-react-native';
 import type { PropsWithChildren, RefObject } from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
 import type { View } from 'react-native';
@@ -16,29 +16,28 @@ import {
 import { MobileBottomNavigation } from '../components/mobile-bottom-navigation';
 import { NavigationHeader } from '../components/navigation-header';
 import {
-  dashboardSections,
-  getMatrixReturnAction,
-  getNavigationMode,
-  navigationPages,
-  shouldShowMobileBottomNavigation,
+  dashboardNavigation,
+  getNavigationScope,
+  settingsNavigation,
 } from '../navigation-config';
-import type { NavigationPageId, NavigationPageRoute } from '../navigation-config';
-import { useNavigationState } from '../navigation-context';
 
 const navigationMarqueeMessages = [
   { id: 'network', translationKey: 'marquee.network', tone: 'accent' },
-  { id: 'matrix', translationKey: 'marquee.matrix', tone: 'default' },
+  { id: 'navigation', translationKey: 'marquee.navigation', tone: 'default' },
   { id: 'recording', translationKey: 'marquee.recording', tone: 'warning' },
   { id: 'sync', translationKey: 'marquee.sync', tone: 'success' },
 ] as const;
 
+const dashboardPages = Object.values(dashboardNavigation.pages).sort((left, right) => left.sort - right.sort);
+const settingsPages = Object.values(settingsNavigation.pages).sort((left, right) => left.sort - right.sort);
+
 type NavigationLayoutProps = PropsWithChildren<{
   blurTarget: RefObject<View | null>;
+  onEnterSettings: () => void;
   onLogout: () => void;
-  onMatrixMode: () => void;
 }>;
 
-export function NavigationLayout({ blurTarget, children, onLogout, onMatrixMode }: NavigationLayoutProps) {
+export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogout }: NavigationLayoutProps) {
   const { t } = useTranslation('navigation');
   const { t: tCommon } = useTranslation('common');
   const { t: tDashboard } = useTranslation('dashboard');
@@ -46,71 +45,31 @@ export function NavigationLayout({ blurTarget, children, onLogout, onMatrixMode 
   const pathname = usePathname();
   const router = useRouter();
   const reducedMotion = useReducedMotion();
-  const enteredFromDashboard = useRef(false);
-  const { activeDashboardSectionId, selectDashboardSection } = useNavigationState();
-  const mode = getNavigationMode(pathname);
-  const activePage = navigationPages.find((page) => page.route === pathname) ?? navigationPages[0];
-  const activePageId = activePage.id;
-  const showMobileBottomNavigation = shouldShowMobileBottomNavigation(activePageId);
-  const headerTitle = mode === 'dashboard'
-    ? activeDashboardSectionId === 'overview'
-      ? t('pages.dashboard.label')
-      : tDashboard(`navigation.sections.${activeDashboardSectionId}.label`)
-    : t(`pages.${activePageId}.label`);
+  const scope = getNavigationScope(pathname);
+  const activeDashboardPage = dashboardPages.find((page) => page.route === pathname) ?? dashboardNavigation.defaultPage;
+  const activeSettingsPage = settingsPages.find((page) => page.route === pathname) ?? settingsNavigation.defaultPage;
+  const headerTitle = scope === 'dashboard'
+    ? tDashboard(`navigation.sections.${activeDashboardPage.id}.label`)
+    : t(`pages.${activeSettingsPage.id}.label`);
 
   useEffect(() => {
-    if (mode === 'matrix') onMatrixMode();
-  }, [mode, onMatrixMode]);
+    if (scope === 'settings') onEnterSettings();
+  }, [onEnterSettings, scope]);
 
-  const returnToDashboard = () => {
-    const action = getMatrixReturnAction(enteredFromDashboard.current, router.canGoBack());
-    enteredFromDashboard.current = false;
-    if (action.kind === 'back') {
-      router.back();
-      return;
-    }
-    router.replace(action.route);
+  const handleScopePress = () => {
+    router.replace(scope === 'dashboard'
+      ? settingsNavigation.defaultPage.route
+      : dashboardNavigation.defaultPage.route);
   };
 
-  const handleMatrixPress = () => {
-    if (mode === 'dashboard') {
-      enteredFromDashboard.current = true;
-      router.push('/settings');
-      return;
-    }
-    returnToDashboard();
+  const handleSelectDashboardPage = (pageId: string) => {
+    const page = dashboardPages.find((candidate) => candidate.id === pageId);
+    if (page && page.route !== pathname) router.replace(page.route);
   };
 
-  const handleSettingsPress = () => {
-    if (activePageId === 'site') {
-      returnToDashboard();
-      return;
-    }
-    if (mode === 'dashboard') {
-      enteredFromDashboard.current = true;
-      router.push('/settings');
-      return;
-    }
-    router.replace('/settings');
-  };
-
-  const handleSelectPage = (pageId: NavigationPageId, route: NavigationPageRoute) => {
-    if (pageId === activePageId) return;
-    if (pageId === 'dashboard') {
-      returnToDashboard();
-      return;
-    }
-    router.replace(route);
-  };
-
-  const handleSelectDashboardSection = (sectionId: string) => {
-    const section = dashboardSections.find((candidate) => candidate.id === sectionId);
-    if (section) selectDashboardSection(section.id);
-  };
-
-  const handleSelectNavigationPage = (pageId: string) => {
-    const page = navigationPages.find((candidate) => candidate.id === pageId);
-    if (page) handleSelectPage(page.id, page.route);
+  const handleSelectSettingsPage = (pageId: string) => {
+    const page = settingsPages.find((candidate) => candidate.id === pageId);
+    if (page && page.route !== pathname) router.replace(page.route);
   };
 
   const transition = reducedMotion ? '0ms' : '400ms';
@@ -143,7 +102,7 @@ export function NavigationLayout({ blurTarget, children, onLogout, onMatrixMode 
           <YStack grow={1} minH={0} position="relative" overflow="hidden">
             <AnimatePresence mode="wait">
               <YStack
-                key={mode}
+                key={scope}
                 transition={transition}
                 position="absolute"
                 t={0}
@@ -159,13 +118,13 @@ export function NavigationLayout({ blurTarget, children, onLogout, onMatrixMode 
                 enterStyle={enterStyle}
                 exitStyle={exitStyle}
               >
-                {mode === 'dashboard'
-                  ? dashboardSections.map((section) => {
-                    const isActive = section.id === activeDashboardSectionId;
-                    const Icon = section.icon;
+                {scope === 'dashboard'
+                  ? dashboardPages.map((page) => {
+                    const isActive = page.id === activeDashboardPage.id;
+                    const Icon = page.icon;
                     return (
                       <Button
-                        key={section.id}
+                        key={page.id}
                         unstyled
                         minH="$4.5"
                         px="$3"
@@ -179,17 +138,17 @@ export function NavigationLayout({ blurTarget, children, onLogout, onMatrixMode 
                         bg={isActive ? '$terminalCyanSoft' : 'transparent'}
                         hoverStyle={{ borderColor: '$terminalBorder', bg: '$terminalRaised' }}
                         pressStyle={{ opacity: 0.7 }}
-                        onPress={() => selectDashboardSection(section.id)}
+                        onPress={() => handleSelectDashboardPage(page.id)}
                         aria-pressed={isActive}
                         $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}
                       >
                         <Icon size={18} color={isActive ? colors.terminalCyan.val : colors.terminalMuted.val} strokeWidth={isActive ? 2 : 1.5} />
-                        <TerminalText size="$3" fontWeight={isActive ? '700' : '500'} color={isActive ? '$terminalCyan' : '$terminalMuted'} numberOfLines={1}>{tDashboard(`navigation.sections.${section.id}.label`)}</TerminalText>
+                        <TerminalText size="$3" fontWeight={isActive ? '700' : '500'} color={isActive ? '$terminalCyan' : '$terminalMuted'} numberOfLines={1}>{tDashboard(`navigation.sections.${page.id}.label`)}</TerminalText>
                       </Button>
                     );
                   })
-                  : navigationPages.map((page) => {
-                    const isActive = page.id === activePageId;
+                  : settingsPages.map((page) => {
+                    const isActive = page.id === activeSettingsPage.id;
                     const Icon = page.icon;
                     return (
                       <Button
@@ -207,7 +166,7 @@ export function NavigationLayout({ blurTarget, children, onLogout, onMatrixMode 
                         bg={isActive ? '$terminalCyanSoft' : 'transparent'}
                         hoverStyle={{ borderColor: '$terminalCyanBorder', bg: '$terminalRaised' }}
                         pressStyle={{ opacity: 0.7 }}
-                        onPress={() => handleSelectPage(page.id, page.route)}
+                        onPress={() => handleSelectSettingsPage(page.id)}
                         aria-pressed={isActive}
                         $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px))' }}
                       >
@@ -229,18 +188,18 @@ export function NavigationLayout({ blurTarget, children, onLogout, onMatrixMode 
               items="center"
               justify="flex-start"
               borderWidth={1}
-              borderColor={mode === 'matrix' ? '$terminalCyanBorder' : '$terminalBorder'}
-              bg={mode === 'matrix' ? '$terminalCyanSoft' : '$terminalRaisedTranslucent'}
+              borderColor={scope === 'settings' ? '$terminalCyanBorder' : '$terminalBorder'}
+              bg={scope === 'settings' ? '$terminalCyanSoft' : '$terminalRaisedTranslucent'}
               hoverStyle={{ borderColor: '$terminalCyanBorder', bg: '$terminalCyanSoft' }}
               pressStyle={{ opacity: 0.7 }}
-              onPress={handleMatrixPress}
-              aria-label={mode === 'dashboard' ? t('matrix.open') : t('matrix.returnToDashboard')}
+              onPress={handleScopePress}
+              aria-label={scope === 'dashboard' ? t('scopeSwitcher.openSettings') : t('scopeSwitcher.returnToDashboard')}
               $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}
             >
               <XStack items="center" gap="$2.5">
-                {mode === 'matrix' ? <ChevronLeft size={16} color={colors.terminalCyan.val} /> : <Orbit size={17} color={colors.terminalCyan.val} />}
+                {scope === 'settings' ? <ChevronLeft size={16} color={colors.terminalCyan.val} /> : <Orbit size={17} color={colors.terminalCyan.val} />}
                 <TerminalText size="$2.5" color="$terminalCyan" fontWeight="700">
-                  {t(mode === 'dashboard' ? 'matrix.label' : 'matrix.return')}
+                  {t(scope === 'dashboard' ? 'scopeSwitcher.settings' : 'scopeSwitcher.dashboard')}
                 </TerminalText>
               </XStack>
             </Button>
@@ -260,9 +219,9 @@ export function NavigationLayout({ blurTarget, children, onLogout, onMatrixMode 
               avatarInitial={t('mobile.avatarInitial')}
               avatarLabel={t('mobile.avatarLabel')}
               blurTarget={blurTarget}
-              isSettingsActive={activePageId === 'site'}
-              onSettingsPress={handleSettingsPress}
-              settingsLabel={t(activePageId === 'site' ? 'matrix.close' : 'matrix.open')}
+              isSettingsActive={scope === 'settings'}
+              onSettingsPress={handleScopePress}
+              settingsLabel={t(scope === 'dashboard' ? 'scopeSwitcher.openSettings' : 'scopeSwitcher.returnToDashboard')}
               title={headerTitle}
             />
             <TerminalMarquee items={navigationMarqueeMessages.map((message) => ({ id: message.id, label: t(message.translationKey), tone: message.tone }))} />
@@ -272,32 +231,30 @@ export function NavigationLayout({ blurTarget, children, onLogout, onMatrixMode 
             {children}
           </YStack>
 
-          {showMobileBottomNavigation && (
-            mode === 'dashboard' ? (
-              <MobileBottomNavigation
-                activeId={activeDashboardSectionId}
-                items={dashboardSections.map((section) => ({
-                  icon: section.icon,
-                  id: section.id,
-                  label: tDashboard(`navigation.sections.${section.id}.label`),
-                }))}
-                navigationKey={mode}
-                onSelect={handleSelectDashboardSection}
-                reducedMotion={reducedMotion}
-              />
-            ) : (
-              <MobileBottomNavigation
-                activeId={activePageId}
-                items={navigationPages.map((page) => ({
-                  icon: page.icon,
-                  id: page.id,
-                  label: t(`pages.${page.id}.label`),
-                }))}
-                navigationKey={mode}
-                onSelect={handleSelectNavigationPage}
-                reducedMotion={reducedMotion}
-              />
-            )
+          {scope === 'dashboard' ? (
+            <MobileBottomNavigation
+              activeId={activeDashboardPage.id}
+              items={dashboardPages.map((page) => ({
+                icon: page.icon,
+                id: page.id,
+                label: tDashboard(`navigation.sections.${page.id}.label`),
+              }))}
+              navigationKey={scope}
+              onSelect={handleSelectDashboardPage}
+              reducedMotion={reducedMotion}
+            />
+          ) : (
+            <MobileBottomNavigation
+              activeId={activeSettingsPage.id}
+              items={settingsPages.map((page) => ({
+                icon: page.icon,
+                id: page.id,
+                label: t(`pages.${page.id}.label`),
+              }))}
+              navigationKey={scope}
+              onSelect={handleSelectSettingsPage}
+              reducedMotion={reducedMotion}
+            />
           )}
         </YStack>
       </XStack>
