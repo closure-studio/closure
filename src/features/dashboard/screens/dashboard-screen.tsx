@@ -3,7 +3,7 @@ import type { LayoutChangeEvent, ScrollView as NativeScrollView } from 'react-na
 import Animated, { useAnimatedRef, useScrollOffset, useSharedValue } from 'react-native-reanimated';
 import { AnimatePresence, YStack, getTokens } from 'tamagui';
 
-import { useNavigationState } from '@/features/navigation';
+import type { DashboardPageId } from '@/features/navigation';
 import { ActivityTimelineView } from '../components/activity-timeline-view';
 import { GameAccountSwitcher } from '../components/dashboard-navigation';
 import { GameAccountOverviewView } from '../components/game-account-overview-view';
@@ -11,16 +11,19 @@ import { LinkGameAccountSheet } from '../components/link-game-account-sheet';
 import { MaterialInventoryView } from '../components/material-inventory-view';
 import { OperatorRosterView } from '../components/operator-roster-view';
 import { RoutineTasksView } from '../components/routine-tasks-view';
-import { useDashboardController } from '../hooks/use-dashboard-controller';
+import { useDashboardState } from '../dashboard-context';
 import { selectBackdropTint } from '../selectors';
 
 export function DashboardScreen({
+  activePageId,
   onBackdropTintChange,
+  onShowOverview,
 }: {
+  activePageId: DashboardPageId;
   onBackdropTintChange: (tint: string) => void;
+  onShowOverview: () => void;
 }) {
   const colors = getTokens().color;
-  const { activeDashboardSectionId, selectDashboardSection } = useNavigationState();
   const {
     activeGameAccount,
     activeGameAccountId,
@@ -30,7 +33,7 @@ export function DashboardScreen({
     selectGameAccount,
     setIsLinkGameAccountSheetOpen,
     toggleRoutineTaskCompletion,
-  } = useDashboardController();
+  } = useDashboardState();
   const contentScrollRef = useAnimatedRef<NativeScrollView>();
   const viewportOffset = useScrollOffset(contentScrollRef);
   const viewportHeight = useSharedValue(0);
@@ -61,7 +64,7 @@ export function DashboardScreen({
       <YStack grow={1} shrink={1} minW={0} minH={0} position="relative">
         <AnimatePresence mode="wait">
           <YStack
-            key={`${activeGameAccountId}-${activeDashboardSectionId}`}
+            key={`${activeGameAccountId}-${activePageId}`}
             transition="400ms"
             position="absolute"
             t={0}
@@ -83,11 +86,11 @@ export function DashboardScreen({
               contentContainerStyle={{ flexGrow: 1 }}
             >
               <YStack width="100%" maxW={1152} self="center" p="$3.5" pt="$4" $md={{ p: '$5' }}>
-                {activeDashboardSectionId === 'overview' ? <GameAccountOverviewView gameAccount={activeGameAccount} viewport={scrollViewport} /> : null}
-                {activeDashboardSectionId === 'operatorRoster' ? <OperatorRosterView operators={activeGameAccount.operators} /> : null}
-                {activeDashboardSectionId === 'materialInventory' ? <MaterialInventoryView materials={activeGameAccount.materials} /> : null}
-                {activeDashboardSectionId === 'routineTasks' ? <RoutineTasksView tasks={activeGameAccount.routineTasks} onToggle={toggleRoutineTaskCompletion} /> : null}
-                {activeDashboardSectionId === 'activityTimeline' ? <ActivityTimelineView entries={activeGameAccount.activityTimeline} viewport={scrollViewport} /> : null}
+                {activePageId === 'overview' ? <GameAccountOverviewView gameAccount={activeGameAccount} viewport={scrollViewport} /> : null}
+                {activePageId === 'operators' ? <OperatorRosterView operators={activeGameAccount.operators} /> : null}
+                {activePageId === 'inventory' ? <MaterialInventoryView materials={activeGameAccount.materials} /> : null}
+                {activePageId === 'tasks' ? <RoutineTasksView tasks={activeGameAccount.routineTasks} onToggle={toggleRoutineTaskCompletion} /> : null}
+                {activePageId === 'activity' ? <ActivityTimelineView entries={activeGameAccount.activityTimeline} viewport={scrollViewport} /> : null}
               </YStack>
             </Animated.ScrollView>
           </YStack>
@@ -99,7 +102,7 @@ export function DashboardScreen({
         onOpenChange={setIsLinkGameAccountSheetOpen}
         onSubmit={(credentials) => {
           linkGameAccount(credentials);
-          selectDashboardSection('overview');
+          onShowOverview();
         }}
       />
     </YStack>

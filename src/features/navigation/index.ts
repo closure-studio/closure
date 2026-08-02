@@ -1,18 +1,8 @@
 export { NavigationLayout } from './screens/navigation-layout';
 export {
-  dashboardSections,
-  getMatrixReturnAction,
-  getNavigationMode,
-  navigationPages,
+  dashboardNavigation,
+  settingsNavigation,
 } from './navigation-config';
 export type {
-  DashboardSectionId,
-  MatrixReturnAction,
-  NavigationMode,
-  NavigationPageId,
-  NavigationPageRoute,
+  DashboardPageId,
 } from './navigation-config';
-export {
-  NavigationProvider,
-  useNavigationState,
-} from './navigation-context';

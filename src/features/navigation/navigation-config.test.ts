@@ -1,46 +1,52 @@
 import {
-  dashboardSections,
-  getMatrixReturnAction,
-  getNavigationMode,
-  navigationPages,
-  shouldShowMobileBottomNavigation,
+  dashboardNavigation,
+  getNavigationScope,
+  settingsNavigation,
 } from './navigation-config';
 
 describe('navigation config', () => {
-  it('keeps the root route in dashboard mode', () => {
-    expect(getNavigationMode('/')).toBe('dashboard');
-  });
+  it.each(['/', '/dashboard', '/dashboard/overview', '/dashboard/operators'] as const)(
+    'derives dashboard scope for %s',
+    (pathname) => {
+      expect(getNavigationScope(pathname)).toBe('dashboard');
+    },
+  );
 
-  it.each(['/system', '/settings', '/records'] as const)('derives matrix mode for %s', (pathname) => {
-    expect(getNavigationMode(pathname)).toBe('matrix');
-  });
+  it.each(['/settings', '/settings/site', '/settings/system', '/settings/recordings'] as const)(
+    'derives settings scope for %s',
+    (pathname) => {
+      expect(getNavigationScope(pathname)).toBe('settings');
+    },
+  );
 
-  it('returns through history only when the matrix was entered from dashboard', () => {
-    expect(getMatrixReturnAction(true, true)).toEqual({ kind: 'back' });
-    expect(getMatrixReturnAction(false, true)).toEqual({ kind: 'replace', route: '/' });
-    expect(getMatrixReturnAction(true, false)).toEqual({ kind: 'replace', route: '/' });
-  });
-
-  it('hides mobile bottom navigation only on site settings', () => {
-    expect(shouldShowMobileBottomNavigation('site')).toBe(false);
-    expect(shouldShowMobileBottomNavigation('dashboard')).toBe(true);
-    expect(shouldShowMobileBottomNavigation('system')).toBe(true);
-    expect(shouldShowMobileBottomNavigation('records')).toBe(true);
+  it('defines the canonical scope destinations', () => {
+    expect(dashboardNavigation.defaultPage).toMatchObject({
+      id: 'overview',
+      route: '/dashboard/overview',
+    });
+    expect(settingsNavigation.defaultPage).toMatchObject({
+      id: 'site',
+      route: '/settings/site',
+    });
+    expect(dashboardNavigation.pages.overview).toBe(dashboardNavigation.defaultPage);
+    expect(settingsNavigation.pages.site).toBe(settingsNavigation.defaultPage);
   });
 
   it('defines the two mutually exclusive adaptive navigation sets', () => {
-    expect(dashboardSections.map((section) => section.id)).toEqual([
-      'overview',
-      'operatorRoster',
-      'materialInventory',
-      'routineTasks',
-      'activityTimeline',
+    const dashboardPages = Object.values(dashboardNavigation.pages).sort((left, right) => left.sort - right.sort);
+    const settingsPages = Object.values(settingsNavigation.pages).sort((left, right) => left.sort - right.sort);
+
+    expect(dashboardPages.map(({ id, route }) => ({ id, route }))).toEqual([
+      { id: 'overview', route: '/dashboard/overview' },
+      { id: 'operators', route: '/dashboard/operators' },
+      { id: 'inventory', route: '/dashboard/inventory' },
+      { id: 'tasks', route: '/dashboard/tasks' },
+      { id: 'activity', route: '/dashboard/activity' },
     ]);
-    expect(navigationPages.map(({ id, route }) => ({ id, route }))).toEqual([
-      { id: 'dashboard', route: '/' },
-      { id: 'system', route: '/system' },
-      { id: 'site', route: '/settings' },
-      { id: 'records', route: '/records' },
+    expect(settingsPages.map(({ id, route }) => ({ id, route }))).toEqual([
+      { id: 'system', route: '/settings/system' },
+      { id: 'site', route: '/settings/site' },
+      { id: 'recordings', route: '/settings/recordings' },
     ]);
   });
 });

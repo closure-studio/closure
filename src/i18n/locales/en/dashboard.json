@@ -29,11 +29,11 @@
     "brandSubtitle": "CLOUD AUTOMATION",
     "brandTitle": "CLOSURE STUDIO",
     "sections": {
-      "activityTimeline": { "label": "Timeline", "subtitle": "TIMELINE" },
-      "materialInventory": { "label": "Inventory", "subtitle": "DEPOT" },
-      "operatorRoster": { "label": "Operators", "subtitle": "OPERATORS" },
+      "activity": { "label": "Timeline", "subtitle": "TIMELINE" },
+      "inventory": { "label": "Inventory", "subtitle": "DEPOT" },
+      "operators": { "label": "Operators", "subtitle": "OPERATORS" },
       "overview": { "label": "Overview", "subtitle": "OVERVIEW" },
-      "routineTasks": { "label": "Routine", "subtitle": "ROUTINE" }
+      "tasks": { "label": "Routine", "subtitle": "ROUTINE" }
     }
   },
   "operators": {

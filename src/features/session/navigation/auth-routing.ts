@@ -2,7 +2,7 @@ import type { Href } from 'expo-router';
 
 type PostLoginDestination = Extract<Href, string>;
 
-const DEFAULT_POST_LOGIN_DESTINATION = '/' satisfies PostLoginDestination;
+const DEFAULT_POST_LOGIN_DESTINATION = '/dashboard/overview' satisfies PostLoginDestination;
 const LOGIN_PATH = '/login';
 const GROUPED_LOGIN_PATH = '/(auth)/login';
 

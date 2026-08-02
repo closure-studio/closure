@@ -29,11 +29,11 @@
     "brandSubtitle": "云端无人托管",
     "brandTitle": "可露希尔工作室",
     "sections": {
-      "activityTimeline": { "label": "日程", "subtitle": "时间线" },
-      "materialInventory": { "label": "仓库", "subtitle": "资源库" },
-      "operatorRoster": { "label": "干员", "subtitle": "干员列表" },
+      "activity": { "label": "日程", "subtitle": "时间线" },
+      "inventory": { "label": "仓库", "subtitle": "资源库" },
+      "operators": { "label": "干员", "subtitle": "干员列表" },
       "overview": { "label": "总览", "subtitle": "概览" },
-      "routineTasks": { "label": "日常", "subtitle": "任务" }
+      "tasks": { "label": "日常", "subtitle": "任务" }
     }
   },
   "operators": {
