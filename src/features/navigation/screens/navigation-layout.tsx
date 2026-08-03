@@ -1,30 +1,38 @@
 import { ChevronLeft, LogOut, Orbit } from 'lucide-react-native';
 import type { PropsWithChildren, RefObject } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
 import type { View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
-import { AnimatePresence, Button, XStack, YStack, getTokens } from 'tamagui';
+import { AnimatePresence, Button, XStack, YStack, getTokens, useMedia } from 'tamagui';
 
 import {
   DecorativeBarcode,
+  HorizontalSwipeScope,
   MonoText,
+  SettingsTransitionProvider,
   TerminalMarquee,
   TerminalText,
 } from '@/components';
+import type { HorizontalSwipeDirection, SettingsTransitionDirection } from '@/components';
 import { MobileBottomNavigation } from '../components/mobile-bottom-navigation';
 import { NavigationHeader } from '../components/navigation-header';
+import {
+  SettingsSwipePager,
+  resolveSettingsSwipeAction,
+} from '../components/settings-swipe-pager';
 import {
   dashboardNavigation,
   getNavigationScope,
   settingsNavigation,
 } from '../navigation-config';
+import type { SettingsPageId } from '../navigation-config';
 
 const navigationMarqueeMessages = [
   { id: 'network', translationKey: 'marquee.network', tone: 'accent' },
   { id: 'navigation', translationKey: 'marquee.navigation', tone: 'default' },
-  { id: 'recording', translationKey: 'marquee.recording', tone: 'warning' },
+  { id: 'account', translationKey: 'marquee.account', tone: 'warning' },
   { id: 'sync', translationKey: 'marquee.sync', tone: 'success' },
 ] as const;
 
@@ -42,12 +50,15 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
   const { t: tCommon } = useTranslation('common');
   const { t: tDashboard } = useTranslation('dashboard');
   const colors = getTokens().color;
+  const media = useMedia();
   const pathname = usePathname();
   const router = useRouter();
   const reducedMotion = useReducedMotion();
+  const [settingsTransitionDirection, setSettingsTransitionDirection] = useState<SettingsTransitionDirection>('none');
   const scope = getNavigationScope(pathname);
   const activeDashboardPage = dashboardPages.find((page) => page.route === pathname) ?? dashboardNavigation.defaultPage;
   const activeSettingsPage = settingsPages.find((page) => page.route === pathname) ?? settingsNavigation.defaultPage;
+  const isSettingsSwipeEnabled = Boolean(media['max-md']);
   const headerTitle = scope === 'dashboard'
     ? tDashboard(`navigation.sections.${activeDashboardPage.id}.label`)
     : t(`pages.${activeSettingsPage.id}.label`);
@@ -57,9 +68,31 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
   }, [onEnterSettings, scope]);
 
   const handleScopePress = () => {
+    setSettingsTransitionDirection('none');
     router.replace(scope === 'dashboard'
       ? settingsNavigation.defaultPage.route
       : dashboardNavigation.defaultPage.route);
+  };
+
+  const handleExitSettings = () => {
+    setSettingsTransitionDirection('none');
+    router.replace(dashboardNavigation.defaultPage.route);
+  };
+
+  const handleSettingsSwipe = (direction: HorizontalSwipeDirection) => {
+    const action = resolveSettingsSwipeAction({
+      activeId: activeSettingsPage.id,
+      direction,
+      items: settingsPages,
+    });
+    if (!action) return;
+
+    if (action.type === 'exit') {
+      handleExitSettings();
+      return;
+    }
+
+    handleSelectSettingsPage(action.pageId);
   };
 
   const handleSelectDashboardPage = (pageId: string) => {
@@ -67,9 +100,14 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
     if (page && page.route !== pathname) router.replace(page.route);
   };
 
-  const handleSelectSettingsPage = (pageId: string) => {
+  const handleSelectSettingsPage = (pageId: SettingsPageId) => {
     const page = settingsPages.find((candidate) => candidate.id === pageId);
-    if (page && page.route !== pathname) router.replace(page.route);
+    if (!page || page.route === pathname) return;
+
+    const currentIndex = settingsPages.findIndex((candidate) => candidate.id === activeSettingsPage.id);
+    const nextIndex = settingsPages.findIndex((candidate) => candidate.id === pageId);
+    setSettingsTransitionDirection(nextIndex > currentIndex ? 'forward' : 'backward');
+    router.replace(page.route);
   };
 
   const transition = reducedMotion ? '0ms' : '400ms';
@@ -81,7 +119,14 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
     : { opacity: 0, y: -18, filter: 'blur(8px)' };
 
   return (
-    <YStack grow={1} height="100%" maxH="100%" overflow="hidden">
+    <SettingsTransitionProvider direction={settingsTransitionDirection} reducedMotion={reducedMotion}>
+      <HorizontalSwipeScope
+        active={scope === 'settings'}
+        enabled={isSettingsSwipeEnabled}
+        name="settings-navigation"
+        onSwipe={handleSettingsSwipe}
+      />
+        <YStack grow={1} height="100%" maxH="100%" overflow="hidden">
       <XStack grow={1} shrink={1} minH={0}>
         <YStack
           display="none"
@@ -228,7 +273,19 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
           </YStack>
 
           <YStack grow={1} shrink={1} minW={0} minH={0} overflow="hidden">
-            {children}
+            {scope === 'settings' ? (
+              <SettingsSwipePager
+                activeId={activeSettingsPage.id}
+                hint={t('mobile.swipeHint')}
+                items={settingsPages.map((page) => ({
+                  id: page.id,
+                  label: t(`pages.${page.id}.label`),
+                }))}
+                onSelect={handleSelectSettingsPage}
+              >
+                {children}
+              </SettingsSwipePager>
+            ) : children}
           </YStack>
 
           {scope === 'dashboard' ? (
@@ -243,21 +300,10 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
               onSelect={handleSelectDashboardPage}
               reducedMotion={reducedMotion}
             />
-          ) : (
-            <MobileBottomNavigation
-              activeId={activeSettingsPage.id}
-              items={settingsPages.map((page) => ({
-                icon: page.icon,
-                id: page.id,
-                label: t(`pages.${page.id}.label`),
-              }))}
-              navigationKey={scope}
-              onSelect={handleSelectSettingsPage}
-              reducedMotion={reducedMotion}
-            />
-          )}
+          ) : null}
         </YStack>
       </XStack>
-    </YStack>
+        </YStack>
+    </SettingsTransitionProvider>
   );
 }

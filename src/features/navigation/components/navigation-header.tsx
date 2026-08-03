@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     zIndex: 0,
+    pointerEvents: 'none',
   },
   fadingEdge: {
     position: 'absolute',
@@ -36,6 +37,7 @@ const styles = StyleSheet.create({
     left: 0,
     height: 5,
     zIndex: 0,
+    pointerEvents: 'none',
   },
 });
 
@@ -97,7 +99,6 @@ export function NavigationHeader({
         {...platformBlurProps}
         intensity={80}
         tint="dark"
-        pointerEvents="none"
         style={styles.blur}
       />
       <YStack
@@ -109,7 +110,7 @@ export function NavigationHeader({
         bg="$terminalSurface"
         opacity={0.18}
         z="$0"
-        pointerEvents="none"
+        style={{ pointerEvents: 'none' }}
       />
       <YStack
         position="absolute"
@@ -120,12 +121,11 @@ export function NavigationHeader({
         bg="$terminalText"
         opacity={0.5}
         z="$0"
-        pointerEvents="none"
+        style={{ pointerEvents: 'none' }}
       />
       <Svg
         width="100%"
         height={5}
-        pointerEvents="none"
         style={styles.fadingEdge}
       >
         <Defs>

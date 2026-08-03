@@ -1,0 +1,92 @@
+{
+  "network": {
+    "code": "SET-NET / 01",
+    "description": "Measure and select the API Node used by this session. Results are deterministic mocks and no network request is sent.",
+    "eyebrow": "Connection routing",
+    "status": "Mock link online",
+    "title": "Network Settings",
+    "nodesCode": "NODE",
+    "nodesTitle": "API Nodes",
+    "nodesSubtitle": "Session routing",
+    "nodes": {
+      "domestic": "Domestic Mirror",
+      "overseas": "Overseas Mirror"
+    },
+    "checking": "Checking",
+    "connected": "Reachable",
+    "unreachable": "Connection failed",
+    "active": "Active",
+    "switch": "Switch",
+    "latency": "Mock latency",
+    "retest": "Retest nodes",
+    "retestLabel": "Retest every API Node",
+    "mockNotice": "MOCK MODE // Node selection lasts for this runtime session only"
+  },
+  "account": {
+    "code": "SET-AUTH / 02",
+    "description": "Review the User Account identity and rehearse security operations. Submissions are validated locally and never change real credentials.",
+    "eyebrow": "Identity security",
+    "status": "Mock identity verified",
+    "title": "Account Security",
+    "identityCode": "IDENTITY",
+    "identityTitle": "User Account",
+    "email": "Account email",
+    "registeredAt": "Registered",
+    "role": "Account role",
+    "roles": {
+      "member": "Member",
+      "administrator": "Administrator"
+    },
+    "passwordCode": "CREDENTIAL",
+    "passwordTitle": "Change password",
+    "passwordSubtitle": "Local validation",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "repeatNewPassword": "Repeat new password",
+    "passwordPlaceholder": "Enter access key",
+    "submitPassword": "Validate change",
+    "validation": {
+      "currentPasswordRequired": "Enter the current password",
+      "newPasswordRequired": "Enter a new password",
+      "repeatNewPasswordRequired": "Repeat the new password",
+      "passwordsMismatch": "The new passwords do not match"
+    },
+    "dangerCode": "DANGER",
+    "dangerTitle": "Danger zone",
+    "dangerDescription": "Deletion permanently removes a User Account. This mock action will not remove data or sign you out.",
+    "deleteAccount": "Delete account",
+    "deleteDialogTitle": "Delete this User Account?",
+    "deleteDialogDescription": "You are simulating deletion of {{email}}. Confirmation only writes to the development log and has no real side effects.",
+    "cancel": "Cancel",
+    "confirmDelete": "Confirm mock deletion",
+    "mockNotice": "MOCK MODE // Authentication services are disconnected"
+  },
+  "acknowledgements": {
+    "code": "SET-ACK / 03",
+    "description": "A record of the contributors, supporters, and creators who keep Closure moving.",
+    "eyebrow": "Contribution archive",
+    "status": "Gratitude signal online",
+    "title": "Acknowledgements",
+    "intro": "The route has felt like clearing a difficult main story, and we are deeply grateful to everyone who fought beside us—especially you, Doctor.",
+    "recipientCode": "YOU",
+    "recipientTitle": "Tonight's featured Doctor",
+    "recipientName": "Dr.{{callsign}}",
+    "recipientDescription": "Thank you for always standing guard. This signal remains lit for Dr.{{callsign}}.",
+    "teamCode": "OPS",
+    "teamTitle": "Operations Team",
+    "teamDescription": "Thanks to the operations team for keeping every release steady.",
+    "contributors": {
+      "outdated": "Explores new technical directions.",
+      "fe-ame-lox": "Handles alerts and incident recovery to bring systems back to full strength.",
+      "kripto": "Maintains deployment and automation workflows while improving delivery efficiency.",
+      "skadi": "Follows up on user feedback and experience issues to keep refining the details.",
+      "gk": "Oh my."
+    },
+    "specialCode": "CREDITS",
+    "specialTitle": "Special Thanks",
+    "credits": {
+      "vibe-coding": "Vibe coding support",
+      "design": "Design"
+    }
+  }
+}

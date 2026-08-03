@@ -2,11 +2,11 @@ import {
   Boxes,
   CalendarClock,
   Grid2X2,
+  HeartHandshake,
   ListChecks,
-  PanelsTopLeft,
-  ServerCog,
+  ShieldCheck,
   UsersRound,
-  Video,
+  Wifi,
 } from 'lucide-react-native';
 
 const dashboardPages = {
@@ -23,17 +23,18 @@ export const dashboardNavigation = {
 } as const;
 
 const settingsPages = {
-  site: { id: 'site', route: '/settings/site', icon: PanelsTopLeft, sort: 20 },
-  system: { id: 'system', route: '/settings/system', icon: ServerCog, sort: 10 },
-  recordings: { id: 'recordings', route: '/settings/recordings', icon: Video, sort: 30 },
+  network: { id: 'network', route: '/settings/network', icon: Wifi, sort: 10 },
+  account: { id: 'account', route: '/settings/account', icon: ShieldCheck, sort: 20 },
+  acknowledgements: { id: 'acknowledgements', route: '/settings/acknowledgements', icon: HeartHandshake, sort: 30 },
 } as const;
 
 export const settingsNavigation = {
-  defaultPage: settingsPages.site,
+  defaultPage: settingsPages.network,
   pages: settingsPages,
 } as const;
 
 export type DashboardPageId = keyof typeof dashboardNavigation.pages;
+export type SettingsPageId = keyof typeof settingsNavigation.pages;
 export type NavigationScope = 'dashboard' | 'settings';
 
 export function getNavigationScope(pathname: string): NavigationScope {

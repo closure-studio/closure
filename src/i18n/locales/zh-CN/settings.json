@@ -1,0 +1,92 @@
+{
+  "network": {
+    "code": "SET-NET / 01",
+    "description": "检测并选择本次会话使用的 API 节点。当前数据为确定性模拟结果，不会发起真实网络请求。",
+    "eyebrow": "连接路由",
+    "status": "模拟链路在线",
+    "title": "网络设置",
+    "nodesCode": "NODE",
+    "nodesTitle": "API 节点",
+    "nodesSubtitle": "会话路由",
+    "nodes": {
+      "domestic": "国内镜像",
+      "overseas": "海外镜像"
+    },
+    "checking": "检测中",
+    "connected": "可连接",
+    "unreachable": "连接失败",
+    "active": "使用中",
+    "switch": "切换",
+    "latency": "模拟延迟",
+    "retest": "重新检测",
+    "retestLabel": "重新检测所有 API 节点",
+    "mockNotice": "MOCK MODE // 节点选择只在当前运行会话中有效"
+  },
+  "account": {
+    "code": "SET-AUTH / 02",
+    "description": "查看用户账号身份并演练安全操作。所有提交仅在本地校验，不会修改真实凭证。",
+    "eyebrow": "身份安全",
+    "status": "模拟身份已验证",
+    "title": "账号安全",
+    "identityCode": "IDENTITY",
+    "identityTitle": "用户账号",
+    "email": "账号邮箱",
+    "registeredAt": "注册时间",
+    "role": "账号角色",
+    "roles": {
+      "member": "普通用户",
+      "administrator": "管理员"
+    },
+    "passwordCode": "CREDENTIAL",
+    "passwordTitle": "修改密码",
+    "passwordSubtitle": "本地校验",
+    "currentPassword": "当前密码",
+    "newPassword": "新密码",
+    "repeatNewPassword": "重复新密码",
+    "passwordPlaceholder": "输入访问密钥",
+    "submitPassword": "验证修改",
+    "validation": {
+      "currentPasswordRequired": "请输入当前密码",
+      "newPasswordRequired": "请输入新密码",
+      "repeatNewPasswordRequired": "请再次输入新密码",
+      "passwordsMismatch": "两次输入的新密码不一致"
+    },
+    "dangerCode": "DANGER",
+    "dangerTitle": "危险操作",
+    "dangerDescription": "注销将永久移除用户账号。当前操作为 mock，不会删除数据或退出登录。",
+    "deleteAccount": "注销账号",
+    "deleteDialogTitle": "确认注销用户账号？",
+    "deleteDialogDescription": "你正在模拟注销 {{email}}。确认后只会写入开发日志，不会产生真实副作用。",
+    "cancel": "取消",
+    "confirmDelete": "确认模拟注销",
+    "mockNotice": "MOCK MODE // 不连接认证服务"
+  },
+  "acknowledgements": {
+    "code": "SET-ACK / 03",
+    "description": "记录共同维护 Closure 的贡献者、支持者与创作者。",
+    "eyebrow": "贡献档案",
+    "status": "感谢信号持续在线",
+    "title": "鸣谢名单",
+    "intro": "这一路像开荒主线一样不容易，幸好有大家并肩作战，真的超——感谢！也感谢一直支持我们的各位博士，尤其是“你”。",
+    "recipientCode": "YOU",
+    "recipientTitle": "今夜限定主角位",
+    "recipientName": "Dr.{{callsign}}",
+    "recipientDescription": "感谢你的常驻守护，这条信号为 Dr.{{callsign}} 保持点亮。",
+    "teamCode": "OPS",
+    "teamTitle": "运维管理天团",
+    "teamDescription": "鸣谢运维管理天团，稳稳托住每一次更新。",
+    "contributors": {
+      "outdated": "折腾新技术方向。",
+      "fe-ame-lox": "处理告警和故障恢复，让系统快速回到最佳状态。",
+      "kripto": "维护部署与自动化流程，持续优化交付效率。",
+      "skadi": "跟进用户反馈和体验问题，推动细节持续打磨。",
+      "gk": "妈耶。"
+    },
+    "specialCode": "CREDITS",
+    "specialTitle": "特别鸣谢",
+    "credits": {
+      "vibe-coding": "提供 Vibe coding",
+      "design": "设计"
+    }
+  }
+}

@@ -1,18 +1,19 @@
 {
   "marquee": {
+    "account": "// 用户账号安全 · MOCK 边界启用",
     "navigation": "// 导航系统 · 两个分区在线",
     "network": "// 安全框架连接 · 延迟 18MS",
-    "recording": "// 当前 03 个录像频道正在运行",
     "sync": "// 布局状态已同步"
   },
   "mobile": {
     "avatarInitial": "博",
-    "avatarLabel": "博士档案"
+    "avatarLabel": "博士档案",
+    "swipeHint": "左右滑动切换"
   },
   "pages": {
-    "recordings": { "label": "录像中心", "subtitle": "影像归档" },
-    "site": { "label": "网站设置", "subtitle": "布局系统" },
-    "system": { "label": "系统管理", "subtitle": "核心拓扑" }
+    "account": { "label": "账号安全", "subtitle": "身份控制" },
+    "acknowledgements": { "label": "鸣谢名单", "subtitle": "贡献档案" },
+    "network": { "label": "网络设置", "subtitle": "API 路由" }
   },
   "scopeSwitcher": {
     "dashboard": "控制台",
