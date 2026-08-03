@@ -21,8 +21,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import type { PropsWithChildren } from 'react';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { TamaguiProvider } from 'tamagui';
 
+import { HorizontalSwipeProvider } from '@/components';
 import { tamaguiConfig } from '../../tamagui.config';
 import { LocalizationProvider } from './localization-provider';
 
@@ -58,10 +60,14 @@ export function AppProvider({ children }: PropsWithChildren) {
   return (
     <LocalizationProvider>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-        <ThemeProvider value={DarkTheme}>
-          <StatusBar style="light" />
-          {children}
-        </ThemeProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <HorizontalSwipeProvider>
+            <ThemeProvider value={DarkTheme}>
+              <StatusBar style="light" />
+              {children}
+            </ThemeProvider>
+          </HorizontalSwipeProvider>
+        </GestureHandlerRootView>
       </TamaguiProvider>
     </LocalizationProvider>
   );

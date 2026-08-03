@@ -44,6 +44,19 @@ module.exports = defineConfig([
     },
   },
   {
+    files: ["src/**/*.tsx"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: 'JSXAttribute[name.name="pointerEvents"]',
+          message:
+            "Use style.pointerEvents instead of the deprecated pointerEvents JSX prop.",
+        },
+      ],
+    },
+  },
+  {
     files: ["tamagui.config.ts"],
     rules: {
       "@typescript-eslint/no-empty-object-type": [

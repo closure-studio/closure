@@ -308,8 +308,7 @@ export default function FlowParticleField({
 
   return (
     <Canvas
-      pointerEvents="none"
-      style={{ position: 'absolute', top: 0, left: 0, width, height }}
+      style={{ position: 'absolute', top: 0, left: 0, width, height, pointerEvents: 'none' }}
     >
       <Rect x={0} y={0} width={width} height={Math.min(height, AURORA_GLOW_HEIGHT)}>
         {AURORA_GLOW_SHADER ? (

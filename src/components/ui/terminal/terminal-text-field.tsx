@@ -61,7 +61,9 @@ type TerminalTextFieldProps = {
   icon: LucideIcon;
   keyboardType?: TerminalInputProps['keyboardType'];
   label: string;
+  onBlur?: TerminalInputProps['onBlur'];
   onChangeText: (value: string) => void;
+  onFocus?: TerminalInputProps['onFocus'];
   onSubmitEditing?: TerminalInputProps['onSubmitEditing'];
   placeholder: string;
   returnKeyType?: TerminalInputProps['returnKeyType'];
@@ -81,7 +83,9 @@ export const TerminalTextField = forwardRef<TerminalTextFieldHandle, TerminalTex
   icon: Icon,
   keyboardType,
   label,
+  onBlur,
   onChangeText,
+  onFocus,
   onSubmitEditing,
   placeholder,
   returnKeyType,
@@ -99,6 +103,8 @@ export const TerminalTextField = forwardRef<TerminalTextFieldHandle, TerminalTex
     ...(autoComplete === undefined ? {} : { autoComplete }),
     ...(enterKeyHint === undefined ? {} : { enterKeyHint }),
     ...(keyboardType === undefined ? {} : { keyboardType }),
+    ...(onBlur === undefined ? {} : { onBlur }),
+    ...(onFocus === undefined ? {} : { onFocus }),
     ...(onSubmitEditing === undefined ? {} : { onSubmitEditing }),
     ...(returnKeyType === undefined ? {} : { returnKeyType }),
     ...(secureTextEntry === undefined
