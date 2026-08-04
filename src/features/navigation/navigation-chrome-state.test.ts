@@ -18,6 +18,7 @@ describe('navigation chrome state', () => {
       scope: 'dashboard',
       settledScope: 'dashboard',
     })).toEqual({
+      isBottomInsetOwnedByDashboardChrome: true,
       isDashboardChromeVisible: true,
       isNavigationHeaderVisible: true,
       isScopeContentVisible: true,
@@ -29,6 +30,7 @@ describe('navigation chrome state', () => {
       scope: 'settings',
       settledScope: 'settings',
     })).toEqual({
+      isBottomInsetOwnedByDashboardChrome: false,
       isDashboardChromeVisible: false,
       isNavigationHeaderVisible: false,
       isScopeContentVisible: true,
@@ -42,6 +44,7 @@ describe('navigation chrome state', () => {
       scope: 'settings',
       settledScope: 'dashboard',
     })).toEqual({
+      isBottomInsetOwnedByDashboardChrome: true,
       isDashboardChromeVisible: false,
       isNavigationHeaderVisible: false,
       isScopeContentVisible: false,
@@ -52,7 +55,16 @@ describe('navigation chrome state', () => {
       isCompact: false,
       scope: 'settings',
       settledScope: 'dashboard',
-    }).isNavigationHeaderVisible).toBe(true);
+    })).toEqual(expect.objectContaining({
+      isBottomInsetOwnedByDashboardChrome: false,
+      isNavigationHeaderVisible: true,
+    }));
+
+    expect(resolveNavigationChromeVisibility({
+      isCompact: true,
+      scope: 'dashboard',
+      settledScope: 'settings',
+    }).isBottomInsetOwnedByDashboardChrome).toBe(false);
   });
 
   it('settles the next scope after the chrome exit phase and cancels stale swaps', async () => {

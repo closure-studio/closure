@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import { MonoText } from '@/components';
@@ -23,6 +24,7 @@ export function MobileBottomNavigation({
   reducedMotion: boolean;
 }) {
   const colors = getTokens().color;
+  const { bottom: bottomInset } = useSafeAreaInsets();
   const [navigationWidth, setNavigationWidth] = useState(0);
   const activeIndex = Math.max(0, items.findIndex((item) => item.id === activeId));
   const buttonWidth = items.length > 0 ? Math.max(0, (navigationWidth - 16) / items.length) : 0;
@@ -35,8 +37,9 @@ export function MobileBottomNavigation({
 
   return (
     <YStack
+      testID="mobile-bottom-navigation"
       display="flex"
-      height={66}
+      height={66 + bottomInset}
       shrink={0}
       position="relative"
       overflow="hidden"
@@ -49,9 +52,9 @@ export function MobileBottomNavigation({
       <XStack
         position="absolute"
         t={0}
-        b={0}
         l={0}
         r={0}
+        height={66}
         px="$2"
         py={6}
       >
