@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
 import type { View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AnimatePresence, Button, XStack, YStack, getTokens, useMedia } from 'tamagui';
 
 import {
@@ -71,6 +72,7 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
   const isCompact = Boolean(media['max-md']);
   const isSettingsSwipeEnabled = isCompact;
   const {
+    isBottomInsetOwnedByDashboardChrome,
     isDashboardChromeVisible,
     isNavigationHeaderVisible,
     isScopeContentVisible,
@@ -144,6 +146,10 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
         name="settings-navigation"
         onSwipe={handleSettingsSwipe}
       />
+      <SafeAreaView
+        edges={isBottomInsetOwnedByDashboardChrome ? [] : ['bottom']}
+        style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
+      >
         <YStack grow={1} height="100%" maxH="100%" overflow="hidden">
       <XStack grow={1} shrink={1} minH={0}>
         <YStack
@@ -347,6 +353,7 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
         </YStack>
       </XStack>
         </YStack>
+      </SafeAreaView>
     </>
   );
 }

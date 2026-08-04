@@ -51,7 +51,10 @@ export function SessionShell({ children }: PropsWithChildren) {
           >
             <TerminalBackdrop tint={backdropTint} />
           </BlurTargetView>
-          <SafeAreaView style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+          <SafeAreaView
+            edges={['top', 'right', 'left']}
+            style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
+          >
             <YStack grow={1} minH={0} height="100%" overflow="hidden">
               {children}
             </YStack>

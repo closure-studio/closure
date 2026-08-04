@@ -14,8 +14,10 @@ export function resolveNavigationChromeVisibility({
 }) {
   const isChromeSettled = settledScope === scope;
   const isDashboardChromeVisible = isChromeSettled && scope === 'dashboard';
+  const isBottomInsetOwnedByDashboardChrome = isCompact && settledScope === 'dashboard';
 
   return {
+    isBottomInsetOwnedByDashboardChrome,
     isDashboardChromeVisible,
     isNavigationHeaderVisible: !isCompact || isDashboardChromeVisible,
     // The routed page mounts as soon as the pathname changes, one commit before the
