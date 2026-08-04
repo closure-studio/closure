@@ -1,9 +1,5 @@
 export { NotFoundView } from './layout/not-found-view';
-export {
-  getPageChromeMotionProps,
-  getPageMotionProps,
-} from './layout/page-transition';
-export type { PageChromeEdge } from './layout/page-transition';
+export { getPageMotionProps } from './layout/page-transition';
 export { SectionPageHeader } from './layout/section-page-header';
 export {
   HORIZONTAL_SWIPE_THRESHOLD_PT,

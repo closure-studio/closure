@@ -57,9 +57,8 @@ type SettingsBackNavigationOptions = {
 };
 
 /**
- * Makes Dashboard Overview the stable history entry immediately below Settings.
- * This gives native stacks and browser history the same Settings -> Dashboard result,
- * including when Settings is opened from a direct/deep link.
+ * Keeps the source Dashboard route immediately below Settings. Direct Settings entry
+ * has no source route, so it is normalized above Dashboard Overview.
  */
 export function useSettingsBackNavigation({
   pathname,
@@ -94,18 +93,16 @@ export function useSettingsBackNavigation({
 
   const enterSettings = useCallback((route: SettingsPageRoute) => {
     if (pendingSettingsRoute.current) return;
+    router.push(route);
+  }, [router]);
 
-    if (pathname === dashboardRoute) {
-      router.push(route);
+  const returnToDashboard = useCallback(() => {
+    if (router.canDismiss()) {
+      router.back();
       return;
     }
 
-    pendingSettingsRoute.current = route;
     router.replace(dashboardRoute);
-  }, [dashboardRoute, pathname, router]);
-
-  const returnToDashboard = useCallback(() => {
-    router.dismissTo(dashboardRoute);
   }, [dashboardRoute, router]);
 
   return { enterSettings, returnToDashboard };

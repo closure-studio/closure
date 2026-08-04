@@ -1,24 +1,15 @@
-import { ChevronLeft, LogOut, Orbit } from 'lucide-react-native';
 import type { PropsWithChildren, RefObject } from 'react';
-import { useCallback, useEffect } from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
 import type { View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AnimatePresence, Button, XStack, YStack, getTokens, useMedia } from 'tamagui';
+import { XStack, YStack, useMedia } from 'tamagui';
 
-import {
-  DecorativeBarcode,
-  HorizontalSwipeScope,
-  MonoText,
-  TerminalMarquee,
-  TerminalText,
-  getPageChromeMotionProps,
-  getPageMotionProps,
-} from '@/components';
+import { HorizontalSwipeScope } from '@/components';
 import type { HorizontalSwipeDirection } from '@/components';
-import { PAGE_TRANSITION_TIMING } from '@/constants/page-transition';
+import { DesktopNavigationSidebar } from '../components/desktop-navigation-sidebar';
 import { MobileBottomNavigation } from '../components/mobile-bottom-navigation';
 import { NavigationHeader } from '../components/navigation-header';
 import {
@@ -30,54 +21,126 @@ import {
   getNavigationScope,
   settingsNavigation,
 } from '../navigation-config';
-import type { SettingsPageId } from '../navigation-config';
 import {
   useNavigationBackHandler,
   useSettingsBackNavigation,
 } from '../back-navigation';
-import {
-  resolveNavigationChromeVisibility,
-  useSettledNavigationScope,
-} from '../navigation-chrome-state';
-
-const navigationMarqueeMessages = [
-  { id: 'network', translationKey: 'marquee.network', tone: 'accent' },
-  { id: 'navigation', translationKey: 'marquee.navigation', tone: 'default' },
-  { id: 'account', translationKey: 'marquee.account', tone: 'warning' },
-  { id: 'sync', translationKey: 'marquee.sync', tone: 'success' },
-] as const;
 
 const dashboardPages = Object.values(dashboardNavigation.pages).sort((left, right) => left.sort - right.sort);
 const settingsPages = Object.values(settingsNavigation.pages).sort((left, right) => left.sort - right.sort);
+type DashboardPage = (typeof dashboardPages)[number];
+type SettingsPage = (typeof settingsPages)[number];
+
+type NavigationLayoutContextValue = {
+  activeDashboardPage: DashboardPage;
+  activeSettingsPage: SettingsPage;
+  blurTarget: RefObject<View | null>;
+  dashboardItems: { icon: DashboardPage['icon']; id: DashboardPage['id']; label: string }[];
+  handleScopePress: () => void;
+  handleSelectDashboardPage: (pageId: string) => void;
+  handleSelectSettingsPage: (pageId: string) => void;
+  isCompact: boolean;
+  reducedMotion: boolean;
+  settingsItems: { icon: SettingsPage['icon']; id: SettingsPage['id']; label: string }[];
+};
+
+const NavigationLayoutContext = createContext<NavigationLayoutContextValue | null>(null);
+
+function useNavigationLayoutContext(): NavigationLayoutContextValue {
+  const value = useContext(NavigationLayoutContext);
+  if (!value) throw new Error('NavigationScopeScreen must be rendered inside NavigationLayout.');
+  return value;
+}
 
 type NavigationLayoutProps = PropsWithChildren<{
   blurTarget: RefObject<View | null>;
-  onEnterSettings: () => void;
   onLogout: () => void;
 }>;
 
-export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogout }: NavigationLayoutProps) {
+export function NavigationScopeScreen({
+  children,
+  scope,
+}: PropsWithChildren<{ scope: 'dashboard' | 'settings' }>) {
   const { t } = useTranslation('navigation');
-  const { t: tCommon } = useTranslation('common');
   const { t: tDashboard } = useTranslation('dashboard');
-  const colors = getTokens().color;
+  const {
+    activeDashboardPage,
+    activeSettingsPage,
+    blurTarget,
+    dashboardItems,
+    handleScopePress,
+    handleSelectDashboardPage,
+    handleSelectSettingsPage,
+    isCompact,
+    reducedMotion,
+    settingsItems,
+  } = useNavigationLayoutContext();
+
+  if (!isCompact) return children;
+
+  if (scope === 'settings') {
+    return (
+      <SafeAreaView edges={['bottom']} style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+        <YStack grow={1} shrink={1} minH={0} overflow="hidden">
+          <SettingsPagerTabs
+            activeId={activeSettingsPage.id}
+            blurTarget={blurTarget}
+            items={settingsItems}
+            onSelect={handleSelectSettingsPage}
+            swipeHint={t('mobile.swipeHint')}
+            tabListLabel={t('mobile.settingsTabsLabel')}
+          />
+          <YStack grow={1} shrink={1} minH={0}>{children}</YStack>
+        </YStack>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView edges={[]} style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <YStack grow={1} shrink={1} minH={0} overflow="hidden">
+        <YStack shrink={0} borderBottomWidth={1} borderColor="$terminalBorder">
+          <NavigationHeader
+            avatarInitial={t('mobile.avatarInitial')}
+            avatarLabel={t('mobile.avatarLabel')}
+            blurTarget={blurTarget}
+            isSettingsActive={false}
+            onSettingsPress={handleScopePress}
+            settingsLabel={t('scopeSwitcher.openSettings')}
+            title={tDashboard(`navigation.sections.${activeDashboardPage.id}.label`)}
+          />
+        </YStack>
+        <YStack grow={1} shrink={1} minH={0}>{children}</YStack>
+        <MobileBottomNavigation
+          activeId={activeDashboardPage.id}
+          items={dashboardItems}
+          onSelect={handleSelectDashboardPage}
+          reducedMotion={reducedMotion}
+        />
+      </YStack>
+    </SafeAreaView>
+  );
+}
+
+export function NavigationLayout({ blurTarget, children, onLogout }: NavigationLayoutProps) {
+  const { t } = useTranslation('navigation');
+  const { t: tDashboard } = useTranslation('dashboard');
   const media = useMedia();
   const pathname = usePathname();
   const router = useRouter();
   const reducedMotion = useReducedMotion();
   const scope = getNavigationScope(pathname);
-  const settledScope = useSettledNavigationScope(scope, reducedMotion);
-  const activeDashboardPage = dashboardPages.find((page) => page.route === pathname) ?? dashboardNavigation.defaultPage;
-  const activeSettingsPage = settingsPages.find((page) => page.route === pathname) ?? settingsNavigation.defaultPage;
+  const matchedDashboardPage = dashboardPages.find((page) => page.route === pathname);
+  const matchedSettingsPage = settingsPages.find((page) => page.route === pathname);
+  const [lastDashboardPage, setLastDashboardPage] = useState<DashboardPage>(
+    matchedDashboardPage ?? dashboardNavigation.defaultPage,
+  );
+  const [lastSettingsPage, setLastSettingsPage] = useState<SettingsPage>(
+    matchedSettingsPage ?? settingsNavigation.defaultPage,
+  );
+  const activeDashboardPage = matchedDashboardPage ?? lastDashboardPage;
+  const activeSettingsPage = matchedSettingsPage ?? lastSettingsPage;
   const isCompact = Boolean(media['max-md']);
-  const isSettingsSwipeEnabled = isCompact;
-  const {
-    isBottomInsetOwnedByDashboardChrome,
-    isDashboardChromeVisible,
-    isNavigationHeaderVisible,
-    isScopeContentVisible,
-    isSettingsChromeVisible,
-  } = resolveNavigationChromeVisibility({ isCompact, scope, settledScope });
   const headerTitle = scope === 'dashboard'
     ? tDashboard(`navigation.sections.${activeDashboardPage.id}.label`)
     : t(`pages.${activeSettingsPage.id}.label`);
@@ -87,22 +150,20 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
     settingsRoute: activeSettingsPage.route,
   });
 
-  useEffect(() => {
-    if (scope === 'settings') onEnterSettings();
-  }, [onEnterSettings, scope]);
-
   const handleExitSettings = useCallback(() => {
+    setLastSettingsPage(activeSettingsPage);
     returnToDashboard();
-  }, [returnToDashboard]);
+  }, [activeSettingsPage, returnToDashboard]);
 
   const handleScopePress = useCallback(() => {
     if (scope === 'dashboard') {
+      setLastDashboardPage(activeDashboardPage);
       enterSettings(settingsNavigation.defaultPage.route);
       return;
     }
 
     handleExitSettings();
-  }, [enterSettings, handleExitSettings, scope]);
+  }, [activeDashboardPage, enterSettings, handleExitSettings, scope]);
 
   useNavigationBackHandler(pathname, handleExitSettings);
 
@@ -124,236 +185,100 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
 
   const handleSelectDashboardPage = (pageId: string) => {
     const page = dashboardPages.find((candidate) => candidate.id === pageId);
-    if (page && page.route !== pathname) router.replace(page.route);
+    if (page && page.route !== pathname) {
+      setLastDashboardPage(page);
+      router.replace(page.route);
+    }
   };
 
-  const handleSelectSettingsPage = (pageId: SettingsPageId) => {
+  const handleSelectSettingsPage = (pageId: string) => {
     const page = settingsPages.find((candidate) => candidate.id === pageId);
     if (!page || page.route === pathname) return;
 
+    setLastSettingsPage(page);
     router.replace(page.route);
   };
 
-  const scopeMotion = getPageMotionProps(reducedMotion);
-  const topChromeMotion = getPageChromeMotionProps('top', reducedMotion);
-  const bottomChromeMotion = getPageChromeMotionProps('bottom', reducedMotion);
+  const dashboardItems = dashboardPages.map((page) => ({
+    icon: page.icon,
+    id: page.id,
+    label: tDashboard(`navigation.sections.${page.id}.label`),
+  }));
+  const settingsItems = settingsPages.map((page) => ({
+    icon: page.icon,
+    id: page.id,
+    label: t(`pages.${page.id}.label`),
+  }));
+  const sidebarItems = scope === 'dashboard' ? dashboardItems : settingsItems;
+  const activeSidebarId = scope === 'dashboard' ? activeDashboardPage.id : activeSettingsPage.id;
+  const handleSelectSidebarPage = scope === 'dashboard'
+    ? handleSelectDashboardPage
+    : handleSelectSettingsPage;
+
+  const contextValue: NavigationLayoutContextValue = {
+    activeDashboardPage,
+    activeSettingsPage,
+    blurTarget,
+    dashboardItems,
+    handleScopePress,
+    handleSelectDashboardPage,
+    handleSelectSettingsPage,
+    isCompact,
+    reducedMotion,
+    settingsItems,
+  };
 
   return (
-    <>
+    <NavigationLayoutContext.Provider value={contextValue}>
       <HorizontalSwipeScope
         active={scope === 'settings'}
-        enabled={isSettingsSwipeEnabled}
+        enabled={isCompact}
         name="settings-navigation"
         onSwipe={handleSettingsSwipe}
       />
       <SafeAreaView
-        edges={isBottomInsetOwnedByDashboardChrome ? [] : ['bottom']}
+        edges={isCompact || scope === 'dashboard' ? [] : ['bottom']}
         style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
       >
         <YStack grow={1} height="100%" maxH="100%" overflow="hidden">
-      <XStack grow={1} shrink={1} minH={0}>
-        <YStack
-          display="none"
-          width={224}
-          shrink={0}
-          borderRightWidth={1}
-          borderColor="$terminalBorder"
-          bg="$terminalSurface"
-          $md={{ display: 'flex' }}
-          $xl={{ width: 256 }}
-        >
-          <YStack px="$4.5" py="$4.5" gap="$2" borderBottomWidth={1} borderColor="$terminalBorder">
-            <TerminalText size="$5" fontWeight="800" letterSpacing={2.8}>{tDashboard('navigation.brandTitle')}</TerminalText>
-            <MonoText size="$1">{tDashboard('navigation.brandSubtitle')}</MonoText>
-            <YStack mt="$1"><DecorativeBarcode /></YStack>
-          </YStack>
+          <XStack grow={1} shrink={1} minH={0}>
+            <DesktopNavigationSidebar
+              activeId={activeSidebarId}
+              items={sidebarItems}
+              onLogout={onLogout}
+              onSelect={handleSelectSidebarPage}
+              onToggleScope={handleScopePress}
+              scope={scope}
+            />
 
-          <YStack grow={1} minH={0} position="relative" overflow="hidden">
-            <AnimatePresence mode="wait">
-              <YStack
-                key={scope}
-                {...scopeMotion}
-                position="absolute"
-                t={0}
-                b={0}
-                l={0}
-                r={0}
-                px="$3"
-                py="$4"
-                gap="$1.5"
-              >
-                {scope === 'dashboard'
-                  ? dashboardPages.map((page) => {
-                    const isActive = page.id === activeDashboardPage.id;
-                    const Icon = page.icon;
-                    return (
-                      <Button
-                        key={page.id}
-                        unstyled
-                        minH="$4.5"
-                        px="$3"
-                        py="$2"
-                        flexDirection="row"
-                        items="center"
-                        justify="flex-start"
-                        gap="$3"
-                        borderWidth={1}
-                        borderColor={isActive ? '$terminalCyanBorder' : 'transparent'}
-                        bg={isActive ? '$terminalCyanSoft' : 'transparent'}
-                        hoverStyle={{ borderColor: '$terminalBorder', bg: '$terminalRaised' }}
-                        pressStyle={{ opacity: 0.7 }}
-                        onPress={() => handleSelectDashboardPage(page.id)}
-                        aria-pressed={isActive}
-                        $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}
-                      >
-                        <Icon size={18} color={isActive ? colors.terminalCyan.val : colors.terminalMuted.val} strokeWidth={isActive ? 2 : 1.5} />
-                        <TerminalText size="$3" fontWeight={isActive ? '700' : '500'} color={isActive ? '$terminalCyan' : '$terminalMuted'} numberOfLines={1}>{tDashboard(`navigation.sections.${page.id}.label`)}</TerminalText>
-                      </Button>
-                    );
-                  })
-                  : settingsPages.map((page) => {
-                    const isActive = page.id === activeSettingsPage.id;
-                    const Icon = page.icon;
-                    return (
-                      <Button
-                        key={page.id}
-                        unstyled
-                        minH="$5"
-                        px="$3"
-                        py="$2"
-                        flexDirection="row"
-                        items="center"
-                        justify="flex-start"
-                        gap="$3"
-                        borderWidth={1}
-                        borderColor={isActive ? '$terminalCyanBorder' : 'transparent'}
-                        bg={isActive ? '$terminalCyanSoft' : 'transparent'}
-                        hoverStyle={{ borderColor: '$terminalCyanBorder', bg: '$terminalRaised' }}
-                        pressStyle={{ opacity: 0.7 }}
-                        onPress={() => handleSelectSettingsPage(page.id)}
-                        aria-pressed={isActive}
-                        $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px))' }}
-                      >
-                        <Icon size={19} color={isActive ? colors.terminalCyan.val : colors.terminalMuted.val} strokeWidth={isActive ? 2 : 1.5} />
-                        <TerminalText size="$3" fontWeight={isActive ? '700' : '500'} color={isActive ? '$terminalCyan' : '$terminalMuted'} numberOfLines={1}>{t(`pages.${page.id}.label`)}</TerminalText>
-                      </Button>
-                    );
-                  })}
-              </YStack>
-            </AnimatePresence>
-          </YStack>
-
-          <YStack px="$3" pb="$3">
-            <Button
-              unstyled
-              minH="$5"
-              px="$3"
-              flexDirection="row"
-              items="center"
-              justify="flex-start"
-              borderWidth={1}
-              borderColor={scope === 'settings' ? '$terminalCyanBorder' : '$terminalBorder'}
-              bg={scope === 'settings' ? '$terminalCyanSoft' : '$terminalRaisedTranslucent'}
-              hoverStyle={{ borderColor: '$terminalCyanBorder', bg: '$terminalCyanSoft' }}
-              pressStyle={{ opacity: 0.7 }}
-              onPress={handleScopePress}
-              aria-label={scope === 'dashboard' ? t('scopeSwitcher.openSettings') : t('scopeSwitcher.returnToDashboard')}
-              $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}
-            >
-              <XStack items="center" gap="$2.5">
-                {scope === 'settings' ? <ChevronLeft size={16} color={colors.terminalCyan.val} /> : <Orbit size={17} color={colors.terminalCyan.val} />}
-                <TerminalText size="$2.5" color="$terminalCyan" fontWeight="700">
-                  {t(scope === 'dashboard' ? 'scopeSwitcher.settings' : 'scopeSwitcher.dashboard')}
-                </TerminalText>
-              </XStack>
-            </Button>
-          </YStack>
-
-          <YStack px="$4.5" py="$4" borderTopWidth={1} borderColor="$terminalBorder">
-            <Button unstyled height="$4" px="$3" flexDirection="row" items="center" justify="center" gap="$2" borderWidth={1} borderColor="$terminalBorder" hoverStyle={{ borderColor: '$terminalWarningBorder', bg: '$terminalWarningSoft' }} pressStyle={{ opacity: 0.7 }} onPress={onLogout}>
-              <LogOut size={14} color={colors.terminalMuted.val} />
-              <MonoText size="$2">{tCommon('actions.logout')}</MonoText>
-            </Button>
-          </YStack>
-        </YStack>
-
-        <YStack grow={1} shrink={1} minW={0} minH={0}>
-          <AnimatePresence>
-            {isNavigationHeaderVisible ? (
-              <YStack
-                key="navigation-header"
-                {...topChromeMotion}
-                shrink={0}
-                borderBottomWidth={1}
-                borderColor="$terminalBorder"
-              >
-                <NavigationHeader
-                  avatarInitial={t('mobile.avatarInitial')}
-                  avatarLabel={t('mobile.avatarLabel')}
-                  blurTarget={blurTarget}
-                  isSettingsActive={scope === 'settings'}
-                  onSettingsPress={handleScopePress}
-                  settingsLabel={t(scope === 'dashboard' ? 'scopeSwitcher.openSettings' : 'scopeSwitcher.returnToDashboard')}
-                  title={headerTitle}
-                />
-                <TerminalMarquee items={navigationMarqueeMessages.map((message) => ({ id: message.id, label: t(message.translationKey), tone: message.tone }))} />
-              </YStack>
-            ) : null}
-          </AnimatePresence>
-
-          <YStack grow={1} shrink={1} minW={0} minH={0} overflow="hidden">
-            <AnimatePresence>
-              {isSettingsChromeVisible ? (
-                <YStack key="settings-pager-tabs" {...topChromeMotion} shrink={0}>
-                  <SettingsPagerTabs
-                    activeId={activeSettingsPage.id}
+            <YStack grow={1} shrink={1} minW={0} minH={0}>
+              {!isCompact ? (
+                <YStack
+                  shrink={0}
+                  borderBottomWidth={1}
+                  borderColor="$terminalBorder"
+                >
+                  <NavigationHeader
+                    avatarInitial={t('mobile.avatarInitial')}
+                    avatarLabel={t('mobile.avatarLabel')}
                     blurTarget={blurTarget}
-                    items={settingsPages.map((page) => ({
-                      id: page.id,
-                      label: t(`pages.${page.id}.label`),
-                    }))}
-                    onSelect={handleSelectSettingsPage}
-                    swipeHint={t('mobile.swipeHint')}
-                    tabListLabel={t('mobile.settingsTabsLabel')}
+                    isSettingsActive={scope === 'settings'}
+                    onSettingsPress={handleScopePress}
+                    settingsLabel={t(scope === 'dashboard' ? 'scopeSwitcher.openSettings' : 'scopeSwitcher.returnToDashboard')}
+                    title={headerTitle}
                   />
                 </YStack>
               ) : null}
-            </AnimatePresence>
 
-            <YStack
-              grow={1}
-              shrink={1}
-              minH={0}
-              opacity={isScopeContentVisible ? 1 : 0}
-              aria-hidden={!isScopeContentVisible}
-              style={{ pointerEvents: isScopeContentVisible ? 'auto' : 'none' }}
-              transition={reducedMotion ? '0ms' : PAGE_TRANSITION_TIMING.phase}
-              animateOnly={['opacity']}
-            >
-              {children}
-            </YStack>
-          </YStack>
-
-          <AnimatePresence>
-            {isDashboardChromeVisible ? (
-              <YStack key="mobile-bottom-navigation" {...bottomChromeMotion} shrink={0}>
-                <MobileBottomNavigation
-                  activeId={activeDashboardPage.id}
-                  items={dashboardPages.map((page) => ({
-                    icon: page.icon,
-                    id: page.id,
-                    label: tDashboard(`navigation.sections.${page.id}.label`),
-                  }))}
-                  onSelect={handleSelectDashboardPage}
-                  reducedMotion={reducedMotion}
-                />
+              <YStack grow={1} shrink={1} minW={0} minH={0} overflow="hidden">
+                <YStack grow={1} shrink={1} minH={0}>
+                  {children}
+                </YStack>
               </YStack>
-            ) : null}
-          </AnimatePresence>
-        </YStack>
-      </XStack>
+            </YStack>
+          </XStack>
         </YStack>
       </SafeAreaView>
-    </>
+    </NavigationLayoutContext.Provider>
   );
 }

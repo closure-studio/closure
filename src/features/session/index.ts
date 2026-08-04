@@ -1,6 +1,7 @@
 export { SessionShell, useSessionBackdrop } from './components/session-shell';
 export {
   getRouteScreenOptions,
+  getScopeTransitionScreenOptions,
 } from './navigation/route-transition';
 export {
   AuthProvider,

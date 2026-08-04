@@ -1,5 +1,5 @@
 import { PAGE_TRANSITION_TIMING } from '@/constants/page-transition';
-import { getPageChromeMotionProps, getPageMotionProps } from './page-transition';
+import { getPageMotionProps } from './page-transition';
 
 describe('page transition motion', () => {
   it('derives the complete transition from two shared phases', () => {
@@ -20,29 +20,11 @@ describe('page transition motion', () => {
     });
   });
 
-  it('moves top and bottom chrome toward their respective edges', () => {
-    expect(getPageChromeMotionProps('top', false)).toMatchObject({
-      transition: PAGE_TRANSITION_TIMING.phase,
-      enterStyle: { opacity: 0, y: -18 },
-      exitStyle: { opacity: 0, y: -18 },
-    });
-    expect(getPageChromeMotionProps('bottom', false)).toMatchObject({
-      transition: PAGE_TRANSITION_TIMING.phase,
-      enterStyle: { opacity: 0, y: 18 },
-      exitStyle: { opacity: 0, y: 18 },
-    });
-  });
-
-  it('keeps page and chrome content still when reduced motion is enabled', () => {
+  it('keeps page content still when reduced motion is enabled', () => {
     expect(getPageMotionProps(true)).toMatchObject({
       transition: '0ms',
       enterStyle: { filter: 'blur(0px)', opacity: 1, y: 0 },
       exitStyle: { filter: 'blur(0px)', opacity: 1, y: 0 },
-    });
-    expect(getPageChromeMotionProps('top', true)).toMatchObject({
-      transition: '0ms',
-      enterStyle: { opacity: 1, y: 0 },
-      exitStyle: { opacity: 1, y: 0 },
     });
   });
 });

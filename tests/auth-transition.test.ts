@@ -1,6 +1,7 @@
 import { PAGE_TRANSITION_TIMING } from '@/constants/page-transition';
 import {
   getRouteScreenOptions,
+  getScopeTransitionScreenOptions,
 } from '@/features/session/navigation/route-transition';
 import { IOS_BACK_GESTURE_EDGE_WIDTH_PT } from '@/constants/back-navigation';
 
@@ -44,5 +45,39 @@ describe('route transition', () => {
     })).toMatchObject({
       gestureEnabled: false,
     });
+  });
+
+  it('uses the shared timing for the compact Dashboard and Settings scene push', () => {
+    const screenOptions = getScopeTransitionScreenOptions(false, {
+      cardBackgroundColor: '#001018',
+      platform: 'ios',
+    });
+
+    expect(typeof screenOptions.cardStyleInterpolator).toBe('function');
+    expect(screenOptions).toMatchObject({
+      animation: 'default',
+      animationTypeForReplace: 'push',
+      cardOverlayEnabled: false,
+      cardShadowEnabled: false,
+      detachPreviousScreen: false,
+      gestureDirection: 'horizontal',
+      gestureEnabled: true,
+      gestureResponseDistance: IOS_BACK_GESTURE_EDGE_WIDTH_PT,
+      transitionSpec: {
+        open: { config: { duration: PAGE_TRANSITION_TIMING.totalMs } },
+        close: { config: { duration: PAGE_TRANSITION_TIMING.totalMs } },
+      },
+    });
+  });
+
+  it('disables compact scene motion and non-iOS gestures where required', () => {
+    expect(getScopeTransitionScreenOptions(true, {
+      cardBackgroundColor: '#001018',
+      platform: 'ios',
+    })).toMatchObject({ animation: 'none', gestureEnabled: false });
+    expect(getScopeTransitionScreenOptions(false, {
+      cardBackgroundColor: '#001018',
+      platform: 'android',
+    })).toMatchObject({ gestureEnabled: false });
   });
 });
