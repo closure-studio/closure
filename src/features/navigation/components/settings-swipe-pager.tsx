@@ -1,8 +1,4 @@
-import { BlurView } from 'expo-blur';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
-import type { RefObject } from 'react';
-import { StyleSheet } from 'react-native';
-import type { View } from 'react-native';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import {
@@ -12,6 +8,7 @@ import {
   TerminalText,
 } from '@/components';
 import type { HorizontalSwipeDirection } from '@/components';
+import { NavigationHeaderEdge } from './navigation-header-edge';
 import type { SettingsPageId } from '../navigation-config';
 
 const PAGER_ITEM_HEIGHT = 22;
@@ -26,18 +23,6 @@ type SettingsPagerItem = {
 export type SettingsSwipeAction =
   | { type: 'exit' }
   | { pageId: SettingsPageId; type: 'select-page' };
-
-const styles = StyleSheet.create({
-  blur: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    zIndex: 0,
-    pointerEvents: 'none',
-  },
-});
 
 export function resolveSettingsSwipeAction({
   activeId,
@@ -91,27 +76,18 @@ function SettingsPagerTick() {
 
 export function SettingsPagerTabs({
   activeId,
-  blurTarget,
   items,
   onSelect,
   swipeHint,
   tabListLabel,
 }: {
   activeId: SettingsPageId;
-  blurTarget: RefObject<View | null>;
   items: readonly SettingsPagerItem[];
   onSelect: (pageId: SettingsPageId) => void;
   swipeHint: string;
   tabListLabel: string;
 }) {
   const colors = getTokens().color;
-  const platformBlurProps = process.env.EXPO_OS === 'android'
-    ? {
-        blurMethod: 'dimezisBlurViewSdk31Plus',
-        blurReductionFactor: 1,
-        blurTarget,
-      } as const
-    : {};
   const hasPreviousStep = hasAdjacentSettingsPage({ activeId, direction: 'right', items });
   const hasNextStep = hasAdjacentSettingsPage({ activeId, direction: 'left', items });
 
@@ -130,23 +106,7 @@ export function SettingsPagerTabs({
         bg="transparent"
         $md={{ display: 'none' }}
       >
-        <BlurView
-          {...platformBlurProps}
-          intensity={64}
-          tint="dark"
-          style={styles.blur}
-        />
-        <YStack
-          position="absolute"
-          t={0}
-          b={0}
-          l={0}
-          r={0}
-          bg="$terminalSurface"
-          opacity={0.28}
-          z="$0"
-          style={{ pointerEvents: 'none' }}
-        />
+        <NavigationHeaderEdge />
 
         <XStack
           position="relative"

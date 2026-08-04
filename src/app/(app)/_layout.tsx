@@ -32,7 +32,7 @@ export default function AppLayout() {
   const router = useRouter();
   const reducedMotion = useReducedMotion();
   const { authState, signOut } = useAuth();
-  const { blurTarget, resetBackdropTint } = useSessionBackdrop();
+  const { resetBackdropTint } = useSessionBackdrop();
   const isCompact = Boolean(media['max-md']);
   const screenOptions = isCompact
     ? getScopeTransitionScreenOptions(reducedMotion, {
@@ -55,10 +55,7 @@ export default function AppLayout() {
   };
 
   return (
-    <NavigationLayout
-      blurTarget={blurTarget}
-      onLogout={handleLogout}
-    >
+    <NavigationLayout onLogout={handleLogout}>
       <AppStack
         screenLayout={renderNavigationScopeScreen}
         screenOptions={screenOptions}

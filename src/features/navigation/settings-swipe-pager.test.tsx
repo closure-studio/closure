@@ -1,6 +1,4 @@
 import { render } from '@testing-library/react-native';
-import { createRef } from 'react';
-import type { View } from 'react-native';
 import { TamaguiProvider } from 'tamagui';
 
 import { HorizontalSwipeProvider } from '@/components';
@@ -21,7 +19,6 @@ async function renderSettingsPagerTabs() {
       <HorizontalSwipeProvider>
         <SettingsPagerTabs
           activeId="network"
-          blurTarget={createRef<View>()}
           items={settingsItems}
           onSelect={jest.fn()}
           swipeHint="SWIPE L/R"

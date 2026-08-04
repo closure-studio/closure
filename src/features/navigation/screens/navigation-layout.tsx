@@ -1,8 +1,7 @@
-import type { PropsWithChildren, RefObject } from 'react';
+import type { PropsWithChildren } from 'react';
 import { createContext, useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
-import type { View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { XStack, YStack, useMedia } from 'tamagui';
@@ -34,7 +33,6 @@ type SettingsPage = (typeof settingsPages)[number];
 type NavigationLayoutContextValue = {
   activeDashboardPage: DashboardPage;
   activeSettingsPage: SettingsPage;
-  blurTarget: RefObject<View | null>;
   dashboardItems: { icon: DashboardPage['icon']; id: DashboardPage['id']; label: string }[];
   handleScopePress: () => void;
   handleSelectDashboardPage: (pageId: string) => void;
@@ -53,7 +51,6 @@ function useNavigationLayoutContext(): NavigationLayoutContextValue {
 }
 
 type NavigationLayoutProps = PropsWithChildren<{
-  blurTarget: RefObject<View | null>;
   onLogout: () => void;
 }>;
 
@@ -66,7 +63,6 @@ export function NavigationScopeScreen({
   const {
     activeDashboardPage,
     activeSettingsPage,
-    blurTarget,
     dashboardItems,
     handleScopePress,
     handleSelectDashboardPage,
@@ -84,7 +80,6 @@ export function NavigationScopeScreen({
         <YStack grow={1} shrink={1} minH={0} overflow="hidden">
           <SettingsPagerTabs
             activeId={activeSettingsPage.id}
-            blurTarget={blurTarget}
             items={settingsItems}
             onSelect={handleSelectSettingsPage}
             swipeHint={t('mobile.swipeHint')}
@@ -103,7 +98,6 @@ export function NavigationScopeScreen({
           <NavigationHeader
             avatarInitial={t('mobile.avatarInitial')}
             avatarLabel={t('mobile.avatarLabel')}
-            blurTarget={blurTarget}
             isSettingsActive={false}
             onSettingsPress={handleScopePress}
             settingsLabel={t('scopeSwitcher.openSettings')}
@@ -122,7 +116,7 @@ export function NavigationScopeScreen({
   );
 }
 
-export function NavigationLayout({ blurTarget, children, onLogout }: NavigationLayoutProps) {
+export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) {
   const { t } = useTranslation('navigation');
   const { t: tDashboard } = useTranslation('dashboard');
   const media = useMedia();
@@ -218,7 +212,6 @@ export function NavigationLayout({ blurTarget, children, onLogout }: NavigationL
   const contextValue: NavigationLayoutContextValue = {
     activeDashboardPage,
     activeSettingsPage,
-    blurTarget,
     dashboardItems,
     handleScopePress,
     handleSelectDashboardPage,
@@ -261,7 +254,6 @@ export function NavigationLayout({ blurTarget, children, onLogout }: NavigationL
                   <NavigationHeader
                     avatarInitial={t('mobile.avatarInitial')}
                     avatarLabel={t('mobile.avatarLabel')}
-                    blurTarget={blurTarget}
                     isSettingsActive={scope === 'settings'}
                     onSettingsPress={handleScopePress}
                     settingsLabel={t(scope === 'dashboard' ? 'scopeSwitcher.openSettings' : 'scopeSwitcher.returnToDashboard')}

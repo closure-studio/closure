@@ -1,17 +1,12 @@
-import { BlurView } from 'expo-blur';
 import { Settings } from 'lucide-react-native';
-import type { RefObject } from 'react';
-import { StyleSheet } from 'react-native';
-import type { View } from 'react-native';
-import Svg, { Defs, LinearGradient as SvgLinearGradient, Rect, Stop } from 'react-native-svg';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import { TerminalText } from '@/components';
+import { NavigationHeaderEdge } from './navigation-header-edge';
 
 type NavigationHeaderProps = {
   avatarInitial: string;
   avatarLabel: string;
-  blurTarget: RefObject<View | null>;
   isSettingsActive: boolean;
   onSettingsPress: () => void;
   settingsLabel: string;
@@ -19,27 +14,6 @@ type NavigationHeaderProps = {
 };
 
 type ProfileAvatarProps = Pick<NavigationHeaderProps, 'avatarInitial' | 'avatarLabel'>;
-
-const styles = StyleSheet.create({
-  blur: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    zIndex: 0,
-    pointerEvents: 'none',
-  },
-  fadingEdge: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    left: 0,
-    height: 5,
-    zIndex: 0,
-    pointerEvents: 'none',
-  },
-});
 
 function ProfileAvatar({ avatarInitial, avatarLabel }: ProfileAvatarProps) {
   return (
@@ -74,20 +48,12 @@ function ProfileAvatar({ avatarInitial, avatarLabel }: ProfileAvatarProps) {
 export function NavigationHeader({
   avatarInitial,
   avatarLabel,
-  blurTarget,
   isSettingsActive,
   onSettingsPress,
   settingsLabel,
   title,
 }: NavigationHeaderProps) {
   const colors = getTokens().color;
-  const platformBlurProps = process.env.EXPO_OS === 'android'
-    ? {
-        blurMethod: 'dimezisBlurViewSdk31Plus',
-        blurReductionFactor: 1,
-        blurTarget,
-      } as const
-    : {};
 
   return (
     <YStack
@@ -95,51 +61,7 @@ export function NavigationHeader({
       overflow="hidden"
       bg="transparent"
     >
-      <BlurView
-        {...platformBlurProps}
-        intensity={80}
-        tint="dark"
-        style={styles.blur}
-      />
-      <YStack
-        position="absolute"
-        t={0}
-        b={0}
-        l={0}
-        r={0}
-        bg="$terminalSurface"
-        opacity={0.18}
-        z="$0"
-        style={{ pointerEvents: 'none' }}
-      />
-      <YStack
-        position="absolute"
-        t={0}
-        l={0}
-        r={0}
-        height={1}
-        bg="$terminalText"
-        opacity={0.5}
-        z="$0"
-        style={{ pointerEvents: 'none' }}
-      />
-      <Svg
-        width="100%"
-        height={5}
-        style={styles.fadingEdge}
-      >
-        <Defs>
-          <SvgLinearGradient id="navigation-header-edge" x1="0%" y1="0%" x2="100%" y2="0%">
-            <Stop offset="0%" stopColor={colors.terminalCyan.val} stopOpacity={0} />
-            <Stop offset="20%" stopColor={colors.terminalCyan.val} stopOpacity={0.08} />
-            <Stop offset="50%" stopColor={colors.terminalCyan.val} stopOpacity={0.72} />
-            <Stop offset="80%" stopColor={colors.terminalCyan.val} stopOpacity={0.08} />
-            <Stop offset="100%" stopColor={colors.terminalCyan.val} stopOpacity={0} />
-          </SvgLinearGradient>
-        </Defs>
-        <Rect width="100%" height={5} fill="url(#navigation-header-edge)" opacity={0.12} />
-        <Rect width="100%" height={1} fill="url(#navigation-header-edge)" transform="translate(0 4)" />
-      </Svg>
+      <NavigationHeaderEdge />
 
       <XStack position="relative" z="$1" minH="$6" px="$3.5" items="center" gap="$2" $md={{ display: 'none' }}>
         <ProfileAvatar avatarInitial={avatarInitial} avatarLabel={avatarLabel} />
