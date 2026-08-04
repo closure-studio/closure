@@ -150,7 +150,13 @@ export function getScopeTransitionScreenOptions(
   };
   const platform = policy.platform ?? process.env.EXPO_OS;
 
-  if (reducedMotion) return { ...sharedOptions, animation: 'none' };
+  if (reducedMotion) {
+    return {
+      ...sharedOptions,
+      animation: 'none',
+      detachPreviousScreen: true,
+    };
+  }
 
   return {
     ...sharedOptions,

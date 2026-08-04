@@ -237,7 +237,7 @@ export function NavigationLayout({ blurTarget, children, onLogout }: NavigationL
         onSwipe={handleSettingsSwipe}
       />
       <SafeAreaView
-        edges={isCompact || scope === 'dashboard' ? [] : ['bottom']}
+        edges={isCompact ? [] : ['bottom']}
         style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
       >
         <YStack grow={1} height="100%" maxH="100%" overflow="hidden">

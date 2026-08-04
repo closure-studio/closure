@@ -74,7 +74,12 @@ describe('route transition', () => {
     expect(getScopeTransitionScreenOptions(true, {
       cardBackgroundColor: '#001018',
       platform: 'ios',
-    })).toMatchObject({ animation: 'none', gestureEnabled: false });
+    })).toMatchObject({
+      animation: 'none',
+      cardStyle: { backgroundColor: 'transparent' },
+      detachPreviousScreen: true,
+      gestureEnabled: false,
+    });
     expect(getScopeTransitionScreenOptions(false, {
       cardBackgroundColor: '#001018',
       platform: 'android',
