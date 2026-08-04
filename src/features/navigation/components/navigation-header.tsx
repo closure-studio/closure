@@ -57,6 +57,7 @@ export function NavigationHeader({
 
   return (
     <YStack
+      testID="navigation-header"
       position="relative"
       overflow="hidden"
       bg="transparent"

@@ -3,7 +3,7 @@ import type { PropsWithChildren } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { XStack, YStack, getTokens } from 'tamagui';
 
-import { TerminalBackdrop } from '@/components';
+import { SessionBackdrop } from './session-backdrop';
 
 type SessionBackdropContextValue = {
   resetBackdropTint: () => void;
@@ -41,7 +41,7 @@ export function SessionShell({ children }: PropsWithChildren) {
           bg="$terminalBg"
           $md={{ maxW: '100%', borderLeftWidth: 0, borderRightWidth: 0 }}
         >
-          <TerminalBackdrop tint={backdropTint} />
+          <SessionBackdrop tint={backdropTint} />
           <SafeAreaView
             edges={['top', 'right', 'left']}
             style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}

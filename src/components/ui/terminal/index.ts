@@ -1,4 +1,3 @@
-export { TerminalBackdrop } from './backdrop';
 export { TerminalCheckbox, type TerminalCheckboxProps } from './terminal-checkbox';
 export { DecorativeBarcode } from './decorative-barcode';
 export { NotchedFrame } from './notched-frame';

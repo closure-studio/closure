@@ -31,15 +31,11 @@ type DashboardPage = (typeof dashboardPages)[number];
 type SettingsPage = (typeof settingsPages)[number];
 
 type NavigationLayoutContextValue = {
-  activeDashboardPage: DashboardPage;
-  activeSettingsPage: SettingsPage;
+  activeDashboardPageId: DashboardPage['id'];
   dashboardItems: { icon: DashboardPage['icon']; id: DashboardPage['id']; label: string }[];
-  handleScopePress: () => void;
   handleSelectDashboardPage: (pageId: string) => void;
-  handleSelectSettingsPage: (pageId: string) => void;
   isCompact: boolean;
   reducedMotion: boolean;
-  settingsItems: { icon: SettingsPage['icon']; id: SettingsPage['id']; label: string }[];
 };
 
 const NavigationLayoutContext = createContext<NavigationLayoutContextValue | null>(null);
@@ -58,18 +54,12 @@ export function NavigationScopeScreen({
   children,
   scope,
 }: PropsWithChildren<{ scope: 'dashboard' | 'settings' }>) {
-  const { t } = useTranslation('navigation');
-  const { t: tDashboard } = useTranslation('dashboard');
   const {
-    activeDashboardPage,
-    activeSettingsPage,
+    activeDashboardPageId,
     dashboardItems,
-    handleScopePress,
     handleSelectDashboardPage,
-    handleSelectSettingsPage,
     isCompact,
     reducedMotion,
-    settingsItems,
   } = useNavigationLayoutContext();
 
   if (!isCompact) return children;
@@ -78,13 +68,6 @@ export function NavigationScopeScreen({
     return (
       <SafeAreaView edges={['bottom']} style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <YStack grow={1} shrink={1} minH={0} overflow="hidden">
-          <SettingsPagerTabs
-            activeId={activeSettingsPage.id}
-            items={settingsItems}
-            onSelect={handleSelectSettingsPage}
-            swipeHint={t('mobile.swipeHint')}
-            tabListLabel={t('mobile.settingsTabsLabel')}
-          />
           <YStack grow={1} shrink={1} minH={0}>{children}</YStack>
         </YStack>
       </SafeAreaView>
@@ -94,19 +77,9 @@ export function NavigationScopeScreen({
   return (
     <SafeAreaView edges={[]} style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
       <YStack grow={1} shrink={1} minH={0} overflow="hidden">
-        <YStack shrink={0} borderBottomWidth={1} borderColor="$terminalBorder">
-          <NavigationHeader
-            avatarInitial={t('mobile.avatarInitial')}
-            avatarLabel={t('mobile.avatarLabel')}
-            isSettingsActive={false}
-            onSettingsPress={handleScopePress}
-            settingsLabel={t('scopeSwitcher.openSettings')}
-            title={tDashboard(`navigation.sections.${activeDashboardPage.id}.label`)}
-          />
-        </YStack>
         <YStack grow={1} shrink={1} minH={0}>{children}</YStack>
         <MobileBottomNavigation
-          activeId={activeDashboardPage.id}
+          activeId={activeDashboardPageId}
           items={dashboardItems}
           onSelect={handleSelectDashboardPage}
           reducedMotion={reducedMotion}
@@ -210,15 +183,11 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
     : handleSelectSettingsPage;
 
   const contextValue: NavigationLayoutContextValue = {
-    activeDashboardPage,
-    activeSettingsPage,
+    activeDashboardPageId: activeDashboardPage.id,
     dashboardItems,
-    handleScopePress,
     handleSelectDashboardPage,
-    handleSelectSettingsPage,
     isCompact,
     reducedMotion,
-    settingsItems,
   };
 
   return (
@@ -245,22 +214,32 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
             />
 
             <YStack grow={1} shrink={1} minW={0} minH={0}>
-              {!isCompact ? (
-                <YStack
-                  shrink={0}
-                  borderBottomWidth={1}
-                  borderColor="$terminalBorder"
-                >
-                  <NavigationHeader
-                    avatarInitial={t('mobile.avatarInitial')}
-                    avatarLabel={t('mobile.avatarLabel')}
-                    isSettingsActive={scope === 'settings'}
-                    onSettingsPress={handleScopePress}
-                    settingsLabel={t(scope === 'dashboard' ? 'scopeSwitcher.openSettings' : 'scopeSwitcher.returnToDashboard')}
-                    title={headerTitle}
+              <YStack testID="navigation-layout-header" shrink={0}>
+                {isCompact && scope === 'settings' ? (
+                  <SettingsPagerTabs
+                    activeId={activeSettingsPage.id}
+                    items={settingsItems}
+                    onSelect={handleSelectSettingsPage}
+                    swipeHint={t('mobile.swipeHint')}
+                    tabListLabel={t('mobile.settingsTabsLabel')}
                   />
-                </YStack>
-              ) : null}
+                ) : (
+                  <YStack
+                    shrink={0}
+                    borderBottomWidth={1}
+                    borderColor="$terminalBorder"
+                  >
+                    <NavigationHeader
+                      avatarInitial={t('mobile.avatarInitial')}
+                      avatarLabel={t('mobile.avatarLabel')}
+                      isSettingsActive={scope === 'settings'}
+                      onSettingsPress={handleScopePress}
+                      settingsLabel={t(scope === 'dashboard' ? 'scopeSwitcher.openSettings' : 'scopeSwitcher.returnToDashboard')}
+                      title={headerTitle}
+                    />
+                  </YStack>
+                )}
+              </YStack>
 
               <YStack grow={1} shrink={1} minW={0} minH={0} overflow="hidden">
                 <YStack grow={1} shrink={1} minH={0}>
