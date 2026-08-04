@@ -1,4 +1,15 @@
+import { useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import Animated, {
+  Easing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import {
@@ -14,6 +25,9 @@ import type { SettingsPageId } from '../navigation-config';
 const PAGER_ITEM_HEIGHT = 22;
 const PAGER_TICK_HEIGHT = 2;
 const PAGER_INACTIVE_TICK_WIDTH = 18;
+const SWIPE_HINT_OFFSET_PX = 10;
+const SWIPE_HINT_HALF_TRAVEL_DURATION_MS = 4_000;
+const SWIPE_HINT_FULL_TRAVEL_DURATION_MS = 8_000;
 
 type SettingsPagerItem = {
   id: SettingsPageId;
@@ -74,6 +88,52 @@ function SettingsPagerTick() {
   );
 }
 
+function AnimatedSwipeHint({ children }: { children: string }) {
+  const reducedMotion = useReducedMotion();
+  const horizontalOffset = useSharedValue(0);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: horizontalOffset.get() }],
+  }));
+
+  useEffect(() => {
+    cancelAnimation(horizontalOffset);
+    horizontalOffset.set(0);
+
+    if (!reducedMotion) {
+      horizontalOffset.set(withRepeat(
+        withSequence(
+          withTiming(SWIPE_HINT_OFFSET_PX, {
+            duration: SWIPE_HINT_HALF_TRAVEL_DURATION_MS,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(-SWIPE_HINT_OFFSET_PX, {
+            duration: SWIPE_HINT_FULL_TRAVEL_DURATION_MS,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(0, {
+            duration: SWIPE_HINT_HALF_TRAVEL_DURATION_MS,
+            easing: Easing.inOut(Easing.ease),
+          }),
+        ),
+        -1,
+        false,
+      ));
+    }
+
+    return () => cancelAnimation(horizontalOffset);
+  }, [horizontalOffset, reducedMotion]);
+
+  return (
+    <XStack justify="center" overflow="hidden">
+      <Animated.View testID="settings-swipe-hint" style={animatedStyle}>
+        <MonoText size="$1" text="center" color="$terminalMuted">
+          {children}
+        </MonoText>
+      </Animated.View>
+    </XStack>
+  );
+}
+
 export function SettingsPagerTabs({
   activeId,
   items,
@@ -117,7 +177,14 @@ export function SettingsPagerTabs({
           role="tablist"
           aria-label={tabListLabel}
         >
-          <YStack opacity={hasPreviousStep ? 0.55 : 0.15} style={{ pointerEvents: 'none' }}>
+          <YStack
+            testID="settings-previous-icon"
+            height={PAGER_ITEM_HEIGHT}
+            items="center"
+            justify="center"
+            opacity={hasPreviousStep ? 0.55 : 0.15}
+            style={{ pointerEvents: 'none' }}
+          >
             <ChevronLeft size={14} color={colors.terminalMuted.val} strokeWidth={1.5} />
           </YStack>
 
@@ -171,14 +238,19 @@ export function SettingsPagerTabs({
             })}
           </SlidingSelection>
 
-          <YStack opacity={hasNextStep ? 0.55 : 0.15} style={{ pointerEvents: 'none' }}>
+          <YStack
+            testID="settings-next-icon"
+            height={PAGER_ITEM_HEIGHT}
+            items="center"
+            justify="center"
+            opacity={hasNextStep ? 0.55 : 0.15}
+            style={{ pointerEvents: 'none' }}
+          >
             <ChevronRight size={14} color={colors.terminalMuted.val} strokeWidth={1.5} />
           </YStack>
         </XStack>
 
-        <MonoText size="$1" text="center" color="$terminalMuted">
-          {swipeHint}
-        </MonoText>
+        <AnimatedSwipeHint>{swipeHint}</AnimatedSwipeHint>
       </YStack>
     </HorizontalSwipeSurface>
   );
