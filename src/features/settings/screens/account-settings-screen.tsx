@@ -1,5 +1,5 @@
 import { CalendarClock, KeyRound, Mail, ShieldAlert, UserRound } from 'lucide-react-native';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as v from 'valibot';
 import {
@@ -22,6 +22,7 @@ import {
   TerminalText,
   TerminalTextField,
 } from '@/components';
+import { useBackDismissal } from '@/hooks/use-back-dismissal';
 import {
   passwordChangeInputSchema,
   passwordChangeIssue,
@@ -67,6 +68,10 @@ export function AccountSettingsScreen() {
   const [visiblePasswordField, setVisiblePasswordField] = useState<PasswordField | null>(null);
   const [passwordErrors, setPasswordErrors] = useState<PasswordErrors>({});
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const handleDeleteDialogDismiss = useCallback(() => {
+    setIsDeleteDialogOpen(false);
+  }, []);
+  useBackDismissal(isDeleteDialogOpen, handleDeleteDialogDismiss);
   const registeredAt = new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, {
     dateStyle: 'medium',
     timeStyle: 'short',

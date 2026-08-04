@@ -70,6 +70,8 @@ yarn-error.*
 /.playwright-mcp/
 /todo.md
 /.codegraph/
+/.claude/
+.mcp.json
 # generated native folders
 /ios
 /android

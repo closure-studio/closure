@@ -39,6 +39,16 @@ Use Valibot as the source of truth for stable domain data, business inputs, and 
 - Add focused schema tests for valid, boundary, empty, malformed, and cross-field failure cases. Canonical mocks and fixtures must be checked against their complete owning schema in tests.
 - Keep `src/types/` for ambient and module declarations only. Before handing off a schema migration, confirm there are no legacy duplicate domain types or imports from removed feature `types.ts` files.
 
+# Constants and Dependency Boundaries
+
+Keep constants with their narrowest owner. Put stable, non-domain constants in `src/constants/<name>.ts` only when they are shared across features or architectural layers.
+
+- Keep `src/constants` modules pure: no JSX and no imports from components, features, React Native, Expo UI packages, or other platform/UI modules.
+- Import shared constants directly from their owning module, for example `@/constants/page-transition`. Do not re-export them from `@/components` or another broad barrel, and do not make pure logic import a UI or feature barrel just to read a constant.
+- Keep feature-local policy values beside their feature owner. Do not move a constant to `src/constants` merely because more than one file in the same feature uses it.
+- Do not put Tamagui tokens, translated display copy, domain literals owned by Valibot schemas, runtime environment configuration, or mock/fixture data in `src/constants`.
+- In pure logic tests, import the subject and its constants from their direct modules so the test does not initialize unrelated UI or feature dependency graphs.
+
 # TypeScript Quality Gate
 
 Treat AI-generated TypeScript as untrusted until deterministic checks pass.

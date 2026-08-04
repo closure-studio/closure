@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, Button, ScrollView, Sheet, XStack, YStack } from 'tamagui';
 
 import { MonoText, TerminalFilterButton, TerminalMeterBar, TerminalPanel, TerminalSectionHeading, TerminalText } from '@/components';
+import { useBackDismissal } from '@/hooks/use-back-dismissal';
 import type { Operator } from '@/schemas/game-account';
 
 import { OperatorRarity } from './operator-rarity';
@@ -13,6 +14,10 @@ export function OperatorRosterView({ operators }: { operators: readonly Operator
   const { t } = useTranslation('dashboard');
   const [selectedProfession, setSelectedProfession] = useState<(typeof filters)[number]>('全部');
   const [selectedOperator, setSelectedOperator] = useState<Operator | null>(null);
+  const handleOperatorDetailsDismiss = useCallback(() => {
+    setSelectedOperator(null);
+  }, []);
+  useBackDismissal(selectedOperator !== null, handleOperatorDetailsDismiss);
   const visibleOperators = useMemo(
     () => selectedProfession === '全部' ? operators : operators.filter((operator) => operator.class === selectedProfession),
     [operators, selectedProfession],

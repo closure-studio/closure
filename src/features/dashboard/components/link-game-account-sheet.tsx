@@ -1,9 +1,10 @@
 import { LockKeyhole, Plus, Server, UserRound, X } from 'lucide-react-native';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Sheet, XStack, YStack, getTokens } from 'tamagui';
 
 import { MonoText, TerminalPasswordVisibilityButton, TerminalSectionHeading, TerminalText, TerminalTextField } from '@/components';
+import { useBackDismissal } from '@/hooks/use-back-dismissal';
 import type { LinkGameAccountCredentials, ServerChannel } from '@/schemas/game-account';
 
 export function LinkGameAccountSheet({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChange: (open: boolean) => void; onSubmit: (credentials: LinkGameAccountCredentials) => void }) {
@@ -16,7 +17,11 @@ export function LinkGameAccountSheet({ open, onOpenChange, onSubmit }: { open: b
   const [showPassword, setShowPassword] = useState(false);
   const [hasValidationError, setHasValidationError] = useState(false);
   const validationMessage = hasValidationError ? `// ${t('account.required')}` : null;
-  const handleClose = () => { setHasValidationError(false); onOpenChange(false); };
+  const handleClose = useCallback(() => {
+    setHasValidationError(false);
+    onOpenChange(false);
+  }, [onOpenChange]);
+  useBackDismissal(open, handleClose);
   const handleSubmit = () => {
     if (!accountIdentifier.trim() || !password.trim()) {
       setHasValidationError(true);

@@ -1,8 +1,9 @@
 import { useEffect, useMemo } from 'react';
 import type { LayoutChangeEvent, ScrollView as NativeScrollView } from 'react-native';
-import Animated, { useAnimatedRef, useScrollOffset, useSharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedRef, useReducedMotion, useScrollOffset, useSharedValue } from 'react-native-reanimated';
 import { AnimatePresence, YStack, getTokens } from 'tamagui';
 
+import { getPageMotionProps } from '@/components';
 import type { DashboardPageId } from '@/features/navigation';
 import { ActivityTimelineView } from '../components/activity-timeline-view';
 import { GameAccountSwitcher } from '../components/dashboard-navigation';
@@ -24,6 +25,8 @@ export function DashboardScreen({
   onShowOverview: () => void;
 }) {
   const colors = getTokens().color;
+  const reducedMotion = useReducedMotion();
+  const pageMotion = getPageMotionProps(reducedMotion);
   const {
     activeGameAccount,
     activeGameAccountId,
@@ -65,17 +68,12 @@ export function DashboardScreen({
         <AnimatePresence mode="wait">
           <YStack
             key={`${activeGameAccountId}-${activePageId}`}
-            transition="400ms"
+            {...pageMotion}
             position="absolute"
             t={0}
             b={0}
             l={0}
             r={0}
-            opacity={1}
-            y={0}
-            filter="blur(0px)"
-            enterStyle={{ opacity: 0, y: 16, filter: 'blur(8px)' }}
-            exitStyle={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
           >
             <Animated.ScrollView
               ref={contentScrollRef}
