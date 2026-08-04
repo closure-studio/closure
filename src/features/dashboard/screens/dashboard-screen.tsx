@@ -1,9 +1,10 @@
 import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { LayoutChangeEvent, ScrollView as NativeScrollView } from 'react-native';
 import Animated, { useAnimatedRef, useReducedMotion, useScrollOffset, useSharedValue } from 'react-native-reanimated';
 import { AnimatePresence, YStack, getTokens } from 'tamagui';
 
-import { getPageMotionProps } from '@/components';
+import { getPageMotionProps, TerminalMarquee } from '@/components';
 import type { DashboardPageId } from '@/features/navigation';
 import { ActivityTimelineView } from '../components/activity-timeline-view';
 import { GameAccountSwitcher } from '../components/dashboard-navigation';
@@ -15,6 +16,13 @@ import { RoutineTasksView } from '../components/routine-tasks-view';
 import { useDashboardState } from '../dashboard-context';
 import { selectBackdropTint } from '../selectors';
 
+const dashboardMarqueeMessages = [
+  { id: 'network', translationKey: 'marquee.network', tone: 'accent' },
+  { id: 'navigation', translationKey: 'marquee.navigation', tone: 'default' },
+  { id: 'account', translationKey: 'marquee.account', tone: 'warning' },
+  { id: 'sync', translationKey: 'marquee.sync', tone: 'success' },
+] as const;
+
 export function DashboardScreen({
   activePageId,
   onBackdropTintChange,
@@ -24,6 +32,7 @@ export function DashboardScreen({
   onBackdropTintChange: (tint: string) => void;
   onShowOverview: () => void;
 }) {
+  const { t } = useTranslation('navigation');
   const colors = getTokens().color;
   const reducedMotion = useReducedMotion();
   const pageMotion = getPageMotionProps(reducedMotion);
@@ -60,6 +69,11 @@ export function DashboardScreen({
 
   return (
     <YStack grow={1} height="100%" maxH="100%" overflow="hidden">
+      <TerminalMarquee items={dashboardMarqueeMessages.map((message) => ({
+        id: message.id,
+        label: t(message.translationKey),
+        tone: message.tone,
+      }))} />
       <YStack borderBottomWidth={1} borderColor="$terminalBorder" bg="$terminalSurface">
         <YStack px="$3.5" py="$3" $md={{ px: '$5' }}><GameAccountSwitcher gameAccounts={gameAccounts} activeGameAccountId={activeGameAccountId} onSelectGameAccount={selectGameAccount} onLinkGameAccount={() => setIsLinkGameAccountSheetOpen(true)} /></YStack>
       </YStack>

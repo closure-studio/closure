@@ -1,7 +1,3 @@
-# Expo HAS CHANGED
-
-Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before writing any code.
-
 # Tamagui-First UI
 
 Use Tamagui as the default UI and styling layer throughout `src/`. Before writing Tamagui code, run `npm run tamagui:generate` and read `.tamagui/prompt.md` so components, themes, tokens, media queries, fonts, and shorthands come from the project's actual configuration.

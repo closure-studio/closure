@@ -1,4 +1,4 @@
-export { NavigationLayout } from './screens/navigation-layout';
+export { NavigationLayout, NavigationScopeScreen } from './screens/navigation-layout';
 export {
   resolveNavigationBackAction,
   useNavigationBackHandler,
