@@ -14,7 +14,6 @@ async function renderMobileBottomNavigation(onSelect = jest.fn()) {
           { id: 'overview', icon: Grid2X2, label: 'Overview' },
           { id: 'operators', icon: UsersRound, label: 'Operators' },
         ]}
-        navigationKey="dashboard"
         onSelect={onSelect}
         reducedMotion
       />

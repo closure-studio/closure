@@ -8,6 +8,7 @@
   "mobile": {
     "avatarInitial": "博",
     "avatarLabel": "博士档案",
+    "settingsTabsLabel": "设置标签页",
     "swipeHint": "左右滑动切换"
   },
   "pages": {

@@ -1,6 +1,6 @@
 import { ChevronLeft, LogOut, Orbit } from 'lucide-react-native';
 import type { PropsWithChildren, RefObject } from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
 import type { View } from 'react-native';
@@ -11,15 +11,17 @@ import {
   DecorativeBarcode,
   HorizontalSwipeScope,
   MonoText,
-  SettingsTransitionProvider,
   TerminalMarquee,
   TerminalText,
+  getPageChromeMotionProps,
+  getPageMotionProps,
 } from '@/components';
-import type { HorizontalSwipeDirection, SettingsTransitionDirection } from '@/components';
+import type { HorizontalSwipeDirection } from '@/components';
+import { PAGE_TRANSITION_TIMING } from '@/constants/page-transition';
 import { MobileBottomNavigation } from '../components/mobile-bottom-navigation';
 import { NavigationHeader } from '../components/navigation-header';
 import {
-  SettingsSwipePager,
+  SettingsPagerTabs,
   resolveSettingsSwipeAction,
 } from '../components/settings-swipe-pager';
 import {
@@ -28,6 +30,14 @@ import {
   settingsNavigation,
 } from '../navigation-config';
 import type { SettingsPageId } from '../navigation-config';
+import {
+  useNavigationBackHandler,
+  useSettingsBackNavigation,
+} from '../back-navigation';
+import {
+  resolveNavigationChromeVisibility,
+  useSettledNavigationScope,
+} from '../navigation-chrome-state';
 
 const navigationMarqueeMessages = [
   { id: 'network', translationKey: 'marquee.network', tone: 'accent' },
@@ -54,30 +64,45 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
   const pathname = usePathname();
   const router = useRouter();
   const reducedMotion = useReducedMotion();
-  const [settingsTransitionDirection, setSettingsTransitionDirection] = useState<SettingsTransitionDirection>('none');
   const scope = getNavigationScope(pathname);
+  const settledScope = useSettledNavigationScope(scope, reducedMotion);
   const activeDashboardPage = dashboardPages.find((page) => page.route === pathname) ?? dashboardNavigation.defaultPage;
   const activeSettingsPage = settingsPages.find((page) => page.route === pathname) ?? settingsNavigation.defaultPage;
-  const isSettingsSwipeEnabled = Boolean(media['max-md']);
+  const isCompact = Boolean(media['max-md']);
+  const isSettingsSwipeEnabled = isCompact;
+  const {
+    isDashboardChromeVisible,
+    isNavigationHeaderVisible,
+    isScopeContentVisible,
+    isSettingsChromeVisible,
+  } = resolveNavigationChromeVisibility({ isCompact, scope, settledScope });
   const headerTitle = scope === 'dashboard'
     ? tDashboard(`navigation.sections.${activeDashboardPage.id}.label`)
     : t(`pages.${activeSettingsPage.id}.label`);
+  const { enterSettings, returnToDashboard } = useSettingsBackNavigation({
+    pathname,
+    router,
+    settingsRoute: activeSettingsPage.route,
+  });
 
   useEffect(() => {
     if (scope === 'settings') onEnterSettings();
   }, [onEnterSettings, scope]);
 
-  const handleScopePress = () => {
-    setSettingsTransitionDirection('none');
-    router.replace(scope === 'dashboard'
-      ? settingsNavigation.defaultPage.route
-      : dashboardNavigation.defaultPage.route);
-  };
+  const handleExitSettings = useCallback(() => {
+    returnToDashboard();
+  }, [returnToDashboard]);
 
-  const handleExitSettings = () => {
-    setSettingsTransitionDirection('none');
-    router.replace(dashboardNavigation.defaultPage.route);
-  };
+  const handleScopePress = useCallback(() => {
+    if (scope === 'dashboard') {
+      enterSettings(settingsNavigation.defaultPage.route);
+      return;
+    }
+
+    handleExitSettings();
+  }, [enterSettings, handleExitSettings, scope]);
+
+  useNavigationBackHandler(pathname, handleExitSettings);
 
   const handleSettingsSwipe = (direction: HorizontalSwipeDirection) => {
     const action = resolveSettingsSwipeAction({
@@ -104,22 +129,15 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
     const page = settingsPages.find((candidate) => candidate.id === pageId);
     if (!page || page.route === pathname) return;
 
-    const currentIndex = settingsPages.findIndex((candidate) => candidate.id === activeSettingsPage.id);
-    const nextIndex = settingsPages.findIndex((candidate) => candidate.id === pageId);
-    setSettingsTransitionDirection(nextIndex > currentIndex ? 'forward' : 'backward');
     router.replace(page.route);
   };
 
-  const transition = reducedMotion ? '0ms' : '400ms';
-  const enterStyle = reducedMotion
-    ? { opacity: 1, y: 0 }
-    : { opacity: 0, y: 22, filter: 'blur(8px)' };
-  const exitStyle = reducedMotion
-    ? { opacity: 1, y: 0 }
-    : { opacity: 0, y: -18, filter: 'blur(8px)' };
+  const scopeMotion = getPageMotionProps(reducedMotion);
+  const topChromeMotion = getPageChromeMotionProps('top', reducedMotion);
+  const bottomChromeMotion = getPageChromeMotionProps('bottom', reducedMotion);
 
   return (
-    <SettingsTransitionProvider direction={settingsTransitionDirection} reducedMotion={reducedMotion}>
+    <>
       <HorizontalSwipeScope
         active={scope === 'settings'}
         enabled={isSettingsSwipeEnabled}
@@ -148,7 +166,7 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
             <AnimatePresence mode="wait">
               <YStack
                 key={scope}
-                transition={transition}
+                {...scopeMotion}
                 position="absolute"
                 t={0}
                 b={0}
@@ -157,11 +175,6 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
                 px="$3"
                 py="$4"
                 gap="$1.5"
-                opacity={1}
-                y={0}
-                filter="blur(0px)"
-                enterStyle={enterStyle}
-                exitStyle={exitStyle}
               >
                 {scope === 'dashboard'
                   ? dashboardPages.map((page) => {
@@ -259,51 +272,81 @@ export function NavigationLayout({ blurTarget, children, onEnterSettings, onLogo
         </YStack>
 
         <YStack grow={1} shrink={1} minW={0} minH={0}>
-          <YStack borderBottomWidth={1} borderColor="$terminalBorder">
-            <NavigationHeader
-              avatarInitial={t('mobile.avatarInitial')}
-              avatarLabel={t('mobile.avatarLabel')}
-              blurTarget={blurTarget}
-              isSettingsActive={scope === 'settings'}
-              onSettingsPress={handleScopePress}
-              settingsLabel={t(scope === 'dashboard' ? 'scopeSwitcher.openSettings' : 'scopeSwitcher.returnToDashboard')}
-              title={headerTitle}
-            />
-            <TerminalMarquee items={navigationMarqueeMessages.map((message) => ({ id: message.id, label: t(message.translationKey), tone: message.tone }))} />
-          </YStack>
+          <AnimatePresence>
+            {isNavigationHeaderVisible ? (
+              <YStack
+                key="navigation-header"
+                {...topChromeMotion}
+                shrink={0}
+                borderBottomWidth={1}
+                borderColor="$terminalBorder"
+              >
+                <NavigationHeader
+                  avatarInitial={t('mobile.avatarInitial')}
+                  avatarLabel={t('mobile.avatarLabel')}
+                  blurTarget={blurTarget}
+                  isSettingsActive={scope === 'settings'}
+                  onSettingsPress={handleScopePress}
+                  settingsLabel={t(scope === 'dashboard' ? 'scopeSwitcher.openSettings' : 'scopeSwitcher.returnToDashboard')}
+                  title={headerTitle}
+                />
+                <TerminalMarquee items={navigationMarqueeMessages.map((message) => ({ id: message.id, label: t(message.translationKey), tone: message.tone }))} />
+              </YStack>
+            ) : null}
+          </AnimatePresence>
 
           <YStack grow={1} shrink={1} minW={0} minH={0} overflow="hidden">
-            {scope === 'settings' ? (
-              <SettingsSwipePager
-                activeId={activeSettingsPage.id}
-                hint={t('mobile.swipeHint')}
-                items={settingsPages.map((page) => ({
-                  id: page.id,
-                  label: t(`pages.${page.id}.label`),
-                }))}
-                onSelect={handleSelectSettingsPage}
-              >
-                {children}
-              </SettingsSwipePager>
-            ) : children}
+            <AnimatePresence>
+              {isSettingsChromeVisible ? (
+                <YStack key="settings-pager-tabs" {...topChromeMotion} shrink={0}>
+                  <SettingsPagerTabs
+                    activeId={activeSettingsPage.id}
+                    blurTarget={blurTarget}
+                    items={settingsPages.map((page) => ({
+                      id: page.id,
+                      label: t(`pages.${page.id}.label`),
+                    }))}
+                    onSelect={handleSelectSettingsPage}
+                    swipeHint={t('mobile.swipeHint')}
+                    tabListLabel={t('mobile.settingsTabsLabel')}
+                  />
+                </YStack>
+              ) : null}
+            </AnimatePresence>
+
+            <YStack
+              grow={1}
+              shrink={1}
+              minH={0}
+              opacity={isScopeContentVisible ? 1 : 0}
+              aria-hidden={!isScopeContentVisible}
+              style={{ pointerEvents: isScopeContentVisible ? 'auto' : 'none' }}
+              transition={reducedMotion ? '0ms' : PAGE_TRANSITION_TIMING.phase}
+              animateOnly={['opacity']}
+            >
+              {children}
+            </YStack>
           </YStack>
 
-          {scope === 'dashboard' ? (
-            <MobileBottomNavigation
-              activeId={activeDashboardPage.id}
-              items={dashboardPages.map((page) => ({
-                icon: page.icon,
-                id: page.id,
-                label: tDashboard(`navigation.sections.${page.id}.label`),
-              }))}
-              navigationKey={scope}
-              onSelect={handleSelectDashboardPage}
-              reducedMotion={reducedMotion}
-            />
-          ) : null}
+          <AnimatePresence>
+            {isDashboardChromeVisible ? (
+              <YStack key="mobile-bottom-navigation" {...bottomChromeMotion} shrink={0}>
+                <MobileBottomNavigation
+                  activeId={activeDashboardPage.id}
+                  items={dashboardPages.map((page) => ({
+                    icon: page.icon,
+                    id: page.id,
+                    label: tDashboard(`navigation.sections.${page.id}.label`),
+                  }))}
+                  onSelect={handleSelectDashboardPage}
+                  reducedMotion={reducedMotion}
+                />
+              </YStack>
+            ) : null}
+          </AnimatePresence>
         </YStack>
       </XStack>
         </YStack>
-    </SettingsTransitionProvider>
+    </>
   );
 }

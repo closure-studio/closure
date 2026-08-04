@@ -10,6 +10,7 @@ import {
 import type { PropsWithChildren, ReactElement } from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
+import { IOS_BACK_GESTURE_EDGE_WIDTH_PT } from '@/constants/back-navigation';
 import {
   registerHorizontalSwipeScope,
   selectActiveHorizontalSwipeScope,
@@ -134,16 +135,23 @@ export function HorizontalSwipeSurface({
     surfaceEnabled: enabled,
   });
   const panGesture = useMemo(
-    () => Gesture.Pan()
-      .enabled(isEnabled)
-      .activeOffsetX([-HORIZONTAL_SWIPE_THRESHOLD_PT, HORIZONTAL_SWIPE_THRESHOLD_PT])
-      .failOffsetY([-HORIZONTAL_SWIPE_THRESHOLD_PT, HORIZONTAL_SWIPE_THRESHOLD_PT])
-      .cancelsTouchesInView(false)
-      .runOnJS(true)
-      .onEnd(({ translationX, translationY }) => {
+    () => {
+      const gesture = Gesture.Pan()
+        .enabled(isEnabled)
+        .activeOffsetX([-HORIZONTAL_SWIPE_THRESHOLD_PT, HORIZONTAL_SWIPE_THRESHOLD_PT])
+        .failOffsetY([-HORIZONTAL_SWIPE_THRESHOLD_PT, HORIZONTAL_SWIPE_THRESHOLD_PT])
+        .cancelsTouchesInView(false)
+        .runOnJS(true);
+
+      if (process.env.EXPO_OS === 'ios') {
+        gesture.hitSlop({ left: -IOS_BACK_GESTURE_EDGE_WIDTH_PT });
+      }
+
+      return gesture.onEnd(({ translationX, translationY }) => {
         const direction = resolveHorizontalSwipeDirection({ translationX, translationY });
         if (direction) activeScope?.onSwipe(direction);
-      }),
+      });
+    },
     [activeScope, isEnabled],
   );
 

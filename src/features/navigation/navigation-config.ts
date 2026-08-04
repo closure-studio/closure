@@ -35,6 +35,8 @@ export const settingsNavigation = {
 
 export type DashboardPageId = keyof typeof dashboardNavigation.pages;
 export type SettingsPageId = keyof typeof settingsNavigation.pages;
+export type SettingsPageRoute =
+  (typeof settingsNavigation.pages)[SettingsPageId]['route'];
 export type NavigationScope = 'dashboard' | 'settings';
 
 export function getNavigationScope(pathname: string): NavigationScope {

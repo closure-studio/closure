@@ -28,7 +28,9 @@ export default function AppLayout() {
       onEnterSettings={resetBackdropTint}
       onLogout={handleLogout}
     >
-      <AppStack screenOptions={getRouteScreenOptions(reducedMotion)} />
+      <AppStack
+        screenOptions={getRouteScreenOptions(reducedMotion, { enableIosBackGesture: true })}
+      />
     </NavigationLayout>
   );
 }
