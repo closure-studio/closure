@@ -26,7 +26,10 @@ import * as v from 'valibot';
 
 import {
   MonoText,
+  NotchedButton,
+  NotchedSelectionIndicator,
   SectionPageHeader,
+  SlidingSelection,
   TerminalNotice,
   TerminalPanel,
   TerminalText,
@@ -332,112 +335,119 @@ export function NetworkSettingsScreen() {
             value={selectedApiNodeId}
             onValueChange={handleNodeChange}
             width="100%"
-            flexDirection="column"
-            gap="$3"
             aria-label={t('network.nodesTitle')}
-            $lg={{ flexDirection: 'row' }}
           >
-            {mockApiNodes.map((apiNode, index) => {
-              const isSelected = apiNode.id === selectedApiNodeId;
-              const isReachable = apiNode.outcome === 'reachable';
-              const latencyTone = isReachable
-                ? resolveLatencyTone(apiNode.mockLatencyMs)
-                : '$appDanger';
-              const SelectionIcon = isSelected ? CircleDot : Circle;
+            <SlidingSelection
+              value={selectedApiNodeId}
+              indicator={<NotchedSelectionIndicator />}
+              width="100%"
+              flexDirection="column"
+              gap="$3"
+              $lg={{ flexDirection: 'row' }}
+            >
+              {mockApiNodes.map((apiNode, index) => {
+                const isSelected = apiNode.id === selectedApiNodeId;
+                const isReachable = apiNode.outcome === 'reachable';
+                const latencyTone = isReachable
+                  ? resolveLatencyTone(apiNode.mockLatencyMs)
+                  : '$appDanger';
+                const SelectionIcon = isSelected ? CircleDot : Circle;
 
-              return (
-                <RadioGroup.Item
-                  key={apiNode.id}
-                  unstyled
-                  id={`api-node-${apiNode.id}`}
-                  value={apiNode.id}
-                  width="100%"
-                  grow={0}
-                  minW={0}
-                  p={0}
-                  rounded="$0"
-                  borderWidth={1}
-                  borderColor="transparent"
-                  pressStyle={{ scale: 0.985 }}
-                  focusVisibleStyle={{ borderColor: '$appAccent' }}
-                  aria-label={t(`network.nodes.${apiNode.id}`)}
-                  $lg={{ width: '50%', grow: 1 }}
-                >
-                  <TerminalPanel
+                return (
+                  <SlidingSelection.Item
+                    key={apiNode.id}
+                    value={apiNode.id}
                     width="100%"
-                    p="$3"
-                    gap="$2.5"
-                    tone={isSelected ? 'cyan' : 'default'}
-                    transition={reducedMotion ? '0ms' : 'quickLessBouncy'}
-                    scale={isSelected ? 1 : 0.985}
-                    hoverStyle={{ borderColor: '$appAccentBorder', bg: '$appSurfaceRaisedTranslucent' }}
-                    $md={{ p: '$3.5', gap: '$3.5' }}
+                    minW={0}
+                    $lg={{ flexBasis: 0, grow: 1 }}
                   >
-                    <TerminalText
-                      position="absolute"
-                      t="$2"
-                      r="$3"
-                      size="$9"
-                      lineHeight="$9"
-                      fontWeight="900"
-                      color={isSelected ? '$appAccent' : '$appBorderSolid'}
-                      opacity={isSelected ? 0.16 : 0.7}
-                      fontVariant={['tabular-nums']}
-                      $md={{ size: '$10', lineHeight: '$10' }}
+                    <RadioGroup.Item
+                      asChild
+                      unstyled
+                      id={`api-node-${apiNode.id}`}
+                      value={apiNode.id}
                     >
-                      {String(index + 1).padStart(2, '0')}
-                    </TerminalText>
-
-                    <XStack items="center" justify="space-between" gap="$3" z="$1">
-                      <XStack items="center" gap="$2">
-                        <SelectionIcon
-                          size={17}
-                          color={isSelected ? colors.appAccent.val : colors.appMuted.val}
-                          strokeWidth={1.8}
-                        />
-                        <MonoText size="$1" color={isSelected ? '$appAccent' : '$appMuted'}>
-                          {isSelected ? t('network.active') : t('network.switch')}
-                        </MonoText>
-                      </XStack>
-                      <Server
-                        size={18}
-                        color={isSelected ? colors.appAccent.val : colors.appMuted.val}
-                        strokeWidth={1.6}
-                      />
-                    </XStack>
-
-                    <XStack items="flex-end" justify="space-between" gap="$3" z="$1">
-                      <YStack grow={1} minW={0} gap="$0.5">
-                        <TerminalText size="$5" fontWeight="800" numberOfLines={1} $md={{ size: '$6' }}>
-                          {t(`network.nodes.${apiNode.id}`)}
-                        </TerminalText>
-                        <MonoText size="$2" numberOfLines={1} selectable>
-                          {apiNode.description}
-                        </MonoText>
-                      </YStack>
-                      <XStack shrink={0} items="baseline" gap="$1">
-                        {isChecking ? <Spinner size="small" color="$appWarning" /> : null}
+                      <NotchedButton
+                        isSelected={isSelected}
+                        testID={`api-node-option-${apiNode.id}`}
+                        width="100%"
+                        minW={0}
+                        overflow="hidden"
+                        p="$3"
+                        flexDirection="column"
+                        items="stretch"
+                        justify="flex-start"
+                        gap="$2.5"
+                        aria-label={t(`network.nodes.${apiNode.id}`)}
+                        $md={{ p: '$3.5', gap: '$3.5' }}
+                      >
                         <TerminalText
-                          size="$6"
-                          lineHeight="$6"
+                          position="absolute"
+                          t="$2"
+                          r="$3"
+                          size="$9"
+                          lineHeight="$9"
                           fontWeight="900"
-                          color={isChecking ? '$appMuted' : latencyTone}
+                          color={isSelected ? '$appAccent' : '$appBorderSolid'}
+                          opacity={isSelected ? 0.16 : 0.7}
                           fontVariant={['tabular-nums']}
-                          $md={{ size: '$7', lineHeight: '$7' }}
+                          $md={{ size: '$10', lineHeight: '$10' }}
                         >
-                          {isChecking ? '--' : isReachable ? apiNode.mockLatencyMs : '--'}
+                          {String(index + 1).padStart(2, '0')}
                         </TerminalText>
-                        <MonoText size="$1" color={isChecking ? '$appMuted' : latencyTone}>
-                          {t('network.latencyUnit')}
-                        </MonoText>
-                      </XStack>
-                    </XStack>
 
-                    <RadioGroup.Indicator position="absolute" opacity={0} />
-                  </TerminalPanel>
-                </RadioGroup.Item>
-              );
-            })}
+                        <XStack items="center" justify="space-between" gap="$3" z="$1">
+                          <XStack items="center" gap="$2">
+                            <SelectionIcon
+                              size={17}
+                              color={isSelected ? colors.appAccent.val : colors.appMuted.val}
+                              strokeWidth={1.8}
+                            />
+                            <MonoText size="$1" color={isSelected ? '$appAccent' : '$appMuted'}>
+                              {isSelected ? t('network.active') : t('network.switch')}
+                            </MonoText>
+                          </XStack>
+                          <Server
+                            size={18}
+                            color={isSelected ? colors.appAccent.val : colors.appMuted.val}
+                            strokeWidth={1.6}
+                          />
+                        </XStack>
+
+                        <XStack items="flex-end" justify="space-between" gap="$3" z="$1">
+                          <YStack grow={1} minW={0} gap="$0.5">
+                            <TerminalText size="$5" fontWeight="800" numberOfLines={1} $md={{ size: '$6' }}>
+                              {t(`network.nodes.${apiNode.id}`)}
+                            </TerminalText>
+                            <MonoText size="$2" numberOfLines={1} selectable>
+                              {apiNode.description}
+                            </MonoText>
+                          </YStack>
+                          <XStack shrink={0} items="baseline" gap="$1">
+                            {isChecking ? <Spinner size="small" color="$appWarning" /> : null}
+                            <TerminalText
+                              size="$6"
+                              lineHeight="$6"
+                              fontWeight="900"
+                              color={isChecking ? '$appMuted' : latencyTone}
+                              fontVariant={['tabular-nums']}
+                              $md={{ size: '$7', lineHeight: '$7' }}
+                            >
+                              {isChecking ? '--' : isReachable ? apiNode.mockLatencyMs : '--'}
+                            </TerminalText>
+                            <MonoText size="$1" color={isChecking ? '$appMuted' : latencyTone}>
+                              {t('network.latencyUnit')}
+                            </MonoText>
+                          </XStack>
+                        </XStack>
+
+                        <RadioGroup.Indicator position="absolute" opacity={0} />
+                      </NotchedButton>
+                    </RadioGroup.Item>
+                  </SlidingSelection.Item>
+                );
+              })}
+            </SlidingSelection>
           </RadioGroup>
         </YStack>
 

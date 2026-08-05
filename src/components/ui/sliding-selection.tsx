@@ -1,6 +1,6 @@
 import {
+  type ComponentProps,
   createContext,
-  type PropsWithChildren,
   type ReactNode,
   useCallback,
   useContext,
@@ -27,11 +27,11 @@ type SlidingSelectionContextValue = {
 
 const SlidingSelectionContext = createContext<SlidingSelectionContextValue | null>(null);
 
-type SlidingSelectionProps = PropsWithChildren<{
-  gap?: number;
+type SlidingSelectionProps = Omit<ComponentProps<typeof XStack>, 'children'> & {
+  children?: ReactNode;
   indicator: ReactNode;
   value: string;
-}>;
+};
 
 const indicatorSpringConfig = {
   damping: 34,
@@ -39,7 +39,13 @@ const indicatorSpringConfig = {
   stiffness: 400,
 } as const;
 
-function SlidingSelectionFrame({ children, gap = 8, indicator, value }: SlidingSelectionProps) {
+function SlidingSelectionFrame({
+  children,
+  gap = 8,
+  indicator,
+  value,
+  ...frameProps
+}: SlidingSelectionProps) {
   const itemLayouts = useRef(new Map<string, SelectionLayout>());
   const selectedValueRef = useRef(value);
   const hasMeasuredSelection = useRef(false);
@@ -49,10 +55,6 @@ function SlidingSelectionFrame({ children, gap = 8, indicator, value }: SlidingS
   const y = useSharedValue(0);
   const width = useSharedValue(0);
   const height = useSharedValue(0);
-
-  useEffect(() => {
-    selectedValueRef.current = value;
-  }, [value]);
 
   const moveIndicatorTo = useCallback((layout: SelectionLayout, animate: boolean) => {
     if (!animate || reducedMotion) {
@@ -88,9 +90,16 @@ function SlidingSelectionFrame({ children, gap = 8, indicator, value }: SlidingS
   }, [indicatorReady]);
 
   useEffect(() => {
+    selectedValueRef.current = value;
     const layout = itemLayouts.current.get(value);
-    if (layout) moveIndicatorTo(layout, hasMeasuredSelection.current);
-  }, [moveIndicatorTo, value]);
+    if (layout) {
+      moveIndicatorTo(layout, hasMeasuredSelection.current);
+      return;
+    }
+
+    hasMeasuredSelection.current = false;
+    indicatorReady.set(0);
+  }, [indicatorReady, moveIndicatorTo, value]);
 
   const context = useMemo(() => ({ registerItemLayout, unregisterItemLayout }), [registerItemLayout, unregisterItemLayout]);
   const indicatorStyle = useAnimatedStyle(() => ({
@@ -102,7 +111,7 @@ function SlidingSelectionFrame({ children, gap = 8, indicator, value }: SlidingS
 
   return (
     <SlidingSelectionContext.Provider value={context}>
-      <XStack position="relative" self="flex-start" gap={gap}>
+      <XStack position="relative" self="flex-start" gap={gap} {...frameProps}>
         {children}
         <Animated.View
           style={[{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }, indicatorStyle]}
@@ -114,11 +123,13 @@ function SlidingSelectionFrame({ children, gap = 8, indicator, value }: SlidingS
   );
 }
 
-type SlidingSelectionItemProps = PropsWithChildren<{
+type SlidingSelectionItemProps = Omit<ComponentProps<typeof YStack>, 'children' | 'onLayout'> & {
+  children?: ReactNode;
+  onLayout?: ComponentProps<typeof YStack>['onLayout'];
   value: string;
-}>;
+};
 
-function SlidingSelectionItem({ children, value }: SlidingSelectionItemProps) {
+function SlidingSelectionItem({ children, onLayout, value, ...itemProps }: SlidingSelectionItemProps) {
   const context = useContext(SlidingSelectionContext);
   if (!context) throw new Error('SlidingSelection.Item must be used inside SlidingSelection');
 
@@ -126,10 +137,11 @@ function SlidingSelectionItem({ children, value }: SlidingSelectionItemProps) {
 
   const handleLayout = (event: LayoutChangeEvent) => {
     context.registerItemLayout(value, event.nativeEvent.layout);
+    onLayout?.(event);
   };
 
   return (
-    <YStack shrink={0} onLayout={handleLayout}>
+    <YStack shrink={0} onLayout={handleLayout} {...itemProps}>
       {children}
     </YStack>
   );
