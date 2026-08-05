@@ -7,6 +7,8 @@ export {
   AuthProvider,
   useAuth,
 } from './providers/auth-provider';
+export type { AuthState } from './providers/auth-provider';
 export {
+  resolveAuthEntryDestination,
   resolvePostLoginDestination,
 } from './navigation/auth-routing';

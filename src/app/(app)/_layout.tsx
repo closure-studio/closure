@@ -35,7 +35,7 @@ export default function AppLayout() {
     ? getScopeTransitionScreenOptions(reducedMotion)
     : getRouteScreenOptions(reducedMotion, { enableIosBackGesture: true });
 
-  if (authState.status === 'unauthenticated' && pathname !== '/login') {
+  if (authState.status !== 'authenticated') {
     return <Redirect href={{ pathname: '/login', params: { returnTo: pathname } }} />;
   }
 
