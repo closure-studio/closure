@@ -8,6 +8,11 @@
     "nodesCode": "NODE",
     "nodesTitle": "API 节点",
     "nodesSubtitle": "会话路由",
+    "activeRoute": "当前会话路由",
+    "sessionId": "SESSION / 01",
+    "sessionOnly": "仅本次会话",
+    "nodeCount": "02",
+    "latencyUnit": "MS",
     "nodes": {
       "domestic": "国内镜像",
       "overseas": "海外镜像"
