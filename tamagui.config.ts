@@ -1,6 +1,7 @@
 import { defaultConfig } from '@tamagui/config/v5';
-import { animations } from '@tamagui/config/v5-rn';
 import { createFont, createTamagui } from 'tamagui';
+
+import { animations } from './src/theme/animations';
 
 const appFontSizes = {
   1: 12,
