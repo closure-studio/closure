@@ -10,11 +10,11 @@ export function NotFoundView() {
   const colors = getTokens().color;
 
   return (
-    <YStack grow={1} items="center" justify="center" bg="$terminalBg" p="$4">
+    <YStack grow={1} items="center" justify="center" bg="$appBackground" p="$4">
       <TerminalPanel cornerBrackets width="100%" maxW={520} p="$5" gap="$4">
-        <MonoText size="$1" color="$terminalWarning">{t('notFound.eyebrow')}</MonoText>
+        <MonoText size="$1" color="$appWarning">{t('notFound.eyebrow')}</MonoText>
         <YStack gap="$1">
-          <TerminalText size="$10" fontWeight="900" color="$terminalCyan">404</TerminalText>
+          <TerminalText size="$10" fontWeight="900" color="$appAccent">404</TerminalText>
           <TerminalText size="$5" fontWeight="700">{t('notFound.title')}</TerminalText>
           <MonoText size="$2">{t('notFound.description')}</MonoText>
         </YStack>
@@ -23,11 +23,11 @@ export function NotFoundView() {
             height="$4.5"
             rounded="$0"
             borderWidth={1}
-            borderColor="$terminalCyanBorder"
-            bg="$terminalCyanSoft"
-            icon={<ArrowLeft size={16} color={colors.terminalCyan.val} />}
+            borderColor="$appAccentBorder"
+            bg="$appAccentSoft"
+            icon={<ArrowLeft size={16} color={colors.appAccent.val} />}
           >
-            <MonoText size="$2" color="$terminalCyan">{t('notFound.returnHome')}</MonoText>
+            <MonoText size="$2" color="$appAccent">{t('notFound.returnHome')}</MonoText>
           </Button>
         </Link>
       </TerminalPanel>

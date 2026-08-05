@@ -19,8 +19,8 @@ export function SectionPageHeader({
     <YStack gap="$4" py="$2" $md={{ py: '$4' }}>
       <XStack items="center" justify="space-between" gap="$3">
         <XStack items="center" gap="$2">
-          <YStack width={7} height={7} rounded="$10" bg="$terminalCyan" />
-          <MonoText size="$1" color="$terminalCyan">{eyebrow}</MonoText>
+          <YStack width={7} height={7} rounded="$10" bg="$appAccent" />
+          <MonoText size="$1" color="$appAccent">{eyebrow}</MonoText>
         </XStack>
         <MonoText size="$1">{code}</MonoText>
       </XStack>
@@ -29,10 +29,10 @@ export function SectionPageHeader({
           {title}
         </TerminalText>
         <YStack gap="$2" maxW={360} pb="$1">
-          <MonoText size="$2" color="$terminalText">{description}</MonoText>
+          <MonoText size="$2" color="$appText">{description}</MonoText>
           <XStack items="center" gap="$2">
-            <YStack grow={1} height={1} bg="$terminalCyanBorder" />
-            <MonoText size="$1" color="$terminalCyan">{status}</MonoText>
+            <YStack grow={1} height={1} bg="$appAccentBorder" />
+            <MonoText size="$1" color="$appAccent">{status}</MonoText>
           </XStack>
         </YStack>
       </YStack>

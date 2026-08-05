@@ -14,7 +14,7 @@ const SessionBackdropContext = createContext<SessionBackdropContextValue | null>
 
 export function SessionShell({ children }: PropsWithChildren) {
   const colors = getTokens().color;
-  const defaultBackdropTint = colors.terminalCyan.val;
+  const defaultBackdropTint = colors.appAccent.val;
   const [backdropTint, setBackdropTint] = useState(defaultBackdropTint);
   const resetBackdropTint = useCallback(() => {
     setBackdropTint(defaultBackdropTint);
@@ -36,9 +36,9 @@ export function SessionShell({ children }: PropsWithChildren) {
           maxH="100%"
           borderLeftWidth={1}
           borderRightWidth={1}
-          borderColor="$terminalBorder"
+          borderColor="$appBorder"
           overflow="hidden"
-          bg="$terminalBg"
+          bg="$appBackground"
           $md={{ maxW: '100%', borderLeftWidth: 0, borderRightWidth: 0 }}
         >
           <SessionBackdrop tint={backdropTint} />

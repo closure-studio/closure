@@ -55,7 +55,7 @@ export function AccessOrbit({ label, nodeId }: { label: string; nodeId: string }
     >
       <Animated.View style={[{ position: 'absolute', width: size, height: size }, rotationStyle]}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ pointerEvents: 'none' }}>
-          <G fill="none" stroke={colors.terminalCyan.val}>
+          <G fill="none" stroke={colors.appAccent.val}>
             <Circle cx={center} cy={center} r={center - 2} strokeOpacity={0.12} strokeWidth={1} />
             <Circle cx={center} cy={center} r={center * 0.78} strokeDasharray="2 10" strokeOpacity={0.42} strokeWidth={1} />
             <Circle cx={center} cy={center} r={center * 0.58} strokeDasharray="52 18" strokeOpacity={0.28} strokeWidth={2} />
@@ -73,10 +73,10 @@ export function AccessOrbit({ label, nodeId }: { label: string; nodeId: string }
       </Animated.View>
 
       <YStack items="center" gap="$0.5" $max-md={{ display: 'none' }}>
-        <TerminalText size={media.md ? '$10' : '$8'} fontWeight="900" color="$terminalText">
+        <TerminalText size={media.md ? '$10' : '$8'} fontWeight="900" color="$appText">
           {nodeId}
         </TerminalText>
-        <MonoText size="$1" color="$terminalCyan" textTransform="uppercase" text="center">
+        <MonoText size="$1" color="$appAccent" textTransform="uppercase" text="center">
           {label}
         </MonoText>
       </YStack>

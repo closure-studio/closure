@@ -80,10 +80,10 @@ function SettingsPagerTick() {
         l={0}
         r={0}
         height={8}
-        bg="$terminalCyanSoft"
+        bg="$appAccentSoft"
         $platform-web={{ clipPath: 'polygon(0 100%, 0 3px, 3px 0, calc(100% - 3px) 0, 100% 3px, 100% 100%)' }}
       />
-      <YStack position="absolute" b={0} l={0} r={0} height={PAGER_TICK_HEIGHT} bg="$terminalCyan" />
+      <YStack position="absolute" b={0} l={0} r={0} height={PAGER_TICK_HEIGHT} bg="$appAccent" />
     </YStack>
   );
 }
@@ -126,7 +126,7 @@ function AnimatedSwipeHint({ children }: { children: string }) {
   return (
     <XStack justify="center" overflow="hidden">
       <Animated.View testID="settings-swipe-hint" style={animatedStyle}>
-        <MonoText size="$1" text="center" color="$terminalMuted">
+        <MonoText size="$1" text="center" color="$appMuted">
           {children}
         </MonoText>
       </Animated.View>
@@ -161,7 +161,7 @@ export function SettingsPagerTabs({
         px="$3.5"
         py="$2.5"
         borderBottomWidth={1}
-        borderColor="$terminalBorder"
+        borderColor="$appBorder"
         bg="transparent"
         $md={{ display: 'none' }}
       >
@@ -183,7 +183,7 @@ export function SettingsPagerTabs({
             opacity={hasPreviousStep ? 0.55 : 0.15}
             style={{ pointerEvents: 'none' }}
           >
-            <ChevronLeft size={14} color={colors.terminalMuted.val} strokeWidth={1.5} />
+            <ChevronLeft size={14} color={colors.appMuted.val} strokeWidth={1.5} />
           </YStack>
 
           <YStack gap="$1.5">
@@ -205,7 +205,7 @@ export function SettingsPagerTabs({
                         rounded="$0"
                         bg="transparent"
                         pressStyle={{ opacity: 0.65 }}
-                        focusVisibleStyle={{ bg: '$terminalCyanSoft' }}
+                        focusVisibleStyle={{ bg: '$appAccentSoft' }}
                         onPress={() => onSelect(item.id)}
                         role="tab"
                         aria-selected={isActive}
@@ -215,7 +215,7 @@ export function SettingsPagerTabs({
                           <TerminalText
                             size="$2.5"
                             lineHeight={18}
-                            color="$terminalCyan"
+                            color="$appAccent"
                             fontWeight="700"
                             numberOfLines={1}
                           >
@@ -228,7 +228,7 @@ export function SettingsPagerTabs({
                             l={0}
                             r={0}
                             height={PAGER_TICK_HEIGHT}
-                            bg="$terminalMuted"
+                            bg="$appMuted"
                             opacity={0.45}
                           />
                         )}
@@ -250,7 +250,7 @@ export function SettingsPagerTabs({
             opacity={hasNextStep ? 0.55 : 0.15}
             style={{ pointerEvents: 'none' }}
           >
-            <ChevronRight size={14} color={colors.terminalMuted.val} strokeWidth={1.5} />
+            <ChevronRight size={14} color={colors.appMuted.val} strokeWidth={1.5} />
           </YStack>
         </XStack>
       </YStack>

@@ -5,9 +5,9 @@ const TerminalPanelFrame = styled(YStack, {
   name: 'TerminalPanel',
   position: 'relative',
   overflow: 'hidden',
-  bg: '$terminalSurface',
+  bg: '$appSurface',
   borderWidth: 1,
-  borderColor: '$terminalBorder',
+  borderColor: '$appBorder',
   rounded: '$0',
   '$platform-web': {
     clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))',
@@ -16,10 +16,10 @@ const TerminalPanelFrame = styled(YStack, {
   variants: {
     tone: {
       default: {},
-      cyan: { bg: '$terminalCyanSoft', borderColor: '$terminalCyanBorder' },
-      warning: { bg: '$terminalWarningSoft', borderColor: '$terminalWarningBorder' },
-      success: { bg: '$terminalSuccessSoft', borderColor: '$terminalSuccess' },
-      danger: { bg: '$terminalDangerSoft', borderColor: '$terminalDangerBorder' },
+      cyan: { bg: '$appAccentSoft', borderColor: '$appAccentBorder' },
+      warning: { bg: '$appWarningSoft', borderColor: '$appWarningBorder' },
+      success: { bg: '$appSuccessSoft', borderColor: '$appSuccess' },
+      danger: { bg: '$appDangerSoft', borderColor: '$appDangerBorder' },
     },
   } as const,
 
@@ -29,10 +29,10 @@ const TerminalPanelFrame = styled(YStack, {
 export function TerminalCornerBrackets() {
   return (
     <>
-      <YStack position="absolute" t={0} l={0} width={12} height={12} borderColor="$terminalCyanRing" borderTopWidth={1} borderLeftWidth={1} style={{ pointerEvents: 'none' }} />
-      <YStack position="absolute" t={0} r={0} width={12} height={12} borderColor="$terminalCyanRing" borderTopWidth={1} borderRightWidth={1} style={{ pointerEvents: 'none' }} />
-      <YStack position="absolute" b={0} l={0} width={12} height={12} borderColor="$terminalCyanRing" borderBottomWidth={1} borderLeftWidth={1} style={{ pointerEvents: 'none' }} />
-      <YStack position="absolute" b={0} r={0} width={12} height={12} borderColor="$terminalCyanRing" borderBottomWidth={1} borderRightWidth={1} style={{ pointerEvents: 'none' }} />
+      <YStack position="absolute" t={0} l={0} width={12} height={12} borderColor="$appAccentRing" borderTopWidth={1} borderLeftWidth={1} style={{ pointerEvents: 'none' }} />
+      <YStack position="absolute" t={0} r={0} width={12} height={12} borderColor="$appAccentRing" borderTopWidth={1} borderRightWidth={1} style={{ pointerEvents: 'none' }} />
+      <YStack position="absolute" b={0} l={0} width={12} height={12} borderColor="$appAccentRing" borderBottomWidth={1} borderLeftWidth={1} style={{ pointerEvents: 'none' }} />
+      <YStack position="absolute" b={0} r={0} width={12} height={12} borderColor="$appAccentRing" borderBottomWidth={1} borderRightWidth={1} style={{ pointerEvents: 'none' }} />
     </>
   );
 }

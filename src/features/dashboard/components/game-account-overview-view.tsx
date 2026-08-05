@@ -11,10 +11,10 @@ export function GameAccountOverviewView({ gameAccount, viewport }: { gameAccount
   const { t } = useTranslation('dashboard');
   const colors = getTokens().color;
   const accountBalances = [
-    { icon: Coins, label: t('overview.balances.lmd'), value: formatCompactNumber(gameAccount.lmd), color: colors.terminalWarning.val },
-    { icon: Gem, label: t('overview.balances.orundum'), value: formatCompactNumber(gameAccount.orundum), color: colors.terminalCyan.val },
-    { icon: Zap, label: t('overview.balances.originium'), value: String(gameAccount.originium), color: colors.terminalCyan.val },
-    { icon: Ticket, label: t('overview.balances.recruitTickets'), value: String(gameAccount.recruitTickets), color: colors.terminalText.val },
+    { icon: Coins, label: t('overview.balances.lmd'), value: formatCompactNumber(gameAccount.lmd), color: colors.appWarning.val },
+    { icon: Gem, label: t('overview.balances.orundum'), value: formatCompactNumber(gameAccount.orundum), color: colors.appAccent.val },
+    { icon: Zap, label: t('overview.balances.originium'), value: String(gameAccount.originium), color: colors.appAccent.val },
+    { icon: Ticket, label: t('overview.balances.recruitTickets'), value: String(gameAccount.recruitTickets), color: colors.appText.val },
   ];
   const baseMetrics = [
     { label: t('overview.baseMetrics.mood'), value: gameAccount.baseMood, tone: 'cyan' as const },
@@ -29,7 +29,7 @@ export function GameAccountOverviewView({ gameAccount, viewport }: { gameAccount
       <DashboardViewportReveal index={0} origin="bottom" viewport={viewport}>
       <TerminalPanel cornerBrackets p="$3.5" minH={166}>
         <XStack mb={12} items="center" justify="space-between">
-          <MonoText size="$1" color="$terminalCyan">{t('overview.profile')}</MonoText>
+          <MonoText size="$1" color="$appAccent">{t('overview.profile')}</MonoText>
           <DecorativeBarcode />
         </XStack>
         <XStack items="flex-end" justify="space-between" gap="$3">
@@ -40,12 +40,12 @@ export function GameAccountOverviewView({ gameAccount, viewport }: { gameAccount
           </YStack>
           <YStack items="flex-end">
             <MonoText size="$1">{t('overview.level')}</MonoText>
-            <TerminalText size="$9" lineHeight="$9" fontWeight="900" color="$terminalCyan">{gameAccount.doctorLevel}</TerminalText>
+            <TerminalText size="$9" lineHeight="$9" fontWeight="900" color="$appAccent">{gameAccount.doctorLevel}</TerminalText>
           </YStack>
         </XStack>
         <XStack mt={12} items="center" justify="space-between">
           <MonoText size="$1">{t('overview.experience')} {formatCompactNumber(gameAccount.exp[0])} / {formatCompactNumber(gameAccount.exp[1])}</MonoText>
-          <XStack items="center" gap="$1"><Activity size={12} color={colors.terminalSuccess.val} /><MonoText size="$1" color="$terminalSuccess">{gameAccount.online}</MonoText></XStack>
+          <XStack items="center" gap="$1"><Activity size={12} color={colors.appSuccess.val} /><MonoText size="$1" color="$appSuccess">{gameAccount.online}</MonoText></XStack>
         </XStack>
         <YStack mt={4}><TerminalMeterBar value={gameAccount.exp[0]} max={gameAccount.exp[1]} /></YStack>
       </TerminalPanel>
@@ -55,11 +55,11 @@ export function GameAccountOverviewView({ gameAccount, viewport }: { gameAccount
       <YStack width="100%" $lg={{ width: '48%' }} $xl={{ width: '31.5%' }}>
       <DashboardViewportReveal index={1} origin="bottom" viewport={viewport}>
       <TerminalPanel p="$3.5" tone={isSanityAtCapacity ? 'warning' : 'default'}>
-        <TerminalSectionHeading code="01" title={t('overview.sanity')} subtitle="AP CORE" trailing={<MonoText size="$1" color={isSanityAtCapacity ? '$terminalWarning' : '$terminalMuted'}>{t('overview.recoversAt', { time: gameAccount.apRecoverAt })}</MonoText>} />
+        <TerminalSectionHeading code="01" title={t('overview.sanity')} subtitle="AP CORE" trailing={<MonoText size="$1" color={isSanityAtCapacity ? '$appWarning' : '$appMuted'}>{t('overview.recoversAt', { time: gameAccount.apRecoverAt })}</MonoText>} />
         <XStack mt={12} items="center" gap="$2">
-          <TerminalText size="$8" fontWeight="800" color={isSanityAtCapacity ? '$terminalWarning' : '$terminalCyan'}>{gameAccount.ap[0]}</TerminalText>
+          <TerminalText size="$8" fontWeight="800" color={isSanityAtCapacity ? '$appWarning' : '$appAccent'}>{gameAccount.ap[0]}</TerminalText>
           <MonoText size="$3">/ {gameAccount.ap[1]}</MonoText>
-          {isSanityAtCapacity ? <XStack ml="auto" items="center" gap="$1" px="$2" py="$1" bg="$terminalWarningSoft"><TriangleAlert size={13} color={colors.terminalWarning.val} /><MonoText size="$1" color="$terminalWarning">{t('overview.overflow')}</MonoText></XStack> : null}
+          {isSanityAtCapacity ? <XStack ml="auto" items="center" gap="$1" px="$2" py="$1" bg="$appWarningSoft"><TriangleAlert size={13} color={colors.appWarning.val} /><MonoText size="$1" color="$appWarning">{t('overview.overflow')}</MonoText></XStack> : null}
         </XStack>
         <YStack mt={8}><TerminalMeterBar value={gameAccount.ap[0]} max={gameAccount.ap[1]} tone={isSanityAtCapacity ? 'warning' : 'cyan'} /></YStack>
       </TerminalPanel>
@@ -97,8 +97,8 @@ export function GameAccountOverviewView({ gameAccount, viewport }: { gameAccount
             <TerminalPanel key={stat.label} width="48.7%" minW={140} grow={1} p="$3" tone={stat.warn ? 'warning' : 'default'} $lg={{ width: '23.5%' }}>
               <MonoText size="$1">{stat.label}</MonoText>
               <XStack items="baseline" gap="$1.5">
-                <TerminalText size="$6" fontWeight="800" color={stat.warn ? '$terminalWarning' : '$terminalText'}>{stat.value}</TerminalText>
-                {stat.trend ? <MonoText size="$1" color="$terminalSuccess">{stat.trend}</MonoText> : null}
+                <TerminalText size="$6" fontWeight="800" color={stat.warn ? '$appWarning' : '$appText'}>{stat.value}</TerminalText>
+                {stat.trend ? <MonoText size="$1" color="$appSuccess">{stat.trend}</MonoText> : null}
               </XStack>
             </TerminalPanel>
           ))}

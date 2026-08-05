@@ -11,14 +11,14 @@ export function TerminalMeterBar({
 }) {
   const fillPercentage: `${number}%` = `${Math.max(0, Math.min(100, (value / max) * 100))}%`;
   const fillColorByTone = {
-    cyan: '$terminalCyan',
-    warning: '$terminalWarning',
-    success: '$terminalSuccess',
-    muted: '$terminalMuted',
+    cyan: '$appAccent',
+    warning: '$appWarning',
+    success: '$appSuccess',
+    muted: '$appMuted',
   } as const;
 
   return (
-    <YStack height={6} width="100%" overflow="hidden" bg="$terminalRaised">
+    <YStack height={6} width="100%" overflow="hidden" bg="$appSurfaceRaised">
       <YStack transition="500ms" height="100%" width={fillPercentage} bg={fillColorByTone[tone]} />
     </YStack>
   );

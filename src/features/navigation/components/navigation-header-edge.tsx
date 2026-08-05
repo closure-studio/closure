@@ -30,11 +30,11 @@ export function NavigationHeaderEdge() {
           x2="100%"
           y2="0%"
         >
-          <Stop offset="0%" stopColor={colors.terminalCyan.val} stopOpacity={0} />
-          <Stop offset="20%" stopColor={colors.terminalCyan.val} stopOpacity={0.08} />
-          <Stop offset="50%" stopColor={colors.terminalCyan.val} stopOpacity={0.72} />
-          <Stop offset="80%" stopColor={colors.terminalCyan.val} stopOpacity={0.08} />
-          <Stop offset="100%" stopColor={colors.terminalCyan.val} stopOpacity={0} />
+          <Stop offset="0%" stopColor={colors.appAccent.val} stopOpacity={0} />
+          <Stop offset="20%" stopColor={colors.appAccent.val} stopOpacity={0.08} />
+          <Stop offset="50%" stopColor={colors.appAccent.val} stopOpacity={0.72} />
+          <Stop offset="80%" stopColor={colors.appAccent.val} stopOpacity={0.08} />
+          <Stop offset="100%" stopColor={colors.appAccent.val} stopOpacity={0} />
         </SvgLinearGradient>
       </Defs>
       <Rect width="100%" height={5} fill={gradientFill} opacity={0.12} />

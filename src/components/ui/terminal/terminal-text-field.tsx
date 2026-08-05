@@ -16,7 +16,7 @@ const TerminalTextInput = styled(Input, {
   p: 0,
   rounded: '$0',
   bg: 'transparent',
-  color: '$terminalText',
+  color: '$appText',
   fontSize: '$3',
   focusStyle: { borderWidth: 0 },
   focusVisibleStyle: { outlineWidth: 0, outlineStyle: 'none' },
@@ -29,24 +29,24 @@ const TerminalTextFieldFrame = styled(XStack, {
   items: 'center',
   gap: '$2',
   borderWidth: 1,
-  borderColor: '$terminalBorder',
+  borderColor: '$appBorder',
 
   variants: {
     surface: {
       solid: {
-        bg: '$terminalRaised',
-        focusWithinStyle: { borderColor: '$terminalCyan' },
+        bg: '$appSurfaceRaised',
+        focusWithinStyle: { borderColor: '$appAccent' },
       },
       translucent: {
-        bg: '$terminalRaisedTranslucent',
-        focusWithinStyle: { borderColor: '$terminalCyanBorder' },
+        bg: '$appSurfaceRaisedTranslucent',
+        focusWithinStyle: { borderColor: '$appAccentBorder' },
       },
     },
     invalid: {
       true: {
-        bg: '$terminalWarningSoft',
-        borderColor: '$terminalWarning',
-        focusWithinStyle: { borderColor: '$terminalWarning' },
+        bg: '$appWarningSoft',
+        borderColor: '$appWarning',
+        focusWithinStyle: { borderColor: '$appWarning' },
       },
     },
   } as const,
@@ -119,14 +119,14 @@ export const TerminalTextField = forwardRef<TerminalTextFieldHandle, TerminalTex
         <MonoText size="$2.5" textTransform="uppercase">{label}</MonoText>
       </Label>
       <TerminalTextFieldFrame surface={surface} invalid={Boolean(error)}>
-        <Icon size={16} color={colors.terminalMuted.val} strokeWidth={1.7} />
+        <Icon size={16} color={colors.appMuted.val} strokeWidth={1.7} />
         <TerminalTextInput
           ref={ref}
           id={id}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="$terminalMuted"
+          placeholderTextColor="$appMuted"
           autoCapitalize="none"
           autoCorrect={false}
           {...optionalInputProps}
@@ -143,7 +143,7 @@ export const TerminalTextField = forwardRef<TerminalTextFieldHandle, TerminalTex
             id={errorId}
             nativeID={errorId}
             size="$2.5"
-            color="$terminalWarning"
+            color="$appWarning"
             accessibilityLiveRegion="polite"
             aria-live="polite"
             transition={reducedMotion ? '0ms' : '200ms'}
@@ -181,14 +181,14 @@ export function TerminalPasswordVisibilityButton({
       borderWidth={1}
       borderColor="transparent"
       rounded="$0"
-      pressStyle={{ bg: '$terminalCyanSoft' }}
-      focusVisibleStyle={{ borderColor: '$terminalCyan' }}
+      pressStyle={{ bg: '$appAccentSoft' }}
+      focusVisibleStyle={{ borderColor: '$appAccent' }}
       onPress={onPress}
       aria-label={isPasswordVisible ? hideLabel : showLabel}
     >
       {isPasswordVisible
-        ? <EyeOff size={16} color={colors.terminalMuted.val} />
-        : <Eye size={16} color={colors.terminalMuted.val} />}
+        ? <EyeOff size={16} color={colors.appMuted.val} />
+        : <Eye size={16} color={colors.appMuted.val} />}
     </Button>
   );
 }

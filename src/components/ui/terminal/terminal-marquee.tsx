@@ -22,11 +22,11 @@ const TerminalMarqueeMessage = styled(MonoText, {
 
   variants: {
     tone: {
-      accent: { color: '$terminalCyan' },
-      danger: { color: '$terminalDanger' },
-      default: { color: '$terminalMuted' },
-      success: { color: '$terminalSuccess' },
-      warning: { color: '$terminalWarning' },
+      accent: { color: '$appAccent' },
+      danger: { color: '$appDanger' },
+      default: { color: '$appMuted' },
+      success: { color: '$appSuccess' },
+      warning: { color: '$appWarning' },
     },
   } as const,
 
@@ -44,8 +44,8 @@ export function TerminalMarquee({ items }: TerminalMarqueeProps) {
       py="$1.5"
       borderTopWidth={1}
       borderBottomWidth={1}
-      borderColor="$terminalBorder"
-      bg="$terminalRaised"
+      borderColor="$appBorder"
+      bg="$appSurfaceRaised"
       overflow="hidden"
       $md={{ mt: '$0' }}
     >

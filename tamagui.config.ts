@@ -2,7 +2,7 @@ import { defaultConfig } from '@tamagui/config/v5';
 import { animations } from '@tamagui/config/v5-rn';
 import { createFont, createTamagui } from 'tamagui';
 
-const terminalFontSizes = {
+const appFontSizes = {
   1: 12,
   2: 13,
   2.5: 14,
@@ -18,7 +18,7 @@ const terminalFontSizes = {
   true: 16,
 } as const;
 
-const terminalLineHeights = {
+const appLineHeights = {
   1: 16,
   2: 18,
   2.5: 19,
@@ -36,8 +36,8 @@ const terminalLineHeights = {
 
 const oxaniumFont = createFont({
   family: 'Oxanium_400Regular',
-  size: terminalFontSizes,
-  lineHeight: terminalLineHeights,
+  size: appFontSizes,
+  lineHeight: appLineHeights,
   weight: {
     1: '400', 2: '400', 2.5: '400', 3: '400', 4: '500', 5: '500', 5.5: '500',
     6: '600', 7: '700', 8: '700', 9: '800', 10: '800', true: '400',
@@ -55,8 +55,8 @@ const oxaniumFont = createFont({
 
 const geistMonoFont = createFont({
   family: 'GeistMono_400Regular',
-  size: terminalFontSizes,
-  lineHeight: terminalLineHeights,
+  size: appFontSizes,
+  lineHeight: appLineHeights,
   weight: {
     1: '400', 2: '400', 2.5: '400', 3: '400', 4: '500', 5: '500', 5.5: '500',
     6: '600', 7: '700', 8: '700', 9: '800', 10: '900', true: '400',
@@ -84,33 +84,33 @@ export const tamaguiConfig = createTamagui({
   tokens: {
     ...defaultConfig.tokens,
     color: {
-      terminalBg: '#090a0c',
-      terminalSurface: 'rgba(15, 18, 20, 0.70)',
-      terminalSurfaceStrong: 'rgba(15, 18, 20, 0.95)',
-      terminalRaised: '#1d2022',
-      terminalRaisedTranslucent: 'rgba(29, 32, 34, 0.40)',
-      terminalBorder: 'rgba(42, 47, 49, 0.70)',
-      terminalBorderSolid: '#2a2f31',
-      terminalGrid: 'rgba(228, 233, 235, 0.06)',
-      terminalScanline: 'rgba(228, 233, 235, 0.04)',
-      terminalText: '#e4e9eb',
-      terminalMuted: '#82878a',
-      terminalCyan: '#3dccdf',
-      terminalCyanBorder: 'rgba(61, 204, 223, 0.50)',
-      terminalCyanEdge: 'rgba(61, 204, 223, 0.60)',
-      terminalCyanRing: 'rgba(61, 204, 223, 0.70)',
-      terminalCyanSoft: 'rgba(61, 204, 223, 0.10)',
-      terminalWarning: '#ff9d36',
-      terminalWarningBorder: 'rgba(255, 157, 54, 0.50)',
-      terminalWarningRing: 'rgba(255, 157, 54, 0.70)',
-      terminalWarningSoft: 'rgba(255, 157, 54, 0.05)',
-      terminalSuccess: '#63d18f',
-      terminalSuccessSoft: 'rgba(99, 209, 143, 0.20)',
-      terminalMutedRing: 'rgba(130, 135, 138, 0.60)',
-      terminalDanger: '#ea3c3f',
-      terminalDangerBorder: 'rgba(234, 60, 63, 0.50)',
-      terminalDangerSoft: 'rgba(234, 60, 63, 0.05)',
-      terminalScrim: 'rgba(5, 6, 7, 0.88)',
+      appBackground: '#090a0c',
+      appSurface: 'rgba(15, 18, 20, 0.70)',
+      appSurfaceStrong: 'rgba(15, 18, 20, 0.95)',
+      appSurfaceRaised: '#1d2022',
+      appSurfaceRaisedTranslucent: 'rgba(29, 32, 34, 0.40)',
+      appBorder: 'rgba(42, 47, 49, 0.70)',
+      appBorderSolid: '#2a2f31',
+      appGrid: 'rgba(228, 233, 235, 0.06)',
+      appScanline: 'rgba(228, 233, 235, 0.04)',
+      appText: '#e4e9eb',
+      appMuted: '#82878a',
+      appAccent: '#3dccdf',
+      appAccentBorder: 'rgba(61, 204, 223, 0.50)',
+      appAccentEdge: 'rgba(61, 204, 223, 0.60)',
+      appAccentRing: 'rgba(61, 204, 223, 0.70)',
+      appAccentSoft: 'rgba(61, 204, 223, 0.10)',
+      appWarning: '#ff9d36',
+      appWarningBorder: 'rgba(255, 157, 54, 0.50)',
+      appWarningRing: 'rgba(255, 157, 54, 0.70)',
+      appWarningSoft: 'rgba(255, 157, 54, 0.05)',
+      appSuccess: '#63d18f',
+      appSuccessSoft: 'rgba(99, 209, 143, 0.20)',
+      appMutedRing: 'rgba(130, 135, 138, 0.60)',
+      appDanger: '#ea3c3f',
+      appDangerBorder: 'rgba(234, 60, 63, 0.50)',
+      appDangerSoft: 'rgba(234, 60, 63, 0.05)',
+      appScrim: 'rgba(5, 6, 7, 0.88)',
     },
   },
 });

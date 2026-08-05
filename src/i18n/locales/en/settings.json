@@ -8,6 +8,11 @@
     "nodesCode": "NODE",
     "nodesTitle": "API Nodes",
     "nodesSubtitle": "Session routing",
+    "activeRoute": "Active session route",
+    "sessionId": "SESSION / 01",
+    "sessionOnly": "Session only",
+    "nodeCount": "02",
+    "latencyUnit": "MS",
     "nodes": {
       "domestic": "Domestic Mirror",
       "overseas": "Overseas Mirror"

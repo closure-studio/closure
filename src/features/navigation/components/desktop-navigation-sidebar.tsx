@@ -41,12 +41,12 @@ export function DesktopNavigationSidebar({
       width={224}
       shrink={0}
       borderRightWidth={1}
-      borderColor="$terminalBorder"
-      bg="$terminalSurface"
+      borderColor="$appBorder"
+      bg="$appSurface"
       $md={{ display: 'flex' }}
       $xl={{ width: 256 }}
     >
-      <YStack px="$4.5" py="$4.5" gap="$2" borderBottomWidth={1} borderColor="$terminalBorder">
+      <YStack px="$4.5" py="$4.5" gap="$2" borderBottomWidth={1} borderColor="$appBorder">
         <TerminalText size="$5" fontWeight="800" letterSpacing={2.8}>
           {tDashboard('navigation.brandTitle')}
         </TerminalText>
@@ -73,11 +73,11 @@ export function DesktopNavigationSidebar({
               justify="flex-start"
               gap="$3"
               borderWidth={1}
-              borderColor={isActive ? '$terminalCyanBorder' : 'transparent'}
-              bg={isActive ? '$terminalCyanSoft' : 'transparent'}
+              borderColor={isActive ? '$appAccentBorder' : 'transparent'}
+              bg={isActive ? '$appAccentSoft' : 'transparent'}
               hoverStyle={{
-                borderColor: isSettings ? '$terminalCyanBorder' : '$terminalBorder',
-                bg: '$terminalRaised',
+                borderColor: isSettings ? '$appAccentBorder' : '$appBorder',
+                bg: '$appSurfaceRaised',
               }}
               pressStyle={{ opacity: 0.7 }}
               onPress={() => onSelect(item.id)}
@@ -90,13 +90,13 @@ export function DesktopNavigationSidebar({
             >
               <Icon
                 size={isSettings ? 19 : 18}
-                color={isActive ? colors.terminalCyan.val : colors.terminalMuted.val}
+                color={isActive ? colors.appAccent.val : colors.appMuted.val}
                 strokeWidth={isActive ? 2 : 1.5}
               />
               <TerminalText
                 size="$3"
                 fontWeight={isActive ? '700' : '500'}
-                color={isActive ? '$terminalCyan' : '$terminalMuted'}
+                color={isActive ? '$appAccent' : '$appMuted'}
                 numberOfLines={1}
               >
                 {item.label}
@@ -115,9 +115,9 @@ export function DesktopNavigationSidebar({
           items="center"
           justify="flex-start"
           borderWidth={1}
-          borderColor={isSettings ? '$terminalCyanBorder' : '$terminalBorder'}
-          bg={isSettings ? '$terminalCyanSoft' : '$terminalRaisedTranslucent'}
-          hoverStyle={{ borderColor: '$terminalCyanBorder', bg: '$terminalCyanSoft' }}
+          borderColor={isSettings ? '$appAccentBorder' : '$appBorder'}
+          bg={isSettings ? '$appAccentSoft' : '$appSurfaceRaisedTranslucent'}
+          hoverStyle={{ borderColor: '$appAccentBorder', bg: '$appAccentSoft' }}
           pressStyle={{ opacity: 0.7 }}
           onPress={onToggleScope}
           aria-label={t(isSettings ? 'scopeSwitcher.returnToDashboard' : 'scopeSwitcher.openSettings')}
@@ -127,16 +127,16 @@ export function DesktopNavigationSidebar({
         >
           <XStack items="center" gap="$2.5">
             {isSettings
-              ? <ChevronLeft size={16} color={colors.terminalCyan.val} />
-              : <Orbit size={17} color={colors.terminalCyan.val} />}
-            <TerminalText size="$2.5" color="$terminalCyan" fontWeight="700">
+              ? <ChevronLeft size={16} color={colors.appAccent.val} />
+              : <Orbit size={17} color={colors.appAccent.val} />}
+            <TerminalText size="$2.5" color="$appAccent" fontWeight="700">
               {t(isSettings ? 'scopeSwitcher.dashboard' : 'scopeSwitcher.settings')}
             </TerminalText>
           </XStack>
         </Button>
       </YStack>
 
-      <YStack px="$4.5" py="$4" borderTopWidth={1} borderColor="$terminalBorder">
+      <YStack px="$4.5" py="$4" borderTopWidth={1} borderColor="$appBorder">
         <Button
           unstyled
           height="$4"
@@ -146,12 +146,12 @@ export function DesktopNavigationSidebar({
           justify="center"
           gap="$2"
           borderWidth={1}
-          borderColor="$terminalBorder"
-          hoverStyle={{ borderColor: '$terminalWarningBorder', bg: '$terminalWarningSoft' }}
+          borderColor="$appBorder"
+          hoverStyle={{ borderColor: '$appWarningBorder', bg: '$appWarningSoft' }}
           pressStyle={{ opacity: 0.7 }}
           onPress={onLogout}
         >
-          <LogOut size={14} color={colors.terminalMuted.val} />
+          <LogOut size={14} color={colors.appMuted.val} />
           <MonoText size="$2">{tCommon('actions.logout')}</MonoText>
         </Button>
       </YStack>

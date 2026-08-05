@@ -25,11 +25,11 @@ function ProfileAvatar({ avatarInitial, avatarLabel }: ProfileAvatarProps) {
       justify="center"
       rounded="$10"
       borderWidth={1}
-      borderColor="$terminalCyanBorder"
-      bg="$terminalCyanSoft"
+      borderColor="$appAccentBorder"
+      bg="$appAccentSoft"
       aria-label={avatarLabel}
     >
-      <TerminalText size="$3" color="$terminalCyan" fontWeight="800">{avatarInitial}</TerminalText>
+      <TerminalText size="$3" color="$appAccent" fontWeight="800">{avatarInitial}</TerminalText>
       <YStack
         position="absolute"
         r={-1}
@@ -38,8 +38,8 @@ function ProfileAvatar({ avatarInitial, avatarLabel }: ProfileAvatarProps) {
         height={8}
         rounded="$10"
         borderWidth={2}
-        borderColor="$terminalSurfaceStrong"
-        bg="$terminalSuccess"
+        borderColor="$appSurfaceStrong"
+        bg="$appSuccess"
       />
     </YStack>
   );
@@ -79,8 +79,8 @@ export function NavigationHeader({
           items="center"
           justify="center"
           rounded="$10"
-          bg={isSettingsActive ? '$terminalCyanSoft' : 'transparent'}
-          hoverStyle={{ bg: '$terminalCyanSoft' }}
+          bg={isSettingsActive ? '$appAccentSoft' : 'transparent'}
+          hoverStyle={{ bg: '$appAccentSoft' }}
           pressStyle={{ opacity: 0.65, scale: 0.94 }}
           onPress={onSettingsPress}
           aria-label={settingsLabel}
@@ -88,7 +88,7 @@ export function NavigationHeader({
         >
           <Settings
             size={20}
-            color={isSettingsActive ? colors.terminalCyan.val : colors.terminalText.val}
+            color={isSettingsActive ? colors.appAccent.val : colors.appText.val}
             strokeWidth={1.8}
           />
         </Button>

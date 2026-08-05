@@ -227,7 +227,7 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
                   <YStack
                     shrink={0}
                     borderBottomWidth={1}
-                    borderColor="$terminalBorder"
+                    borderColor="$appBorder"
                   >
                     <NavigationHeader
                       avatarInitial={t('mobile.avatarInitial')}
