@@ -4,8 +4,7 @@ import {
 } from '@/features/session';
 
 describe('auth routing', () => {
-  it('keeps startup inside auth until the session check resolves', () => {
-    expect(resolveAuthEntryDestination('checking')).toBeNull();
+  it('routes startup from auth according to the current session state', () => {
     expect(resolveAuthEntryDestination('unauthenticated')).toBe('/login');
     expect(resolveAuthEntryDestination('authenticated')).toBe('/dashboard/overview');
   });

@@ -25,8 +25,7 @@ export function resolvePostLoginDestination(
 
 export function resolveAuthEntryDestination(
   status: AuthState['status'],
-): PostLoginDestination | null {
-  if (status === 'checking') return null;
+): PostLoginDestination {
   if (status === 'authenticated') return DEFAULT_POST_LOGIN_DESTINATION;
   return LOGIN_PATH;
 }

@@ -3,11 +3,8 @@ import { Button, Text, View } from 'react-native';
 
 import { AuthProvider, useAuth } from '@/features/session';
 
-const observeAuthStatus = jest.fn();
-
 function AuthProbe() {
   const { authState, signIn, signOut } = useAuth();
-  observeAuthStatus(authState.status);
 
   return (
     <View>
@@ -19,10 +16,6 @@ function AuthProbe() {
 }
 
 describe('AuthProvider', () => {
-  beforeEach(() => {
-    observeAuthStatus.mockClear();
-  });
-
   it('owns the in-memory authentication lifecycle', async () => {
     const screen = await render(
       <AuthProvider>
@@ -31,8 +24,6 @@ describe('AuthProvider', () => {
     );
 
     expect(screen.getByText('unauthenticated')).toBeTruthy();
-    expect(observeAuthStatus).toHaveBeenCalledWith('checking');
-    expect(observeAuthStatus).toHaveBeenLastCalledWith('unauthenticated');
 
     await fireEvent.press(screen.getByText('Sign in'));
     expect(screen.getByText('authenticated')).toBeTruthy();

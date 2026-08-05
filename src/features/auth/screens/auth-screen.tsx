@@ -1,14 +1,9 @@
 import { useReducedMotion } from 'react-native-reanimated';
 import { KeyboardAvoidingView } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, Spinner, XStack, YStack, getTokens } from 'tamagui';
+import { ScrollView, XStack, YStack, getTokens } from 'tamagui';
 
-import {
-  DecorativeBarcode,
-  FlickeringStatusIndicator,
-  MonoText,
-  TerminalPanel,
-} from '@/components';
+import { DecorativeBarcode, FlickeringStatusIndicator, MonoText } from '@/components';
 import { AccessOrbit } from '../components/access-orbit';
 import { LoginForm } from '../components/login-form';
 import { TerminalBrand } from '../components/terminal-brand';
@@ -16,20 +11,14 @@ import { TerminalBrand } from '../components/terminal-brand';
 const MOCK_AUTHENTICATION_DELAY_MS = 1_100;
 const ACCESS_ORBIT_NODE_ID = '07';
 
-type AuthScreenProps =
-  | { mode: 'checking' }
-  | { mode?: 'login'; onAuthenticated: () => void };
-
-export function AuthScreen(props: AuthScreenProps) {
+export function AuthScreen({ onAuthenticated }: { onAuthenticated: () => void }) {
   const { t } = useTranslation('auth');
   const colors = getTokens().color;
   const reducedMotion = useReducedMotion();
   const handleAuthentication = async () => {
-    if (props.mode === 'checking') return;
-
     await new Promise<void>((resolve) => {
       setTimeout(() => {
-        props.onAuthenticated();
+        onAuthenticated();
         resolve();
       }, MOCK_AUTHENTICATION_DELAY_MS);
     });
@@ -53,26 +42,7 @@ export function AuthScreen(props: AuthScreenProps) {
               </YStack>
 
               <YStack width="100%" maxW={440} $md={{ grow: 1 }}>
-                {props.mode === 'checking' ? (
-                  <TerminalPanel
-                    accessibilityLabel={t('checking.accessibilityLabel')}
-                    accessibilityLiveRegion="polite"
-                    accessibilityRole="progressbar"
-                    aria-busy
-                    cornerBrackets
-                    items="center"
-                    gap="$3"
-                    p="$4.5"
-                    testID="auth-checking"
-                  >
-                    <Spinner size="large" color="$terminalCyan" />
-                    <MonoText size="$2.5" color="$terminalCyan" text="center">
-                      {t('checking.message')}
-                    </MonoText>
-                  </TerminalPanel>
-                ) : (
-                  <LoginForm onSubmit={handleAuthentication} />
-                )}
+                <LoginForm onSubmit={handleAuthentication} />
               </YStack>
             </XStack>
 
