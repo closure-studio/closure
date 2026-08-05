@@ -72,7 +72,7 @@ export function AccessOrbit({ label, nodeId }: { label: string; nodeId: string }
         </Svg>
       </Animated.View>
 
-      <YStack items="center" gap="$0.5" $max-md={{ display: 'none' }}>
+      <YStack items="center" gap="$0.5">
         <TerminalText size={media.md ? '$10' : '$8'} fontWeight="900" color="$appText">
           {nodeId}
         </TerminalText>
