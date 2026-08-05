@@ -1,5 +1,7 @@
 import type { Href } from 'expo-router';
 
+import type { AuthState } from '../providers/auth-provider';
+
 type PostLoginDestination = Extract<Href, string>;
 
 const DEFAULT_POST_LOGIN_DESTINATION = '/dashboard/overview' satisfies PostLoginDestination;
@@ -19,4 +21,11 @@ export function resolvePostLoginDestination(
 ): PostLoginDestination {
   if (typeof returnTo === 'string' && isPostLoginDestination(returnTo)) return returnTo;
   return DEFAULT_POST_LOGIN_DESTINATION;
+}
+
+export function resolveAuthEntryDestination(
+  status: AuthState['status'],
+): PostLoginDestination {
+  if (status === 'authenticated') return DEFAULT_POST_LOGIN_DESTINATION;
+  return LOGIN_PATH;
 }

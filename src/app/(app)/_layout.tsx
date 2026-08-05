@@ -1,9 +1,8 @@
 import { Redirect, usePathname, useRouter } from 'expo-router';
 import { Stack as AppStack } from 'expo-router/js-stack';
 import type { ComponentProps } from 'react';
-import { useEffect } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
-import { getTokens, useMedia } from 'tamagui';
+import { useMedia } from 'tamagui';
 
 import {
   getRouteScreenOptions,
@@ -12,7 +11,6 @@ import {
   useSessionBackdrop,
 } from '@/features/session';
 import {
-  getNavigationScope,
   NavigationLayout,
   NavigationScopeScreen,
 } from '@/features/navigation';
@@ -26,25 +24,18 @@ const renderNavigationScopeScreen: AppStackScreenLayout = ({ children, route }) 
 );
 
 export default function AppLayout() {
-  const colors = getTokens().color;
   const media = useMedia();
   const pathname = usePathname();
   const router = useRouter();
   const reducedMotion = useReducedMotion();
   const { authState, signOut } = useAuth();
-  const { blurTarget, resetBackdropTint } = useSessionBackdrop();
+  const { resetBackdropTint } = useSessionBackdrop();
   const isCompact = Boolean(media['max-md']);
   const screenOptions = isCompact
-    ? getScopeTransitionScreenOptions(reducedMotion, {
-        cardBackgroundColor: colors.terminalBg.val,
-      })
+    ? getScopeTransitionScreenOptions(reducedMotion)
     : getRouteScreenOptions(reducedMotion, { enableIosBackGesture: true });
 
-  useEffect(() => {
-    if (getNavigationScope(pathname) === 'settings') resetBackdropTint();
-  }, [pathname, resetBackdropTint]);
-
-  if (authState.status === 'unauthenticated' && pathname !== '/login') {
+  if (authState.status !== 'authenticated') {
     return <Redirect href={{ pathname: '/login', params: { returnTo: pathname } }} />;
   }
 
@@ -55,10 +46,7 @@ export default function AppLayout() {
   };
 
   return (
-    <NavigationLayout
-      blurTarget={blurTarget}
-      onLogout={handleLogout}
-    >
+    <NavigationLayout onLogout={handleLogout}>
       <AppStack
         screenLayout={renderNavigationScopeScreen}
         screenOptions={screenOptions}

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 
-type AuthState =
+export type AuthState =
   | { status: 'unauthenticated'; session: null }
   | { status: 'authenticated'; session: { kind: 'mock' } };
 

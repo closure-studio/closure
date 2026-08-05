@@ -1,8 +1,14 @@
 import {
+  resolveAuthEntryDestination,
   resolvePostLoginDestination,
 } from '@/features/session';
 
 describe('auth routing', () => {
+  it('routes startup from auth according to the current session state', () => {
+    expect(resolveAuthEntryDestination('unauthenticated')).toBe('/login');
+    expect(resolveAuthEntryDestination('authenticated')).toBe('/dashboard/overview');
+  });
+
   it('accepts any internal destination without a route allowlist', () => {
     expect(resolvePostLoginDestination('/settings/network')).toBe('/settings/network');
     expect(resolvePostLoginDestination('/dashboard/operators')).toBe('/dashboard/operators');

@@ -1,8 +1,15 @@
-import { BlurView } from 'expo-blur';
+import { useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
-import type { RefObject } from 'react';
-import { StyleSheet } from 'react-native';
-import type { View } from 'react-native';
+import Animated, {
+  Easing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import {
@@ -12,11 +19,15 @@ import {
   TerminalText,
 } from '@/components';
 import type { HorizontalSwipeDirection } from '@/components';
+import { NavigationHeaderEdge } from './navigation-header-edge';
 import type { SettingsPageId } from '../navigation-config';
 
 const PAGER_ITEM_HEIGHT = 22;
 const PAGER_TICK_HEIGHT = 2;
 const PAGER_INACTIVE_TICK_WIDTH = 18;
+const SWIPE_HINT_OFFSET_PX = 10;
+const SWIPE_HINT_HALF_TRAVEL_DURATION_MS = 4_000;
+const SWIPE_HINT_FULL_TRAVEL_DURATION_MS = 8_000;
 
 type SettingsPagerItem = {
   id: SettingsPageId;
@@ -26,18 +37,6 @@ type SettingsPagerItem = {
 export type SettingsSwipeAction =
   | { type: 'exit' }
   | { pageId: SettingsPageId; type: 'select-page' };
-
-const styles = StyleSheet.create({
-  blur: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    zIndex: 0,
-    pointerEvents: 'none',
-  },
-});
 
 export function resolveSettingsSwipeAction({
   activeId,
@@ -89,29 +88,66 @@ function SettingsPagerTick() {
   );
 }
 
+function AnimatedSwipeHint({ children }: { children: string }) {
+  const reducedMotion = useReducedMotion();
+  const horizontalOffset = useSharedValue(0);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: horizontalOffset.get() }],
+  }));
+
+  useEffect(() => {
+    cancelAnimation(horizontalOffset);
+    horizontalOffset.set(0);
+
+    if (!reducedMotion) {
+      horizontalOffset.set(withRepeat(
+        withSequence(
+          withTiming(SWIPE_HINT_OFFSET_PX, {
+            duration: SWIPE_HINT_HALF_TRAVEL_DURATION_MS,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(-SWIPE_HINT_OFFSET_PX, {
+            duration: SWIPE_HINT_FULL_TRAVEL_DURATION_MS,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(0, {
+            duration: SWIPE_HINT_HALF_TRAVEL_DURATION_MS,
+            easing: Easing.inOut(Easing.ease),
+          }),
+        ),
+        -1,
+        false,
+      ));
+    }
+
+    return () => cancelAnimation(horizontalOffset);
+  }, [horizontalOffset, reducedMotion]);
+
+  return (
+    <XStack justify="center" overflow="hidden">
+      <Animated.View testID="settings-swipe-hint" style={animatedStyle}>
+        <MonoText size="$1" text="center" color="$terminalMuted">
+          {children}
+        </MonoText>
+      </Animated.View>
+    </XStack>
+  );
+}
+
 export function SettingsPagerTabs({
   activeId,
-  blurTarget,
   items,
   onSelect,
   swipeHint,
   tabListLabel,
 }: {
   activeId: SettingsPageId;
-  blurTarget: RefObject<View | null>;
   items: readonly SettingsPagerItem[];
   onSelect: (pageId: SettingsPageId) => void;
   swipeHint: string;
   tabListLabel: string;
 }) {
   const colors = getTokens().color;
-  const platformBlurProps = process.env.EXPO_OS === 'android'
-    ? {
-        blurMethod: 'dimezisBlurViewSdk31Plus',
-        blurReductionFactor: 1,
-        blurTarget,
-      } as const
-    : {};
   const hasPreviousStep = hasAdjacentSettingsPage({ activeId, direction: 'right', items });
   const hasNextStep = hasAdjacentSettingsPage({ activeId, direction: 'left', items });
 
@@ -124,101 +160,99 @@ export function SettingsPagerTabs({
         overflow="hidden"
         px="$3.5"
         py="$2.5"
-        gap="$1.5"
         borderBottomWidth={1}
         borderColor="$terminalBorder"
         bg="transparent"
         $md={{ display: 'none' }}
       >
-        <BlurView
-          {...platformBlurProps}
-          intensity={64}
-          tint="dark"
-          style={styles.blur}
-        />
-        <YStack
-          position="absolute"
-          t={0}
-          b={0}
-          l={0}
-          r={0}
-          bg="$terminalSurface"
-          opacity={0.28}
-          z="$0"
-          style={{ pointerEvents: 'none' }}
-        />
+        <NavigationHeaderEdge />
 
         <XStack
+          testID="settings-pager-layout"
           position="relative"
           z="$1"
           items="center"
           justify="center"
           gap="$3"
-          role="tablist"
-          aria-label={tabListLabel}
         >
-          <YStack opacity={hasPreviousStep ? 0.55 : 0.15} style={{ pointerEvents: 'none' }}>
+          <YStack
+            testID="settings-previous-icon"
+            height={PAGER_ITEM_HEIGHT}
+            items="center"
+            justify="center"
+            opacity={hasPreviousStep ? 0.55 : 0.15}
+            style={{ pointerEvents: 'none' }}
+          >
             <ChevronLeft size={14} color={colors.terminalMuted.val} strokeWidth={1.5} />
           </YStack>
 
-          <SlidingSelection value={activeId} gap={10} indicator={<SettingsPagerTick />}>
-            {items.map((item) => {
-              const isActive = item.id === activeId;
+          <YStack gap="$1.5">
+            <XStack items="center" justify="center" role="tablist" aria-label={tabListLabel}>
+              <SlidingSelection value={activeId} gap={10} indicator={<SettingsPagerTick />}>
+                {items.map((item) => {
+                  const isActive = item.id === activeId;
 
-              return (
-                <SlidingSelection.Item key={item.id} value={item.id}>
-                  <Button
-                    unstyled
-                    height={PAGER_ITEM_HEIGHT}
-                    width={isActive ? undefined : PAGER_INACTIVE_TICK_WIDTH}
-                    px={isActive ? '$1.5' : 0}
-                    flexDirection="row"
-                    items="flex-start"
-                    justify="center"
-                    rounded="$0"
-                    bg="transparent"
-                    pressStyle={{ opacity: 0.65 }}
-                    focusVisibleStyle={{ bg: '$terminalCyanSoft' }}
-                    onPress={() => onSelect(item.id)}
-                    role="tab"
-                    aria-selected={isActive}
-                    aria-label={item.label}
-                  >
-                    {isActive ? (
-                      <TerminalText
-                        size="$2.5"
-                        lineHeight={18}
-                        color="$terminalCyan"
-                        fontWeight="700"
-                        numberOfLines={1}
+                  return (
+                    <SlidingSelection.Item key={item.id} value={item.id}>
+                      <Button
+                        unstyled
+                        height={PAGER_ITEM_HEIGHT}
+                        width={isActive ? undefined : PAGER_INACTIVE_TICK_WIDTH}
+                        px={isActive ? '$1.5' : 0}
+                        flexDirection="row"
+                        items="flex-start"
+                        justify="center"
+                        rounded="$0"
+                        bg="transparent"
+                        pressStyle={{ opacity: 0.65 }}
+                        focusVisibleStyle={{ bg: '$terminalCyanSoft' }}
+                        onPress={() => onSelect(item.id)}
+                        role="tab"
+                        aria-selected={isActive}
+                        aria-label={item.label}
                       >
-                        {item.label}
-                      </TerminalText>
-                    ) : (
-                      <YStack
-                        position="absolute"
-                        b={0}
-                        l={0}
-                        r={0}
-                        height={PAGER_TICK_HEIGHT}
-                        bg="$terminalMuted"
-                        opacity={0.45}
-                      />
-                    )}
-                  </Button>
-                </SlidingSelection.Item>
-              );
-            })}
-          </SlidingSelection>
+                        {isActive ? (
+                          <TerminalText
+                            size="$2.5"
+                            lineHeight={18}
+                            color="$terminalCyan"
+                            fontWeight="700"
+                            numberOfLines={1}
+                          >
+                            {item.label}
+                          </TerminalText>
+                        ) : (
+                          <YStack
+                            position="absolute"
+                            b={0}
+                            l={0}
+                            r={0}
+                            height={PAGER_TICK_HEIGHT}
+                            bg="$terminalMuted"
+                            opacity={0.45}
+                          />
+                        )}
+                      </Button>
+                    </SlidingSelection.Item>
+                  );
+                })}
+              </SlidingSelection>
+            </XStack>
 
-          <YStack opacity={hasNextStep ? 0.55 : 0.15} style={{ pointerEvents: 'none' }}>
+            <AnimatedSwipeHint>{swipeHint}</AnimatedSwipeHint>
+          </YStack>
+
+          <YStack
+            testID="settings-next-icon"
+            height={PAGER_ITEM_HEIGHT}
+            items="center"
+            justify="center"
+            opacity={hasNextStep ? 0.55 : 0.15}
+            style={{ pointerEvents: 'none' }}
+          >
             <ChevronRight size={14} color={colors.terminalMuted.val} strokeWidth={1.5} />
           </YStack>
         </XStack>
-
-        <MonoText size="$1" text="center" color="$terminalMuted">
-          {swipeHint}
-        </MonoText>
       </YStack>
     </HorizontalSwipeSurface>
   );

@@ -22,11 +22,6 @@ const transitionSpec: NonNullable<JsStackScreenOptions['transitionSpec']> = {
   close: timingTransition,
 };
 
-const SCOPE_PARALLAX_RATIO = 0.2;
-const SCOPE_PREVIOUS_CARD_HIDE_START = 0.98;
-const SCOPE_PREVIOUS_CARD_HIDE_END = 0.99;
-const SCOPE_BACKGROUND_REVEAL_START = SCOPE_PREVIOUS_CARD_HIDE_END;
-
 const routeCardStyleInterpolator: CardStyleInterpolator = ({ current, next }) => {
   if (next) {
     return {
@@ -55,43 +50,25 @@ const routeCardStyleInterpolator: CardStyleInterpolator = ({ current, next }) =>
   };
 };
 
-function createScopeCardStyleInterpolator(cardBackgroundColor: string): CardStyleInterpolator {
-  return ({ current, inverted, layouts, next }) => {
-    const focusedTranslation = Animated.multiply(current.progress.interpolate({
-      inputRange: [0, 1],
-      outputRange: [layouts.screen.width, 0],
-      extrapolate: 'clamp',
-    }), inverted);
-    const unfocusedTranslation = next
-      ? Animated.multiply(next.progress.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, -layouts.screen.width * SCOPE_PARALLAX_RATIO],
-          extrapolate: 'clamp',
-        }), inverted)
-      : 0;
+const scopeCardStyleInterpolator: CardStyleInterpolator = ({ current, inverted, layouts, next }) => {
+  const translation = next
+    ? next.progress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, -layouts.screen.width],
+        extrapolate: 'clamp',
+      })
+    : current.progress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [layouts.screen.width, 0],
+        extrapolate: 'clamp',
+      });
 
-    return {
-      cardStyle: {
-        backgroundColor: current.progress.interpolate({
-          inputRange: [0, SCOPE_BACKGROUND_REVEAL_START, 1],
-          outputRange: [cardBackgroundColor, cardBackgroundColor, 'transparent'],
-          extrapolate: 'clamp',
-        }),
-        opacity: next
-          ? next.progress.interpolate({
-              inputRange: [0, SCOPE_PREVIOUS_CARD_HIDE_START, SCOPE_PREVIOUS_CARD_HIDE_END, 1],
-              outputRange: [1, 1, 0, 0],
-              extrapolate: 'clamp',
-            })
-          : 1,
-        transform: [
-          { translateX: focusedTranslation },
-          { translateX: unfocusedTranslation },
-        ],
-      },
-    };
+  return {
+    cardStyle: {
+      transform: [{ translateX: Animated.multiply(translation, inverted) }],
+    },
   };
-}
+};
 
 type RouteScreenOptionsPolicy = {
   enableIosBackGesture?: boolean;
@@ -99,7 +76,6 @@ type RouteScreenOptionsPolicy = {
 };
 
 type ScopeTransitionScreenOptionsPolicy = {
-  cardBackgroundColor: string;
   platform?: string;
 };
 
@@ -138,7 +114,7 @@ export function getRouteScreenOptions(
 
 export function getScopeTransitionScreenOptions(
   reducedMotion: boolean,
-  policy: ScopeTransitionScreenOptionsPolicy,
+  policy: ScopeTransitionScreenOptionsPolicy = {},
 ): JsStackScreenOptions {
   const sharedOptions: JsStackScreenOptions = {
     cardOverlayEnabled: false,
@@ -162,7 +138,7 @@ export function getScopeTransitionScreenOptions(
     ...sharedOptions,
     animation: 'default',
     animationTypeForReplace: 'push',
-    cardStyleInterpolator: createScopeCardStyleInterpolator(policy.cardBackgroundColor),
+    cardStyleInterpolator: scopeCardStyleInterpolator,
     gestureDirection: 'horizontal',
     gestureEnabled: platform === 'ios',
     gestureResponseDistance: IOS_BACK_GESTURE_EDGE_WIDTH_PT,

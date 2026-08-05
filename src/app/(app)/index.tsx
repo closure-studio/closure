@@ -1,7 +1,0 @@
-import { Redirect } from 'expo-router';
-
-import { dashboardNavigation } from '@/features/navigation';
-
-export default function AppIndexRoute() {
-  return <Redirect href={dashboardNavigation.defaultPage.route} />;
-}
