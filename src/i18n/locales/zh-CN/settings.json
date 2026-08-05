@@ -66,12 +66,12 @@
     "confirmDelete": "确认模拟注销",
     "mockNotice": "MOCK MODE // 不连接认证服务"
   },
-  "acknowledgements": {
-    "code": "SET-ACK / 03",
+  "contributors": {
+    "code": "SET-CONTRIB / 03",
     "description": "记录共同维护 Closure 的贡献者、支持者与创作者。",
     "eyebrow": "贡献档案",
     "status": "感谢信号持续在线",
-    "title": "鸣谢名单",
+    "title": "贡献者",
     "intro": "这一路像开荒主线一样不容易，幸好有大家并肩作战，真的超——感谢！也感谢一直支持我们的各位博士，尤其是“你”。",
     "recipientCode": "YOU",
     "recipientTitle": "今夜限定主角位",

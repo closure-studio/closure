@@ -12,9 +12,9 @@
     "swipeHint": "SWIPE L/R"
   },
   "pages": {
-    "account": { "label": "Account Security", "subtitle": "IDENTITY CONTROL" },
-    "acknowledgements": { "label": "Acknowledgements", "subtitle": "CONTRIBUTION ARCHIVE" },
-    "network": { "label": "Network Settings", "subtitle": "API ROUTING" }
+    "account": { "label": "Account", "subtitle": "IDENTITY CONTROL" },
+    "contributors": { "label": "Contributors", "subtitle": "CONTRIBUTION ARCHIVE" },
+    "network": { "label": "Network", "subtitle": "API ROUTING" }
   },
   "scopeSwitcher": {
     "dashboard": "DASHBOARD",

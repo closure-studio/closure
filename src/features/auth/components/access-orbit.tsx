@@ -72,11 +72,11 @@ export function AccessOrbit({ label, nodeId }: { label: string; nodeId: string }
         </Svg>
       </Animated.View>
 
-      <YStack items="center" gap="$0.5" $max-md={{ display: 'none' }}>
-        <TerminalText size={media.md ? '$10' : '$8'} fontWeight="900" color="$appText">
+      <YStack position="absolute" width={size} height={size} items="center" justify="center" gap="$0.5">
+        <TerminalText size={media.md ? '$10' : '$6'} fontWeight="900" color="$appText">
           {nodeId}
         </TerminalText>
-        <MonoText size="$1" color="$appAccent" textTransform="uppercase" text="center">
+        <MonoText display="none" size="$1" color="$appAccent" textTransform="uppercase" text="center" $md={{ display: 'flex' }}>
           {label}
         </MonoText>
       </YStack>

@@ -1,8 +1,8 @@
-import feAmeLoxAvatar from '@/assets/images/acknowledgements/fe-ame-lox.jpg';
-import gkAvatar from '@/assets/images/acknowledgements/gk.jpg';
-import kriptoAvatar from '@/assets/images/acknowledgements/kripto.jpg';
-import outdatedAvatar from '@/assets/images/acknowledgements/ooooooutdated.jpg';
-import skadiAvatar from '@/assets/images/acknowledgements/skadi.jpg';
+import feAmeLoxAvatar from '@/assets/images/contributors/fe-ame-lox.jpg';
+import gkAvatar from '@/assets/images/contributors/gk.jpg';
+import kriptoAvatar from '@/assets/images/contributors/kripto.jpg';
+import outdatedAvatar from '@/assets/images/contributors/ooooooutdated.jpg';
+import skadiAvatar from '@/assets/images/contributors/skadi.jpg';
 import { Image } from 'expo-image';
 import { Heart, Radio, Sparkles, UsersRound } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
@@ -15,9 +15,9 @@ import {
   TerminalSectionHeading,
   TerminalText,
 } from '@/components';
-import type { AcknowledgementAvatarKey } from '@/schemas/acknowledgement';
+import type { ContributorAvatarKey } from '@/schemas/contributor';
 import { SettingsPage } from '../components/settings-page';
-import { mockAcknowledgements } from '../mocks/settings-mocks';
+import { mockContributors } from '../mocks/settings-mocks';
 
 const contributorAvatars = {
   'ooooooutdated': outdatedAvatar,
@@ -25,26 +25,26 @@ const contributorAvatars = {
   'kripto': kriptoAvatar,
   'skadi': skadiAvatar,
   'gk': gkAvatar,
-} satisfies Record<AcknowledgementAvatarKey, number>;
+} satisfies Record<ContributorAvatarKey, number>;
 
-export function AcknowledgementsScreen() {
+export function ContributorsScreen() {
   const { t } = useTranslation('settings');
   const colors = getTokens().color;
 
   return (
     <SettingsPage>
       <SectionPageHeader
-        code={t('acknowledgements.code')}
-        description={t('acknowledgements.description')}
-        eyebrow={t('acknowledgements.eyebrow')}
-        status={t('acknowledgements.status')}
-        title={t('acknowledgements.title')}
+        code={t('contributors.code')}
+        description={t('contributors.description')}
+        eyebrow={t('contributors.eyebrow')}
+        status={t('contributors.status')}
+        title={t('contributors.title')}
       />
 
       <TerminalPanel p="$3.5" gap="$4" tone="cyan" cornerBrackets $md={{ p: '$5' }}>
         <XStack items="flex-start" gap="$3">
           <Heart size={21} color={colors.appAccent.val} fill={colors.appAccentSoft.val} />
-          <MonoText grow={1} size="$3" lineHeight="$4" color="$appText">{t('acknowledgements.intro')}</MonoText>
+          <MonoText grow={1} size="$3" lineHeight="$4" color="$appText">{t('contributors.intro')}</MonoText>
         </XStack>
 
         <XStack flexDirection="column" gap="$4" $md={{ flexDirection: 'row', items: 'center' }}>
@@ -59,16 +59,16 @@ export function AcknowledgementsScreen() {
             bg="$appWarningSoft"
           >
             <TerminalText size="$7" lineHeight="$7" fontWeight="800" color="$appWarning">
-              {mockAcknowledgements.recipient.avatarInitial}
+              {mockContributors.recipient.avatarInitial}
             </TerminalText>
           </YStack>
           <YStack grow={1} minW={0} gap="$2">
-            <TerminalSectionHeading code={t('acknowledgements.recipientCode')} title={t('acknowledgements.recipientTitle')} />
+            <TerminalSectionHeading code={t('contributors.recipientCode')} title={t('contributors.recipientTitle')} />
             <TerminalText size="$6" fontWeight="800" color="$appWarning" select="text">
-              {t('acknowledgements.recipientName', { callsign: mockAcknowledgements.recipient.callsign })}
+              {t('contributors.recipientName', { callsign: mockContributors.recipient.callsign })}
             </TerminalText>
             <MonoText size="$2.5" lineHeight="$3">
-              {t('acknowledgements.recipientDescription', { callsign: mockAcknowledgements.recipient.callsign })}
+              {t('contributors.recipientDescription', { callsign: mockContributors.recipient.callsign })}
             </MonoText>
           </YStack>
           <Radio size={28} color={colors.appWarning.val} />
@@ -77,12 +77,12 @@ export function AcknowledgementsScreen() {
 
       <TerminalPanel p="$3.5" gap="$4" $md={{ p: '$5' }}>
         <XStack flexDirection="column" gap="$2" $sm={{ flexDirection: 'row', items: 'flex-end', justify: 'space-between' }}>
-          <TerminalSectionHeading code={t('acknowledgements.teamCode')} title={t('acknowledgements.teamTitle')} />
-          <MonoText size="$2" maxW={420}>{t('acknowledgements.teamDescription')}</MonoText>
+          <TerminalSectionHeading code={t('contributors.teamCode')} title={t('contributors.teamTitle')} />
+          <MonoText size="$2" maxW={420}>{t('contributors.teamDescription')}</MonoText>
         </XStack>
 
         <XStack flexDirection="column" flexWrap="wrap" gap="$3" $lg={{ flexDirection: 'row' }}>
-          {mockAcknowledgements.operationsTeam.map((member, index) => (
+          {mockContributors.operationsTeam.map((member, index) => (
             <XStack
               key={member.id}
               width="100%"
@@ -105,7 +105,7 @@ export function AcknowledgementsScreen() {
               </YStack>
               <YStack grow={1} minW={0} gap="$1">
                 <TerminalText size="$3" fontWeight="700" select="text">{member.name}</TerminalText>
-                <MonoText size="$2" lineHeight="$3">{t(`acknowledgements.contributors.${member.id}`)}</MonoText>
+                <MonoText size="$2" lineHeight="$3">{t(`contributors.contributors.${member.id}`)}</MonoText>
               </YStack>
               <MonoText size="$1">{String(index + 1).padStart(2, '0')}</MonoText>
             </XStack>
@@ -114,9 +114,9 @@ export function AcknowledgementsScreen() {
       </TerminalPanel>
 
       <TerminalPanel p="$3.5" gap="$4" tone="warning" $md={{ p: '$5' }}>
-        <TerminalSectionHeading code={t('acknowledgements.specialCode')} title={t('acknowledgements.specialTitle')} />
+        <TerminalSectionHeading code={t('contributors.specialCode')} title={t('contributors.specialTitle')} />
         <XStack flexDirection="column" gap="$3" $sm={{ flexDirection: 'row' }}>
-          {mockAcknowledgements.specialThanks.map((credit) => (
+          {mockContributors.specialThanks.map((credit) => (
             <XStack
               key={credit.id}
               grow={1}
@@ -132,7 +132,7 @@ export function AcknowledgementsScreen() {
                 ? <Sparkles size={19} color={colors.appWarning.val} />
                 : <UsersRound size={19} color={colors.appWarning.val} />}
               <YStack grow={1} minW={0} gap="$1">
-                <MonoText size="$1" color="$appWarning">{t(`acknowledgements.credits.${credit.id}`)}</MonoText>
+                <MonoText size="$1" color="$appWarning">{t(`contributors.credits.${credit.id}`)}</MonoText>
                 <TerminalText size="$3" fontWeight="700" select="text">{credit.name}</TerminalText>
               </YStack>
             </XStack>

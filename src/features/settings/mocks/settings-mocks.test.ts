@@ -1,10 +1,10 @@
 import * as v from 'valibot';
 
 import { apiNodeSchema } from '@/schemas/api-node';
-import { acknowledgementsSchema } from '@/schemas/acknowledgement';
+import { contributorsSchema } from '@/schemas/contributor';
 import { userAccountSchema } from '@/schemas/user-account';
 import {
-  mockAcknowledgements,
+  mockContributors,
   mockApiNodes,
   mockFailedApiNode,
   mockUserAccount,
@@ -21,7 +21,7 @@ describe('settings mocks', () => {
     expect(v.safeParse(userAccountSchema, mockUserAccount).success).toBe(true);
   });
 
-  it('keeps the complete acknowledgements fixture valid', () => {
-    expect(v.safeParse(acknowledgementsSchema, mockAcknowledgements).success).toBe(true);
+  it('keeps the complete contributors fixture valid', () => {
+    expect(v.safeParse(contributorsSchema, mockContributors).success).toBe(true);
   });
 });

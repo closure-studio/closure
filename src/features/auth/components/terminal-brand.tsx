@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { XStack, YStack, getTokens, useMedia } from 'tamagui';
 
-import { MonoText, NotchedFrame, TerminalText } from '@/components';
+import { MonoText, NotchedSurface, TerminalText } from '@/components';
 
 type TerminalBrandProps = Omit<React.ComponentProps<typeof XStack>, 'children' | 'scale'> & {
   mark?: ReactNode;
@@ -23,13 +23,19 @@ export function TerminalBrand({
 
   return (
     <XStack items="center" gap="$3" {...props}>
-      <NotchedFrame
-        size={large ? 64 : 48}
-        notch={8}
-        fill={colors.appAccentSoft.val}
-        stroke={colors.appAccentEdge.val}
-        bracketColor={colors.appAccentRing.val}
+      <YStack
+        position="relative"
+        width={large ? '$6' : '$4.5'}
+        height={large ? '$6' : '$4.5'}
+        items="center"
+        justify="center"
       >
+        <NotchedSurface
+          notch={8}
+          fill={colors.appAccentSoft.val}
+          stroke={colors.appAccentEdge.val}
+          bracketColor={colors.appAccentRing.val}
+        />
         <TerminalText
           size={large ? '$7' : '$5'}
           fontWeight="900"
@@ -38,7 +44,7 @@ export function TerminalBrand({
         >
           {mark}
         </TerminalText>
-      </NotchedFrame>
+      </YStack>
       <YStack minW={0} shrink={1} gap="$0.5">
         <TerminalText size={large ? '$7' : '$5.5'} fontWeight="800" letterSpacing={3.6} shrink={1}>
           {title}

@@ -1,6 +1,5 @@
 export { TerminalCheckbox, type TerminalCheckboxProps } from './terminal-checkbox';
 export { DecorativeBarcode } from './decorative-barcode';
-export { NotchedFrame } from './notched-frame';
 export { TerminalFilterButton } from './terminal-filter-button';
 export { TerminalMarquee, type TerminalMarqueeItem, type TerminalMarqueeProps, type TerminalMarqueeTone } from './terminal-marquee';
 export { TerminalMeterBar } from './terminal-meter-bar';

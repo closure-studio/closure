@@ -180,14 +180,14 @@ describe('back navigation', () => {
       ({ pathname }: { pathname: string }) => useSettingsBackNavigation({
         pathname,
         router,
-        settingsRoute: '/settings/acknowledgements',
+        settingsRoute: '/settings/contributors',
       }),
-      { initialProps: { pathname: '/settings/acknowledgements' } },
+      { initialProps: { pathname: '/settings/contributors' } },
     );
 
     expect(router.replace).toHaveBeenCalledWith('/dashboard/overview');
     await rerender({ pathname: '/dashboard/overview' });
-    expect(router.push).toHaveBeenCalledWith('/settings/acknowledgements');
+    expect(router.push).toHaveBeenCalledWith('/settings/contributors');
 
     await unmount();
   });

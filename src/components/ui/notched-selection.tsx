@@ -1,17 +1,20 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { ComponentProps, PropsWithChildren } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
-import Svg, { Path, Polygon } from 'react-native-svg';
+import Svg, { ClipPath, Defs, G, Path, Polygon } from 'react-native-svg';
 import { Button, YStack, getTokens } from 'tamagui';
 
 const DEFAULT_NOTCH_SIZE = 12;
+const NOTCHED_BRACKET_SIZE = 12;
 const NOTCHED_STROKE_INSET = 0.5;
+const NOTCHED_STROKE_WIDTH = 1;
 
 type NotchedSurfaceProps = {
   fill: string;
   fillOpacity?: number;
   notch?: number;
+  bracketColor?: string;
   stroke: string;
   strokeDasharray?: string;
 };
@@ -20,9 +23,11 @@ export function NotchedSurface({
   fill,
   fillOpacity = 1,
   notch = DEFAULT_NOTCH_SIZE,
+  bracketColor,
   stroke,
   strokeDasharray,
 }: NotchedSurfaceProps) {
+  const clipId = `notched-surface-${useId().replace(/:/g, '')}`;
   const [layout, setLayout] = useState({ height: 0, width: 0 });
 
   const handleLayout = (event: LayoutChangeEvent) => {
@@ -42,6 +47,12 @@ export function NotchedSurface({
     `M${width - NOTCHED_STROKE_INSET},${height - NOTCHED_STROKE_INSET} H${notch + NOTCHED_STROKE_INSET}`,
     `M${NOTCHED_STROKE_INSET},${height - notch - NOTCHED_STROKE_INSET} V${NOTCHED_STROKE_INSET}`,
   ].join(' ');
+  const bracketPath = [
+    `M${NOTCHED_STROKE_INSET},${NOTCHED_BRACKET_SIZE} V${NOTCHED_STROKE_INSET} H${NOTCHED_BRACKET_SIZE}`,
+    `M${width - NOTCHED_BRACKET_SIZE},${NOTCHED_STROKE_INSET} H${width - NOTCHED_STROKE_INSET} V${NOTCHED_BRACKET_SIZE}`,
+    `M${NOTCHED_STROKE_INSET},${height - NOTCHED_BRACKET_SIZE} V${height - NOTCHED_STROKE_INSET} H${NOTCHED_BRACKET_SIZE}`,
+    `M${width - NOTCHED_BRACKET_SIZE},${height - NOTCHED_STROKE_INSET} H${width - NOTCHED_STROKE_INSET} V${height - NOTCHED_BRACKET_SIZE}`,
+  ].join(' ');
 
   return (
     <YStack
@@ -56,14 +67,29 @@ export function NotchedSurface({
     >
       {width > 0 && height > 0 ? (
         <Svg width={width} height={height} style={{ pointerEvents: 'none' }}>
+          <Defs>
+            <ClipPath id={clipId}>
+              <Polygon points={fillPoints} />
+            </ClipPath>
+          </Defs>
           <Polygon points={fillPoints} fill={fill} fillOpacity={fillOpacity} />
           <Path
             d={strokePath}
             fill="none"
             stroke={stroke}
-            strokeWidth={1}
+            strokeWidth={NOTCHED_STROKE_WIDTH}
             {...(strokeDasharray ? { strokeDasharray } : {})}
           />
+          {bracketColor ? (
+            <G clipPath={`url(#${clipId})`}>
+              <Path
+                d={bracketPath}
+                fill="none"
+                stroke={bracketColor}
+                strokeWidth={NOTCHED_STROKE_WIDTH}
+              />
+            </G>
+          ) : null}
         </Svg>
       ) : null}
     </YStack>

@@ -441,7 +441,7 @@ export function NetworkSettingsScreen() {
                           </XStack>
                         </XStack>
 
-                        <RadioGroup.Indicator position="absolute" opacity={0} />
+                        <RadioGroup.Indicator unstyled position="absolute" opacity={0} />
                       </NotchedButton>
                     </RadioGroup.Item>
                   </SlidingSelection.Item>
