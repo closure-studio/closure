@@ -89,7 +89,7 @@ describe('resolveSettingsSwipeAction', () => {
 
   it('moves backward for a right swipe', () => {
     expect(resolveSettingsSwipeAction({
-      activeId: 'acknowledgements',
+      activeId: 'contributors',
       direction: 'right',
       items: settingsItems,
     })).toEqual({ pageId: 'account', type: 'select-page' });
@@ -104,7 +104,7 @@ describe('resolveSettingsSwipeAction', () => {
   });
 
   it.each([
-    { activeId: 'acknowledgements', direction: 'left' },
+    { activeId: 'contributors', direction: 'left' },
   ] as const)('does not navigate past the final page', (gesture) => {
     expect(resolveSettingsSwipeAction({ ...gesture, items: settingsItems })).toBeNull();
   });

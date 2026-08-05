@@ -25,7 +25,7 @@ export const dashboardNavigation = {
 const settingsPages = {
   network: { id: 'network', route: '/settings/network', icon: Wifi, sort: 10 },
   account: { id: 'account', route: '/settings/account', icon: ShieldCheck, sort: 20 },
-  acknowledgements: { id: 'acknowledgements', route: '/settings/acknowledgements', icon: HeartHandshake, sort: 30 },
+  contributors: { id: 'contributors', route: '/settings/contributors', icon: HeartHandshake, sort: 30 },
 } as const;
 
 export const settingsNavigation = {

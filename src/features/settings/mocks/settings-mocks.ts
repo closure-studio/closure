@@ -1,5 +1,5 @@
 import type { ApiNode } from '@/schemas/api-node';
-import type { Acknowledgements } from '@/schemas/acknowledgement';
+import type { Contributors } from '@/schemas/contributor';
 import type { UserAccount } from '@/schemas/user-account';
 
 export const mockApiNodes = [
@@ -31,7 +31,7 @@ export const mockUserAccount = {
   role: 'member',
 } satisfies UserAccount;
 
-export const mockAcknowledgements = {
+export const mockContributors = {
   recipient: {
     gameAccountId: 'acc-01',
     callsign: 'AMIYA-MAIN',
@@ -48,4 +48,4 @@ export const mockAcknowledgements = {
     { id: 'vibe-coding', name: '黑与白公益站' },
     { id: 'design', name: '欧阳淇淇' },
   ],
-} satisfies Acknowledgements;
+} satisfies Contributors;

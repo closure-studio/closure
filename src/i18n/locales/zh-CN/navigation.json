@@ -12,9 +12,9 @@
     "swipeHint": "左右滑动切换"
   },
   "pages": {
-    "account": { "label": "账号安全", "subtitle": "身份控制" },
-    "acknowledgements": { "label": "鸣谢名单", "subtitle": "贡献档案" },
-    "network": { "label": "网络设置", "subtitle": "API 路由" }
+    "account": { "label": "账号", "subtitle": "身份控制" },
+    "contributors": { "label": "贡献者", "subtitle": "贡献档案" },
+    "network": { "label": "网络", "subtitle": "API 路由" }
   },
   "scopeSwitcher": {
     "dashboard": "控制台",

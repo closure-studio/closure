@@ -12,7 +12,7 @@ describe('navigation config', () => {
     },
   );
 
-  it.each(['/settings', '/settings/network', '/settings/account', '/settings/acknowledgements'] as const)(
+  it.each(['/settings', '/settings/network', '/settings/account', '/settings/contributors'] as const)(
     'derives settings scope for %s',
     (pathname) => {
       expect(getNavigationScope(pathname)).toBe('settings');
@@ -46,7 +46,7 @@ describe('navigation config', () => {
     expect(settingsPages.map(({ id, route }) => ({ id, route }))).toEqual([
       { id: 'network', route: '/settings/network' },
       { id: 'account', route: '/settings/account' },
-      { id: 'acknowledgements', route: '/settings/acknowledgements' },
+      { id: 'contributors', route: '/settings/contributors' },
     ]);
   });
 });

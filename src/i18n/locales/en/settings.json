@@ -66,12 +66,12 @@
     "confirmDelete": "Confirm mock deletion",
     "mockNotice": "MOCK MODE // Authentication services are disconnected"
   },
-  "acknowledgements": {
-    "code": "SET-ACK / 03",
+  "contributors": {
+    "code": "SET-CONTRIB / 03",
     "description": "A record of the contributors, supporters, and creators who keep Closure moving.",
     "eyebrow": "Contribution archive",
     "status": "Gratitude signal online",
-    "title": "Acknowledgements",
+    "title": "Contributors",
     "intro": "The route has felt like clearing a difficult main story, and we are deeply grateful to everyone who fought beside us—especially you, Doctor.",
     "recipientCode": "YOU",
     "recipientTitle": "Tonight's featured Doctor",
