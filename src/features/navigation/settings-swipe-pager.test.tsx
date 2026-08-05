@@ -51,9 +51,12 @@ describe('SettingsPagerTabs', () => {
     expect(screen.getByRole('tab', { name: 'network' }).props['aria-selected']).toBe(true);
   });
 
-  it('centers both direction icons within the pager item height', async () => {
+  it('centers both direction icons against the complete pager content', async () => {
     const screen = await renderSettingsPagerTabs();
 
+    expect(screen.getByTestId('settings-pager-layout')).toHaveStyle({
+      alignItems: 'center',
+    });
     expect(screen.getByTestId('settings-previous-icon')).toHaveStyle({
       alignItems: 'center',
       height: 22,

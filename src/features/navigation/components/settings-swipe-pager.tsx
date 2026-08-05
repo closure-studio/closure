@@ -160,7 +160,6 @@ export function SettingsPagerTabs({
         overflow="hidden"
         px="$3.5"
         py="$2.5"
-        gap="$1.5"
         borderBottomWidth={1}
         borderColor="$terminalBorder"
         bg="transparent"
@@ -169,13 +168,12 @@ export function SettingsPagerTabs({
         <NavigationHeaderEdge />
 
         <XStack
+          testID="settings-pager-layout"
           position="relative"
           z="$1"
           items="center"
           justify="center"
           gap="$3"
-          role="tablist"
-          aria-label={tabListLabel}
         >
           <YStack
             testID="settings-previous-icon"
@@ -188,55 +186,61 @@ export function SettingsPagerTabs({
             <ChevronLeft size={14} color={colors.terminalMuted.val} strokeWidth={1.5} />
           </YStack>
 
-          <SlidingSelection value={activeId} gap={10} indicator={<SettingsPagerTick />}>
-            {items.map((item) => {
-              const isActive = item.id === activeId;
+          <YStack gap="$1.5">
+            <XStack items="center" justify="center" role="tablist" aria-label={tabListLabel}>
+              <SlidingSelection value={activeId} gap={10} indicator={<SettingsPagerTick />}>
+                {items.map((item) => {
+                  const isActive = item.id === activeId;
 
-              return (
-                <SlidingSelection.Item key={item.id} value={item.id}>
-                  <Button
-                    unstyled
-                    height={PAGER_ITEM_HEIGHT}
-                    width={isActive ? undefined : PAGER_INACTIVE_TICK_WIDTH}
-                    px={isActive ? '$1.5' : 0}
-                    flexDirection="row"
-                    items="flex-start"
-                    justify="center"
-                    rounded="$0"
-                    bg="transparent"
-                    pressStyle={{ opacity: 0.65 }}
-                    focusVisibleStyle={{ bg: '$terminalCyanSoft' }}
-                    onPress={() => onSelect(item.id)}
-                    role="tab"
-                    aria-selected={isActive}
-                    aria-label={item.label}
-                  >
-                    {isActive ? (
-                      <TerminalText
-                        size="$2.5"
-                        lineHeight={18}
-                        color="$terminalCyan"
-                        fontWeight="700"
-                        numberOfLines={1}
+                  return (
+                    <SlidingSelection.Item key={item.id} value={item.id}>
+                      <Button
+                        unstyled
+                        height={PAGER_ITEM_HEIGHT}
+                        width={isActive ? undefined : PAGER_INACTIVE_TICK_WIDTH}
+                        px={isActive ? '$1.5' : 0}
+                        flexDirection="row"
+                        items="flex-start"
+                        justify="center"
+                        rounded="$0"
+                        bg="transparent"
+                        pressStyle={{ opacity: 0.65 }}
+                        focusVisibleStyle={{ bg: '$terminalCyanSoft' }}
+                        onPress={() => onSelect(item.id)}
+                        role="tab"
+                        aria-selected={isActive}
+                        aria-label={item.label}
                       >
-                        {item.label}
-                      </TerminalText>
-                    ) : (
-                      <YStack
-                        position="absolute"
-                        b={0}
-                        l={0}
-                        r={0}
-                        height={PAGER_TICK_HEIGHT}
-                        bg="$terminalMuted"
-                        opacity={0.45}
-                      />
-                    )}
-                  </Button>
-                </SlidingSelection.Item>
-              );
-            })}
-          </SlidingSelection>
+                        {isActive ? (
+                          <TerminalText
+                            size="$2.5"
+                            lineHeight={18}
+                            color="$terminalCyan"
+                            fontWeight="700"
+                            numberOfLines={1}
+                          >
+                            {item.label}
+                          </TerminalText>
+                        ) : (
+                          <YStack
+                            position="absolute"
+                            b={0}
+                            l={0}
+                            r={0}
+                            height={PAGER_TICK_HEIGHT}
+                            bg="$terminalMuted"
+                            opacity={0.45}
+                          />
+                        )}
+                      </Button>
+                    </SlidingSelection.Item>
+                  );
+                })}
+              </SlidingSelection>
+            </XStack>
+
+            <AnimatedSwipeHint>{swipeHint}</AnimatedSwipeHint>
+          </YStack>
 
           <YStack
             testID="settings-next-icon"
@@ -249,8 +253,6 @@ export function SettingsPagerTabs({
             <ChevronRight size={14} color={colors.terminalMuted.val} strokeWidth={1.5} />
           </YStack>
         </XStack>
-
-        <AnimatedSwipeHint>{swipeHint}</AnimatedSwipeHint>
       </YStack>
     </HorizontalSwipeSurface>
   );
