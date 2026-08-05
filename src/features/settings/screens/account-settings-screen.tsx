@@ -1,16 +1,21 @@
-import { CalendarClock, KeyRound, Mail, ShieldAlert, UserRound } from 'lucide-react-native';
-import { useCallback, useState } from 'react';
+import {
+  CalendarClock,
+  KeyRound,
+  Mail,
+  ShieldCheck,
+  UserRound,
+  type LucideIcon,
+} from 'lucide-react-native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as v from 'valibot';
 import {
-  Adapt,
   Button,
-  Dialog,
   Form,
-  Sheet,
   XStack,
   YStack,
   getTokens,
+  useMedia,
 } from 'tamagui';
 
 import {
@@ -18,11 +23,9 @@ import {
   SectionPageHeader,
   TerminalPanel,
   TerminalPasswordVisibilityButton,
-  TerminalSectionHeading,
   TerminalText,
   TerminalTextField,
 } from '@/components';
-import { useBackDismissal } from '@/hooks/use-back-dismissal';
 import {
   passwordChangeInputSchema,
   passwordChangeIssue,
@@ -57,21 +60,143 @@ function passwordErrorsFromIssues(issues: readonly { message: string }[]): Passw
   return errors;
 }
 
+function AccountPanelHeading({ code, title }: { code: string; title: string }) {
+  return (
+    <XStack items="baseline" justify="space-between" gap="$3" minW={0}>
+      <MonoText size="$2.5" color="$appAccent" shrink={0}>
+        {code}
+      </MonoText>
+      <TerminalText
+        size="$3"
+        text="right"
+        fontWeight="700"
+        letterSpacing={2.8}
+        textTransform="uppercase"
+        shrink={1}
+      >
+        {title}
+      </TerminalText>
+    </XStack>
+  );
+}
+
+function AccountFact({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+}) {
+  const colors = getTokens().color;
+
+  return (
+    <YStack grow={1} minW={0} p="$3" gap="$1.5" borderWidth={1} borderColor="$appBorder" bg="$appSurfaceRaisedTranslucent">
+      <XStack items="center" gap="$2">
+        <Icon size={14} color={colors.appAccent.val} strokeWidth={1.7} />
+        <MonoText size="$1">{label}</MonoText>
+      </XStack>
+      <TerminalText size="$2.5" fontWeight="700" select="text" numberOfLines={2}>
+        {value}
+      </TerminalText>
+    </YStack>
+  );
+}
+
+function AccountIdentityPanel({
+  email,
+  registeredAt,
+  registeredAtLabel,
+  role,
+  roleLabel,
+  status,
+  statusLabel,
+  title,
+  titleCode,
+}: {
+  email: string;
+  registeredAt: string;
+  registeredAtLabel: string;
+  role: string;
+  roleLabel: string;
+  status: string;
+  statusLabel: string;
+  title: string;
+  titleCode: string;
+}) {
+  const colors = getTokens().color;
+
+  return (
+    <TerminalPanel
+      testID="account-identity-panel"
+      p="$3.5"
+      gap="$4"
+      tone="cyan"
+      cornerBrackets
+      $md={{ p: '$4.5' }}
+    >
+      <AccountPanelHeading code={titleCode} title={title} />
+
+      <XStack items="center" gap="$3" p="$3" borderWidth={1} borderColor="$appBorder" bg="$appSurfaceRaisedTranslucent">
+        <YStack
+          width="$7"
+          height="$7"
+          shrink={0}
+          items="center"
+          justify="center"
+          rounded="$10"
+          borderWidth={1}
+          borderColor="$appAccentBorder"
+          bg="$appAccentSoft"
+        >
+          <UserRound size={26} color={colors.appAccent.val} strokeWidth={1.6} />
+        </YStack>
+        <YStack grow={1} minW={0} gap="$1">
+          <XStack items="center" gap="$2">
+            <Mail size={14} color={colors.appAccent.val} strokeWidth={1.7} />
+            <MonoText size="$1">{email}</MonoText>
+          </XStack>
+          <TerminalText size="$4" fontWeight="800" select="text" numberOfLines={1}>
+            {email}
+          </TerminalText>
+          <XStack items="center" gap="$2">
+            <MonoText size="$1">{roleLabel}</MonoText>
+            <TerminalText size="$2.5" color="$appAccent" fontWeight="700" select="text">
+              {role}
+            </TerminalText>
+          </XStack>
+        </YStack>
+      </XStack>
+
+      <XStack flexDirection="column" gap="$3" $sm={{ flexDirection: 'row' }}>
+        <AccountFact
+          icon={CalendarClock}
+          label={registeredAtLabel}
+          value={registeredAt}
+        />
+        <AccountFact
+          icon={ShieldCheck}
+          label={statusLabel}
+          value={status}
+        />
+      </XStack>
+    </TerminalPanel>
+  );
+}
+
 export function AccountSettingsScreen() {
   const { t, i18n } = useTranslation('settings');
   const { t: tCommon } = useTranslation('common');
   const colors = getTokens().color;
+  const media = useMedia();
+  const isDesktop = Boolean(media.md);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [repeatNewPassword, setRepeatNewPassword] = useState('');
   const [focusedPasswordField, setFocusedPasswordField] = useState<PasswordField | null>(null);
   const [visiblePasswordField, setVisiblePasswordField] = useState<PasswordField | null>(null);
   const [passwordErrors, setPasswordErrors] = useState<PasswordErrors>({});
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const handleDeleteDialogDismiss = useCallback(() => {
-    setIsDeleteDialogOpen(false);
-  }, []);
-  useBackDismissal(isDeleteDialogOpen, handleDeleteDialogDismiss);
   const registeredAt = new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, {
     dateStyle: 'medium',
     timeStyle: 'short',
@@ -123,247 +248,157 @@ export function AccountSettingsScreen() {
     console.info('Mock password change accepted.', { userAccountId: mockUserAccount.id });
   };
 
-  const handleDeleteConfirm = () => {
-    console.info('Mock User Account deletion confirmed.', { userAccountId: mockUserAccount.id });
-    setIsDeleteDialogOpen(false);
-  };
+  const renderPasswordField = ({
+    autoComplete,
+    field,
+    label,
+    onChangeText,
+    value,
+  }: {
+    autoComplete: 'current-password' | 'new-password';
+    field: PasswordField;
+    label: string;
+    onChangeText: (value: string) => void;
+    value: string;
+  }) => (
+    <TerminalTextField
+      icon={KeyRound}
+      label={label}
+      value={value}
+      onBlur={() => handlePasswordFieldBlur(field)}
+      onChangeText={onChangeText}
+      onFocus={() => setFocusedPasswordField(field)}
+      placeholder={t('account.passwordPlaceholder')}
+      secureTextEntry={visiblePasswordField !== field}
+      autoComplete={autoComplete}
+      {...(passwordErrors[field]
+        ? { error: translatePasswordError(passwordErrors[field]) }
+        : {})}
+      trailing={(
+        <TerminalPasswordVisibilityButton
+          hideLabel={tCommon('accessibility.hidePassword')}
+          showLabel={tCommon('accessibility.showPassword')}
+          isPasswordVisible={visiblePasswordField === field}
+          onPress={() => setVisiblePasswordField((visibleField) => visibleField === field ? null : field)}
+        />
+      )}
+    />
+  );
 
   return (
     <SettingsPage isSwipeEnabled={focusedPasswordField === null}>
-      <SectionPageHeader
-        code={t('account.code')}
-        description={t('account.description')}
-        eyebrow={t('account.eyebrow')}
-        status={t('account.status')}
-        title={t('account.title')}
-      />
+      {isDesktop ? (
+        <SectionPageHeader
+          code={t('account.code')}
+          description={t('account.description')}
+          eyebrow={t('account.eyebrow')}
+          status={t('account.status')}
+          title={t('account.title')}
+        />
+      ) : null}
 
-      <XStack flexDirection="column" gap="$4" $lg={{ flexDirection: 'row', items: 'flex-start' }}>
-        <YStack grow={1} minW={0} gap="$4">
-          <TerminalPanel p="$3.5" gap="$4" tone="cyan" $md={{ p: '$4.5' }}>
-            <TerminalSectionHeading code={t('account.identityCode')} title={t('account.identityTitle')} />
-            <XStack flexDirection="column" gap="$3" $sm={{ flexDirection: 'row' }}>
-              <YStack grow={1} minH="$5" p="$3" gap="$1" borderWidth={1} borderColor="$appBorder" bg="$appBackground">
-                <XStack items="center" gap="$2">
-                  <Mail size={15} color={colors.appAccent.val} />
-                  <MonoText size="$1">{t('account.email')}</MonoText>
-                </XStack>
-                <TerminalText size="$3" fontWeight="700" select="text">{mockUserAccount.email}</TerminalText>
-              </YStack>
-              <YStack grow={1} minH="$5" p="$3" gap="$1" borderWidth={1} borderColor="$appBorder" bg="$appBackground">
-                <XStack items="center" gap="$2">
-                  <CalendarClock size={15} color={colors.appAccent.val} />
-                  <MonoText size="$1">{t('account.registeredAt')}</MonoText>
-                </XStack>
-                <TerminalText size="$3" fontWeight="700" select="text">{registeredAt}</TerminalText>
-              </YStack>
-            </XStack>
-            <XStack items="center" gap="$3" minH="$4.5" px="$3" borderWidth={1} borderColor="$appBorder" bg="$appSurfaceRaisedTranslucent">
-              <UserRound size={17} color={colors.appMuted.val} />
-              <MonoText size="$2">{t('account.role')}</MonoText>
-              <TerminalText ml="auto" size="$2.5" color="$appAccent" fontWeight="700">
-                {t(`account.roles.${mockUserAccount.role}`)}
-              </TerminalText>
-            </XStack>
-          </TerminalPanel>
+      <YStack gap="$3" $md={{ gap: '$5' }}>
+        {!isDesktop ? (
+          <MonoText size="$2" lineHeight="$3" color="$appText" select="text">
+            {t('account.description')}
+          </MonoText>
+        ) : null}
 
-          <Form onSubmit={handlePasswordSubmit}>
-            <TerminalPanel p="$3.5" gap="$4" cornerBrackets $md={{ p: '$4.5' }}>
-              <TerminalSectionHeading
-                code={t('account.passwordCode')}
-                title={t('account.passwordTitle')}
-                subtitle={t('account.passwordSubtitle')}
-              />
-              <TerminalTextField
-                icon={KeyRound}
-                label={t('account.currentPassword')}
-                value={currentPassword}
-                onBlur={() => handlePasswordFieldBlur('currentPassword')}
-                onChangeText={(value) => {
-                  setCurrentPassword(value);
-                  clearPasswordError('currentPassword');
-                }}
-                onFocus={() => setFocusedPasswordField('currentPassword')}
-                placeholder={t('account.passwordPlaceholder')}
-                secureTextEntry={visiblePasswordField !== 'currentPassword'}
-                autoComplete="current-password"
-                {...(passwordErrors.currentPassword
-                  ? { error: translatePasswordError(passwordErrors.currentPassword) }
-                  : {})}
-                trailing={(
-                  <TerminalPasswordVisibilityButton
-                    hideLabel={tCommon('accessibility.hidePassword')}
-                    showLabel={tCommon('accessibility.showPassword')}
-                    isPasswordVisible={visiblePasswordField === 'currentPassword'}
-                    onPress={() => setVisiblePasswordField((field) => field === 'currentPassword' ? null : 'currentPassword')}
-                  />
-                )}
-              />
-              <XStack flexDirection="column" gap="$3" $sm={{ flexDirection: 'row' }}>
-                <YStack grow={1} minW={0}>
-                  <TerminalTextField
-                    icon={KeyRound}
-                    label={t('account.newPassword')}
-                    value={newPassword}
-                    onBlur={() => handlePasswordFieldBlur('newPassword')}
-                    onChangeText={(value) => {
-                      setNewPassword(value);
-                      clearPasswordError('newPassword');
-                      clearPasswordError('repeatNewPassword');
-                    }}
-                    onFocus={() => setFocusedPasswordField('newPassword')}
-                    placeholder={t('account.passwordPlaceholder')}
-                    secureTextEntry={visiblePasswordField !== 'newPassword'}
-                    autoComplete="new-password"
-                    {...(passwordErrors.newPassword
-                      ? { error: translatePasswordError(passwordErrors.newPassword) }
-                      : {})}
-                    trailing={(
-                      <TerminalPasswordVisibilityButton
-                        hideLabel={tCommon('accessibility.hidePassword')}
-                        showLabel={tCommon('accessibility.showPassword')}
-                        isPasswordVisible={visiblePasswordField === 'newPassword'}
-                        onPress={() => setVisiblePasswordField((field) => field === 'newPassword' ? null : 'newPassword')}
-                      />
-                    )}
-                  />
-                </YStack>
-                <YStack grow={1} minW={0}>
-                  <TerminalTextField
-                    icon={KeyRound}
-                    label={t('account.repeatNewPassword')}
-                    value={repeatNewPassword}
-                    onBlur={() => handlePasswordFieldBlur('repeatNewPassword')}
-                    onChangeText={(value) => {
-                      setRepeatNewPassword(value);
-                      clearPasswordError('repeatNewPassword');
-                    }}
-                    onFocus={() => setFocusedPasswordField('repeatNewPassword')}
-                    placeholder={t('account.passwordPlaceholder')}
-                    secureTextEntry={visiblePasswordField !== 'repeatNewPassword'}
-                    autoComplete="new-password"
-                    {...(passwordErrors.repeatNewPassword
-                      ? { error: translatePasswordError(passwordErrors.repeatNewPassword) }
-                      : {})}
-                    trailing={(
-                      <TerminalPasswordVisibilityButton
-                        hideLabel={tCommon('accessibility.hidePassword')}
-                        showLabel={tCommon('accessibility.showPassword')}
-                        isPasswordVisible={visiblePasswordField === 'repeatNewPassword'}
-                        onPress={() => setVisiblePasswordField((field) => field === 'repeatNewPassword' ? null : 'repeatNewPassword')}
-                      />
-                    )}
-                  />
-                </YStack>
-              </XStack>
-              <Form.Trigger asChild>
-                <Button
-                  minH="$4.5"
-                  rounded="$0"
-                  borderWidth={1}
-                  borderColor="$appAccent"
-                  bg="$appAccentSoft"
-                  hoverStyle={{ bg: '$appSurfaceRaised', borderColor: '$appAccent' }}
-                  pressStyle={{ opacity: 0.75 }}
-                  focusVisibleStyle={{ borderColor: '$appText' }}
-                >
-                  <TerminalText size="$3" color="$appAccent" fontWeight="700">{t('account.submitPassword')}</TerminalText>
-                </Button>
-              </Form.Trigger>
-            </TerminalPanel>
-          </Form>
-        </YStack>
+        <XStack minW={0} flexDirection="column" gap="$4" $lg={{ flexDirection: 'row', items: 'flex-start' }}>
+          <YStack width="100%" gap="$4" shrink={0} $lg={{ width: '34%', maxW: 380 }}>
+            <AccountIdentityPanel
+              email={mockUserAccount.email}
+              registeredAt={registeredAt}
+              registeredAtLabel={t('account.registeredAt')}
+              role={t(`account.roles.${mockUserAccount.role}`)}
+              roleLabel={t('account.role')}
+              status={t('account.status')}
+              statusLabel={t('account.identityStatus')}
+              title={t('account.identityTitle')}
+              titleCode={t('account.identityCode')}
+            />
+          </YStack>
 
-        <YStack width="100%" gap="$4" $lg={{ maxW: 360 }}>
-          <TerminalPanel p="$3.5" gap="$4" tone="danger" $md={{ p: '$4.5' }}>
-            <TerminalSectionHeading code={t('account.dangerCode')} title={t('account.dangerTitle')} />
-            <XStack items="flex-start" gap="$3">
-              <ShieldAlert size={21} color={colors.appDanger.val} />
-              <MonoText grow={1} size="$2.5" lineHeight="$3">{t('account.dangerDescription')}</MonoText>
-            </XStack>
-
-            <Dialog modal open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-              <Dialog.Trigger asChild>
-                <Button
-                  minH="$4.5"
-                  rounded="$0"
-                  borderWidth={1}
-                  borderColor="$appDanger"
-                  bg="$appDangerSoft"
-                  hoverStyle={{ bg: '$appDangerSoft', borderColor: '$appDanger' }}
-                  pressStyle={{ opacity: 0.72 }}
-                  focusVisibleStyle={{ borderColor: '$appText' }}
-                >
-                  <TerminalText size="$3" color="$appDanger" fontWeight="700">{t('account.deleteAccount')}</TerminalText>
-                </Button>
-              </Dialog.Trigger>
-
-              <Adapt platform="touch" when="max-md">
-                <Sheet modal dismissOnSnapToBottom snapPointsMode="fit" zIndex={100000}>
-                  <Sheet.Frame p="$4" bg="$appSurfaceStrong" borderTopWidth={1} borderColor="$appDangerBorder">
-                    <Adapt.Contents />
-                  </Sheet.Frame>
-                  <Sheet.Overlay bg="$appScrim" />
-                </Sheet>
-              </Adapt>
-
-              <Dialog.Portal>
-                <Dialog.Overlay
-                  key="account-delete-overlay"
-                  transition="200ms"
-                  bg="$appScrim"
-                  opacity={1}
-                  enterStyle={{ opacity: 0 }}
-                  exitStyle={{ opacity: 0 }}
+          <YStack grow={1} shrink={1} minW={0} width="100%" $lg={{ width: 'auto' }}>
+            <Form onSubmit={handlePasswordSubmit}>
+              <TerminalPanel
+                testID="account-password-panel"
+                p="$3.5"
+                gap="$4"
+                cornerBrackets
+                $md={{ p: '$4.5' }}
+              >
+                <AccountPanelHeading
+                  code={t('account.passwordCode')}
+                  title={t('account.passwordTitle')}
                 />
-                <Dialog.Content
-                  key="account-delete-content"
-                  width="90%"
-                  maxW={480}
-                  p="$5"
-                  gap="$4"
-                  rounded="$0"
-                  borderWidth={1}
-                  borderColor="$appDangerBorder"
-                  bg="$appSurfaceStrong"
-                  transition="200ms"
-                  enterStyle={{ opacity: 0, scale: 0.96, y: 8 }}
-                  exitStyle={{ opacity: 0, scale: 0.96, y: 8 }}
-                >
-                  <Dialog.Title asChild>
-                    <TerminalText size="$5" fontWeight="800">{t('account.deleteDialogTitle')}</TerminalText>
-                  </Dialog.Title>
-                  <Dialog.Description asChild>
-                    <MonoText size="$2.5" lineHeight="$3" select="text">
-                      {t('account.deleteDialogDescription', { email: mockUserAccount.email })}
-                    </MonoText>
-                  </Dialog.Description>
-                  <XStack flexDirection="column-reverse" gap="$2" $xs={{ flexDirection: 'row', justify: 'flex-end' }}>
-                    <Dialog.Close asChild>
-                      <Button minH="$4.5" px="$4" rounded="$0" borderWidth={1} borderColor="$appBorder" bg="$appSurfaceRaised">
-                        <MonoText size="$2.5">{t('account.cancel')}</MonoText>
-                      </Button>
-                    </Dialog.Close>
-                    <Button
-                      minH="$4.5"
-                      px="$4"
-                      rounded="$0"
-                      borderWidth={1}
-                      borderColor="$appDanger"
-                      bg="$appDangerSoft"
-                      onPress={handleDeleteConfirm}
-                    >
-                      <TerminalText size="$2.5" color="$appDanger" fontWeight="700">{t('account.confirmDelete')}</TerminalText>
-                    </Button>
-                  </XStack>
-                </Dialog.Content>
-              </Dialog.Portal>
-            </Dialog>
 
-            <MonoText size="$1" color="$appWarning">{t('account.mockNotice')}</MonoText>
-          </TerminalPanel>
-        </YStack>
-      </XStack>
+                {renderPasswordField({
+                  autoComplete: 'current-password',
+                  field: 'currentPassword',
+                  label: t('account.currentPassword'),
+                  onChangeText: (value) => {
+                    setCurrentPassword(value);
+                    clearPasswordError('currentPassword');
+                  },
+                  value: currentPassword,
+                })}
+
+                <XStack flexDirection="column" gap="$3" $sm={{ flexDirection: 'row' }}>
+                  <YStack grow={1} minW={0}>
+                    {renderPasswordField({
+                      autoComplete: 'new-password',
+                      field: 'newPassword',
+                      label: t('account.newPassword'),
+                      onChangeText: (value) => {
+                        setNewPassword(value);
+                        clearPasswordError('newPassword');
+                        clearPasswordError('repeatNewPassword');
+                      },
+                      value: newPassword,
+                    })}
+                  </YStack>
+                  <YStack grow={1} minW={0}>
+                    {renderPasswordField({
+                      autoComplete: 'new-password',
+                      field: 'repeatNewPassword',
+                      label: t('account.repeatNewPassword'),
+                      onChangeText: (value) => {
+                        setRepeatNewPassword(value);
+                        clearPasswordError('repeatNewPassword');
+                      },
+                      value: repeatNewPassword,
+                    })}
+                  </YStack>
+                </XStack>
+
+                <Form.Trigger asChild>
+                  <Button
+                    testID="account-password-submit"
+                    width="100%"
+                    minH="$4.5"
+                    rounded="$0"
+                    borderWidth={1}
+                    borderColor="$appAccent"
+                    bg="$appAccentSoft"
+                    hoverStyle={{ bg: '$appSurfaceRaised', borderColor: '$appAccent' }}
+                    pressStyle={{ opacity: 0.75 }}
+                    focusVisibleStyle={{ borderColor: '$appText' }}
+                  >
+                    <XStack items="center" gap="$2">
+                      <ShieldCheck size={15} color={colors.appAccent.val} strokeWidth={1.8} />
+                      <TerminalText size="$3" color="$appAccent" fontWeight="700">
+                        {t('account.submitPassword')}
+                      </TerminalText>
+                    </XStack>
+                  </Button>
+                </Form.Trigger>
+              </TerminalPanel>
+            </Form>
+          </YStack>
+        </XStack>
+      </YStack>
+
     </SettingsPage>
   );
 }

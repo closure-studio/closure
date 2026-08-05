@@ -37,6 +37,7 @@
     "identityTitle": "用户账号",
     "email": "账号邮箱",
     "registeredAt": "注册时间",
+    "identityStatus": "身份状态",
     "role": "账号角色",
     "roles": {
       "member": "普通用户",
@@ -44,7 +45,6 @@
     },
     "passwordCode": "CREDENTIAL",
     "passwordTitle": "修改密码",
-    "passwordSubtitle": "本地校验",
     "currentPassword": "当前密码",
     "newPassword": "新密码",
     "repeatNewPassword": "重复新密码",
@@ -55,16 +55,7 @@
       "newPasswordRequired": "请输入新密码",
       "repeatNewPasswordRequired": "请再次输入新密码",
       "passwordsMismatch": "两次输入的新密码不一致"
-    },
-    "dangerCode": "DANGER",
-    "dangerTitle": "危险操作",
-    "dangerDescription": "注销将永久移除用户账号。当前操作为 mock，不会删除数据或退出登录。",
-    "deleteAccount": "注销账号",
-    "deleteDialogTitle": "确认注销用户账号？",
-    "deleteDialogDescription": "你正在模拟注销 {{email}}。确认后只会写入开发日志，不会产生真实副作用。",
-    "cancel": "取消",
-    "confirmDelete": "确认模拟注销",
-    "mockNotice": "MOCK MODE // 不连接认证服务"
+    }
   },
   "contributors": {
     "code": "SET-CONTRIB / 03",
