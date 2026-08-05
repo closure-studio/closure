@@ -26,15 +26,15 @@ export function TerminalBrand({
       <NotchedFrame
         size={large ? 64 : 48}
         notch={8}
-        fill={colors.terminalCyanSoft.val}
-        stroke={colors.terminalCyanEdge.val}
-        bracketColor={colors.terminalCyanRing.val}
+        fill={colors.appAccentSoft.val}
+        stroke={colors.appAccentEdge.val}
+        bracketColor={colors.appAccentRing.val}
       >
         <TerminalText
           size={large ? '$7' : '$5'}
           fontWeight="900"
           letterSpacing={large ? -1.4 : -0.9}
-          color="$terminalCyan"
+          color="$appAccent"
         >
           {mark}
         </TerminalText>

@@ -43,8 +43,8 @@ export function AcknowledgementsScreen() {
 
       <TerminalPanel p="$3.5" gap="$4" tone="cyan" cornerBrackets $md={{ p: '$5' }}>
         <XStack items="flex-start" gap="$3">
-          <Heart size={21} color={colors.terminalCyan.val} fill={colors.terminalCyanSoft.val} />
-          <MonoText grow={1} size="$3" lineHeight="$4" color="$terminalText">{t('acknowledgements.intro')}</MonoText>
+          <Heart size={21} color={colors.appAccent.val} fill={colors.appAccentSoft.val} />
+          <MonoText grow={1} size="$3" lineHeight="$4" color="$appText">{t('acknowledgements.intro')}</MonoText>
         </XStack>
 
         <XStack flexDirection="column" gap="$4" $md={{ flexDirection: 'row', items: 'center' }}>
@@ -55,23 +55,23 @@ export function AcknowledgementsScreen() {
             items="center"
             justify="center"
             borderWidth={1}
-            borderColor="$terminalWarningBorder"
-            bg="$terminalWarningSoft"
+            borderColor="$appWarningBorder"
+            bg="$appWarningSoft"
           >
-            <TerminalText size="$7" lineHeight="$7" fontWeight="800" color="$terminalWarning">
+            <TerminalText size="$7" lineHeight="$7" fontWeight="800" color="$appWarning">
               {mockAcknowledgements.recipient.avatarInitial}
             </TerminalText>
           </YStack>
           <YStack grow={1} minW={0} gap="$2">
             <TerminalSectionHeading code={t('acknowledgements.recipientCode')} title={t('acknowledgements.recipientTitle')} />
-            <TerminalText size="$6" fontWeight="800" color="$terminalWarning" select="text">
+            <TerminalText size="$6" fontWeight="800" color="$appWarning" select="text">
               {t('acknowledgements.recipientName', { callsign: mockAcknowledgements.recipient.callsign })}
             </TerminalText>
             <MonoText size="$2.5" lineHeight="$3">
               {t('acknowledgements.recipientDescription', { callsign: mockAcknowledgements.recipient.callsign })}
             </MonoText>
           </YStack>
-          <Radio size={28} color={colors.terminalWarning.val} />
+          <Radio size={28} color={colors.appWarning.val} />
         </XStack>
       </TerminalPanel>
 
@@ -91,11 +91,11 @@ export function AcknowledgementsScreen() {
               items="center"
               gap="$3"
               borderWidth={1}
-              borderColor="$terminalBorder"
-              bg="$terminalRaisedTranslucent"
+              borderColor="$appBorder"
+              bg="$appSurfaceRaisedTranslucent"
               $lg={{ width: '48.5%', grow: 1 }}
             >
-              <YStack width="$5" height="$5" shrink={0} overflow="hidden" borderWidth={1} borderColor="$terminalCyanBorder" bg="$terminalBg">
+              <YStack width="$5" height="$5" shrink={0} overflow="hidden" borderWidth={1} borderColor="$appAccentBorder" bg="$appBackground">
                 <Image
                   source={contributorAvatars[member.avatarKey]}
                   contentFit="cover"
@@ -125,14 +125,14 @@ export function AcknowledgementsScreen() {
               items="center"
               gap="$3"
               borderWidth={1}
-              borderColor="$terminalWarningBorder"
-              bg="$terminalBg"
+              borderColor="$appWarningBorder"
+              bg="$appBackground"
             >
               {credit.id === 'design'
-                ? <Sparkles size={19} color={colors.terminalWarning.val} />
-                : <UsersRound size={19} color={colors.terminalWarning.val} />}
+                ? <Sparkles size={19} color={colors.appWarning.val} />
+                : <UsersRound size={19} color={colors.appWarning.val} />}
               <YStack grow={1} minW={0} gap="$1">
-                <MonoText size="$1" color="$terminalWarning">{t(`acknowledgements.credits.${credit.id}`)}</MonoText>
+                <MonoText size="$1" color="$appWarning">{t(`acknowledgements.credits.${credit.id}`)}</MonoText>
                 <TerminalText size="$3" fontWeight="700" select="text">{credit.name}</TerminalText>
               </YStack>
             </XStack>

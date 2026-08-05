@@ -54,9 +54,9 @@ export function DashboardScreen({
     [contentScrollRef, viewportHeight, viewportOffset],
   );
   const backdropTint = selectBackdropTint(activeGameAccount, {
-    primary: colors.terminalCyan.val,
-    warning: colors.terminalWarning.val,
-    muted: colors.terminalMuted.val,
+    primary: colors.appAccent.val,
+    warning: colors.appWarning.val,
+    muted: colors.appMuted.val,
   });
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export function DashboardScreen({
         label: t(message.translationKey),
         tone: message.tone,
       }))} />
-      <YStack borderBottomWidth={1} borderColor="$terminalBorder" bg="$terminalSurface">
+      <YStack borderBottomWidth={1} borderColor="$appBorder" bg="$appSurface">
         <YStack px="$3.5" py="$3" $md={{ px: '$5' }}><GameAccountSwitcher gameAccounts={gameAccounts} activeGameAccountId={activeGameAccountId} onSelectGameAccount={selectGameAccount} onLinkGameAccount={() => setIsLinkGameAccountSheetOpen(true)} /></YStack>
       </YStack>
 

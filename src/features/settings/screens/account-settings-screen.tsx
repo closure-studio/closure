@@ -143,25 +143,25 @@ export function AccountSettingsScreen() {
           <TerminalPanel p="$3.5" gap="$4" tone="cyan" $md={{ p: '$4.5' }}>
             <TerminalSectionHeading code={t('account.identityCode')} title={t('account.identityTitle')} />
             <XStack flexDirection="column" gap="$3" $sm={{ flexDirection: 'row' }}>
-              <YStack grow={1} minH="$5" p="$3" gap="$1" borderWidth={1} borderColor="$terminalBorder" bg="$terminalBg">
+              <YStack grow={1} minH="$5" p="$3" gap="$1" borderWidth={1} borderColor="$appBorder" bg="$appBackground">
                 <XStack items="center" gap="$2">
-                  <Mail size={15} color={colors.terminalCyan.val} />
+                  <Mail size={15} color={colors.appAccent.val} />
                   <MonoText size="$1">{t('account.email')}</MonoText>
                 </XStack>
                 <TerminalText size="$3" fontWeight="700" select="text">{mockUserAccount.email}</TerminalText>
               </YStack>
-              <YStack grow={1} minH="$5" p="$3" gap="$1" borderWidth={1} borderColor="$terminalBorder" bg="$terminalBg">
+              <YStack grow={1} minH="$5" p="$3" gap="$1" borderWidth={1} borderColor="$appBorder" bg="$appBackground">
                 <XStack items="center" gap="$2">
-                  <CalendarClock size={15} color={colors.terminalCyan.val} />
+                  <CalendarClock size={15} color={colors.appAccent.val} />
                   <MonoText size="$1">{t('account.registeredAt')}</MonoText>
                 </XStack>
                 <TerminalText size="$3" fontWeight="700" select="text">{registeredAt}</TerminalText>
               </YStack>
             </XStack>
-            <XStack items="center" gap="$3" minH="$4.5" px="$3" borderWidth={1} borderColor="$terminalBorder" bg="$terminalRaisedTranslucent">
-              <UserRound size={17} color={colors.terminalMuted.val} />
+            <XStack items="center" gap="$3" minH="$4.5" px="$3" borderWidth={1} borderColor="$appBorder" bg="$appSurfaceRaisedTranslucent">
+              <UserRound size={17} color={colors.appMuted.val} />
               <MonoText size="$2">{t('account.role')}</MonoText>
-              <TerminalText ml="auto" size="$2.5" color="$terminalCyan" fontWeight="700">
+              <TerminalText ml="auto" size="$2.5" color="$appAccent" fontWeight="700">
                 {t(`account.roles.${mockUserAccount.role}`)}
               </TerminalText>
             </XStack>
@@ -261,13 +261,13 @@ export function AccountSettingsScreen() {
                   minH="$4.5"
                   rounded="$0"
                   borderWidth={1}
-                  borderColor="$terminalCyan"
-                  bg="$terminalCyanSoft"
-                  hoverStyle={{ bg: '$terminalRaised', borderColor: '$terminalCyan' }}
+                  borderColor="$appAccent"
+                  bg="$appAccentSoft"
+                  hoverStyle={{ bg: '$appSurfaceRaised', borderColor: '$appAccent' }}
                   pressStyle={{ opacity: 0.75 }}
-                  focusVisibleStyle={{ borderColor: '$terminalText' }}
+                  focusVisibleStyle={{ borderColor: '$appText' }}
                 >
-                  <TerminalText size="$3" color="$terminalCyan" fontWeight="700">{t('account.submitPassword')}</TerminalText>
+                  <TerminalText size="$3" color="$appAccent" fontWeight="700">{t('account.submitPassword')}</TerminalText>
                 </Button>
               </Form.Trigger>
             </TerminalPanel>
@@ -278,7 +278,7 @@ export function AccountSettingsScreen() {
           <TerminalPanel p="$3.5" gap="$4" tone="danger" $md={{ p: '$4.5' }}>
             <TerminalSectionHeading code={t('account.dangerCode')} title={t('account.dangerTitle')} />
             <XStack items="flex-start" gap="$3">
-              <ShieldAlert size={21} color={colors.terminalDanger.val} />
+              <ShieldAlert size={21} color={colors.appDanger.val} />
               <MonoText grow={1} size="$2.5" lineHeight="$3">{t('account.dangerDescription')}</MonoText>
             </XStack>
 
@@ -288,22 +288,22 @@ export function AccountSettingsScreen() {
                   minH="$4.5"
                   rounded="$0"
                   borderWidth={1}
-                  borderColor="$terminalDanger"
-                  bg="$terminalDangerSoft"
-                  hoverStyle={{ bg: '$terminalDangerSoft', borderColor: '$terminalDanger' }}
+                  borderColor="$appDanger"
+                  bg="$appDangerSoft"
+                  hoverStyle={{ bg: '$appDangerSoft', borderColor: '$appDanger' }}
                   pressStyle={{ opacity: 0.72 }}
-                  focusVisibleStyle={{ borderColor: '$terminalText' }}
+                  focusVisibleStyle={{ borderColor: '$appText' }}
                 >
-                  <TerminalText size="$3" color="$terminalDanger" fontWeight="700">{t('account.deleteAccount')}</TerminalText>
+                  <TerminalText size="$3" color="$appDanger" fontWeight="700">{t('account.deleteAccount')}</TerminalText>
                 </Button>
               </Dialog.Trigger>
 
               <Adapt platform="touch" when="max-md">
                 <Sheet modal dismissOnSnapToBottom snapPointsMode="fit" zIndex={100000}>
-                  <Sheet.Frame p="$4" bg="$terminalSurfaceStrong" borderTopWidth={1} borderColor="$terminalDangerBorder">
+                  <Sheet.Frame p="$4" bg="$appSurfaceStrong" borderTopWidth={1} borderColor="$appDangerBorder">
                     <Adapt.Contents />
                   </Sheet.Frame>
-                  <Sheet.Overlay bg="$terminalScrim" />
+                  <Sheet.Overlay bg="$appScrim" />
                 </Sheet>
               </Adapt>
 
@@ -311,7 +311,7 @@ export function AccountSettingsScreen() {
                 <Dialog.Overlay
                   key="account-delete-overlay"
                   transition="200ms"
-                  bg="$terminalScrim"
+                  bg="$appScrim"
                   opacity={1}
                   enterStyle={{ opacity: 0 }}
                   exitStyle={{ opacity: 0 }}
@@ -324,8 +324,8 @@ export function AccountSettingsScreen() {
                   gap="$4"
                   rounded="$0"
                   borderWidth={1}
-                  borderColor="$terminalDangerBorder"
-                  bg="$terminalSurfaceStrong"
+                  borderColor="$appDangerBorder"
+                  bg="$appSurfaceStrong"
                   transition="200ms"
                   enterStyle={{ opacity: 0, scale: 0.96, y: 8 }}
                   exitStyle={{ opacity: 0, scale: 0.96, y: 8 }}
@@ -340,7 +340,7 @@ export function AccountSettingsScreen() {
                   </Dialog.Description>
                   <XStack flexDirection="column-reverse" gap="$2" $xs={{ flexDirection: 'row', justify: 'flex-end' }}>
                     <Dialog.Close asChild>
-                      <Button minH="$4.5" px="$4" rounded="$0" borderWidth={1} borderColor="$terminalBorder" bg="$terminalRaised">
+                      <Button minH="$4.5" px="$4" rounded="$0" borderWidth={1} borderColor="$appBorder" bg="$appSurfaceRaised">
                         <MonoText size="$2.5">{t('account.cancel')}</MonoText>
                       </Button>
                     </Dialog.Close>
@@ -349,18 +349,18 @@ export function AccountSettingsScreen() {
                       px="$4"
                       rounded="$0"
                       borderWidth={1}
-                      borderColor="$terminalDanger"
-                      bg="$terminalDangerSoft"
+                      borderColor="$appDanger"
+                      bg="$appDangerSoft"
                       onPress={handleDeleteConfirm}
                     >
-                      <TerminalText size="$2.5" color="$terminalDanger" fontWeight="700">{t('account.confirmDelete')}</TerminalText>
+                      <TerminalText size="$2.5" color="$appDanger" fontWeight="700">{t('account.confirmDelete')}</TerminalText>
                     </Button>
                   </XStack>
                 </Dialog.Content>
               </Dialog.Portal>
             </Dialog>
 
-            <MonoText size="$1" color="$terminalWarning">{t('account.mockNotice')}</MonoText>
+            <MonoText size="$1" color="$appWarning">{t('account.mockNotice')}</MonoText>
           </TerminalPanel>
         </YStack>
       </XStack>

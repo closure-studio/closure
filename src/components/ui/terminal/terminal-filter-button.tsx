@@ -10,7 +10,7 @@ const TerminalFilterButtonFrame = styled(Button, {
   py: 6,
   rounded: '$0',
   borderWidth: 1,
-  hoverStyle: { borderColor: '$terminalCyanBorder' },
+  hoverStyle: { borderColor: '$appAccentBorder' },
   pressStyle: { opacity: 0.7 },
   '$platform-web': {
     clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
@@ -18,8 +18,8 @@ const TerminalFilterButtonFrame = styled(Button, {
 
   variants: {
     selected: {
-      true: { borderColor: '$terminalCyanBorder', bg: '$terminalCyanSoft' },
-      false: { borderColor: '$terminalBorder', bg: 'transparent' },
+      true: { borderColor: '$appAccentBorder', bg: '$appAccentSoft' },
+      false: { borderColor: '$appBorder', bg: 'transparent' },
     },
   } as const,
 
@@ -29,7 +29,7 @@ const TerminalFilterButtonFrame = styled(Button, {
 export function TerminalFilterButton({ selected, label, onPress }: { selected: boolean; label: string; onPress: () => void }) {
   return (
     <TerminalFilterButtonFrame selected={selected} onPress={onPress} aria-pressed={selected}>
-      <MonoText size="$2" color={selected ? '$terminalCyan' : '$terminalMuted'}>{label}</MonoText>
+      <MonoText size="$2" color={selected ? '$appAccent' : '$appMuted'}>{label}</MonoText>
     </TerminalFilterButtonFrame>
   );
 }

@@ -44,8 +44,8 @@ export function MobileBottomNavigation({
       position="relative"
       overflow="hidden"
       borderTopWidth={1}
-      borderColor="$terminalBorder"
-      bg="$terminalBg"
+      borderColor="$appBorder"
+      bg="$appBackground"
       onLayout={handleLayout}
       $md={{ display: 'none' }}
     >
@@ -65,7 +65,7 @@ export function MobileBottomNavigation({
           l={indicatorLeft}
           width={indicatorWidth}
           height={2}
-          bg="$terminalCyan"
+          bg="$appAccent"
           opacity={navigationWidth > 0 ? 1 : 0}
         />
         {items.map((item) => {
@@ -80,7 +80,7 @@ export function MobileBottomNavigation({
               py="$2"
               items="center"
               gap="$1"
-              hoverStyle={{ bg: '$terminalCyanSoft' }}
+              hoverStyle={{ bg: '$appAccentSoft' }}
               pressStyle={{ opacity: 0.7 }}
               onPress={() => onSelect(item.id)}
               role="tab"
@@ -88,12 +88,12 @@ export function MobileBottomNavigation({
             >
               <Icon
                 size={19}
-                color={isActive ? colors.terminalCyan.val : colors.terminalMuted.val}
+                color={isActive ? colors.appAccent.val : colors.appMuted.val}
                 strokeWidth={isActive ? 2 : 1.5}
               />
               <MonoText
                 size="$1"
-                color={isActive ? '$terminalCyan' : '$terminalMuted'}
+                color={isActive ? '$appAccent' : '$appMuted'}
                 numberOfLines={1}
               >
                 {item.label}

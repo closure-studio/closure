@@ -28,20 +28,20 @@ const TerminalNoticeFrame = styled(XStack, {
   variants: {
     tone: {
       danger: {
-        borderColor: '$terminalDanger',
-        bg: '$terminalDangerSoft',
+        borderColor: '$appDanger',
+        bg: '$appDangerSoft',
       },
       info: {
-        borderColor: '$terminalCyan',
-        bg: '$terminalCyanSoft',
+        borderColor: '$appAccent',
+        bg: '$appAccentSoft',
       },
       success: {
-        borderColor: '$terminalSuccess',
-        bg: '$terminalSuccessSoft',
+        borderColor: '$appSuccess',
+        bg: '$appSuccessSoft',
       },
       warning: {
-        borderColor: '$terminalWarning',
-        bg: '$terminalWarningSoft',
+        borderColor: '$appWarning',
+        bg: '$appWarningSoft',
       },
     },
   } as const,
@@ -59,24 +59,24 @@ export function TerminalNotice({
   const colors = getTokens().color;
   const tonePresentation = {
     danger: {
-      color: '$terminalDanger' as const,
+      color: '$appDanger' as const,
       icon: CircleX,
-      iconColor: colors.terminalDanger.val,
+      iconColor: colors.appDanger.val,
     },
     info: {
-      color: '$terminalCyan' as const,
+      color: '$appAccent' as const,
       icon: Info,
-      iconColor: colors.terminalCyan.val,
+      iconColor: colors.appAccent.val,
     },
     success: {
-      color: '$terminalSuccess' as const,
+      color: '$appSuccess' as const,
       icon: CircleCheck,
-      iconColor: colors.terminalSuccess.val,
+      iconColor: colors.appSuccess.val,
     },
     warning: {
-      color: '$terminalWarning' as const,
+      color: '$appWarning' as const,
       icon: TriangleAlert,
-      iconColor: colors.terminalWarning.val,
+      iconColor: colors.appWarning.val,
     },
   }[tone];
   const NoticeIcon = icon ?? tonePresentation.icon;

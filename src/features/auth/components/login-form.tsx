@@ -23,9 +23,9 @@ const TerminalActionButton = styled(Button, {
   borderWidth: 1,
   borderColor: 'transparent',
   rounded: '$0',
-  hoverStyle: { bg: '$terminalCyanSoft' },
-  pressStyle: { bg: '$terminalCyanSoft', opacity: 0.75 },
-  focusVisibleStyle: { borderColor: '$terminalCyan', bg: '$terminalCyanSoft' },
+  hoverStyle: { bg: '$appAccentSoft' },
+  pressStyle: { bg: '$appAccentSoft', opacity: 0.75 },
+  focusVisibleStyle: { borderColor: '$appAccent', bg: '$appAccentSoft' },
 });
 
 export function LoginForm({ onSubmit }: { onSubmit: (credentials: LoginCredentials) => Promise<void> | void }) {
@@ -154,16 +154,16 @@ export function LoginForm({ onSubmit }: { onSubmit: (credentials: LoginCredentia
                   onCheckedChange={setRememberSession}
                 />
                 <TerminalActionButton onPress={() => { setMode('forgot'); setIsRecoveryRequestSent(false); setIsRecoveryIdentifierMissing(false); }}>
-                  <MonoText size="$3" color="$terminalCyan">{t('login.forgotAccessKey')}</MonoText>
+                  <MonoText size="$3" color="$appAccent">{t('login.forgotAccessKey')}</MonoText>
                 </TerminalActionButton>
               </XStack>
               <Form.Trigger asChild>
-                <Button height="$4.5" borderWidth={1} borderColor="$terminalCyan" rounded="$0" bg="$terminalCyanSoft" hoverStyle={{ bg: '$terminalCyanSoft', borderColor: '$terminalCyan' }} pressStyle={{ bg: '$terminalRaised' }} focusVisibleStyle={{ borderColor: '$terminalText' }} disabledStyle={{ opacity: 0.55 }} disabled={isSubmittingLogin} aria-busy={isSubmittingLogin} {...(isSubmittingLogin ? { icon: <Spinner size="small" color="$terminalCyan" /> } : {})} $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}>
-                  <TerminalText size="$3" color="$terminalCyan" fontWeight="700">{isSubmittingLogin ? t('login.connecting') : t('login.submit')}</TerminalText>
-                  {!isSubmittingLogin ? <ArrowRight size={16} color={colors.terminalCyan.val} /> : null}
+                <Button height="$4.5" borderWidth={1} borderColor="$appAccent" rounded="$0" bg="$appAccentSoft" hoverStyle={{ bg: '$appAccentSoft', borderColor: '$appAccent' }} pressStyle={{ bg: '$appSurfaceRaised' }} focusVisibleStyle={{ borderColor: '$appText' }} disabledStyle={{ opacity: 0.55 }} disabled={isSubmittingLogin} aria-busy={isSubmittingLogin} {...(isSubmittingLogin ? { icon: <Spinner size="small" color="$appAccent" /> } : {})} $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}>
+                  <TerminalText size="$3" color="$appAccent" fontWeight="700">{isSubmittingLogin ? t('login.connecting') : t('login.submit')}</TerminalText>
+                  {!isSubmittingLogin ? <ArrowRight size={16} color={colors.appAccent.val} /> : null}
                 </Button>
               </Form.Trigger>
-              {submissionError ? <MonoText size="$2.5" color="$terminalWarning" accessibilityLiveRegion="polite">{submissionError}</MonoText> : null}
+              {submissionError ? <MonoText size="$2.5" color="$appWarning" accessibilityLiveRegion="polite">{submissionError}</MonoText> : null}
             </TerminalPanel>
           </Form>
           <MonoText size="$2.5" text="center">{t('login.unregistered')}</MonoText>
@@ -176,7 +176,7 @@ export function LoginForm({ onSubmit }: { onSubmit: (credentials: LoginCredentia
               <AnimatePresence mode="wait">
                 {isRecoveryRequestSent ? (
                   <YStack key="reset-sent" transition={reducedMotion ? '0ms' : '300ms'} enterStyle={reducedMotion ? null : { opacity: 0, scale: 0.96 }} exitStyle={reducedMotion ? null : { opacity: 0 }} opacity={1} scale={1} items="center" gap="$2" py="$3">
-                    <Check size={36} color={colors.terminalSuccess.val} />
+                    <Check size={36} color={colors.appSuccess.val} />
                     <TerminalText size="$4" fontWeight="700">{t('recovery.sentTitle')}</TerminalText>
                     <MonoText size="$2.5" text="center" lineHeight="$3">
                       {t('recovery.sentDescription', { destination: recoveryIdentifier || t('recovery.fallbackChannel') })}
@@ -201,17 +201,17 @@ export function LoginForm({ onSubmit }: { onSubmit: (credentials: LoginCredentia
                       {...(isRecoveryIdentifierMissing ? { error: t('recovery.identifierRequired') } : {})}
                     />
                     <Form.Trigger asChild>
-                      <Button height="$4.5" borderWidth={1} borderColor="$terminalWarning" rounded="$1" bg="$terminalWarningSoft" hoverStyle={{ borderColor: '$terminalWarning', bg: '$terminalWarningSoft' }} pressStyle={{ bg: '$terminalRaised' }} focusVisibleStyle={{ borderColor: '$terminalText' }}>
-                        <TerminalText size="$3" color="$terminalWarning" fontWeight="700">{t('recovery.send')}</TerminalText>
-                        <ArrowRight size={16} color={colors.terminalWarning.val} />
+                      <Button height="$4.5" borderWidth={1} borderColor="$appWarning" rounded="$1" bg="$appWarningSoft" hoverStyle={{ borderColor: '$appWarning', bg: '$appWarningSoft' }} pressStyle={{ bg: '$appSurfaceRaised' }} focusVisibleStyle={{ borderColor: '$appText' }}>
+                        <TerminalText size="$3" color="$appWarning" fontWeight="700">{t('recovery.send')}</TerminalText>
+                        <ArrowRight size={16} color={colors.appWarning.val} />
                       </Button>
                     </Form.Trigger>
                   </YStack>
                 )}
               </AnimatePresence>
               <TerminalActionButton self="flex-start" onPress={() => { setMode('login'); setInvalidLoginField(null); }}>
-                <ArrowLeft size={16} color={colors.terminalCyan.val} />
-                <MonoText size="$3" color="$terminalCyan">{t('recovery.backToLogin')}</MonoText>
+                <ArrowLeft size={16} color={colors.appAccent.val} />
+                <MonoText size="$3" color="$appAccent">{t('recovery.backToLogin')}</MonoText>
               </TerminalActionButton>
             </TerminalPanel>
           </Form>

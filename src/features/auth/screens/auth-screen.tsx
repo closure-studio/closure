@@ -36,8 +36,8 @@ export function AuthScreen({ onAuthenticated }: { onAuthenticated: () => void })
                 <MonoText display="none" size="$2" lineHeight="$4" $md={{ display: 'flex' }}>{t('meta.description')}</MonoText>
                 <DecorativeBarcode />
                 <YStack display="none" gap="$2" pt="$2" $md={{ display: 'flex' }}>
-                  <XStack items="center" gap="$2"><FlickeringStatusIndicator color={colors.terminalSuccess.val} /><MonoText size="$1">{t('meta.secureChannel')}</MonoText></XStack>
-                  <XStack items="center" gap="$2"><YStack width={6} height={6} rounded="$10" bg="$terminalCyan" /><MonoText size="$1">{t('meta.syncReady')}</MonoText></XStack>
+                  <XStack items="center" gap="$2"><FlickeringStatusIndicator color={colors.appSuccess.val} /><MonoText size="$1">{t('meta.secureChannel')}</MonoText></XStack>
+                  <XStack items="center" gap="$2"><YStack width={6} height={6} rounded="$10" bg="$appAccent" /><MonoText size="$1">{t('meta.syncReady')}</MonoText></XStack>
                 </YStack>
               </YStack>
 
@@ -46,9 +46,9 @@ export function AuthScreen({ onAuthenticated }: { onAuthenticated: () => void })
               </YStack>
             </XStack>
 
-            <XStack flexDirection="column" items="center" gap="$1" pt="$3" borderTopWidth={1} borderColor="$terminalBorder" $max-xxs={{ mx: '$-2' }} $sm={{ mx: '$0', flexDirection: 'row', justify: 'space-between', items: 'center' }}>
+            <XStack flexDirection="column" items="center" gap="$1" pt="$3" borderTopWidth={1} borderColor="$appBorder" $max-xxs={{ mx: '$-2' }} $sm={{ mx: '$0', flexDirection: 'row', justify: 'space-between', items: 'center' }}>
               <MonoText size="$1" shrink={1} self="stretch" text="center" $sm={{ self: 'auto', text: 'left' }}>{t('meta.footer')}</MonoText>
-              <MonoText size="$1" color="$terminalCyan" shrink={1} self="stretch" text="center" $sm={{ self: 'auto', text: 'right' }}>{t('meta.syncReady')}</MonoText>
+              <MonoText size="$1" color="$appAccent" shrink={1} self="stretch" text="center" $sm={{ self: 'auto', text: 'right' }}>{t('meta.syncReady')}</MonoText>
             </XStack>
           </YStack>
         </ScrollView>

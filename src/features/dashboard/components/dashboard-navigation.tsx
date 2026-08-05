@@ -15,8 +15,8 @@ function GameAccountSelectionIndicator() {
       overflow="hidden"
       $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}
     >
-      <YStack position="absolute" t={0} b={0} l={0} r={0} bg="$terminalCyanSoft" opacity={0.5} />
-      <YStack position="absolute" t={0} b={0} l={0} r={0} borderWidth={1} borderColor="$terminalCyanBorder" />
+      <YStack position="absolute" t={0} b={0} l={0} r={0} bg="$appAccentSoft" opacity={0.5} />
+      <YStack position="absolute" t={0} b={0} l={0} r={0} borderWidth={1} borderColor="$appAccentBorder" />
     </YStack>
   );
 }
@@ -24,15 +24,15 @@ function GameAccountSelectionIndicator() {
 function GameAccountButton({ gameAccount, isActive, onPress }: { gameAccount: GameAccount; isActive: boolean; onPress: () => void }) {
   const { t } = useTranslation('dashboard');
   const avatarTone = gameAccount.color === 'warning'
-    ? '$terminalWarningRing'
+    ? '$appWarningRing'
     : gameAccount.color === 'primary'
-      ? '$terminalCyanRing'
-      : '$terminalMutedRing';
+      ? '$appAccentRing'
+      : '$appMutedRing';
   const avatarColor = gameAccount.color === 'warning'
-    ? '$terminalWarning'
+    ? '$appWarning'
     : gameAccount.color === 'primary'
-      ? '$terminalCyan'
-      : '$terminalMuted';
+      ? '$appAccent'
+      : '$appMuted';
 
   return (
     <Button
@@ -46,22 +46,22 @@ function GameAccountButton({ gameAccount, isActive, onPress }: { gameAccount: Ga
       justify="flex-start"
       gap={10}
       borderWidth={1}
-      borderColor={isActive ? '$terminalCyanBorder' : '$terminalBorder'}
-      bg="$terminalRaised"
-      hoverStyle={isActive ? null : { borderColor: '$terminalCyanBorder' }}
+      borderColor={isActive ? '$appAccentBorder' : '$appBorder'}
+      bg="$appSurfaceRaised"
+      hoverStyle={isActive ? null : { borderColor: '$appAccentBorder' }}
       pressStyle={{ opacity: 0.72 }}
       onPress={onPress}
       aria-pressed={isActive}
       $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}
     >
-      <YStack width={32} height={32} shrink={0} items="center" justify="center" bg="$terminalSurfaceStrong" borderWidth={1} borderColor={avatarTone}>
+      <YStack width={32} height={32} shrink={0} items="center" justify="center" bg="$appSurfaceStrong" borderWidth={1} borderColor={avatarTone}>
         <TerminalText size="$3" fontWeight="700" color={avatarColor}>{gameAccount.avatar}</TerminalText>
       </YStack>
       <YStack shrink={0}>
-        <MonoText size="$2" lineHeight="$1" letterSpacing={0} color={isActive ? '$terminalText' : '$terminalMuted'} fontWeight="600" numberOfLines={1}>{gameAccount.callsign}</MonoText>
+        <MonoText size="$2" lineHeight="$1" letterSpacing={0} color={isActive ? '$appText' : '$appMuted'} fontWeight="600" numberOfLines={1}>{gameAccount.callsign}</MonoText>
         <MonoText size="$1" letterSpacing={0} textTransform="uppercase" numberOfLines={1}>{t('operators.accountLevel', { level: gameAccount.doctorLevel })} · {formatCompactNumber(gameAccount.orundum)} ♦</MonoText>
       </YStack>
-      <YStack width={6} height={6} shrink={0} rounded="$10" bg={gameAccount.online === '在线' ? '$terminalSuccess' : '$terminalMuted'} opacity={gameAccount.online === '在线' ? 1 : 0.5} />
+      <YStack width={6} height={6} shrink={0} rounded="$10" bg={gameAccount.online === '在线' ? '$appSuccess' : '$appMuted'} opacity={gameAccount.online === '在线' ? 1 : 0.5} />
     </Button>
   );
 }
@@ -90,16 +90,16 @@ export function GameAccountSwitcher({ gameAccounts, activeGameAccountId, onSelec
             gap={8}
             borderWidth={1}
             borderStyle="dashed"
-            borderColor="$terminalBorder"
-            bg="$terminalRaised"
-            hoverStyle={{ borderColor: '$terminalCyanBorder' }}
+            borderColor="$appBorder"
+            bg="$appSurfaceRaised"
+            hoverStyle={{ borderColor: '$appAccentBorder' }}
             pressStyle={{ opacity: 0.72 }}
             onPress={onLinkGameAccount}
             aria-label={tDashboard('account.title')}
             $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}
           >
-            <YStack width={32} height={32} items="center" justify="center" bg="$terminalSurfaceStrong"><Plus size={16} color={colors.terminalMuted.val} /></YStack>
-            <MonoText size="$2" letterSpacing={0} fontWeight="600" color="$terminalMuted" textTransform="uppercase">{t('actions.add')}</MonoText>
+            <YStack width={32} height={32} items="center" justify="center" bg="$appSurfaceStrong"><Plus size={16} color={colors.appMuted.val} /></YStack>
+            <MonoText size="$2" letterSpacing={0} fontWeight="600" color="$appMuted" textTransform="uppercase">{t('actions.add')}</MonoText>
           </Button>
         </SlidingSelection>
       </YStack>

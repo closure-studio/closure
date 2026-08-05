@@ -16,7 +16,7 @@ export function TerminalSectionHeading({
 }) {
   return (
     <XStack items="baseline" gap="$2" minW={0}>
-      {code ? <MonoText size="$2.5" color="$terminalCyan">{code}</MonoText> : null}
+      {code ? <MonoText size="$2.5" color="$appAccent">{code}</MonoText> : null}
       <TerminalText size="$3" fontWeight="700" letterSpacing={2.8} textTransform="uppercase" shrink={1}>{title}</TerminalText>
       {subtitle ? <MonoText size="$1" textTransform="uppercase" shrink={1}>{subtitle}</MonoText> : null}
       {trailing ? <XStack ml="auto">{trailing}</XStack> : null}

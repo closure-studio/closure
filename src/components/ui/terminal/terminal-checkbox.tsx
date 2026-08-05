@@ -42,12 +42,12 @@ const TerminalCheckboxFrame = styled(Checkbox, {
   size: '$2',
   hitSlop: 10,
   rounded: '$0',
-  focusVisibleStyle: { borderColor: '$terminalText' },
+  focusVisibleStyle: { borderColor: '$appText' },
 
   variants: {
     selected: {
-      true: { borderColor: '$terminalCyan', bg: '$terminalCyanSoft' },
-      false: { borderColor: '$terminalBorder', bg: 'transparent' },
+      true: { borderColor: '$appAccent', bg: '$appAccentSoft' },
+      false: { borderColor: '$appBorder', bg: 'transparent' },
     },
   } as const,
 });
@@ -141,7 +141,7 @@ export function TerminalCheckbox({ checked, disabled = false, id, label, onCheck
               width: checkboxDimension,
               height: checkboxDimension,
               borderWidth: 1,
-              borderColor: colors.terminalCyan.val,
+              borderColor: colors.appAccent.val,
             },
             pulseStyle,
           ]}
@@ -168,15 +168,15 @@ export function TerminalCheckbox({ checked, disabled = false, id, label, onCheck
               circuitStyle,
             ]}
           >
-            <YStack position="absolute" l={-3} t={10} width={2} height={8} bg="$terminalCyan" />
-            <YStack position="absolute" r={-3} t={10} width={2} height={8} bg="$terminalCyan" />
-            <YStack position="absolute" width={11} height={1} bg="$terminalCyan" />
-            <YStack position="absolute" width={1} height={11} bg="$terminalCyan" />
-            <YStack position="absolute" width={3} height={3} bg="$terminalCyan" />
+            <YStack position="absolute" l={-3} t={10} width={2} height={8} bg="$appAccent" />
+            <YStack position="absolute" r={-3} t={10} width={2} height={8} bg="$appAccent" />
+            <YStack position="absolute" width={11} height={1} bg="$appAccent" />
+            <YStack position="absolute" width={1} height={11} bg="$appAccent" />
+            <YStack position="absolute" width={3} height={3} bg="$appAccent" />
           </AnimatedView>
           <Checkbox.Indicator forceMount>
             <AnimatedView style={checkStyle}>
-              <Check size={14} strokeWidth={2.5} color={colors.terminalCyan.val} />
+              <Check size={14} strokeWidth={2.5} color={colors.appAccent.val} />
             </AnimatedView>
           </Checkbox.Indicator>
         </TerminalCheckboxFrame>

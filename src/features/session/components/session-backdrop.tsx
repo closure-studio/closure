@@ -27,15 +27,15 @@ export function SessionBackdrop({ tint }: { tint: string }) {
       l={0}
       r={0}
       overflow="hidden"
-      bg="$terminalBg"
+      bg="$appBackground"
       style={{ pointerEvents: 'none' }}
       onLayout={handleBackdropLayout}
     >
       <Svg width="100%" height="100%" viewBox={`0 0 ${viewportSize.width} ${viewportSize.height}`} style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}>
         <Defs>
           <Pattern id={gridPatternId} width="40" height="40" patternUnits="userSpaceOnUse">
-            <Rect width="1" height="40" fill={colors.terminalGrid.val} />
-            <Rect width="40" height="1" fill={colors.terminalGrid.val} />
+            <Rect width="1" height="40" fill={colors.appGrid.val} />
+            <Rect width="40" height="1" fill={colors.appGrid.val} />
           </Pattern>
         </Defs>
         <Rect width="100%" height="100%" fill={`url(#${gridPatternId})`} opacity="0.52" />
@@ -44,12 +44,12 @@ export function SessionBackdrop({ tint }: { tint: string }) {
         width={viewportSize.width}
         height={viewportSize.height}
         tint={tint}
-        secondaryTint={colors.terminalSuccess.val}
+        secondaryTint={colors.appSuccess.val}
       />
       <Svg width="100%" height="100%" viewBox={`0 0 ${viewportSize.width} ${viewportSize.height}`} style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}>
         <Defs>
           <Pattern id={scanlinePatternId} width="3" height="3" patternUnits="userSpaceOnUse">
-            <Rect width="3" height="1" fill={colors.terminalScanline.val} />
+            <Rect width="3" height="1" fill={colors.appScanline.val} />
           </Pattern>
         </Defs>
         <Rect width="100%" height="100%" fill={`url(#${scanlinePatternId})`} opacity="0.5" />
