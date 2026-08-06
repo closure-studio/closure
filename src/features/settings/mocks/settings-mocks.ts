@@ -44,8 +44,4 @@ export const mockContributors = {
     { id: 'skadi', name: 'Skadi', avatarKey: 'skadi' },
     { id: 'gk', name: '神算子GK', avatarKey: 'gk' },
   ],
-  specialThanks: [
-    { id: 'vibe-coding', name: '黑与白公益站' },
-    { id: 'design', name: '欧阳淇淇' },
-  ],
 } satisfies Contributors;
