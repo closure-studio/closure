@@ -67,12 +67,10 @@
     "recipientCode": "YOU",
     "recipientTitle": "今夜限定主角位",
     "recipientPrefix": "Dr.",
-    "teamCode": "OPS",
-    "teamTitle": "运维管理天团",
     "teamDescription": "鸣谢运维管理天团，稳稳托住每一次更新。",
     "contributors": {
       "outdated": "折腾新技术方向。",
-      "fe-ame-lox": "处理告警和故障恢复，让系统快速回到最佳状态。",
+      "fe-ame-lox": "处理故障恢复，让系统快速回到最佳状态。",
       "kripto": "维护部署与自动化流程，持续优化交付效率。",
       "skadi": "跟进用户反馈和体验问题，推动细节持续打磨。",
       "gk": "妈耶。"

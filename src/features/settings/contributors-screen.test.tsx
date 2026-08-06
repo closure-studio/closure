@@ -48,11 +48,30 @@ describe('ContributorsScreen', () => {
     expect(screen.getByTestId('contributors-tribute-body')).toHaveTextContent(
       i18n.t('contributors.intro', { ns: 'settings' }),
     );
-    expect(screen.queryByText('/ 01')).toBeNull();
     expect(screen.getByTestId('contributors-operations-panel')).toBeTruthy();
+    expect(screen.getByTestId('contributors-team-description')).toHaveTextContent(
+      i18n.t('contributors.teamDescription', { ns: 'settings' }),
+    );
     expect(screen.getAllByTestId(/contributors-roster-row-/)).toHaveLength(
       mockContributors.operationsTeam.length,
     );
+    for (const [index, member] of mockContributors.operationsTeam.entries()) {
+      expect(screen.getByTestId(`contributors-roster-name-${member.id}`)).toHaveTextContent(
+        member.name,
+      );
+      expect(screen.getByTestId(`contributors-roster-avatar-${member.id}`)).toHaveStyle({
+        width: 52,
+        height: 52,
+      });
+      expect(screen.getByTestId(`contributors-roster-name-${member.id}`)).toHaveStyle({
+        fontSize: 16,
+        lineHeight: 24,
+      });
+      expect(
+        screen.getByText(i18n.t(`contributors.contributors.${member.id}`, { ns: 'settings' })),
+      ).toBeTruthy();
+      expect(screen.queryByText(String(index + 1).padStart(2, '0'))).toBeNull();
+    }
     expect(screen.queryByText('Special Thanks')).toBeNull();
     expect(screen.queryByText('特别鸣谢')).toBeNull();
   });

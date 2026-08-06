@@ -18,7 +18,6 @@ export const contributorsSchema = v.object({
   recipient: v.object({
     gameAccountId: v.pipe(v.string(), v.minLength(1)),
     callsign: v.pipe(v.string(), v.minLength(1)),
-    avatarInitial: v.pipe(v.string(), v.length(1)),
   }),
   operationsTeam: v.pipe(v.array(contributorSchema), v.minLength(1)),
 });

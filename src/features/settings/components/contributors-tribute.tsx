@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useId, useRef } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
 import { StyleSheet } from 'react-native';
 import Animated, {
@@ -27,8 +27,6 @@ import { XStack, YStack, getTokens } from 'tamagui';
 
 import { MonoText, TerminalText } from '@/components';
 
-const TRIBUTE_SIGNAL_GRADIENT_ID = 'contributors-tribute-signal';
-const TRIBUTE_SCAN_GRADIENT_ID = 'contributors-tribute-scan';
 const REVEAL_DURATION_MS = 600;
 const IDENTITY_REVEAL_DELAY_MS = REVEAL_DURATION_MS + 150;
 const IDENTITY_REVEAL_DURATION_MS = 1000;
@@ -64,8 +62,9 @@ function TributeSignalArtwork({
   scanX: SharedValue<number>;
 }) {
   const colors = getTokens().color;
-  const signalGradientFill = `url(#${TRIBUTE_SIGNAL_GRADIENT_ID})`;
-  const scanGradientFill = `url(#${TRIBUTE_SCAN_GRADIENT_ID})`;
+  const gradientId = useId().replace(/:/g, '');
+  const signalGradientFill = `url(#${gradientId}-signal)`;
+  const scanGradientFill = `url(#${gradientId}-scan)`;
   const scanStyle = useAnimatedStyle(() => ({
     opacity: reducedMotion ? 0 : 1,
     transform: [{ translateX: scanX.get() + hoverDepth.get() }],
@@ -89,7 +88,7 @@ function TributeSignalArtwork({
         style={styles.artwork}
       >
         <Defs>
-          <SvgLinearGradient id={TRIBUTE_SIGNAL_GRADIENT_ID} x1="0%" y1="0%" x2="100%" y2="0%">
+          <SvgLinearGradient id={`${gradientId}-signal`} x1="0%" y1="0%" x2="100%" y2="0%">
             <Stop offset="0%" stopColor={colors.appAccent.val} stopOpacity={0} />
             <Stop offset="16%" stopColor={colors.appAccent.val} stopOpacity={0.18} />
             <Stop offset="72%" stopColor={colors.appAccent.val} stopOpacity={0.38} />
@@ -116,7 +115,7 @@ function TributeSignalArtwork({
       <Animated.View style={[styles.scanBeam, scanStyle]}>
         <Svg width={SCAN_BEAM_WIDTH} height="100%">
           <Defs>
-            <SvgLinearGradient id={TRIBUTE_SCAN_GRADIENT_ID} x1="0%" y1="0%" x2="100%" y2="0%">
+            <SvgLinearGradient id={`${gradientId}-scan`} x1="0%" y1="0%" x2="100%" y2="0%">
               <Stop offset="0%" stopColor={colors.appAccent.val} stopOpacity={0} />
               <Stop offset="44%" stopColor={colors.appAccent.val} stopOpacity={0.02} />
               <Stop offset="62%" stopColor={colors.appAccent.val} stopOpacity={0.14} />
@@ -144,6 +143,7 @@ export function ContributorsTribute({
   const identityProgress = useSharedValue(reducedMotion ? 1 : 0);
   const scanX = useSharedValue(-SCAN_BEAM_WIDTH);
   const hoverDepth = useSharedValue(0);
+  const scanWidthRef = useRef(0);
 
   useEffect(() => {
     if (reducedMotion) {
@@ -171,12 +171,12 @@ export function ContributorsTribute({
     };
   }, [hoverDepth, identityProgress, reducedMotion, revealProgress, scanX]);
 
-  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+  const startScan = useCallback((width: number) => {
     cancelAnimation(scanX);
     scanX.set(-SCAN_BEAM_WIDTH);
-    if (reducedMotion) return;
+    if (reducedMotion || width <= 0) return;
 
-    const scanDestination = event.nativeEvent.layout.width + SCAN_BEAM_WIDTH;
+    const scanDestination = width + SCAN_BEAM_WIDTH;
     scanX.set(withRepeat(
       withSequence(
         withTiming(scanDestination, {
@@ -192,6 +192,15 @@ export function ContributorsTribute({
       -1,
     ));
   }, [reducedMotion, scanX]);
+
+  useEffect(() => {
+    if (scanWidthRef.current > 0) startScan(scanWidthRef.current);
+  }, [reducedMotion, startScan]);
+
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+    scanWidthRef.current = event.nativeEvent.layout.width;
+    startScan(scanWidthRef.current);
+  }, [startScan]);
 
   const handleHoverIn = useCallback(() => {
     if (!reducedMotion) hoverDepth.set(withSpring(HOVER_DEPTH_OFFSET, hoverSpring));

@@ -35,7 +35,6 @@ export const mockContributors = {
   recipient: {
     gameAccountId: 'acc-01',
     callsign: 'AMIYA-MAIN',
-    avatarInitial: 'A',
   },
   operationsTeam: [
     { id: 'outdated', name: 'Ooooooutdated', avatarKey: 'ooooooutdated' },

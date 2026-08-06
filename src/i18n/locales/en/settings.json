@@ -59,7 +59,7 @@
   },
   "contributors": {
     "code": "SET-CONTRIB / 03",
-    "description": "A record of the contributors, supporters, and creators who keep Closure moving.",
+    "description": "A record of the contributors who keep Closure moving.",
     "eyebrow": "Contribution archive",
     "status": "Gratitude signal online",
     "title": "Contributors",
@@ -67,12 +67,10 @@
     "recipientCode": "YOU",
     "recipientTitle": "Tonight's Spotlight",
     "recipientPrefix": "Dr.",
-    "teamCode": "OPS",
-    "teamTitle": "Operations Team",
     "teamDescription": "Thanks to the operations team for keeping every release steady.",
     "contributors": {
       "outdated": "Explores new technical directions.",
-      "fe-ame-lox": "Handles alerts and incident recovery to bring systems back to full strength.",
+      "fe-ame-lox": "Handles fault recovery to bring systems back to their best state quickly.",
       "kripto": "Maintains deployment and automation workflows while improving delivery efficiency.",
       "skadi": "Follows up on user feedback and experience issues to keep refining the details.",
       "gk": "Oh my."
