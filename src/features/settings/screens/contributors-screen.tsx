@@ -4,9 +4,8 @@ import kriptoAvatar from '@/assets/images/contributors/kripto.jpg';
 import outdatedAvatar from '@/assets/images/contributors/ooooooutdated.jpg';
 import skadiAvatar from '@/assets/images/contributors/skadi.jpg';
 import { Image } from 'expo-image';
-import { Heart, Radio } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { XStack, YStack, getTokens, useMedia } from 'tamagui';
+import { XStack, YStack, useMedia } from 'tamagui';
 
 import {
   MonoText,
@@ -15,6 +14,7 @@ import {
   TerminalText,
 } from '@/components';
 import type { ContributorAvatarKey } from '@/schemas/contributor';
+import { ContributorsTribute } from '../components/contributors-tribute';
 import { SettingsPage } from '../components/settings-page';
 import { mockContributors } from '../mocks/settings-mocks';
 
@@ -103,7 +103,6 @@ function ContributorRosterRow({
 
 export function ContributorsScreen() {
   const { t } = useTranslation('settings');
-  const colors = getTokens().color;
   const media = useMedia();
   const isDesktop = Boolean(media.md);
 
@@ -126,48 +125,13 @@ export function ContributorsScreen() {
           </MonoText>
         ) : null}
 
-        <TerminalPanel p="$3.5" gap="$4" tone="cyan" cornerBrackets $md={{ p: '$5' }}>
-          <XStack items="flex-start" gap="$3">
-            <Heart size={21} color={colors.appAccent.val} fill={colors.appAccentSoft.val} />
-            <MonoText grow={1} size="$3" lineHeight="$4" color="$appText">{t('contributors.intro')}</MonoText>
-          </XStack>
-
-          <XStack
-            flexDirection="column"
-            gap="$4"
-            $md={{ flexDirection: 'row', items: 'center' }}
-          >
-            <YStack
-              width="$7"
-              height="$7"
-              shrink={0}
-              items="center"
-              justify="center"
-              borderWidth={1}
-              borderColor="$appWarningBorder"
-              bg="$appWarningSoft"
-            >
-              <TerminalText size="$7" lineHeight="$7" fontWeight="800" color="$appWarning">
-                {mockContributors.recipient.avatarInitial}
-              </TerminalText>
-            </YStack>
-            <YStack grow={1} minW={0} gap="$2">
-              <ContributorsSectionHeading
-                code={t('contributors.recipientCode')}
-                title={t('contributors.recipientTitle')}
-              />
-              <TerminalText size="$6" fontWeight="800" color="$appWarning" select="text">
-                {t('contributors.recipientName', { callsign: mockContributors.recipient.callsign })}
-              </TerminalText>
-              <MonoText size="$2.5" lineHeight="$3">
-                {t('contributors.recipientDescription', { callsign: mockContributors.recipient.callsign })}
-              </MonoText>
-            </YStack>
-            <XStack self="flex-end" $md={{ self: 'auto' }}>
-              <Radio size={28} color={colors.appWarning.val} />
-            </XStack>
-          </XStack>
-        </TerminalPanel>
+        <ContributorsTribute
+          body={t('contributors.intro')}
+          recipientCode={t('contributors.recipientCode')}
+          recipientCallsign={mockContributors.recipient.callsign}
+          recipientPrefix={t('contributors.recipientPrefix')}
+          recipientTitle={t('contributors.recipientTitle')}
+        />
 
         <TerminalPanel
           testID="contributors-operations-panel"

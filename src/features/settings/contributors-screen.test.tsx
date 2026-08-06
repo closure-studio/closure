@@ -35,6 +35,20 @@ describe('ContributorsScreen', () => {
   it('renders every operations team member without the removed credits section', async () => {
     const screen = await renderContributors();
 
+    expect(screen.getByTestId('contributors-tribute')).toBeTruthy();
+    expect(screen.getByTestId('contributors-tribute-recipient-title')).toHaveTextContent(
+      i18n.t('contributors.recipientTitle', { ns: 'settings' }),
+    );
+    expect(screen.getByTestId('contributors-tribute-recipient-prefix')).toHaveTextContent(
+      i18n.t('contributors.recipientPrefix', { ns: 'settings' }),
+    );
+    expect(screen.getByTestId('contributors-tribute-recipient-callsign')).toHaveTextContent(
+      mockContributors.recipient.callsign,
+    );
+    expect(screen.getByTestId('contributors-tribute-body')).toHaveTextContent(
+      i18n.t('contributors.intro', { ns: 'settings' }),
+    );
+    expect(screen.queryByText('/ 01')).toBeNull();
     expect(screen.getByTestId('contributors-operations-panel')).toBeTruthy();
     expect(screen.getAllByTestId(/contributors-roster-row-/)).toHaveLength(
       mockContributors.operationsTeam.length,
