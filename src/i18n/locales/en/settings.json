@@ -37,6 +37,7 @@
     "identityTitle": "User Account",
     "email": "Account email",
     "registeredAt": "Registered",
+    "identityStatus": "Identity status",
     "role": "Account role",
     "roles": {
       "member": "Member",
@@ -44,7 +45,6 @@
     },
     "passwordCode": "CREDENTIAL",
     "passwordTitle": "Change password",
-    "passwordSubtitle": "Local validation",
     "currentPassword": "Current password",
     "newPassword": "New password",
     "repeatNewPassword": "Repeat new password",
@@ -55,43 +55,24 @@
       "newPasswordRequired": "Enter a new password",
       "repeatNewPasswordRequired": "Repeat the new password",
       "passwordsMismatch": "The new passwords do not match"
-    },
-    "dangerCode": "DANGER",
-    "dangerTitle": "Danger zone",
-    "dangerDescription": "Deletion permanently removes a User Account. This mock action will not remove data or sign you out.",
-    "deleteAccount": "Delete account",
-    "deleteDialogTitle": "Delete this User Account?",
-    "deleteDialogDescription": "You are simulating deletion of {{email}}. Confirmation only writes to the development log and has no real side effects.",
-    "cancel": "Cancel",
-    "confirmDelete": "Confirm mock deletion",
-    "mockNotice": "MOCK MODE // Authentication services are disconnected"
+    }
   },
   "contributors": {
     "code": "SET-CONTRIB / 03",
-    "description": "A record of the contributors, supporters, and creators who keep Closure moving.",
     "eyebrow": "Contribution archive",
     "status": "Gratitude signal online",
     "title": "Contributors",
-    "intro": "The route has felt like clearing a difficult main story, and we are deeply grateful to everyone who fought beside us—especially you, Doctor.",
+    "intro": "This route was as hard as clearing a main story from scratch. Thankfully, everyone fought beside us—thank you, truly. And thank you to every Doctor who kept supporting us, especially you.",
     "recipientCode": "YOU",
-    "recipientTitle": "Tonight's featured Doctor",
-    "recipientName": "Dr.{{callsign}}",
-    "recipientDescription": "Thank you for always standing guard. This signal remains lit for Dr.{{callsign}}.",
-    "teamCode": "OPS",
-    "teamTitle": "Operations Team",
+    "recipientTitle": "Tonight's Spotlight",
+    "recipientPrefix": "Dr.",
     "teamDescription": "Thanks to the operations team for keeping every release steady.",
     "contributors": {
       "outdated": "Explores new technical directions.",
-      "fe-ame-lox": "Handles alerts and incident recovery to bring systems back to full strength.",
+      "fe-ame-lox": "Handles fault recovery to bring systems back to their best state quickly.",
       "kripto": "Maintains deployment and automation workflows while improving delivery efficiency.",
       "skadi": "Follows up on user feedback and experience issues to keep refining the details.",
       "gk": "Oh my."
-    },
-    "specialCode": "CREDITS",
-    "specialTitle": "Special Thanks",
-    "credits": {
-      "vibe-coding": "Vibe coding support",
-      "design": "Design"
     }
   }
 }

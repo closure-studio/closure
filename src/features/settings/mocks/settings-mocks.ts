@@ -35,7 +35,6 @@ export const mockContributors = {
   recipient: {
     gameAccountId: 'acc-01',
     callsign: 'AMIYA-MAIN',
-    avatarInitial: 'A',
   },
   operationsTeam: [
     { id: 'outdated', name: 'Ooooooutdated', avatarKey: 'ooooooutdated' },
@@ -43,9 +42,5 @@ export const mockContributors = {
     { id: 'kripto', name: 'oʇdı̣ɹꓘ', avatarKey: 'kripto' },
     { id: 'skadi', name: 'Skadi', avatarKey: 'skadi' },
     { id: 'gk', name: '神算子GK', avatarKey: 'gk' },
-  ],
-  specialThanks: [
-    { id: 'vibe-coding', name: '黑与白公益站' },
-    { id: 'design', name: '欧阳淇淇' },
   ],
 } satisfies Contributors;
