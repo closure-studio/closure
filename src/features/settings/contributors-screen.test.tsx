@@ -36,6 +36,9 @@ describe('ContributorsScreen', () => {
     const screen = await renderContributors();
 
     expect(screen.getByTestId('contributors-tribute')).toBeTruthy();
+    expect(screen.queryByText('记录共同维护 可露希尔 的贡献者。')).toBeNull();
+    expect(screen.queryByText('A record of the contributors who keep Closure moving.')).toBeNull();
+    expect(screen.queryByTestId('contributors-tribute-bottom-accent')).toBeNull();
     expect(screen.getByTestId('contributors-tribute-recipient-title')).toHaveTextContent(
       i18n.t('contributors.recipientTitle', { ns: 'settings' }),
     );

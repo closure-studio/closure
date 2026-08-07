@@ -10,7 +10,7 @@ export function SectionPageHeader({
   title,
 }: {
   code: string;
-  description: string;
+  description?: string;
   eyebrow: string;
   status: string;
   title: string;
@@ -29,7 +29,7 @@ export function SectionPageHeader({
           {title}
         </TerminalText>
         <YStack gap="$2" maxW={360} pb="$1">
-          <MonoText size="$2" color="$appText">{description}</MonoText>
+          {description ? <MonoText size="$2" color="$appText">{description}</MonoText> : null}
           <XStack items="center" gap="$2">
             <YStack grow={1} height={1} bg="$appAccentBorder" />
             <MonoText size="$1" color="$appAccent">{status}</MonoText>

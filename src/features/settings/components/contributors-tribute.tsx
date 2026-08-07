@@ -238,8 +238,6 @@ export function ContributorsTribute({
       overflow="hidden"
       px="$3.5"
       py="$2"
-      borderTopWidth={1}
-      borderColor="$appAccentBorder"
       bg="$appSurfaceRaisedTranslucent"
       onLayout={handleLayout}
       onPointerEnter={handleHoverIn}

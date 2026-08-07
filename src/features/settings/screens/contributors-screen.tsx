@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { YStack, useMedia } from 'tamagui';
 
-import { MonoText, SectionPageHeader } from '@/components';
+import { SectionPageHeader } from '@/components';
 import { ContributorsOperationsRoster } from '../components/contributors-operations-roster';
 import { ContributorsTribute } from '../components/contributors-tribute';
 import { SettingsPage } from '../components/settings-page';
@@ -21,7 +21,6 @@ export function ContributorsScreen() {
       {isDesktop ? (
         <SectionPageHeader
           code={t('contributors.code')}
-          description={t('contributors.description')}
           eyebrow={t('contributors.eyebrow')}
           status={t('contributors.status')}
           title={t('contributors.title')}
@@ -29,12 +28,6 @@ export function ContributorsScreen() {
       ) : null}
 
       <YStack gap="$3" $md={{ gap: '$5' }}>
-        {!isDesktop ? (
-          <MonoText size="$2" lineHeight="$3" color="$appText" select="text">
-            {t('contributors.description')}
-          </MonoText>
-        ) : null}
-
         <ContributorsTribute
           body={t('contributors.intro')}
           recipientCode={t('contributors.recipientCode')}
