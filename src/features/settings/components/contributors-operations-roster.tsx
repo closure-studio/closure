@@ -3,13 +3,20 @@ import gkAvatar from '@/assets/images/contributors/gk.jpg';
 import kriptoAvatar from '@/assets/images/contributors/kripto.jpg';
 import outdatedAvatar from '@/assets/images/contributors/ooooooutdated.jpg';
 import skadiAvatar from '@/assets/images/contributors/skadi.jpg';
+import { useId, useState } from 'react';
 import { Image } from 'expo-image';
 import { StyleSheet } from 'react-native';
 import Animated, {
   FadeInRight,
   useReducedMotion,
 } from 'react-native-reanimated';
-import { XStack, YStack, styled } from 'tamagui';
+import Svg, {
+  Defs,
+  LinearGradient as SvgLinearGradient,
+  Rect,
+  Stop,
+} from 'react-native-svg';
+import { XStack, YStack, getTokens, styled } from 'tamagui';
 
 import { MonoText, TerminalText } from '@/components';
 import type { ContributorAvatarKey, Contributors } from '@/schemas/contributor';
@@ -91,6 +98,43 @@ const PortraitFrame = styled(YStack, {
   },
 });
 
+function RosterRowHighlight({
+  memberId,
+  visible,
+}: {
+  memberId: string;
+  visible: boolean;
+}) {
+  const colors = getTokens().color;
+  const gradientId = useId().replace(/:/g, '');
+  const gradientFill = `url(#${gradientId}-roster-highlight)`;
+
+  return (
+    <YStack
+      testID={`contributors-roster-highlight-${memberId}`}
+      position="absolute"
+      t={0}
+      b={0}
+      l={0}
+      r={0}
+      opacity={visible ? 1 : 0}
+      aria-hidden
+      style={styles.highlightOverlay}
+    >
+      <Svg width="100%" height="100%" preserveAspectRatio="none">
+        <Defs>
+          <SvgLinearGradient id={`${gradientId}-roster-highlight`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <Stop offset="0%" stopColor={colors.appAccent.val} stopOpacity={0.02} />
+            <Stop offset="58%" stopColor={colors.appAccent.val} stopOpacity={0.05} />
+            <Stop offset="100%" stopColor={colors.appWarning.val} stopOpacity={0.1} />
+          </SvgLinearGradient>
+        </Defs>
+        <Rect width="100%" height="100%" fill={gradientFill} />
+      </Svg>
+    </YStack>
+  );
+}
+
 function ContributorRosterRow({
   index,
   isLast,
@@ -102,6 +146,8 @@ function ContributorRosterRow({
   member: OperationsTeamMember;
   reducedMotion: boolean;
 }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
   const entering = reducedMotion
     ? undefined
     : FadeInRight
@@ -116,7 +162,19 @@ function ContributorRosterRow({
       <RosterRowFrame
         testID={`contributors-roster-row-${member.id}`}
         last={isLast}
+        onPointerEnter={() => setIsHovered(true)}
+        onPointerLeave={() => {
+          setIsHovered(false);
+          setIsPressed(false);
+        }}
+        onPointerDown={() => setIsPressed(true)}
+        onPointerUp={() => setIsPressed(false)}
+        onPointerCancel={() => setIsPressed(false)}
       >
+        <RosterRowHighlight
+          memberId={member.id}
+          visible={isHovered || isPressed}
+        />
         <PortraitFrame testID={`contributors-roster-avatar-${member.id}`}>
           <Image
             source={contributorAvatars[member.avatarKey]}
@@ -204,6 +262,9 @@ export function ContributorsOperationsRoster({
 const styles = StyleSheet.create({
   animatedRow: {
     width: '100%',
+  },
+  highlightOverlay: {
+    pointerEvents: 'none',
   },
   portrait: {
     height: '100%',

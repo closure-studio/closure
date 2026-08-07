@@ -137,7 +137,6 @@ export function ContributorsTribute({
   recipientPrefix,
   recipientTitle,
 }: ContributorsTributeProps) {
-  const colors = getTokens().color;
   const reducedMotion = useReducedMotion();
   const revealProgress = useSharedValue(reducedMotion ? 1 : 0);
   const identityProgress = useSharedValue(reducedMotion ? 1 : 0);
@@ -225,9 +224,6 @@ export function ContributorsTribute({
       ],
     };
   });
-  const identityBorderStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(identityProgress.get(), [0, 0.55, 1], [0, 0.72, 1], Extrapolation.CLAMP),
-  }));
   const backdropWordStyle = useAnimatedStyle(() => ({
     opacity: 0.12 * revealProgress.get(),
     transform: [
@@ -374,16 +370,6 @@ export function ContributorsTribute({
           </YStack>
         </Animated.View>
       </YStack>
-
-      <Animated.View
-        testID="contributors-tribute-bottom-accent"
-        aria-hidden
-        style={[
-          styles.bottomAccent,
-          { backgroundColor: colors.appWarningBorder.val },
-          identityBorderStyle,
-        ]}
-      />
     </YStack>
   );
 }
@@ -405,14 +391,6 @@ const styles = StyleSheet.create({
   },
   animatedContent: {
     width: '100%',
-  },
-  bottomAccent: {
-    bottom: 0,
-    height: 1,
-    left: 0,
-    pointerEvents: 'none',
-    position: 'absolute',
-    right: 0,
   },
   scanBeam: {
     bottom: 0,
