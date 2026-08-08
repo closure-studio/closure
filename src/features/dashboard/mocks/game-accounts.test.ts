@@ -26,6 +26,11 @@ describe('game account fixtures', () => {
         expect(current).toBeLessThanOrEqual(target);
         expect(task.isCompleted).toBe(current >= target);
       }
+
+      for (const [itemId, quantity] of Object.entries(account.inventory)) {
+        expect(itemId).toBeTruthy();
+        expect(quantity).toBeGreaterThanOrEqual(0);
+      }
     }
   });
 
@@ -36,5 +41,6 @@ describe('game account fixtures', () => {
     expect(account.server).toBe('官服 · 官方');
     expect(account.avatar).toBe('D');
     expect(account.operators).not.toHaveLength(0);
+    expect(account.inventory['31034']).toBe(131);
   });
 });

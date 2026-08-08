@@ -10,15 +10,6 @@
     "required": "Enter your game account and password",
     "title": "Add game account"
   },
-  "inventory": {
-    "autoPlan": "AUTO PLAN",
-    "itemCount": "{{count}} ITEMS",
-    "shortage": "SHORT {{count}}",
-    "shortageSummary": "{{count}} materials are below target",
-    "synthesisPlanning": "SYNTHESIS PLAN",
-    "tier": "T{{tier}}",
-    "title": "Resources and inventory"
-  },
   "marquee": {
     "contract": "// Contingency Contract season 21 begins soon",
     "maintenance": "// Version maintenance at 04:00 on 07-25",

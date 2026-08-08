@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 
 import { activityTimelineEntrySchema } from './activity-timeline-entry.schema';
-import { materialSchema } from './material.schema';
+import { inventorySchema } from './inventory.schema';
 import { operatorSchema } from './operator.schema';
 import { routineTaskSchema } from './routine-task.schema';
 
@@ -36,7 +36,7 @@ export const gameAccountSchema = v.object({
   trainingLoad: v.number(),
   stats: v.array(gameAccountStatSchema),
   operators: v.array(operatorSchema),
-  materials: v.array(materialSchema),
+  inventory: inventorySchema,
   routineTasks: v.array(routineTaskSchema),
   activityTimeline: v.array(activityTimelineEntrySchema),
 });

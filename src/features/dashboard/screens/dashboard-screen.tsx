@@ -9,11 +9,12 @@ import type { DashboardPageId } from '@/features/navigation';
 import { ActivityTimelineView } from '../components/activity-timeline-view';
 import { GameAccountSwitcher } from '../components/dashboard-navigation';
 import { GameAccountOverviewView } from '../components/game-account-overview-view';
+import { InventoryView } from '../components/inventory-view';
 import { LinkGameAccountSheet } from '../components/link-game-account-sheet';
-import { MaterialInventoryView } from '../components/material-inventory-view';
 import { OperatorRosterView } from '../components/operator-roster-view';
 import { RoutineTasksView } from '../components/routine-tasks-view';
 import { useDashboardState } from '../dashboard-context';
+import { itemTable } from '../item-table';
 import { selectBackdropTint } from '../selectors';
 
 const dashboardMarqueeMessages = [
@@ -100,7 +101,7 @@ export function DashboardScreen({
               <YStack width="100%" maxW={1152} self="center" p="$3.5" pt="$4" $md={{ p: '$5' }}>
                 {activePageId === 'overview' ? <GameAccountOverviewView gameAccount={activeGameAccount} viewport={scrollViewport} /> : null}
                 {activePageId === 'operators' ? <OperatorRosterView operators={activeGameAccount.operators} /> : null}
-                {activePageId === 'inventory' ? <MaterialInventoryView materials={activeGameAccount.materials} /> : null}
+                {activePageId === 'inventory' ? <InventoryView inventory={activeGameAccount.inventory} itemTable={itemTable} /> : null}
                 {activePageId === 'tasks' ? <RoutineTasksView tasks={activeGameAccount.routineTasks} onToggle={toggleRoutineTaskCompletion} /> : null}
                 {activePageId === 'activity' ? <ActivityTimelineView entries={activeGameAccount.activityTimeline} viewport={scrollViewport} /> : null}
               </YStack>

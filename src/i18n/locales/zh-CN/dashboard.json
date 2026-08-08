@@ -10,15 +10,6 @@
     "required": "请填写游戏账号与密码",
     "title": "添加游戏账号"
   },
-  "inventory": {
-    "autoPlan": "自动规划",
-    "itemCount": "{{count}} 项",
-    "shortage": "缺口 {{count}}",
-    "shortageSummary": "共 {{count}} 项素材存在缺口",
-    "synthesisPlanning": "合成规划",
-    "tier": "T{{tier}}",
-    "title": "资源与仓库"
-  },
   "marquee": {
     "contract": "// 危机合约第21期即将开启",
     "maintenance": "// 07-25 04:00 版本维护",

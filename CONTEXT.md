@@ -24,9 +24,9 @@ _Avoid_: Server, network node, Server Channel
 The collection of Operators owned by a Game Account and their progression state.
 _Avoid_: Operators view, unit list
 
-**Material Inventory**:
-The materials owned by a Game Account together with the quantities required by its current plans.
-_Avoid_: Resources, depot data
+**Inventory**:
+The item quantities owned by a Game Account, keyed by the game item ID and displayed with the bundled item table metadata.
+_Avoid_: Material Inventory, Resources, depot data
 
 **Routine Task**:
 A recurring daily or weekly objective with a completion state and reward.
