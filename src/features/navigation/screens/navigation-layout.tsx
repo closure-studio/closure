@@ -27,6 +27,7 @@ import {
 
 const dashboardPages = Object.values(dashboardNavigation.pages).sort((left, right) => left.sort - right.sort);
 const settingsPages = Object.values(settingsNavigation.pages).sort((left, right) => left.sort - right.sort);
+const MOCK_PROFILE_AVATAR_URL = 'https://ark-resource.arknights.app/assets/avatar/ASSISTANT/char_003_kalts_sale_14.webp';
 type DashboardPage = (typeof dashboardPages)[number];
 type SettingsPage = (typeof settingsPages)[number];
 
@@ -230,8 +231,8 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
                     borderColor="$appBorder"
                   >
                     <NavigationHeader
-                      avatarInitial={t('mobile.avatarInitial')}
                       avatarLabel={t('mobile.avatarLabel')}
+                      avatarUrl={MOCK_PROFILE_AVATAR_URL}
                       isSettingsActive={scope === 'settings'}
                       onSettingsPress={handleScopePress}
                       settingsLabel={t(scope === 'dashboard' ? 'scopeSwitcher.openSettings' : 'scopeSwitcher.returnToDashboard')}

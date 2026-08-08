@@ -1,53 +1,21 @@
 import { Settings } from 'lucide-react-native';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
-import { TerminalText } from '@/components';
+import { Avatar, TerminalText } from '@/components';
 import { NavigationHeaderEdge } from './navigation-header-edge';
 
 type NavigationHeaderProps = {
-  avatarInitial: string;
   avatarLabel: string;
+  avatarUrl?: string | null | undefined;
   isSettingsActive: boolean;
   onSettingsPress: () => void;
   settingsLabel: string;
   title: string;
 };
 
-type ProfileAvatarProps = Pick<NavigationHeaderProps, 'avatarInitial' | 'avatarLabel'>;
-
-function ProfileAvatar({ avatarInitial, avatarLabel }: ProfileAvatarProps) {
-  return (
-    <YStack
-      width="$3.5"
-      height="$3.5"
-      shrink={0}
-      items="center"
-      justify="center"
-      rounded="$10"
-      borderWidth={1}
-      borderColor="$appAccentBorder"
-      bg="$appAccentSoft"
-      aria-label={avatarLabel}
-    >
-      <TerminalText size="$3" color="$appAccent" fontWeight="800">{avatarInitial}</TerminalText>
-      <YStack
-        position="absolute"
-        r={-1}
-        b={-1}
-        width={8}
-        height={8}
-        rounded="$10"
-        borderWidth={2}
-        borderColor="$appSurfaceStrong"
-        bg="$appSuccess"
-      />
-    </YStack>
-  );
-}
-
 export function NavigationHeader({
-  avatarInitial,
   avatarLabel,
+  avatarUrl,
   isSettingsActive,
   onSettingsPress,
   settingsLabel,
@@ -64,13 +32,16 @@ export function NavigationHeader({
     >
       <NavigationHeaderEdge />
 
-      <XStack position="relative" z="$1" minH="$6" px="$3.5" items="center" gap="$2" $md={{ display: 'none' }}>
-        <ProfileAvatar avatarInitial={avatarInitial} avatarLabel={avatarLabel} />
-
-        <YStack grow={1} minW={0} items="center" justify="center">
-          <TerminalText size="$4" fontWeight="700" numberOfLines={1}>{title}</TerminalText>
-        </YStack>
-
+      <XStack
+        position="relative"
+        z="$1"
+        minH="$6"
+        px="$3.5"
+        items="center"
+        flexDirection="row-reverse"
+        gap="$2"
+        $md={{ flexDirection: 'row', px: '$5', gap: '$4' }}
+      >
         <Button
           unstyled
           width="$3.5"
@@ -85,6 +56,7 @@ export function NavigationHeader({
           onPress={onSettingsPress}
           aria-label={settingsLabel}
           aria-pressed={isSettingsActive}
+          $md={{ display: 'none' }}
         >
           <Settings
             size={20}
@@ -92,11 +64,12 @@ export function NavigationHeader({
             strokeWidth={1.8}
           />
         </Button>
-      </XStack>
 
-      <XStack position="relative" z="$1" display="none" minH="$6" px="$5" items="center" justify="space-between" gap="$4" $md={{ display: 'flex' }}>
-        <TerminalText size="$4" fontWeight="700" numberOfLines={1}>{title}</TerminalText>
-        <ProfileAvatar avatarInitial={avatarInitial} avatarLabel={avatarLabel} />
+        <YStack grow={1} minW={0} items="center" justify="center" $md={{ items: 'flex-start' }}>
+          <TerminalText size="$4" fontWeight="700" numberOfLines={1}>{title}</TerminalText>
+        </YStack>
+
+        <Avatar accessibilityLabel={avatarLabel} source={avatarUrl} />
       </XStack>
     </YStack>
   );
