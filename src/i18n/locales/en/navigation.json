@@ -6,7 +6,6 @@
     "sync": "// LAYOUT STATE SYNCHRONIZED"
   },
   "mobile": {
-    "avatarInitial": "D",
     "avatarLabel": "Doctor profile",
     "settingsTabsLabel": "Settings tabs",
     "swipeHint": "SWIPE L/R"

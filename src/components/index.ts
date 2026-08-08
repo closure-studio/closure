@@ -1,6 +1,7 @@
 export { NotFoundView } from './layout/not-found-view';
 export { getPageMotionProps } from './layout/page-transition';
 export { SectionPageHeader } from './layout/section-page-header';
+export { Avatar, type AvatarProps } from './ui/avatar';
 export {
   HORIZONTAL_SWIPE_THRESHOLD_PT,
   HorizontalSwipeProvider,
