@@ -35,6 +35,7 @@ import {
   TerminalText,
 } from '@/components';
 import { apiNodeIdSchema } from '@/schemas/api-node';
+import type { ApiNode } from '@/schemas/api-node';
 import { SettingsPage } from '../components/settings-page';
 import { mockApiNodes } from '../mocks/settings-mocks';
 import { useSettingsMockState } from '../settings-mock-context';
@@ -44,6 +45,7 @@ const LOW_LATENCY_MAX_MS = 80;
 const ELEVATED_LATENCY_MAX_MS = 150;
 
 type LatencyTone = '$appSuccess' | '$appWarning' | '$appDanger';
+type DetectionStatus = 'checking' | 'reachable' | 'unreachable';
 
 function resolveLatencyTone(latencyMs: number): LatencyTone {
   if (latencyMs <= LOW_LATENCY_MAX_MS) return '$appSuccess';
@@ -60,7 +62,9 @@ export function NetworkSettingsScreen() {
   const { selectApiNode, selectedApiNodeId } = useSettingsMockState();
   const [detectionRun, setDetectionRun] = useState(0);
   const [isChecking, setIsChecking] = useState(true);
-  const selectedApiNode = mockApiNodes.find((apiNode) => apiNode.id === selectedApiNodeId);
+  const selectedApiNode: ApiNode | undefined = mockApiNodes.find(
+    (apiNode) => apiNode.id === selectedApiNodeId,
+  );
 
   if (!selectedApiNode) {
     throw new Error(`Selected mock API Node is missing: ${selectedApiNodeId}`);
@@ -87,13 +91,51 @@ export function NetworkSettingsScreen() {
     setDetectionRun((run) => run + 1);
   };
 
-  const activeNodeReachable = selectedApiNode.outcome === 'reachable';
-  const activeLatencyTone = activeNodeReachable
-    ? resolveLatencyTone(selectedApiNode.mockLatencyMs)
-    : '$appDanger';
-  const activeStatusColor = activeNodeReachable
-    ? colors.appSuccess.val
-    : colors.appDanger.val;
+  const detectionStatus: DetectionStatus = isChecking
+    ? 'checking'
+    : selectedApiNode.outcome;
+  const detectionComplete = detectionStatus !== 'checking';
+  const detectionPresentation = {
+    buttonBackground: detectionComplete ? '$appAccentSoft' : '$appWarningSoft',
+    buttonBorderColor: detectionComplete ? '$appAccentBorder' : '$appWarningBorder',
+    buttonDisabled: !detectionComplete,
+    buttonIcon: detectionComplete
+      ? <RefreshCw size={15} color={colors.appAccent.val} strokeWidth={1.8} />
+      : <Spinner size="small" color="$appWarning" />,
+    buttonLabel: t(detectionComplete ? 'network.retest' : 'network.checking'),
+    buttonTone: detectionComplete ? '$appAccent' : '$appWarning',
+    latencyAnimationKey: detectionComplete
+      ? `latency-${selectedApiNode.id}`
+      : `checking-${detectionRun}`,
+    panelIndicatorOpacity: detectionComplete ? 0.55 : 1,
+    panelIndicatorTone: detectionComplete ? '$appAccent' : '$appWarning',
+    panelRingScale: detectionComplete ? 1 : 1.08,
+    progressTone: detectionComplete ? '$appAccent' : '$appWarning',
+    progressWidth: detectionComplete ? '34%' : '100%',
+    ...({
+      checking: {
+        latencyTone: '$appMuted',
+        latencyValue: '--',
+        statusIcon: <Spinner size="small" color="$appWarning" />,
+        statusLabel: t('network.checking'),
+        statusTone: '$appWarning',
+      },
+      reachable: {
+        latencyTone: resolveLatencyTone(selectedApiNode.mockLatencyMs),
+        latencyValue: selectedApiNode.mockLatencyMs,
+        statusIcon: <Signal size={15} color={colors.appSuccess.val} strokeWidth={1.8} />,
+        statusLabel: t('network.connected'),
+        statusTone: '$appSuccess',
+      },
+      unreachable: {
+        latencyTone: '$appDanger',
+        latencyValue: '--',
+        statusIcon: <SignalZero size={15} color={colors.appDanger.val} strokeWidth={1.8} />,
+        statusLabel: t('network.unreachable'),
+        statusTone: '$appDanger',
+      },
+    } as const)[detectionStatus],
+  } as const;
 
   return (
     <SettingsPage>
@@ -122,9 +164,9 @@ export function NetworkSettingsScreen() {
             l={0}
             r={0}
             height={2}
-            bg={isChecking ? '$appWarning' : '$appAccent'}
+            bg={detectionPresentation.panelIndicatorTone}
             transition={reducedMotion ? '0ms' : '500ms'}
-            opacity={isChecking ? 1 : 0.55}
+            opacity={detectionPresentation.panelIndicatorOpacity}
           />
           <YStack
             position="absolute"
@@ -136,7 +178,7 @@ export function NetworkSettingsScreen() {
             borderWidth={1}
             borderColor="$appAccentBorder"
             opacity={0.22}
-            scale={isChecking ? 1.08 : 1}
+            scale={detectionPresentation.panelRingScale}
             transition={reducedMotion ? '0ms' : 'slow'}
             $md={{ t: '$5', r: '$6', width: '$15', height: '$15' }}
           />
@@ -198,26 +240,9 @@ export function NetworkSettingsScreen() {
                 </YStack>
               </AnimatePresence>
               <XStack items="center" gap="$2" pt="$2">
-                {isChecking ? (
-                  <Spinner size="small" color="$appWarning" />
-                ) : activeNodeReachable ? (
-                  <Signal size={15} color={activeStatusColor} strokeWidth={1.8} />
-                ) : (
-                  <SignalZero size={15} color={activeStatusColor} strokeWidth={1.8} />
-                )}
-                <MonoText
-                  size="$2"
-                  color={isChecking
-                    ? '$appWarning'
-                    : activeNodeReachable
-                      ? '$appSuccess'
-                      : '$appDanger'}
-                >
-                  {t(isChecking
-                    ? 'network.checking'
-                    : activeNodeReachable
-                      ? 'network.connected'
-                      : 'network.unreachable')}
+                {detectionPresentation.statusIcon}
+                <MonoText size="$2" color={detectionPresentation.statusTone}>
+                  {detectionPresentation.statusLabel}
                 </MonoText>
               </XStack>
             </YStack>
@@ -229,7 +254,7 @@ export function NetworkSettingsScreen() {
               </XStack>
               <AnimatePresence mode="wait">
                 <XStack
-                  key={isChecking ? `checking-${detectionRun}` : `latency-${selectedApiNode.id}`}
+                  key={detectionPresentation.latencyAnimationKey}
                   items="baseline"
                   gap="$2"
                   transition={reducedMotion ? '0ms' : 'quickLessBouncy'}
@@ -243,14 +268,12 @@ export function NetworkSettingsScreen() {
                     size="$10"
                     lineHeight="$10"
                     fontWeight="900"
-                    color={isChecking
-                      ? '$appMuted'
-                      : activeLatencyTone}
+                    color={detectionPresentation.latencyTone}
                     fontVariant={['tabular-nums']}
                   >
-                    {isChecking ? '--' : activeNodeReachable ? selectedApiNode.mockLatencyMs : '--'}
+                    {detectionPresentation.latencyValue}
                   </TerminalText>
-                  <MonoText size="$3" color={isChecking ? '$appMuted' : activeLatencyTone}>
+                  <MonoText size="$3" color={detectionPresentation.latencyTone}>
                     {t('network.latencyUnit')}
                   </MonoText>
                 </XStack>
@@ -262,8 +285,8 @@ export function NetworkSettingsScreen() {
             <YStack grow={1} height={1} bg="$appBorder" overflow="hidden">
               <YStack
                 height="100%"
-                width={isChecking ? '100%' : '34%'}
-                bg={isChecking ? '$appWarning' : '$appAccent'}
+                width={detectionPresentation.progressWidth}
+                bg={detectionPresentation.progressTone}
                 opacity={0.8}
                 transition={reducedMotion ? '0ms' : 'slow'}
               />
@@ -294,27 +317,23 @@ export function NetworkSettingsScreen() {
                 justify="center"
                 gap="$2"
                 borderWidth={1}
-                borderColor={isChecking ? '$appWarningBorder' : '$appAccentBorder'}
-                bg={isChecking ? '$appWarningSoft' : '$appAccentSoft'}
+                borderColor={detectionPresentation.buttonBorderColor}
+                bg={detectionPresentation.buttonBackground}
                 hoverStyle={{ borderColor: '$appAccent', bg: '$appAccentSoft' }}
                 pressStyle={{ opacity: 0.72, scale: 0.98 }}
                 focusVisibleStyle={{ borderColor: '$appText' }}
-                disabled={isChecking}
+                disabled={detectionPresentation.buttonDisabled}
                 disabledStyle={{ opacity: 0.58 }}
                 onPress={handleRetest}
                 aria-label={t('network.retestLabel')}
-                aria-busy={isChecking}
+                aria-busy={detectionPresentation.buttonDisabled}
                 $platform-web={{
                   clipPath: 'polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px))',
                 }}
               >
-                {isChecking ? (
-                  <Spinner size="small" color="$appWarning" />
-                ) : (
-                  <RefreshCw size={15} color={colors.appAccent.val} strokeWidth={1.8} />
-                )}
-                <MonoText size="$2.5" color={isChecking ? '$appWarning' : '$appAccent'}>
-                  {isChecking ? t('network.checking') : t('network.retest')}
+                {detectionPresentation.buttonIcon}
+                <MonoText size="$2.5" color={detectionPresentation.buttonTone}>
+                  {detectionPresentation.buttonLabel}
                 </MonoText>
               </Button>
             </XStack>
@@ -424,18 +443,18 @@ export function NetworkSettingsScreen() {
                             </MonoText>
                           </YStack>
                           <XStack shrink={0} items="baseline" gap="$1">
-                            {isChecking ? <Spinner size="small" color="$appWarning" /> : null}
+                            {detectionComplete ? null : <Spinner size="small" color="$appWarning" />}
                             <TerminalText
                               size="$6"
                               lineHeight="$6"
                               fontWeight="900"
-                              color={isChecking ? '$appMuted' : latencyTone}
+                              color={detectionComplete ? latencyTone : '$appMuted'}
                               fontVariant={['tabular-nums']}
                               $md={{ size: '$7', lineHeight: '$7' }}
                             >
-                              {isChecking ? '--' : isReachable ? apiNode.mockLatencyMs : '--'}
+                              {detectionComplete && isReachable ? apiNode.mockLatencyMs : '--'}
                             </TerminalText>
-                            <MonoText size="$1" color={isChecking ? '$appMuted' : latencyTone}>
+                            <MonoText size="$1" color={detectionComplete ? latencyTone : '$appMuted'}>
                               {t('network.latencyUnit')}
                             </MonoText>
                           </XStack>
