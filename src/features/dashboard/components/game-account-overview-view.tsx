@@ -2,12 +2,11 @@ import { Activity, Coins, Gem, Ticket, TriangleAlert, Zap } from 'lucide-react-n
 import { useTranslation } from 'react-i18next';
 import { XStack, YStack, getTokens } from 'tamagui';
 
-import { DecorativeBarcode, MonoText, type ScrollViewportMetrics, TerminalMeterBar, TerminalPanel, TerminalSectionHeading, TerminalText } from '@/components';
+import { DecorativeBarcode, MonoText, TerminalMeterBar, TerminalPanel, TerminalSectionHeading, TerminalText } from '@/components';
 import type { GameAccount } from '@/schemas/game-account';
 import { formatCompactNumber } from '../utils';
-import { DashboardViewportReveal } from './dashboard-viewport-reveal';
 
-export function GameAccountOverviewView({ gameAccount, viewport }: { gameAccount: GameAccount; viewport: ScrollViewportMetrics }) {
+export function GameAccountOverviewView({ gameAccount }: { gameAccount: GameAccount }) {
   const { t } = useTranslation('dashboard');
   const colors = getTokens().color;
   const accountBalances = [
@@ -26,7 +25,6 @@ export function GameAccountOverviewView({ gameAccount, viewport }: { gameAccount
   return (
     <XStack flexWrap="wrap" items="flex-start" gap={20} pb="$4">
       <YStack width="100%" $xl={{ width: '65%' }}>
-      <DashboardViewportReveal index={0} origin="bottom" viewport={viewport}>
       <TerminalPanel cornerBrackets p="$3.5" minH={166}>
         <XStack mb={12} items="center" justify="space-between">
           <MonoText size="$1" color="$appAccent">{t('overview.profile')}</MonoText>
@@ -49,11 +47,9 @@ export function GameAccountOverviewView({ gameAccount, viewport }: { gameAccount
         </XStack>
         <YStack mt={4}><TerminalMeterBar value={gameAccount.exp[0]} max={gameAccount.exp[1]} /></YStack>
       </TerminalPanel>
-      </DashboardViewportReveal>
       </YStack>
 
       <YStack width="100%" $lg={{ width: '48%' }} $xl={{ width: '31.5%' }}>
-      <DashboardViewportReveal index={1} origin="bottom" viewport={viewport}>
       <TerminalPanel p="$3.5" tone={isSanityAtCapacity ? 'warning' : 'default'}>
         <TerminalSectionHeading code="01" title={t('overview.sanity')} subtitle="AP CORE" trailing={<MonoText size="$1" color={isSanityAtCapacity ? '$appWarning' : '$appMuted'}>{t('overview.recoversAt', { time: gameAccount.apRecoverAt })}</MonoText>} />
         <XStack mt={12} items="center" gap="$2">
@@ -63,11 +59,9 @@ export function GameAccountOverviewView({ gameAccount, viewport }: { gameAccount
         </XStack>
         <YStack mt={8}><TerminalMeterBar value={gameAccount.ap[0]} max={gameAccount.ap[1]} tone={isSanityAtCapacity ? 'warning' : 'cyan'} /></YStack>
       </TerminalPanel>
-      </DashboardViewportReveal>
       </YStack>
 
       <YStack width="100%" $lg={{ width: '48%' }} $xl={{ width: '31.5%' }}>
-      <DashboardViewportReveal index={2} origin="bottom" viewport={viewport}>
       <YStack gap="$2">
         <TerminalSectionHeading code="02" title={t('overview.assets')} subtitle="ASSETS" />
         <XStack flexWrap="wrap" gap="$2">
@@ -85,11 +79,9 @@ export function GameAccountOverviewView({ gameAccount, viewport }: { gameAccount
           })}
         </XStack>
       </YStack>
-      </DashboardViewportReveal>
       </YStack>
 
       <YStack width="100%" $lg={{ width: '48%' }} $xl={{ width: '31.5%' }}>
-      <DashboardViewportReveal index={3} origin="bottom" viewport={viewport}>
       <YStack gap="$2">
         <TerminalSectionHeading code="03" title={t('overview.operationMetrics')} subtitle="METRICS" />
         <XStack flexWrap="wrap" gap="$2">
@@ -104,11 +96,9 @@ export function GameAccountOverviewView({ gameAccount, viewport }: { gameAccount
           ))}
         </XStack>
       </YStack>
-      </DashboardViewportReveal>
       </YStack>
 
       <YStack width="100%" $xl={{ width: '31.5%' }}>
-      <DashboardViewportReveal index={4} origin="bottom" viewport={viewport}>
       <TerminalPanel cornerBrackets p="$4" gap="$3">
         <TerminalSectionHeading code="04" title={t('overview.base')} subtitle="BASE" trailing={<MonoText size="$1">{gameAccount.progress}</MonoText>} />
         {baseMetrics.map((metric) => (
@@ -118,7 +108,6 @@ export function GameAccountOverviewView({ gameAccount, viewport }: { gameAccount
           </YStack>
         ))}
       </TerminalPanel>
-      </DashboardViewportReveal>
       </YStack>
     </XStack>
   );

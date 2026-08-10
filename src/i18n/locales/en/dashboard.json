@@ -21,7 +21,7 @@
     "brandTitle": "CLOSURE STUDIO",
     "sections": {
       "activity": { "label": "Timeline", "subtitle": "TIMELINE" },
-      "inventory": { "label": "Inventory", "subtitle": "DEPOT" },
+      "inventory": { "label": "Inventory" },
       "operators": { "label": "Operators", "subtitle": "OPERATORS" },
       "overview": { "label": "Overview", "subtitle": "OVERVIEW" },
       "tasks": { "label": "Routine", "subtitle": "ROUTINE" }

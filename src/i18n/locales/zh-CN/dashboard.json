@@ -21,7 +21,7 @@
     "brandTitle": "可露希尔工作室",
     "sections": {
       "activity": { "label": "日程", "subtitle": "时间线" },
-      "inventory": { "label": "仓库", "subtitle": "资源库" },
+      "inventory": { "label": "仓库" },
       "operators": { "label": "干员", "subtitle": "干员列表" },
       "overview": { "label": "总览", "subtitle": "概览" },
       "tasks": { "label": "日常", "subtitle": "任务" }

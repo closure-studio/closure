@@ -1,11 +1,8 @@
-import { StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import Animated, { Extrapolation, interpolate, useAnimatedStyle } from 'react-native-reanimated';
-import { XStack, YStack, getTokens } from 'tamagui';
+import { XStack, YStack } from 'tamagui';
 
-import { MonoText, type ScrollViewportMetrics, TerminalCornerBrackets, TerminalPanel, TerminalSectionHeading, TerminalText } from '@/components';
+import { MonoText, TerminalCornerBrackets, TerminalPanel, TerminalSectionHeading, TerminalText } from '@/components';
 import type { ActivityTimelineEntry } from '@/schemas/game-account';
-import { DashboardViewportReveal } from './dashboard-viewport-reveal';
 
 const toneByCategory: Record<ActivityTimelineEntry['category'], 'cyan' | 'warning' | 'danger' | 'default'> = {
   event: 'cyan',
@@ -14,36 +11,15 @@ const toneByCategory: Record<ActivityTimelineEntry['category'], 'cyan' | 'warnin
   notice: 'default',
 };
 
-const INITIAL_RAIL_PROGRESS = 0.48;
-const FULL_RAIL_PROGRESS_SCROLL_OFFSET = 550;
-
-function TimelineProgressRail({ viewport }: { viewport: ScrollViewportMetrics }) {
-  const colors = getTokens().color;
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{
-      scaleY: interpolate(
-        viewport.offset.get(),
-        [0, FULL_RAIL_PROGRESS_SCROLL_OFFSET],
-        [INITIAL_RAIL_PROGRESS, 1],
-        Extrapolation.CLAMP,
-      ),
-    }],
-  }));
-
-  return <Animated.View style={[styles.progressRail, { backgroundColor: colors.appAccent.val }, animatedStyle]} />;
-}
-
-export function ActivityTimelineView({ entries, viewport }: { entries: readonly ActivityTimelineEntry[]; viewport: ScrollViewportMetrics }) {
+export function ActivityTimelineView({ entries }: { entries: readonly ActivityTimelineEntry[] }) {
   const { t } = useTranslation('dashboard');
   return (
     <YStack width="100%" maxW={860} self="center" gap={16} pb="$4">
       <TerminalSectionHeading code="LOG" title={t('timeline.title')} subtitle="TIMELINE" />
       <YStack position="relative" gap={12}>
         <YStack position="absolute" t={0} b={0} l={9} width={1} bg="$appBorder" />
-        <TimelineProgressRail viewport={viewport} />
-        {entries.map((entry, index) => (
-          <DashboardViewportReveal key={entry.id} index={index} origin="left" viewport={viewport}>
-          <XStack position="relative" pl={40}>
+        {entries.map((entry) => (
+          <XStack key={entry.id} position="relative" pl={40}>
             <YStack position="absolute" l={3} t={16} width={12} height={12} rotate="45deg" borderWidth={1} borderColor="$appAccent" bg="$appBackground" items="center" justify="center">
               <YStack width={4} height={4} bg="$appAccent" />
             </YStack>
@@ -60,21 +36,8 @@ export function ActivityTimelineView({ entries, viewport }: { entries: readonly 
               <TerminalText mt={8} size="$3" lineHeight="$4" color="$appMuted">{entry.description}</TerminalText>
             </TerminalPanel>
           </XStack>
-          </DashboardViewportReveal>
         ))}
       </YStack>
     </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  progressRail: {
-    bottom: 0,
-    left: 9,
-    pointerEvents: 'none',
-    position: 'absolute',
-    top: 0,
-    transformOrigin: 'top',
-    width: 1,
-  },
-});
