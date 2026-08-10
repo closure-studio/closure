@@ -190,16 +190,9 @@ describe('InventoryView', () => {
         borderBottomRightRadius: 999,
       }),
     );
-    expect(screen.getByTestId('inventory-grid-columns-2')).toBeTruthy();
-    expect(screen.getByTestId('inventory-grid-columns-2').props).toEqual(
-      expect.objectContaining({
-        initialNumToRender: 1,
-        maxToRenderPerBatch: 1,
-        removeClippedSubviews: true,
-        updateCellsBatchingPeriod: 100,
-        windowSize: 2,
-      }),
-    );
+    const inventoryGrid = screen.getByTestId('inventory-grid-columns-2');
+    expect(inventoryGrid.props.data).toBeUndefined();
+    expect(inventoryGrid.props.renderItem).toBeUndefined();
 
     expect(getInventoryColumnCount(320, true, 7)).toBe(2);
     expect(getInventoryColumnCount(400, true, 7)).toBe(3);

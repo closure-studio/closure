@@ -8,10 +8,12 @@ import DashboardOverviewRoute from '../src/app/(app)/dashboard/overview';
 import DashboardTasksRoute from '../src/app/(app)/dashboard/tasks';
 
 jest.mock('@/features/dashboard', () => {
-  const { Text } = jest.requireActual<typeof import('react-native')>('react-native');
+  const { Text, View } = jest.requireActual<typeof import('react-native')>('react-native');
   return {
     ActivityTimelineView: () => <Text testID="activity-screen" />,
-    DashboardPageScroll: ({ children }: PropsWithChildren) => children,
+    DashboardPageScroll: ({ children }: PropsWithChildren) => (
+      <View testID="dashboard-page-scroll">{children}</View>
+    ),
     GameAccountOverviewView: () => <Text testID="overview-screen" />,
     InventoryView: () => <Text testID="inventory-screen" />,
     OperatorRosterView: () => <Text testID="operators-screen" />,
@@ -42,6 +44,7 @@ describe('dashboard routes', () => {
   ] as const)('renders the dedicated %s screen', async (screenId, Route) => {
     const screen = await render(<Route />);
 
+    expect(screen.getByTestId('dashboard-page-scroll')).toBeTruthy();
     expect(screen.getByTestId(`${screenId}-screen`)).toBeTruthy();
   });
 });

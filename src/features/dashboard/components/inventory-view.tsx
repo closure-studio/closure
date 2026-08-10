@@ -1,7 +1,5 @@
 import { PackageOpen } from 'lucide-react-native';
-import { memo, useCallback, useId, useMemo, useState } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
-import type { ListRenderItemInfo } from 'react-native';
+import { memo, useId, useMemo, useState } from 'react';
 import Svg, {
   Circle,
   Defs,
@@ -35,10 +33,6 @@ const MOBILE_MIN_ITEM_WIDTH = 128;
 const DESKTOP_MIN_ITEM_WIDTH = 240;
 const DEFAULT_MOBILE_COLUMN_COUNT = 2;
 const DEFAULT_DESKTOP_COLUMN_COUNT = 4;
-const INITIAL_ROWS_TO_RENDER = 1;
-const MAX_ROWS_PER_RENDER_BATCH = 1;
-const VIRTUALIZED_ROW_WINDOW_SIZE = 2;
-const ROW_BATCHING_PERIOD_MS = 100;
 const ITEM_ARTWORK_FEATHER_STOPS = [
   { offset: '0%', opacity: 1, color: '#ffffff' },
   { offset: '58%', opacity: 1, color: '#ffffff' },
@@ -495,10 +489,6 @@ const InventoryRow = memo(function InventoryRow({
   );
 });
 
-function getInventoryRowKey(row: readonly InventoryEntry[]): string {
-  return row[0]?.itemId ?? 'empty-row';
-}
-
 export function InventoryView({
   inventory,
   itemTable,
@@ -533,23 +523,6 @@ export function InventoryView({
     return rows;
   }, [columnCount, entries]);
 
-  const handleListLayout = useCallback((width: number) => {
-    setListWidth((currentWidth) => (currentWidth === width ? currentWidth : width));
-  }, []);
-  const renderInventoryRow = useCallback(
-    ({ item: row }: ListRenderItemInfo<InventoryEntry[]>) => (
-      <InventoryRow
-        compact={compact}
-        itemWidth={itemWidth}
-        onSelect={setRequestedItemId}
-        row={row}
-        rowGap={gridGap}
-        selectedItemId={selectedItemId ?? undefined}
-      />
-    ),
-    [compact, gridGap, itemWidth, selectedItemId],
-  );
-
   if (!selectedEntry) {
     return (
       <YStack testID="inventory-empty" minH={360} items="center" justify="center" gap="$3">
@@ -559,61 +532,36 @@ export function InventoryView({
   }
 
   return (
-    <YStack
-      grow={1}
-      shrink={1}
-      minH={0}
-      width="100%"
-      mt="$2"
-      px="$2.5"
-      pb="$4"
-      $md={{ mt: '$3', px: '$5', pb: '$5' }}
-    >
+    <YStack width="100%">
       <TerminalPanel
         testID="inventory-panel"
         cornerBrackets
-        grow={1}
-        shrink={1}
-        minH={0}
         width="100%"
         p={0}
-        overflow="hidden"
       >
-        <YStack
-          testID="inventory-matrix"
-          grow={1}
-          shrink={1}
-          minH={0}
-        >
-          <FlatList
+        <InventoryPreview compact={compact} entry={selectedEntry} />
+        <YStack testID="inventory-matrix">
+          <YStack
             testID={`inventory-grid-columns-${columnCount}`}
-            data={entryRows}
-            renderItem={renderInventoryRow}
-            keyExtractor={getInventoryRowKey}
-            ListHeaderComponent={<InventoryPreview compact={compact} entry={selectedEntry} />}
-            initialNumToRender={INITIAL_ROWS_TO_RENDER}
-            maxToRenderPerBatch={MAX_ROWS_PER_RENDER_BATCH}
-            windowSize={VIRTUALIZED_ROW_WINDOW_SIZE}
-            updateCellsBatchingPeriod={ROW_BATCHING_PERIOD_MS}
-            removeClippedSubviews
-            showsVerticalScrollIndicator={false}
-            contentInsetAdjustmentBehavior="automatic"
-            style={styles.list}
-            contentContainerStyle={styles.listContent}
-            onLayout={(event) => handleListLayout(event.nativeEvent.layout.width)}
-          />
+            onLayout={(event) => {
+              const width = event.nativeEvent.layout.width;
+              setListWidth((currentWidth) => (currentWidth === width ? currentWidth : width));
+            }}
+          >
+            {entryRows.map((row) => (
+              <InventoryRow
+                key={row[0]?.itemId ?? 'empty-row'}
+                compact={compact}
+                itemWidth={itemWidth}
+                onSelect={setRequestedItemId}
+                row={row}
+                rowGap={gridGap}
+                selectedItemId={selectedItemId ?? undefined}
+              />
+            ))}
+          </YStack>
         </YStack>
       </TerminalPanel>
     </YStack>
   );
 }
-
-const styles = StyleSheet.create({
-  list: {
-    flex: 1,
-    minHeight: 0,
-  },
-  listContent: {
-    flexGrow: 1,
-  },
-});
