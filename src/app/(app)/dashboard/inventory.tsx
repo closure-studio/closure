@@ -1,13 +1,7 @@
-import { DashboardScreen } from '@/features/dashboard';
-import { useSessionBackdrop } from '@/features/session';
+import { InventoryView, itemTable, useDashboardState } from '@/features/dashboard';
 
 export default function DashboardInventoryRoute() {
-  const { setBackdropTint } = useSessionBackdrop();
+  const { activeGameAccount } = useDashboardState();
 
-  return (
-    <DashboardScreen
-      activePageId="inventory"
-      onBackdropTintChange={setBackdropTint}
-    />
-  );
+  return <InventoryView inventory={activeGameAccount.inventory} itemTable={itemTable} />;
 }

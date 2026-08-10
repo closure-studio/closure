@@ -1,7 +1,9 @@
 import type { PropsWithChildren } from 'react';
-import { YStack } from 'tamagui';
+import { ScrollView, YStack } from 'tamagui';
 
 import { DashboardSecondaryHeader, type DashboardSecondaryHeaderProps } from './dashboard-secondary-header';
+
+const DASHBOARD_CONTENT_MAX_WIDTH = 1152;
 
 export function DashboardShell({ children, ...headerProps }: PropsWithChildren<DashboardSecondaryHeaderProps>) {
   return (
@@ -10,6 +12,32 @@ export function DashboardShell({ children, ...headerProps }: PropsWithChildren<D
       <YStack grow={1} shrink={1} minH={0}>
         {children}
       </YStack>
+    </YStack>
+  );
+}
+
+export function DashboardPageScroll({ children }: PropsWithChildren) {
+  return (
+    <YStack grow={1} shrink={1} minW={0} minH={0} height="100%" maxH="100%" overflow="hidden">
+      <ScrollView
+        grow={1}
+        shrink={1}
+        minH={0}
+        contentInsetAdjustmentBehavior="automatic"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ grow: 1 }}
+      >
+        <YStack
+          width="100%"
+          maxW={DASHBOARD_CONTENT_MAX_WIDTH}
+          self="center"
+          p="$3.5"
+          pt="$3"
+          $md={{ p: '$5', pt: '$4' }}
+        >
+          {children}
+        </YStack>
+      </ScrollView>
     </YStack>
   );
 }

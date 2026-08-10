@@ -12,6 +12,7 @@ describe('Item Table schema', () => {
       },
       '3233': { name: '重装双芯片', icon: 'MTL_ASC_TNK3' },
       EPGS_COIN: { name: '寻访参数模型', icon: 'EPGS_COIN' },
+      item_without_description: { name: '无描述物品', icon: 'NO_DESCRIPTION', description: null },
     });
 
     expect(result.success).toBe(true);

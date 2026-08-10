@@ -119,28 +119,23 @@ describe('InventoryView', () => {
     expect(screen.getByTestId('inventory-selection-top-right-31034')).toBeTruthy();
     expect(screen.getByTestId('inventory-selection-bottom-left-31034')).toBeTruthy();
     expect(screen.getByTestId('inventory-selection-bottom-right-31034')).toBeTruthy();
-    const inventoryImage = screen.getByTestId('inventory-item-image-svg-image-31034', {
+    const inventoryImage = screen.getByTestId('inventory-item-image-31034', {
       includeHiddenElements: true,
     });
-    expect(inventoryImage.props.src).toEqual({
+    expect(inventoryImage.props.source).toEqual(expect.objectContaining({
       uri: 'https://ark-resource.arknights.app/assets/items/MTL_SL_OC4.webp',
-    });
+    }));
     expect(inventoryImage.props.opacity).toBe(0);
     expect(readSvgText(screen.getByTestId('inventory-item-image-fallback-character-31034', {
       includeHiddenElements: true,
     }))).toBe('晶');
     await fireEvent(inventoryImage, 'load');
-    expect(screen.queryByTestId('inventory-item-image-fallback-31034')).toBeNull();
+    expect(screen.queryByTestId('inventory-item-image-fallback-character-31034')).toBeNull();
     expect(inventoryImage.props.opacity).toBe(1);
-    expect(screen.getByTestId('inventory-item-image-filter-31034', {
-      includeHiddenElements: true,
-    })).toBeTruthy();
-    expect(screen.getByTestId('inventory-item-image-feather-31034', {
-      includeHiddenElements: true,
-    })).toBeTruthy();
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-image-circle-31034').props.style)).toEqual(
       expect.objectContaining({
-        aspectRatio: 1,
+        height: 100,
+        width: 100,
         borderTopLeftRadius: 999,
         borderTopRightRadius: 999,
         borderBottomLeftRadius: 999,
@@ -188,7 +183,7 @@ describe('InventoryView', () => {
     );
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-image-circle-31034').props.style)).toEqual(
       expect.objectContaining({
-        aspectRatio: 1,
+        height: 40,
         borderTopLeftRadius: 999,
         borderTopRightRadius: 999,
         borderBottomLeftRadius: 999,
@@ -196,6 +191,15 @@ describe('InventoryView', () => {
       }),
     );
     expect(screen.getByTestId('inventory-grid-columns-2')).toBeTruthy();
+    expect(screen.getByTestId('inventory-grid-columns-2').props).toEqual(
+      expect.objectContaining({
+        initialNumToRender: 1,
+        maxToRenderPerBatch: 1,
+        removeClippedSubviews: true,
+        updateCellsBatchingPeriod: 100,
+        windowSize: 2,
+      }),
+    );
 
     expect(getInventoryColumnCount(320, true, 7)).toBe(2);
     expect(getInventoryColumnCount(400, true, 7)).toBe(3);

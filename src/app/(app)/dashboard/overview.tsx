@@ -1,13 +1,15 @@
-import { DashboardScreen } from '@/features/dashboard';
-import { useSessionBackdrop } from '@/features/session';
+import {
+  DashboardPageScroll,
+  GameAccountOverviewView,
+  useDashboardState,
+} from '@/features/dashboard';
 
 export default function DashboardOverviewRoute() {
-  const { setBackdropTint } = useSessionBackdrop();
+  const { activeGameAccount } = useDashboardState();
 
   return (
-    <DashboardScreen
-      activePageId="overview"
-      onBackdropTintChange={setBackdropTint}
-    />
+    <DashboardPageScroll>
+      <GameAccountOverviewView gameAccount={activeGameAccount} />
+    </DashboardPageScroll>
   );
 }

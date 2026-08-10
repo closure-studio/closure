@@ -1,13 +1,18 @@
-import { DashboardScreen } from '@/features/dashboard';
-import { useSessionBackdrop } from '@/features/session';
+import {
+  DashboardPageScroll,
+  RoutineTasksView,
+  useDashboardState,
+} from '@/features/dashboard';
 
 export default function DashboardTasksRoute() {
-  const { setBackdropTint } = useSessionBackdrop();
+  const { activeGameAccount, toggleRoutineTaskCompletion } = useDashboardState();
 
   return (
-    <DashboardScreen
-      activePageId="tasks"
-      onBackdropTintChange={setBackdropTint}
-    />
+    <DashboardPageScroll>
+      <RoutineTasksView
+        tasks={activeGameAccount.routineTasks}
+        onToggle={toggleRoutineTaskCompletion}
+      />
+    </DashboardPageScroll>
   );
 }
