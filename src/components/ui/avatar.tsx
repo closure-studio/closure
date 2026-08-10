@@ -5,16 +5,14 @@ import Svg, {
   Defs,
   G,
   Image as SvgImage,
-  LinearGradient as SvgLinearGradient,
   Mask,
-  Pattern,
   RadialGradient as SvgRadialGradient,
-  Rect,
   Stop,
 } from 'react-native-svg';
-import { YStack, getTokens } from 'tamagui';
+import { YStack } from 'tamagui';
 
 import profileAvatarFallback from '@/assets/images/profile-avatar.webp';
+import { AvatarFilter } from './avatar-filter';
 
 const DEFAULT_AVATAR_SIZE = 52;
 
@@ -29,15 +27,11 @@ export function Avatar({
   size = DEFAULT_AVATAR_SIZE,
   source,
 }: AvatarProps) {
-  const colors = getTokens().color;
   const avatarId = useId().replace(/[^a-zA-Z0-9_-]/g, '');
   const maskGradientId = `avatar-mask-gradient-${avatarId}`;
   const maskId = `avatar-mask-${avatarId}`;
-  const scanlinePatternId = `avatar-scanlines-${avatarId}`;
   const normalizedSource = source?.trim() ?? '';
   const maskFill = `url(#${maskGradientId})`;
-  const scanlineFill = `url(#${scanlinePatternId})`;
-  const washFill = `url(#${scanlinePatternId}-wash)`;
 
   return (
     <YStack
@@ -94,20 +88,6 @@ export function Avatar({
                 fill={maskFill}
               />
             </Mask>
-            <Pattern id={scanlinePatternId} width="3" height="3" patternUnits="userSpaceOnUse">
-              <Rect width="3" height="1" fill={colors.appScanline.val} />
-            </Pattern>
-            <SvgLinearGradient
-              id={`${scanlinePatternId}-wash`}
-              x1="0%"
-              y1="100%"
-              x2="100%"
-              y2="0%"
-            >
-              <Stop offset="0%" stopColor={colors.appAccent.val} stopOpacity={0.14} />
-              <Stop offset="52%" stopColor={colors.appAccent.val} stopOpacity={0} />
-              <Stop offset="100%" stopColor={colors.appText.val} stopOpacity={0.08} />
-            </SvgLinearGradient>
           </Defs>
           <G mask={`url(#${maskId})`}>
             <SvgImage
@@ -126,10 +106,7 @@ export function Avatar({
                 preserveAspectRatio="xMidYMid slice"
               />
             ) : null}
-            <Rect width="100%" height="100%" fill={colors.appBackground.val} opacity={0.18} />
-            <Rect width="100%" height="100%" fill={colors.appAccent.val} opacity={0.08} />
-            <Rect width="100%" height="100%" fill={washFill} />
-            <Rect width="100%" height="100%" fill={scanlineFill} opacity={0.62} />
+            <AvatarFilter testID="avatar-filter" />
           </G>
         </Svg>
       </YStack>

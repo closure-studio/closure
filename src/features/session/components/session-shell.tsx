@@ -34,12 +34,9 @@ export function SessionShell({ children }: PropsWithChildren) {
           height="100%"
           maxW={460}
           maxH="100%"
-          borderLeftWidth={1}
-          borderRightWidth={1}
-          borderColor="$appBorder"
           overflow="hidden"
           bg="$appBackground"
-          $md={{ maxW: '100%', borderLeftWidth: 0, borderRightWidth: 0 }}
+          $md={{ maxW: '100%' }}
         >
           <SessionBackdrop tint={backdropTint} />
           <SafeAreaView

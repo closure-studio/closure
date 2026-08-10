@@ -1,4 +1,11 @@
-import type { ActivityTimelineEntry, GameAccount, Material, Operator, RoutineTask, ServerChannel } from '@/schemas/game-account';
+import type {
+  ActivityTimelineEntry,
+  GameAccount,
+  Operator,
+  RoutineTask,
+  ServerChannel,
+} from '@/schemas/game-account';
+import { inventoryFixture } from './inventory';
 
 type RoutineTaskTemplate = Omit<RoutineTask, 'isCompleted' | 'completionProgress'> & {
   target: number;
@@ -13,17 +20,6 @@ const operatorTemplates: Omit<Operator, 'level' | 'trust' | 'elite'>[] = [
   { id: 'ptl', name: '推进之王', codename: 'SIEGE', class: '先锋', rarity: 6, maxLevel: 90, potential: 1, skillLevel: 7, proficiency: [1, 0, 0] },
   { id: 'ken', name: '凯尔希', codename: 'KAL\u2019TSIT', class: '医疗', rarity: 6, maxLevel: 90, potential: 1, skillLevel: 7, proficiency: [0, 2, 0] },
   { id: 'sus', name: '苏苏洛', codename: 'SUSSURRO', class: '医疗', rarity: 5, maxLevel: 80, potential: 3, skillLevel: 7, proficiency: [0, 1, 0] },
-];
-
-const materialTemplates: Omit<Material, 'owned' | 'needed'>[] = [
-  { id: 'm1', name: '固源岩组', tier: 3, category: '基础素材' },
-  { id: 'm2', name: '聚酸酯块', tier: 3, category: '基础素材' },
-  { id: 'm3', name: '全新装置', tier: 4, category: '进阶素材' },
-  { id: 'm4', name: '晶体电路', tier: 4, category: '进阶素材' },
-  { id: 'm5', name: 'D32钢', tier: 5, category: '进阶素材' },
-  { id: 'm6', name: '双极纳米片', tier: 5, category: '进阶素材' },
-  { id: 'm7', name: '近卫芯片组', tier: 4, category: '芯片' },
-  { id: 'm8', name: '技巧概要·卷3', tier: 3, category: '技巧概要' },
 ];
 
 const routineTaskTemplates: RoutineTaskTemplate[] = [
@@ -60,15 +56,6 @@ function createOperators(accountKey: string): Operator[] {
   }));
 }
 
-function createMaterials(accountKey: string): Material[] {
-  const accountKeyCode = accountKey.charCodeAt(accountKey.length - 1);
-  return materialTemplates.map((material, index) => ({
-    ...material,
-    owned: (accountKeyCode * (index + 2)) % 60,
-    needed: 12 + ((accountKeyCode + index * 5) % 40),
-  }));
-}
-
 function createRoutineTasks(accountKey: string): RoutineTask[] {
   const accountKeyCode = accountKey.charCodeAt(accountKey.length - 1);
   return routineTaskTemplates.map((task, index) => {
@@ -80,13 +67,13 @@ function createRoutineTasks(accountKey: string): RoutineTask[] {
 }
 
 function assembleGameAccount(
-  input: Omit<GameAccount, 'operators' | 'materials' | 'routineTasks' | 'activityTimeline'>,
+  input: Omit<GameAccount, 'operators' | 'inventory' | 'routineTasks' | 'activityTimeline'>,
   accountKey: string,
 ): GameAccount {
   return {
     ...input,
     operators: createOperators(accountKey),
-    materials: createMaterials(accountKey),
+    inventory: { ...inventoryFixture },
     routineTasks: createRoutineTasks(accountKey),
     activityTimeline,
   };

@@ -1,7 +1,7 @@
 export { NotFoundView } from './layout/not-found-view';
-export { getPageMotionProps } from './layout/page-transition';
 export { SectionPageHeader } from './layout/section-page-header';
 export { Avatar, type AvatarProps } from './ui/avatar';
+export { AvatarFilter, type AvatarFilterProps } from './ui/avatar-filter';
 export {
   HORIZONTAL_SWIPE_THRESHOLD_PT,
   HorizontalSwipeProvider,
@@ -11,8 +11,6 @@ export {
 } from './layout/horizontal-swipe-context';
 export type { HorizontalSwipeDirection } from './layout/horizontal-swipe-context';
 export { FlickeringStatusIndicator } from './ui/motion/flickering-status-indicator';
-export { LoopingMarquee } from './ui/motion/looping-marquee';
-export { ViewportReveal, type ScrollViewportMetrics } from './ui/motion/viewport-reveal';
 export {
   NotchedButton,
   NotchedSelectionIndicator,

@@ -24,6 +24,7 @@ describe('Avatar', () => {
 
     expect(screen.getByLabelText('Operator avatar')).toBeTruthy();
     expect(screen.getByTestId('avatar-mask')).toBeTruthy();
+    expect(screen.getByTestId('avatar-filter')).toBeTruthy();
     expect(screen.getByTestId('avatar-fallback-image')).toBeTruthy();
     expect(screen.getByTestId('avatar-source-image').props.src).toEqual({ uri: TEST_AVATAR_URL });
     expect(screen.getByTestId('avatar').props.style).toEqual(

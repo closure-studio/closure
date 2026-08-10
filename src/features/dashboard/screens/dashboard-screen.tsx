@@ -1,58 +1,64 @@
-import { useEffect, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import type { LayoutChangeEvent, ScrollView as NativeScrollView } from 'react-native';
-import Animated, { useAnimatedRef, useReducedMotion, useScrollOffset, useSharedValue } from 'react-native-reanimated';
-import { AnimatePresence, YStack, getTokens } from 'tamagui';
+import type { PropsWithChildren } from 'react';
+import { useEffect } from 'react';
+import { ScrollView, YStack, getTokens } from 'tamagui';
 
-import { getPageMotionProps, TerminalMarquee } from '@/components';
 import type { DashboardPageId } from '@/features/navigation';
 import { ActivityTimelineView } from '../components/activity-timeline-view';
-import { GameAccountSwitcher } from '../components/dashboard-navigation';
 import { GameAccountOverviewView } from '../components/game-account-overview-view';
-import { LinkGameAccountSheet } from '../components/link-game-account-sheet';
-import { MaterialInventoryView } from '../components/material-inventory-view';
+import { InventoryView } from '../components/inventory-view';
 import { OperatorRosterView } from '../components/operator-roster-view';
 import { RoutineTasksView } from '../components/routine-tasks-view';
 import { useDashboardState } from '../dashboard-context';
+import { itemTable } from '../item-table';
 import { selectBackdropTint } from '../selectors';
 
-const dashboardMarqueeMessages = [
-  { id: 'network', translationKey: 'marquee.network', tone: 'accent' },
-  { id: 'navigation', translationKey: 'marquee.navigation', tone: 'default' },
-  { id: 'account', translationKey: 'marquee.account', tone: 'warning' },
-  { id: 'sync', translationKey: 'marquee.sync', tone: 'success' },
-] as const;
+type DashboardPageScrollProps = PropsWithChildren<{
+  contentMaxWidth: number;
+  padded?: boolean;
+}>;
+
+function DashboardPageScroll({
+  children,
+  contentMaxWidth,
+  padded = false,
+}: DashboardPageScrollProps) {
+  return (
+    <YStack grow={1} shrink={1} minW={0} minH={0}>
+      <ScrollView
+        grow={1}
+        shrink={1}
+        minH={0}
+        contentInsetAdjustmentBehavior="automatic"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ grow: 1 }}
+      >
+        <YStack
+          width="100%"
+          maxW={contentMaxWidth}
+          self="center"
+          p={padded ? '$3.5' : 0}
+          pt={padded ? '$3' : 0}
+          $md={padded ? { p: '$5', pt: '$4' } : {}}
+        >
+          {children}
+        </YStack>
+      </ScrollView>
+    </YStack>
+  );
+}
 
 export function DashboardScreen({
   activePageId,
   onBackdropTintChange,
-  onShowOverview,
 }: {
   activePageId: DashboardPageId;
   onBackdropTintChange: (tint: string) => void;
-  onShowOverview: () => void;
 }) {
-  const { t } = useTranslation('navigation');
   const colors = getTokens().color;
-  const reducedMotion = useReducedMotion();
-  const pageMotion = getPageMotionProps(reducedMotion);
   const {
     activeGameAccount,
-    activeGameAccountId,
-    gameAccounts,
-    isLinkGameAccountSheetOpen,
-    linkGameAccount,
-    selectGameAccount,
-    setIsLinkGameAccountSheetOpen,
     toggleRoutineTaskCompletion,
   } = useDashboardState();
-  const contentScrollRef = useAnimatedRef<NativeScrollView>();
-  const viewportOffset = useScrollOffset(contentScrollRef);
-  const viewportHeight = useSharedValue(0);
-  const scrollViewport = useMemo(
-    () => ({ height: viewportHeight, offset: viewportOffset, ref: contentScrollRef }),
-    [contentScrollRef, viewportHeight, viewportOffset],
-  );
   const backdropTint = selectBackdropTint(activeGameAccount, {
     primary: colors.appAccent.val,
     warning: colors.appWarning.val,
@@ -63,60 +69,21 @@ export function DashboardScreen({
     onBackdropTintChange(backdropTint);
   }, [backdropTint, onBackdropTintChange]);
 
-  const handleContentLayout = (event: LayoutChangeEvent) => {
-    viewportHeight.set(event.nativeEvent.layout.height);
-  };
-
   return (
     <YStack grow={1} height="100%" maxH="100%" overflow="hidden">
-      <TerminalMarquee items={dashboardMarqueeMessages.map((message) => ({
-        id: message.id,
-        label: t(message.translationKey),
-        tone: message.tone,
-      }))} />
-      <YStack borderBottomWidth={1} borderColor="$appBorder" bg="$appSurface">
-        <YStack px="$3.5" py="$3" $md={{ px: '$5' }}><GameAccountSwitcher gameAccounts={gameAccounts} activeGameAccountId={activeGameAccountId} onSelectGameAccount={selectGameAccount} onLinkGameAccount={() => setIsLinkGameAccountSheetOpen(true)} /></YStack>
-      </YStack>
+      {activePageId === 'inventory' ? (
+        <DashboardPageScroll contentMaxWidth={1440}>
+          <InventoryView inventory={activeGameAccount.inventory} itemTable={itemTable} />
+        </DashboardPageScroll>
+      ) : (
+        <DashboardPageScroll contentMaxWidth={1152} padded>
+          {activePageId === 'overview' ? <GameAccountOverviewView gameAccount={activeGameAccount} /> : null}
+          {activePageId === 'operators' ? <OperatorRosterView operators={activeGameAccount.operators} /> : null}
+          {activePageId === 'tasks' ? <RoutineTasksView tasks={activeGameAccount.routineTasks} onToggle={toggleRoutineTaskCompletion} /> : null}
+          {activePageId === 'activity' ? <ActivityTimelineView entries={activeGameAccount.activityTimeline} /> : null}
+        </DashboardPageScroll>
+      )}
 
-      <YStack grow={1} shrink={1} minW={0} minH={0} position="relative">
-        <AnimatePresence mode="wait">
-          <YStack
-            key={`${activeGameAccountId}-${activePageId}`}
-            {...pageMotion}
-            position="absolute"
-            t={0}
-            b={0}
-            l={0}
-            r={0}
-          >
-            <Animated.ScrollView
-              ref={contentScrollRef}
-              style={{ flexGrow: 1, flexShrink: 1, minHeight: 0 }}
-              contentInsetAdjustmentBehavior="automatic"
-              showsVerticalScrollIndicator={false}
-              onLayout={handleContentLayout}
-              contentContainerStyle={{ flexGrow: 1 }}
-            >
-              <YStack width="100%" maxW={1152} self="center" p="$3.5" pt="$4" $md={{ p: '$5' }}>
-                {activePageId === 'overview' ? <GameAccountOverviewView gameAccount={activeGameAccount} viewport={scrollViewport} /> : null}
-                {activePageId === 'operators' ? <OperatorRosterView operators={activeGameAccount.operators} /> : null}
-                {activePageId === 'inventory' ? <MaterialInventoryView materials={activeGameAccount.materials} /> : null}
-                {activePageId === 'tasks' ? <RoutineTasksView tasks={activeGameAccount.routineTasks} onToggle={toggleRoutineTaskCompletion} /> : null}
-                {activePageId === 'activity' ? <ActivityTimelineView entries={activeGameAccount.activityTimeline} viewport={scrollViewport} /> : null}
-              </YStack>
-            </Animated.ScrollView>
-          </YStack>
-        </AnimatePresence>
-      </YStack>
-
-      <LinkGameAccountSheet
-        open={isLinkGameAccountSheetOpen}
-        onOpenChange={setIsLinkGameAccountSheetOpen}
-        onSubmit={(credentials) => {
-          linkGameAccount(credentials);
-          onShowOverview();
-        }}
-      />
     </YStack>
   );
 }

@@ -49,7 +49,7 @@ Large components do not automatically become state-connected. For example, an Op
 ## Placement
 
 - Put a component in `components/ui/` only when it is reusable across features and does not use business model types.
-- Put a component in `features/<feature>/components/` when it represents feature language such as login credentials, Game Accounts, Operator Rosters, Material Inventories, or Routine Tasks.
+- Put a component in `features/<feature>/components/` when it represents feature language such as login credentials, Game Accounts, Operator Rosters, Inventories, or Routine Tasks.
 - Feature presentation components import domain types from `@/schemas/<domain>` and may import their own feature's `utils.ts` through a single-level relative import, but they do not import mocks, APIs, stores, or screens.
 - Put store, context, API, and routing access in the feature screen or feature hook that composes those components.
 - Export feature entry points explicitly from `index.ts`. Do not import another feature's internal files.
