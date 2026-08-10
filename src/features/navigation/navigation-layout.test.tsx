@@ -6,7 +6,6 @@ import { HorizontalSwipeProvider } from '@/components';
 import { tamaguiConfig } from '../../../tamagui.config';
 import {
   NavigationLayout,
-  NavigationScopeScreen,
 } from './screens/navigation-layout';
 
 const mockUsePathname = jest.fn(() => '/dashboard/overview');
@@ -60,9 +59,7 @@ function NavigationTestTree({ scope }: { scope: 'dashboard' | 'settings' }) {
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <HorizontalSwipeProvider>
           <NavigationLayout onLogout={jest.fn()}>
-            <NavigationScopeScreen scope={scope}>
-              <YStack testID={`${scope}-route-content`} />
-            </NavigationScopeScreen>
+            <YStack testID={`${scope}-route-content`} />
           </NavigationLayout>
         </HorizontalSwipeProvider>
       </TamaguiProvider>

@@ -2,10 +2,13 @@ import type { PropsWithChildren } from 'react';
 import { render } from '@testing-library/react-native';
 
 const mockDashboardTabs = jest.fn((_props: unknown) => null);
+const mockDashboardTabsScreen = jest.fn(() => null);
+const mockDashboardMobileTabBar = jest.fn(() => null);
 const mockGetTabScreenOptions = jest.fn((reducedMotion: boolean) => ({
   animation: reducedMotion ? 'none' : 'fade',
 }));
 const mockUseReducedMotion = jest.fn(() => false);
+const mockUseMedia = jest.fn(() => ({ 'max-md': true }));
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({
@@ -14,7 +17,7 @@ jest.mock('expo-router', () => ({
 }));
 
 jest.mock('expo-router/tabs', () => ({
-  Tabs: mockDashboardTabs,
+  Tabs: Object.assign(mockDashboardTabs, { Screen: mockDashboardTabsScreen }),
 }));
 
 jest.mock('react-native-reanimated', () => {
@@ -36,6 +39,7 @@ jest.mock('tamagui', () => ({
       appWarning: { val: '#ffff00' },
     },
   }),
+  useMedia: mockUseMedia,
 }));
 
 jest.mock('@/features/dashboard', () => ({
@@ -54,6 +58,7 @@ jest.mock('@/features/dashboard', () => ({
 }));
 
 jest.mock('@/features/navigation', () => ({
+  DashboardMobileTabBar: mockDashboardMobileTabBar,
   dashboardNavigation: {
     defaultPage: { route: '/dashboard/overview' },
     pages: {
@@ -77,6 +82,8 @@ describe('DashboardLayout route transitions', () => {
     mockGetTabScreenOptions.mockClear();
     mockUseReducedMotion.mockReset();
     mockUseReducedMotion.mockReturnValue(false);
+    mockUseMedia.mockReset();
+    mockUseMedia.mockReturnValue({ 'max-md': true });
   });
 
   it('enables Dashboard route transitions when reduced motion is disabled', async () => {
@@ -85,6 +92,7 @@ describe('DashboardLayout route transitions', () => {
     expect(mockGetTabScreenOptions).toHaveBeenCalledWith(false);
     expect(mockDashboardTabs).toHaveBeenCalledWith(
       expect.objectContaining({
+        detachInactiveScreens: false,
         screenOptions: { animation: 'fade' },
         tabBar: expect.any(Function),
       }),
@@ -95,7 +103,28 @@ describe('DashboardLayout route transitions', () => {
       throw new Error('Expected Dashboard Tabs props.');
     }
     const tabBar = Reflect.get(receivedProps, 'tabBar');
-    if (typeof tabBar !== 'function') throw new Error('Expected a hidden tab bar renderer.');
+    if (typeof tabBar !== 'function') throw new Error('Expected a Dashboard tab bar renderer.');
+    expect(Reflect.apply(tabBar, null, [{}])).toEqual(expect.objectContaining({
+      props: expect.objectContaining({ reducedMotion: false }),
+      type: mockDashboardMobileTabBar,
+    }));
+    expect(Reflect.get(receivedProps, 'children')).toEqual(expect.objectContaining({
+      props: { name: 'index', options: { href: null } },
+      type: mockDashboardTabsScreen,
+    }));
+  });
+
+  it('renders no Dashboard tab bar on desktop', async () => {
+    mockUseMedia.mockReturnValue({ 'max-md': false });
+
+    await render(<DashboardLayout />);
+
+    const receivedProps = mockDashboardTabs.mock.calls[0]?.[0];
+    if (typeof receivedProps !== 'object' || receivedProps === null) {
+      throw new Error('Expected Dashboard Tabs props.');
+    }
+    const tabBar = Reflect.get(receivedProps, 'tabBar');
+    if (typeof tabBar !== 'function') throw new Error('Expected a Dashboard tab bar renderer.');
     expect(Reflect.apply(tabBar, null, [{}])).toBeNull();
   });
 

@@ -1,15 +1,13 @@
 import type { PropsWithChildren } from 'react';
-import { createContext, useCallback, useContext, useState } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
-import { useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { XStack, YStack, useMedia } from 'tamagui';
 
 import { HorizontalSwipeScope } from '@/components';
 import type { HorizontalSwipeDirection } from '@/components';
 import { DesktopNavigationSidebar } from '../components/desktop-navigation-sidebar';
-import { MobileBottomNavigation } from '../components/mobile-bottom-navigation';
 import { NavigationHeader } from '../components/navigation-header';
 import {
   SettingsPagerTabs,
@@ -28,67 +26,10 @@ import {
 const dashboardPages = Object.values(dashboardNavigation.pages).sort((left, right) => left.sort - right.sort);
 const settingsPages = Object.values(settingsNavigation.pages).sort((left, right) => left.sort - right.sort);
 const MOCK_PROFILE_AVATAR_URL = 'https://ark-resource.arknights.app/assets/avatar/ASSISTANT/char_003_kalts_sale_14.webp';
-type DashboardPage = (typeof dashboardPages)[number];
-type SettingsPage = (typeof settingsPages)[number];
-
-type NavigationLayoutContextValue = {
-  activeDashboardPageId: DashboardPage['id'];
-  dashboardItems: { icon: DashboardPage['icon']; id: DashboardPage['id']; label: string }[];
-  handleSelectDashboardPage: (pageId: string) => void;
-  isCompact: boolean;
-  reducedMotion: boolean;
-};
-
-const NavigationLayoutContext = createContext<NavigationLayoutContextValue | null>(null);
-
-function useNavigationLayoutContext(): NavigationLayoutContextValue {
-  const value = useContext(NavigationLayoutContext);
-  if (!value) throw new Error('NavigationScopeScreen must be rendered inside NavigationLayout.');
-  return value;
-}
 
 type NavigationLayoutProps = PropsWithChildren<{
   onLogout: () => void;
 }>;
-
-export function NavigationScopeScreen({
-  children,
-  scope,
-}: PropsWithChildren<{ scope: 'dashboard' | 'settings' }>) {
-  const {
-    activeDashboardPageId,
-    dashboardItems,
-    handleSelectDashboardPage,
-    isCompact,
-    reducedMotion,
-  } = useNavigationLayoutContext();
-
-  if (!isCompact) return children;
-
-  if (scope === 'settings') {
-    return (
-      <SafeAreaView edges={['bottom']} style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-        <YStack grow={1} shrink={1} minH={0} overflow="hidden">
-          <YStack grow={1} shrink={1} minH={0}>{children}</YStack>
-        </YStack>
-      </SafeAreaView>
-    );
-  }
-
-  return (
-    <SafeAreaView edges={[]} style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-      <YStack grow={1} shrink={1} minH={0} overflow="hidden">
-        <YStack grow={1} shrink={1} minH={0}>{children}</YStack>
-        <MobileBottomNavigation
-          activeId={activeDashboardPageId}
-          items={dashboardItems}
-          onSelect={handleSelectDashboardPage}
-          reducedMotion={reducedMotion}
-        />
-      </YStack>
-    </SafeAreaView>
-  );
-}
 
 export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) {
   const { t } = useTranslation('navigation');
@@ -96,18 +37,11 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
   const media = useMedia();
   const pathname = usePathname();
   const router = useRouter();
-  const reducedMotion = useReducedMotion();
   const scope = getNavigationScope(pathname);
   const matchedDashboardPage = dashboardPages.find((page) => page.route === pathname);
   const matchedSettingsPage = settingsPages.find((page) => page.route === pathname);
-  const [lastDashboardPage, setLastDashboardPage] = useState<DashboardPage>(
-    matchedDashboardPage ?? dashboardNavigation.defaultPage,
-  );
-  const [lastSettingsPage, setLastSettingsPage] = useState<SettingsPage>(
-    matchedSettingsPage ?? settingsNavigation.defaultPage,
-  );
-  const activeDashboardPage = matchedDashboardPage ?? lastDashboardPage;
-  const activeSettingsPage = matchedSettingsPage ?? lastSettingsPage;
+  const activeDashboardPage = matchedDashboardPage ?? dashboardNavigation.defaultPage;
+  const activeSettingsPage = matchedSettingsPage ?? settingsNavigation.defaultPage;
   const isCompact = Boolean(media['max-md']);
   const headerTitle = scope === 'dashboard'
     ? tDashboard(`navigation.sections.${activeDashboardPage.id}.label`)
@@ -119,19 +53,17 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
   });
 
   const handleExitSettings = useCallback(() => {
-    setLastSettingsPage(activeSettingsPage);
     returnToDashboard();
-  }, [activeSettingsPage, returnToDashboard]);
+  }, [returnToDashboard]);
 
   const handleScopePress = useCallback(() => {
     if (scope === 'dashboard') {
-      setLastDashboardPage(activeDashboardPage);
       enterSettings(settingsNavigation.defaultPage.route);
       return;
     }
 
     handleExitSettings();
-  }, [activeDashboardPage, enterSettings, handleExitSettings, scope]);
+  }, [enterSettings, handleExitSettings, scope]);
 
   useNavigationBackHandler(pathname, handleExitSettings);
 
@@ -153,17 +85,13 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
 
   const handleSelectDashboardPage = (pageId: string) => {
     const page = dashboardPages.find((candidate) => candidate.id === pageId);
-    if (page && page.route !== pathname) {
-      setLastDashboardPage(page);
-      router.replace(page.route);
-    }
+    if (page && page.route !== pathname) router.replace(page.route);
   };
 
   const handleSelectSettingsPage = (pageId: string) => {
     const page = settingsPages.find((candidate) => candidate.id === pageId);
     if (!page || page.route === pathname) return;
 
-    setLastSettingsPage(page);
     router.replace(page.route);
   };
 
@@ -183,16 +111,8 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
     ? handleSelectDashboardPage
     : handleSelectSettingsPage;
 
-  const contextValue: NavigationLayoutContextValue = {
-    activeDashboardPageId: activeDashboardPage.id,
-    dashboardItems,
-    handleSelectDashboardPage,
-    isCompact,
-    reducedMotion,
-  };
-
   return (
-    <NavigationLayoutContext.Provider value={contextValue}>
+    <>
       <HorizontalSwipeScope
         active={scope === 'settings'}
         enabled={isCompact}
@@ -251,6 +171,6 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
           </XStack>
         </YStack>
       </SafeAreaView>
-    </NavigationLayoutContext.Provider>
+    </>
   );
 }

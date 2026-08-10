@@ -1,6 +1,5 @@
 import { Redirect, usePathname, useRouter } from 'expo-router';
 import { Stack as AppStack } from 'expo-router/js-stack';
-import type { ComponentProps } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useMedia } from 'tamagui';
 
@@ -12,16 +11,7 @@ import {
 } from '@/features/session';
 import {
   NavigationLayout,
-  NavigationScopeScreen,
 } from '@/features/navigation';
-
-type AppStackScreenLayout = NonNullable<ComponentProps<typeof AppStack>['screenLayout']>;
-
-const renderNavigationScopeScreen: AppStackScreenLayout = ({ children, route }) => (
-  <NavigationScopeScreen scope={route.name === 'settings' ? 'settings' : 'dashboard'}>
-    {children}
-  </NavigationScopeScreen>
-);
 
 export default function AppLayout() {
   const media = useMedia();
@@ -48,7 +38,6 @@ export default function AppLayout() {
   return (
     <NavigationLayout onLogout={handleLogout}>
       <AppStack
-        screenLayout={renderNavigationScopeScreen}
         screenOptions={screenOptions}
       />
     </NavigationLayout>

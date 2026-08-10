@@ -2,7 +2,7 @@ import { Tabs as DashboardTabs } from 'expo-router/tabs';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
-import { getTokens } from 'tamagui';
+import { getTokens, useMedia } from 'tamagui';
 
 import {
   DashboardProvider,
@@ -10,14 +10,13 @@ import {
   selectBackdropTint,
   useDashboardState,
 } from '@/features/dashboard';
-import { dashboardNavigation } from '@/features/navigation';
+import { DashboardMobileTabBar, dashboardNavigation } from '@/features/navigation';
 import type { LinkGameAccountCredentials } from '@/schemas/game-account';
 import { getTabScreenOptions, useSessionBackdrop } from '@/features/session';
 
-const renderHiddenTabBar = () => null;
-
 function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
   const colors = getTokens().color;
+  const media = useMedia();
   const router = useRouter();
   const { setBackdropTint } = useSessionBackdrop();
   const {
@@ -34,6 +33,7 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
     warning: colors.appWarning.val,
     muted: colors.appMuted.val,
   });
+  const isCompact = Boolean(media['max-md']);
 
   useEffect(() => {
     setBackdropTint(backdropTint);
@@ -55,9 +55,14 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
       onSelectGameAccount={selectGameAccount}
     >
       <DashboardTabs
+        detachInactiveScreens={process.env.EXPO_OS !== 'ios'}
         screenOptions={getTabScreenOptions(reducedMotion)}
-        tabBar={renderHiddenTabBar}
-      />
+        tabBar={isCompact
+          ? (props) => <DashboardMobileTabBar {...props} reducedMotion={reducedMotion} />
+          : () => null}
+      >
+        <DashboardTabs.Screen name="index" options={{ href: null }} />
+      </DashboardTabs>
     </DashboardShell>
   );
 }
