@@ -6,8 +6,10 @@ import { ContributorsOperationsRoster } from '../components/contributors-operati
 import { ContributorsTribute } from '../components/contributors-tribute';
 import { SettingsPage } from '../components/settings-page';
 import { mockContributors } from '../mocks/settings-mocks';
+import { useSettingsSwipe } from '../settings-swipe-context';
 
 export function ContributorsScreen() {
+  const settingsSwipe = useSettingsSwipe();
   const { t } = useTranslation('settings');
   const media = useMedia();
   const isDesktop = Boolean(media.md);
@@ -17,7 +19,10 @@ export function ContributorsScreen() {
   }));
 
   return (
-    <SettingsPage>
+    <SettingsPage
+      isSwipeEnabled={settingsSwipe.enabled}
+      onSwipe={settingsSwipe.onSwipe}
+    >
       {isDesktop ? (
         <SectionPageHeader
           code={t('contributors.code')}

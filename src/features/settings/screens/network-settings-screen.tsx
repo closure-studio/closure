@@ -39,6 +39,7 @@ import type { ApiNode } from '@/schemas/api-node';
 import { SettingsPage } from '../components/settings-page';
 import { mockApiNodes } from '../mocks/settings-mocks';
 import { useSettingsMockState } from '../settings-mock-context';
+import { useSettingsSwipe } from '../settings-swipe-context';
 
 const API_NODE_DETECTION_DELAY_MS = 650;
 const LOW_LATENCY_MAX_MS = 80;
@@ -54,6 +55,7 @@ function resolveLatencyTone(latencyMs: number): LatencyTone {
 }
 
 export function NetworkSettingsScreen() {
+  const settingsSwipe = useSettingsSwipe();
   const { t } = useTranslation('settings');
   const colors = getTokens().color;
   const media = useMedia();
@@ -138,7 +140,10 @@ export function NetworkSettingsScreen() {
   } as const;
 
   return (
-    <SettingsPage>
+    <SettingsPage
+      isSwipeEnabled={settingsSwipe.enabled}
+      onSwipe={settingsSwipe.onSwipe}
+    >
       {isDesktop ? (
         <SectionPageHeader
           code={t('network.code')}

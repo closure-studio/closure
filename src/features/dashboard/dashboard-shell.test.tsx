@@ -29,7 +29,9 @@ function DashboardShellTestTree({ pageId }: { pageId: string }) {
         <DashboardShell
           activeGameAccountId="acc-01"
           gameAccounts={initialGameAccounts}
+          isContentSwipeEnabled
           isLinkGameAccountSheetOpen={false}
+          onContentSwipe={jest.fn()}
           onLinkGameAccount={jest.fn()}
           onLinkGameAccountSheetOpenChange={jest.fn()}
           onOpenLinkGameAccount={jest.fn()}

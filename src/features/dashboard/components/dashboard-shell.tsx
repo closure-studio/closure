@@ -1,17 +1,34 @@
 import type { PropsWithChildren } from 'react';
 import { ScrollView, YStack } from 'tamagui';
 
+import { HorizontalSwipeSurface } from '@/components';
+import type { HorizontalSwipeDirection } from '@/components';
 import { DashboardSecondaryHeader, type DashboardSecondaryHeaderProps } from './dashboard-secondary-header';
 
 const DASHBOARD_CONTENT_MAX_WIDTH = 1152;
 
-export function DashboardShell({ children, ...headerProps }: PropsWithChildren<DashboardSecondaryHeaderProps>) {
+type DashboardShellProps = DashboardSecondaryHeaderProps & {
+  isContentSwipeEnabled: boolean;
+  onContentSwipe: (direction: HorizontalSwipeDirection) => void;
+};
+
+export function DashboardShell({
+  children,
+  isContentSwipeEnabled,
+  onContentSwipe,
+  ...headerProps
+}: PropsWithChildren<DashboardShellProps>) {
   return (
     <YStack grow={1} shrink={1} minH={0} overflow="hidden">
       <DashboardSecondaryHeader {...headerProps} />
-      <YStack grow={1} shrink={1} minH={0}>
-        {children}
-      </YStack>
+      <HorizontalSwipeSurface
+        enabled={isContentSwipeEnabled}
+        onSwipe={onContentSwipe}
+      >
+        <YStack grow={1} shrink={1} minH={0}>
+          {children}
+        </YStack>
+      </HorizontalSwipeSurface>
     </YStack>
   );
 }

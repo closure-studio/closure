@@ -2,7 +2,6 @@ import { render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider, YStack } from 'tamagui';
 
-import { HorizontalSwipeProvider } from '@/components';
 import { tamaguiConfig } from '../../../tamagui.config';
 import {
   NavigationLayout,
@@ -57,11 +56,9 @@ function NavigationTestTree({ scope }: { scope: 'dashboard' | 'settings' }) {
   return (
     <SafeAreaProvider initialMetrics={safeAreaMetrics}>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-        <HorizontalSwipeProvider>
-          <NavigationLayout onLogout={jest.fn()}>
-            <YStack testID={`${scope}-route-content`} />
-          </NavigationLayout>
-        </HorizontalSwipeProvider>
+        <NavigationLayout onLogout={jest.fn()}>
+          <YStack testID={`${scope}-route-content`} />
+        </NavigationLayout>
       </TamaguiProvider>
     </SafeAreaProvider>
   );

@@ -32,6 +32,7 @@ import {
 } from '@/schemas/user-account';
 import { SettingsPage } from '../components/settings-page';
 import { mockUserAccount } from '../mocks/settings-mocks';
+import { useSettingsSwipe } from '../settings-swipe-context';
 
 type PasswordField = 'currentPassword' | 'newPassword' | 'repeatNewPassword';
 type PasswordIssue = (typeof passwordChangeIssue)[keyof typeof passwordChangeIssue];
@@ -186,6 +187,7 @@ function AccountIdentityPanel({
 }
 
 export function AccountSettingsScreen() {
+  const settingsSwipe = useSettingsSwipe();
   const { t, i18n } = useTranslation('settings');
   const { t: tCommon } = useTranslation('common');
   const colors = getTokens().color;
@@ -286,7 +288,10 @@ export function AccountSettingsScreen() {
   );
 
   return (
-    <SettingsPage isSwipeEnabled={focusedPasswordField === null}>
+    <SettingsPage
+      isSwipeEnabled={settingsSwipe.enabled && focusedPasswordField === null}
+      onSwipe={settingsSwipe.onSwipe}
+    >
       {isDesktop ? (
         <SectionPageHeader
           code={t('account.code')}

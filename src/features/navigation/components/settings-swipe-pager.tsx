@@ -15,6 +15,7 @@ import { Button, XStack, YStack, getTokens } from 'tamagui';
 import {
   HorizontalSwipeSurface,
   MonoText,
+  resolveAdjacentHorizontalSwipeItem,
   SlidingSelection,
   TerminalText,
 } from '@/components';
@@ -47,15 +48,11 @@ export function resolveSettingsSwipeAction({
   direction: HorizontalSwipeDirection;
   items: readonly { id: SettingsPageId }[];
 }): SettingsSwipeAction | null {
-  const activeIndex = items.findIndex((item) => item.id === activeId);
-  if (activeIndex < 0) return null;
-
-  if (activeIndex === 0 && direction === 'right') {
+  if (items[0]?.id === activeId && direction === 'right') {
     return { type: 'exit' };
   }
 
-  const nextIndex = direction === 'left' ? activeIndex + 1 : activeIndex - 1;
-  const nextPage = items[nextIndex];
+  const nextPage = resolveAdjacentHorizontalSwipeItem({ activeId, direction, items });
   return nextPage ? { pageId: nextPage.id, type: 'select-page' } : null;
 }
 
@@ -136,14 +133,18 @@ function AnimatedSwipeHint({ children }: { children: string }) {
 
 export function SettingsPagerTabs({
   activeId,
+  isSwipeEnabled,
   items,
   onSelect,
+  onSwipe,
   swipeHint,
   tabListLabel,
 }: {
   activeId: SettingsPageId;
+  isSwipeEnabled: boolean;
   items: readonly SettingsPagerItem[];
   onSelect: (pageId: SettingsPageId) => void;
+  onSwipe: (direction: HorizontalSwipeDirection) => void;
   swipeHint: string;
   tabListLabel: string;
 }) {
@@ -152,7 +153,7 @@ export function SettingsPagerTabs({
   const hasNextStep = hasAdjacentSettingsPage({ activeId, direction: 'left', items });
 
   return (
-    <HorizontalSwipeSurface>
+    <HorizontalSwipeSurface enabled={isSwipeEnabled} onSwipe={onSwipe}>
       <YStack
         display="flex"
         shrink={0}

@@ -24,7 +24,6 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { TamaguiProvider } from 'tamagui';
 
-import { HorizontalSwipeProvider } from '@/components';
 import { tamaguiConfig } from '../../tamagui.config';
 import { LocalizationProvider } from './localization-provider';
 
@@ -61,12 +60,10 @@ export function AppProvider({ children }: PropsWithChildren) {
     <LocalizationProvider>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <GestureHandlerRootView style={{ flex: 1 }}>
-          <HorizontalSwipeProvider>
-            <ThemeProvider value={DarkTheme}>
-              <StatusBar style="light" />
-              {children}
-            </ThemeProvider>
-          </HorizontalSwipeProvider>
+          <ThemeProvider value={DarkTheme}>
+            <StatusBar style="light" />
+            {children}
+          </ThemeProvider>
         </GestureHandlerRootView>
       </TamaguiProvider>
     </LocalizationProvider>

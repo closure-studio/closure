@@ -5,8 +5,8 @@ import { usePathname, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { XStack, YStack, useMedia } from 'tamagui';
 
-import { HorizontalSwipeScope } from '@/components';
 import type { HorizontalSwipeDirection } from '@/components';
+import { SettingsSwipeProvider } from '@/features/settings';
 import { DesktopNavigationSidebar } from '../components/desktop-navigation-sidebar';
 import { NavigationHeader } from '../components/navigation-header';
 import {
@@ -67,7 +67,19 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
 
   useNavigationBackHandler(pathname, handleExitSettings);
 
-  const handleSettingsSwipe = (direction: HorizontalSwipeDirection) => {
+  const handleSelectDashboardPage = (pageId: string) => {
+    const page = dashboardPages.find((candidate) => candidate.id === pageId);
+    if (page && page.route !== pathname) router.replace(page.route);
+  };
+
+  const handleSelectSettingsPage = useCallback((pageId: string) => {
+    const page = settingsPages.find((candidate) => candidate.id === pageId);
+    if (!page || page.route === pathname) return;
+
+    router.replace(page.route);
+  }, [pathname, router]);
+
+  const handleSettingsSwipe = useCallback((direction: HorizontalSwipeDirection) => {
     const action = resolveSettingsSwipeAction({
       activeId: activeSettingsPage.id,
       direction,
@@ -81,19 +93,7 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
     }
 
     handleSelectSettingsPage(action.pageId);
-  };
-
-  const handleSelectDashboardPage = (pageId: string) => {
-    const page = dashboardPages.find((candidate) => candidate.id === pageId);
-    if (page && page.route !== pathname) router.replace(page.route);
-  };
-
-  const handleSelectSettingsPage = (pageId: string) => {
-    const page = settingsPages.find((candidate) => candidate.id === pageId);
-    if (!page || page.route === pathname) return;
-
-    router.replace(page.route);
-  };
+  }, [activeSettingsPage.id, handleExitSettings, handleSelectSettingsPage]);
 
   const dashboardItems = dashboardPages.map((page) => ({
     icon: page.icon,
@@ -112,13 +112,10 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
     : handleSelectSettingsPage;
 
   return (
-    <>
-      <HorizontalSwipeScope
-        active={scope === 'settings'}
-        enabled={isCompact}
-        name="settings-navigation"
-        onSwipe={handleSettingsSwipe}
-      />
+    <SettingsSwipeProvider
+      enabled={scope === 'settings' && isCompact}
+      onSwipe={handleSettingsSwipe}
+    >
       <SafeAreaView
         edges={isCompact ? [] : ['bottom']}
         style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
@@ -139,8 +136,10 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
                 {isCompact && scope === 'settings' ? (
                   <SettingsPagerTabs
                     activeId={activeSettingsPage.id}
+                    isSwipeEnabled
                     items={settingsItems}
                     onSelect={handleSelectSettingsPage}
+                    onSwipe={handleSettingsSwipe}
                     swipeHint={t('mobile.swipeHint')}
                     tabListLabel={t('mobile.settingsTabsLabel')}
                   />
@@ -171,6 +170,6 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
           </XStack>
         </YStack>
       </SafeAreaView>
-    </>
+    </SettingsSwipeProvider>
   );
 }

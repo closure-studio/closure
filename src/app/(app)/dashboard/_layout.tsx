@@ -1,9 +1,11 @@
 import { Tabs as DashboardTabs } from 'expo-router/tabs';
-import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { useIsFocused, useRouter } from 'expo-router';
+import { useCallback, useEffect } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
 import { getTokens, useMedia } from 'tamagui';
 
+import { resolveAdjacentHorizontalSwipeItem } from '@/components';
+import type { HorizontalSwipeDirection } from '@/components';
 import {
   DashboardProvider,
   DashboardShell,
@@ -17,6 +19,7 @@ import { getTabScreenOptions, useSessionBackdrop } from '@/features/session';
 function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
   const colors = getTokens().color;
   const media = useMedia();
+  const isFocused = useIsFocused();
   const router = useRouter();
   const { setBackdropTint } = useSessionBackdrop();
   const {
@@ -44,11 +47,22 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
     router.replace(dashboardNavigation.defaultPage.route);
   };
 
+  const handleGameAccountSwipe = useCallback((direction: HorizontalSwipeDirection) => {
+    const adjacentGameAccount = resolveAdjacentHorizontalSwipeItem({
+      activeId: activeGameAccountId,
+      direction,
+      items: gameAccounts,
+    });
+    if (adjacentGameAccount) selectGameAccount(adjacentGameAccount.id);
+  }, [activeGameAccountId, gameAccounts, selectGameAccount]);
+
   return (
     <DashboardShell
       activeGameAccountId={activeGameAccountId}
       gameAccounts={gameAccounts}
+      isContentSwipeEnabled={isFocused && isCompact && gameAccounts.length > 1}
       isLinkGameAccountSheetOpen={isLinkGameAccountSheetOpen}
+      onContentSwipe={handleGameAccountSwipe}
       onLinkGameAccount={handleLinkGameAccount}
       onLinkGameAccountSheetOpenChange={setIsLinkGameAccountSheetOpen}
       onOpenLinkGameAccount={() => setIsLinkGameAccountSheetOpen(true)}
