@@ -2,11 +2,12 @@ import {
   resolveAuthEntryDestination,
   resolvePostLoginDestination,
 } from '@/features/session';
+import { mockActiveSession } from '@/features/auth/api/mock-auth-fixtures';
 
 describe('auth routing', () => {
   it('routes startup from auth according to the current session state', () => {
-    expect(resolveAuthEntryDestination('unauthenticated')).toBe('/login');
-    expect(resolveAuthEntryDestination('authenticated')).toBe('/dashboard/overview');
+    expect(resolveAuthEntryDestination(null)).toBe('/login');
+    expect(resolveAuthEntryDestination(mockActiveSession)).toBe('/dashboard/overview');
   });
 
   it('accepts any internal destination without a route allowlist', () => {

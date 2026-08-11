@@ -1,6 +1,6 @@
 import * as v from 'valibot';
 
-import { authStateSchema } from '@/schemas/auth';
+import { userSessionSchema } from '@/schemas/auth';
 import { gameAccountSchema } from '@/schemas/game-account';
 
 export const gamesStateSchema = v.pipe(
@@ -17,8 +17,8 @@ export const gamesStateSchema = v.pipe(
 );
 
 export const persistedAppStateSchema = v.object({
+  auth: v.object({ session: v.nullable(userSessionSchema) }),
   games: gamesStateSchema,
-  user: authStateSchema,
 });
 
 export type GamesState = v.InferOutput<typeof gamesStateSchema>;

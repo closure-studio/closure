@@ -18,21 +18,21 @@ export default function AppLayout() {
   const pathname = usePathname();
   const router = useRouter();
   const reducedMotion = useReducedMotion();
-  const authStatus = useAppStore((state) => state.user.status);
-  const signOut = useAppStore((state) => state.signOut);
+  const logout = useAppStore((state) => state.logout);
+  const session = useAppStore((state) => state.auth.session);
   const { resetBackdropTint } = useSessionBackdrop();
   const screenOptions = layoutSize === 'small'
     ? getScopeTransitionScreenOptions(reducedMotion)
     : getRouteScreenOptions(reducedMotion, { enableIosBackGesture: true });
 
-  if (authStatus !== 'authenticated') {
+  if (!session) {
     return <Redirect href={{ pathname: '/login', params: { returnTo: pathname } }} />;
   }
 
   const handleLogout = () => {
     resetBackdropTint();
     router.replace('/login');
-    signOut();
+    logout();
   };
 
   return (

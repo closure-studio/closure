@@ -16,6 +16,10 @@ _Avoid_: Account, profile, Game Account
 The authenticated period in which a person can access protected Closure capabilities as a User Account.
 _Avoid_: Auth state, login state
 
+**Session Principal**:
+The identity and authorization snapshot carried by a User Session for access decisions during that session.
+_Avoid_: Auth user, user info, complete User Account
+
 **Server Channel**:
 The distribution or login channel through which a Game Account is accessed, such as the official channel or Bilibili channel.
 _Avoid_: Platform, device platform

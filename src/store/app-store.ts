@@ -5,19 +5,33 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import type { StateStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
+import { MockAuthAdapter } from '@/features/auth/api';
+import type { AuthAdapter, AuthFailure } from '@/features/auth/api';
 import { createGameAccount, initialGameAccounts } from '@/features/dashboard/mocks/game-accounts';
 import { mmkvStateStorage } from '@/lib/mmkv';
-import type { AuthState, LoginCredentials } from '@/schemas/auth';
+import { loginSubmissionSchema } from '@/schemas/auth';
+import type { LoginSubmission } from '@/schemas/auth';
 import type { GameAccount, LinkGameAccountCredentials } from '@/schemas/game-account';
 import { persistedAppStateSchema } from '@/schemas/local-state';
 import type { GamesState, PersistedAppState } from '@/schemas/local-state';
 
 export const APP_STORE_STORAGE_KEY = 'closure.app-store';
 
-const unauthenticatedUserState: AuthState = {
-  credentials: null,
-  status: 'unauthenticated',
-  token: null,
+type LoginStatus = 'failed' | 'idle' | 'pending' | 'succeeded';
+
+type AuthStoreState = PersistedAppState['auth'] & {
+  loginError: AuthFailure | null;
+  loginStatus: LoginStatus;
+  rememberSession: boolean;
+};
+
+type AppStoreState = Omit<PersistedAppState, 'auth'> & { auth: AuthStoreState };
+
+const unauthenticatedAuthState: AuthStoreState = {
+  loginError: null,
+  loginStatus: 'idle',
+  rememberSession: false,
+  session: null,
 };
 
 const emptyGamesState: GamesState = {
@@ -27,12 +41,12 @@ const emptyGamesState: GamesState = {
 
 type AppStoreActions = {
   linkGameAccount: (credentials: LinkGameAccountCredentials) => void;
+  login: (submission: LoginSubmission) => Promise<void>;
+  logout: () => void;
   selectGameAccount: (gameAccountId: string) => void;
-  signIn: (credentials: LoginCredentials) => void;
-  signOut: () => void;
 };
 
-export type AppStore = PersistedAppState & AppStoreActions;
+export type AppStore = AppStoreState & AppStoreActions;
 
 function initialGamesState(): GamesState {
   return {
@@ -42,9 +56,16 @@ function initialGamesState(): GamesState {
 }
 
 function persistedStateFromStore(state: AppStore): PersistedAppState {
+  if (!state.auth.rememberSession || !state.auth.session) {
+    return {
+      auth: { session: null },
+      games: emptyGamesState,
+    };
+  }
+
   return {
+    auth: { session: state.auth.session },
     games: state.games,
-    user: state.user,
   };
 }
 
@@ -53,16 +74,69 @@ function parsePersistedState(persistedState: unknown): PersistedAppState | null 
   return result.success ? result.output : null;
 }
 
-export function createAppStore(storage: StateStorage = mmkvStateStorage) {
+export function createAppStore(
+  storage: StateStorage = mmkvStateStorage,
+  authAdapter: AuthAdapter = new MockAuthAdapter(),
+) {
   return createStore<AppStore>()(
     persist(
-      immer((set) => ({
+      immer((set, get) => ({
+        auth: unauthenticatedAuthState,
         games: emptyGamesState,
         linkGameAccount: (credentials) => {
           const newGameAccount = createGameAccount(credentials);
           set((state) => {
             state.games.gameAccounts.push(newGameAccount);
             state.games.activeGameAccountId = newGameAccount.id;
+          });
+        },
+        login: async (submission) => {
+          if (get().auth.loginStatus === 'pending') return;
+          const parsedSubmission = v.safeParse(loginSubmissionSchema, submission);
+          if (!parsedSubmission.success) {
+            set((state) => {
+              state.auth.loginError = { code: 'invalid-input', kind: 'business' };
+              state.auth.loginStatus = 'failed';
+            });
+            return;
+          }
+
+          set((state) => {
+            state.auth.loginError = null;
+            state.auth.loginStatus = 'pending';
+          });
+
+          try {
+            const result = await authAdapter.login(parsedSubmission.output.credentials);
+            if (!result.ok) {
+              set((state) => {
+                state.auth.loginError = result.error;
+                state.auth.loginStatus = 'failed';
+                state.auth.rememberSession = false;
+                state.auth.session = null;
+              });
+              return;
+            }
+
+            set((state) => {
+              state.auth.loginError = null;
+              state.auth.loginStatus = 'succeeded';
+              state.auth.rememberSession = parsedSubmission.output.rememberSession;
+              state.auth.session = result.data;
+              if (state.games.gameAccounts.length === 0) state.games = initialGamesState();
+            });
+          } catch (error: unknown) {
+            set((state) => {
+              state.auth.loginError = null;
+              state.auth.loginStatus = 'failed';
+            });
+            throw error;
+          }
+        },
+        logout: () => {
+          set((state) => {
+            state.auth = unauthenticatedAuthState;
+            state.games = emptyGamesState;
           });
         },
         selectGameAccount: (gameAccountId) => {
@@ -72,23 +146,6 @@ export function createAppStore(storage: StateStorage = mmkvStateStorage) {
             }
           });
         },
-        signIn: (credentials) => {
-          set((state) => {
-            state.user = {
-              credentials,
-              status: 'authenticated',
-              token: 'mock-session-token',
-            };
-            if (state.games.gameAccounts.length === 0) state.games = initialGamesState();
-          });
-        },
-        signOut: () => {
-          set((state) => {
-            state.user = unauthenticatedUserState;
-            state.games = emptyGamesState;
-          });
-        },
-        user: unauthenticatedUserState,
       })),
       {
         merge: (persistedState, currentState) => {
@@ -98,7 +155,15 @@ export function createAppStore(storage: StateStorage = mmkvStateStorage) {
             return currentState;
           }
 
-          return { ...currentState, ...storedState };
+          return {
+            ...currentState,
+            auth: {
+              ...currentState.auth,
+              rememberSession: storedState.auth.session !== null,
+              session: storedState.auth.session,
+            },
+            games: storedState.games,
+          };
         },
         name: APP_STORE_STORAGE_KEY,
         onRehydrateStorage: () => (_state, error) => {

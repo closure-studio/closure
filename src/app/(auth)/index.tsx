@@ -4,8 +4,8 @@ import { resolveAuthEntryDestination } from '@/features/session';
 import { useAppStore } from '@/store';
 
 export default function AuthIndexRoute() {
-  const authStatus = useAppStore((state) => state.user.status);
-  const destination = resolveAuthEntryDestination(authStatus);
+  const session = useAppStore((state) => state.auth.session);
+  const destination = resolveAuthEntryDestination(session);
 
   return <Redirect href={destination} />;
 }
