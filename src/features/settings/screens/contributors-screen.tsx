@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { YStack, useMedia } from 'tamagui';
+import { YStack } from 'tamagui';
 
 import { SectionPageHeader } from '@/components';
+import { useUiSettings } from '@/providers/ui-settings-provider';
 import { ContributorsOperationsRoster } from '../components/contributors-operations-roster';
 import { ContributorsTribute } from '../components/contributors-tribute';
 import { SettingsPage } from '../components/settings-page';
@@ -11,8 +12,7 @@ import { useSettingsSwipe } from '../settings-swipe-context';
 export function ContributorsScreen() {
   const settingsSwipe = useSettingsSwipe();
   const { t } = useTranslation('settings');
-  const media = useMedia();
-  const isDesktop = Boolean(media.md);
+  const { layoutSize } = useUiSettings();
   const operationsTeam = mockContributors.operationsTeam.map((member) => ({
     ...member,
     description: t(`contributors.contributors.${member.id}`),
@@ -23,7 +23,7 @@ export function ContributorsScreen() {
       isSwipeEnabled={settingsSwipe.enabled}
       onSwipe={settingsSwipe.onSwipe}
     >
-      {isDesktop ? (
+      {layoutSize === 'large' ? (
         <SectionPageHeader
           code={t('contributors.code')}
           eyebrow={t('contributors.eyebrow')}

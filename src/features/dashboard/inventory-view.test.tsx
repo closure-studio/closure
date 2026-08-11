@@ -6,18 +6,15 @@ import * as v from 'valibot';
 import { tamaguiConfig } from '../../../tamagui.config';
 import { itemTableSchema } from '@/schemas/game-data';
 import { inventorySchema } from '@/schemas/game-account';
+import type { LayoutSize } from '@/schemas/ui-settings';
 import { InventoryView, getInventoryColumnCount } from './components/inventory-view';
 import { getItemImageUrl } from './item-image';
 
-let mockCompactMedia = false;
+let mockLayoutSize: LayoutSize = 'large';
 
-jest.mock('tamagui', () => {
-  const actual = jest.requireActual<typeof import('tamagui')>('tamagui');
-  return {
-    ...actual,
-    useMedia: () => ({ 'max-md': mockCompactMedia }),
-  };
-});
+jest.mock('@/providers/ui-settings-provider', () => ({
+  useUiSettings: () => ({ layoutSize: mockLayoutSize }),
+}));
 
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
@@ -70,12 +67,12 @@ function readSvgText(value: unknown): string | undefined {
 describe('InventoryView', () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    mockCompactMedia = false;
+    mockLayoutSize = 'large';
   });
 
   afterEach(() => {
     jest.useRealTimers();
-    mockCompactMedia = false;
+    mockLayoutSize = 'large';
   });
 
   it('renders known inventory entries, selects an item, and skips unknown IDs', async () => {
@@ -151,8 +148,8 @@ describe('InventoryView', () => {
 
   });
 
-  it('renders the mobile inventory with a compact two-column matrix and preview', async () => {
-    mockCompactMedia = true;
+  it('renders the Small Screen inventory with a two-column matrix and preview', async () => {
+    mockLayoutSize = 'small';
     const screen = await render(
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <InventoryView inventory={inventory} itemTable={itemTable} />
@@ -194,8 +191,8 @@ describe('InventoryView', () => {
     expect(inventoryGrid.props.data).toBeUndefined();
     expect(inventoryGrid.props.renderItem).toBeUndefined();
 
-    expect(getInventoryColumnCount(320, true, 7)).toBe(2);
-    expect(getInventoryColumnCount(400, true, 7)).toBe(3);
+    expect(getInventoryColumnCount(320, 'small', 7)).toBe(2);
+    expect(getInventoryColumnCount(400, 'small', 7)).toBe(3);
   });
 
   it('renders an empty state when no inventory item is known', async () => {

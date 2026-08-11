@@ -3,11 +3,12 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { XStack, YStack, useMedia } from 'tamagui';
+import { XStack, YStack } from 'tamagui';
 
 import type { HorizontalSwipeDirection } from '@/components';
 import { SettingsSwipeProvider } from '@/features/settings';
-import { DesktopNavigationSidebar } from '../components/desktop-navigation-sidebar';
+import { useUiSettings } from '@/providers/ui-settings-provider';
+import { LargeScreenNavigationSidebar } from '../components/large-screen-navigation-sidebar';
 import { NavigationHeader } from '../components/navigation-header';
 import {
   SettingsPagerTabs,
@@ -34,7 +35,7 @@ type NavigationLayoutProps = PropsWithChildren<{
 export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) {
   const { t } = useTranslation('navigation');
   const { t: tDashboard } = useTranslation('dashboard');
-  const media = useMedia();
+  const { layoutSize } = useUiSettings();
   const pathname = usePathname();
   const router = useRouter();
   const scope = getNavigationScope(pathname);
@@ -42,7 +43,6 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
   const matchedSettingsPage = settingsPages.find((page) => page.route === pathname);
   const activeDashboardPage = matchedDashboardPage ?? dashboardNavigation.defaultPage;
   const activeSettingsPage = matchedSettingsPage ?? settingsNavigation.defaultPage;
-  const isCompact = Boolean(media['max-md']);
   const headerTitle = scope === 'dashboard'
     ? tDashboard(`navigation.sections.${activeDashboardPage.id}.label`)
     : t(`pages.${activeSettingsPage.id}.label`);
@@ -113,16 +113,16 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
 
   return (
     <SettingsSwipeProvider
-      enabled={scope === 'settings' && isCompact}
+      enabled={scope === 'settings' && layoutSize === 'small'}
       onSwipe={handleSettingsSwipe}
     >
       <SafeAreaView
-        edges={isCompact ? [] : ['bottom']}
+        edges={layoutSize === 'small' ? [] : ['bottom']}
         style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
       >
         <YStack grow={1} height="100%" maxH="100%" overflow="hidden">
           <XStack grow={1} shrink={1} minH={0}>
-            <DesktopNavigationSidebar
+            <LargeScreenNavigationSidebar
               activeId={activeSidebarId}
               items={sidebarItems}
               onLogout={onLogout}
@@ -133,15 +133,15 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
 
             <YStack grow={1} shrink={1} minW={0} minH={0}>
               <YStack testID="navigation-layout-header" shrink={0}>
-                {isCompact && scope === 'settings' ? (
+                {layoutSize === 'small' && scope === 'settings' ? (
                   <SettingsPagerTabs
                     activeId={activeSettingsPage.id}
                     isSwipeEnabled
                     items={settingsItems}
                     onSelect={handleSelectSettingsPage}
                     onSwipe={handleSettingsSwipe}
-                    swipeHint={t('mobile.swipeHint')}
-                    tabListLabel={t('mobile.settingsTabsLabel')}
+                    swipeHint={t('smallScreen.swipeHint')}
+                    tabListLabel={t('smallScreen.settingsTabsLabel')}
                   />
                 ) : (
                   <YStack
@@ -150,7 +150,7 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
                     borderColor="$appBorder"
                   >
                     <NavigationHeader
-                      avatarLabel={t('mobile.avatarLabel')}
+                      avatarLabel={t('smallScreen.avatarLabel')}
                       avatarUrl={MOCK_PROFILE_AVATAR_URL}
                       isSettingsActive={scope === 'settings'}
                       onSettingsPress={handleScopePress}

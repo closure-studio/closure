@@ -1,7 +1,6 @@
 import { Redirect, usePathname, useRouter } from 'expo-router';
 import { Stack as AppStack } from 'expo-router/js-stack';
 import { useReducedMotion } from 'react-native-reanimated';
-import { useMedia } from 'tamagui';
 
 import {
   getRouteScreenOptions,
@@ -12,16 +11,16 @@ import {
 import {
   NavigationLayout,
 } from '@/features/navigation';
+import { useUiSettings } from '@/providers/ui-settings-provider';
 
 export default function AppLayout() {
-  const media = useMedia();
+  const { layoutSize } = useUiSettings();
   const pathname = usePathname();
   const router = useRouter();
   const reducedMotion = useReducedMotion();
   const { authState, signOut } = useAuth();
   const { resetBackdropTint } = useSessionBackdrop();
-  const isCompact = Boolean(media['max-md']);
-  const screenOptions = isCompact
+  const screenOptions = layoutSize === 'small'
     ? getScopeTransitionScreenOptions(reducedMotion)
     : getRouteScreenOptions(reducedMotion, { enableIosBackGesture: true });
 

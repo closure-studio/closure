@@ -15,7 +15,6 @@ import {
   XStack,
   YStack,
   getTokens,
-  useMedia,
 } from 'tamagui';
 
 import {
@@ -30,6 +29,7 @@ import {
   passwordChangeInputSchema,
   passwordChangeIssue,
 } from '@/schemas/user-account';
+import { useUiSettings } from '@/providers/ui-settings-provider';
 import { SettingsPage } from '../components/settings-page';
 import { mockUserAccount } from '../mocks/settings-mocks';
 import { useSettingsSwipe } from '../settings-swipe-context';
@@ -191,8 +191,7 @@ export function AccountSettingsScreen() {
   const { t, i18n } = useTranslation('settings');
   const { t: tCommon } = useTranslation('common');
   const colors = getTokens().color;
-  const media = useMedia();
-  const isDesktop = Boolean(media.md);
+  const { layoutSize } = useUiSettings();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [repeatNewPassword, setRepeatNewPassword] = useState('');
@@ -292,7 +291,7 @@ export function AccountSettingsScreen() {
       isSwipeEnabled={settingsSwipe.enabled && focusedPasswordField === null}
       onSwipe={settingsSwipe.onSwipe}
     >
-      {isDesktop ? (
+      {layoutSize === 'large' ? (
         <SectionPageHeader
           code={t('account.code')}
           description={t('account.description')}
@@ -303,7 +302,7 @@ export function AccountSettingsScreen() {
       ) : null}
 
       <YStack gap="$3" $md={{ gap: '$5' }}>
-        {!isDesktop ? (
+        {layoutSize === 'small' ? (
           <MonoText size="$2" lineHeight="$3" color="$appText" select="text">
             {t('account.description')}
           </MonoText>

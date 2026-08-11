@@ -3,7 +3,7 @@
     "name": "Closure Studio",
     "slug": "closure",
     "version": "1.0.0",
-    "orientation": "default",
+    "orientation": "portrait",
     "icon": "./assets/icons/icon.png",
     "scheme": "closure",
     "userInterfaceStyle": "automatic",

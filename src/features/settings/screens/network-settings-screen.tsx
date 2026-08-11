@@ -20,7 +20,6 @@ import {
   XStack,
   YStack,
   getTokens,
-  useMedia,
 } from 'tamagui';
 import * as v from 'valibot';
 
@@ -34,6 +33,7 @@ import {
   TerminalPanel,
   TerminalText,
 } from '@/components';
+import { useUiSettings } from '@/providers/ui-settings-provider';
 import { apiNodeIdSchema } from '@/schemas/api-node';
 import type { ApiNode } from '@/schemas/api-node';
 import { SettingsPage } from '../components/settings-page';
@@ -58,9 +58,8 @@ export function NetworkSettingsScreen() {
   const settingsSwipe = useSettingsSwipe();
   const { t } = useTranslation('settings');
   const colors = getTokens().color;
-  const media = useMedia();
+  const { layoutSize } = useUiSettings();
   const reducedMotion = useReducedMotion();
-  const isDesktop = Boolean(media.md);
   const { selectApiNode, selectedApiNodeId } = useSettingsMockState();
   const [detectionRun, setDetectionRun] = useState(0);
   const [isChecking, setIsChecking] = useState(true);
@@ -144,7 +143,7 @@ export function NetworkSettingsScreen() {
       isSwipeEnabled={settingsSwipe.enabled}
       onSwipe={settingsSwipe.onSwipe}
     >
-      {isDesktop ? (
+      {layoutSize === 'large' ? (
         <SectionPageHeader
           code={t('network.code')}
           description={t('network.description')}
@@ -155,7 +154,7 @@ export function NetworkSettingsScreen() {
       ) : null}
 
       <YStack gap="$3" $md={{ gap: '$5' }}>
-        {isDesktop ? (
+        {layoutSize === 'large' ? (
           <TerminalPanel
             cornerBrackets
             minH={320}
@@ -303,7 +302,7 @@ export function NetworkSettingsScreen() {
         ) : null}
 
         <YStack gap="$3">
-          {isDesktop ? (
+          {layoutSize === 'large' ? (
             <XStack items="center" justify="space-between" gap="$3">
               <XStack items="baseline" gap="$2">
                 <TerminalText size="$5" fontWeight="800">
@@ -344,7 +343,7 @@ export function NetworkSettingsScreen() {
             </XStack>
           ) : null}
 
-          {!isDesktop ? (
+          {layoutSize === 'small' ? (
             <MonoText
               size="$2"
               lineHeight="$3"

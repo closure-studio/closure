@@ -6,7 +6,7 @@ import { TamaguiProvider } from 'tamagui';
 
 import { i18n } from '@/i18n';
 import { tamaguiConfig } from '../../../tamagui.config';
-import { DashboardMobileTabBar } from './dashboard-mobile-tab-bar';
+import { DashboardSmallScreenTabBar } from './dashboard-small-screen-tab-bar';
 
 const bottomInset = 34;
 const safeAreaMetrics = {
@@ -26,7 +26,7 @@ async function renderMobileBottomNavigation(defaultPrevented = false) {
     <SafeAreaProvider initialMetrics={safeAreaMetrics}>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <I18nextProvider i18n={i18n}>
-          <DashboardMobileTabBar
+          <DashboardSmallScreenTabBar
             navigation={{ emit, navigate }}
             reducedMotion
             state={{
@@ -52,7 +52,7 @@ async function renderMobileBottomNavigation(defaultPrevented = false) {
 describe('MobileBottomNavigation', () => {
   it('extends its background through the bottom safe area', async () => {
     const { screen } = await renderMobileBottomNavigation();
-    const navigation = screen.getByTestId('mobile-bottom-navigation');
+    const navigation = screen.getByTestId('small-screen-bottom-navigation');
 
     expect(StyleSheet.flatten(navigation.props.style)).toEqual(expect.objectContaining({
       height: 66 + bottomInset,

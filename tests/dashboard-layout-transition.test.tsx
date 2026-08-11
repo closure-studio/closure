@@ -1,9 +1,11 @@
 import type { PropsWithChildren } from 'react';
 import { render } from '@testing-library/react-native';
 
+import type { LayoutSize } from '@/schemas/ui-settings';
+
 const mockDashboardTabs = jest.fn((_props: unknown) => null);
 const mockDashboardTabsScreen = jest.fn(() => null);
-const mockDashboardMobileTabBar = jest.fn(() => null);
+const mockDashboardSmallScreenTabBar = jest.fn(() => null);
 const mockDashboardShell = jest.fn(({ children }: PropsWithChildren) => children);
 const mockSelectGameAccount = jest.fn();
 const mockGetTabScreenOptions = jest.fn((reducedMotion: boolean) => ({
@@ -11,7 +13,7 @@ const mockGetTabScreenOptions = jest.fn((reducedMotion: boolean) => ({
 }));
 const mockUseReducedMotion = jest.fn(() => false);
 const mockUseIsFocused = jest.fn(() => true);
-const mockUseMedia = jest.fn(() => ({ 'max-md': true }));
+const mockUseUiSettings = jest.fn((): { layoutSize: LayoutSize } => ({ layoutSize: 'small' }));
 
 jest.mock('expo-router', () => ({
   useIsFocused: mockUseIsFocused,
@@ -43,7 +45,10 @@ jest.mock('tamagui', () => ({
       appWarning: { val: '#ffff00' },
     },
   }),
-  useMedia: mockUseMedia,
+}));
+
+jest.mock('@/providers/ui-settings-provider', () => ({
+  useUiSettings: mockUseUiSettings,
 }));
 
 jest.mock('@/components', () => {
@@ -72,7 +77,7 @@ jest.mock('@/features/dashboard', () => ({
 }));
 
 jest.mock('@/features/navigation', () => ({
-  DashboardMobileTabBar: mockDashboardMobileTabBar,
+  DashboardSmallScreenTabBar: mockDashboardSmallScreenTabBar,
   dashboardNavigation: {
     defaultPage: { route: '/dashboard/overview' },
     pages: {
@@ -100,8 +105,8 @@ describe('DashboardLayout route transitions', () => {
     mockUseReducedMotion.mockReturnValue(false);
     mockUseIsFocused.mockReset();
     mockUseIsFocused.mockReturnValue(true);
-    mockUseMedia.mockReset();
-    mockUseMedia.mockReturnValue({ 'max-md': true });
+    mockUseUiSettings.mockReset();
+    mockUseUiSettings.mockReturnValue({ layoutSize: 'small' });
   });
 
   it('enables Dashboard route transitions when reduced motion is disabled', async () => {
@@ -131,7 +136,7 @@ describe('DashboardLayout route transitions', () => {
     if (typeof tabBar !== 'function') throw new Error('Expected a Dashboard tab bar renderer.');
     expect(Reflect.apply(tabBar, null, [{}])).toEqual(expect.objectContaining({
       props: expect.objectContaining({ reducedMotion: false }),
-      type: mockDashboardMobileTabBar,
+      type: mockDashboardSmallScreenTabBar,
     }));
     expect(Reflect.get(receivedProps, 'children')).toEqual(expect.objectContaining({
       props: { name: 'index', options: { href: null } },
@@ -150,8 +155,8 @@ describe('DashboardLayout route transitions', () => {
     expect(mockSelectGameAccount).toHaveBeenCalledWith('account-2');
   });
 
-  it('renders no Dashboard tab bar on desktop', async () => {
-    mockUseMedia.mockReturnValue({ 'max-md': false });
+  it('renders no Dashboard tab bar on Large Screen', async () => {
+    mockUseUiSettings.mockReturnValue({ layoutSize: 'large' });
 
     await render(<DashboardLayout />);
 

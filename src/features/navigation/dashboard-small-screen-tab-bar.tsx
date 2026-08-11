@@ -11,7 +11,7 @@ import { dashboardNavigation } from './navigation-config';
 const dashboardPages = Object.values(dashboardNavigation.pages)
   .sort((left, right) => left.sort - right.sort);
 
-type DashboardMobileTabBarProps = {
+type DashboardSmallScreenTabBarProps = {
   navigation: {
     emit: (event: {
       canPreventDefault: true;
@@ -24,11 +24,11 @@ type DashboardMobileTabBarProps = {
   state: Pick<BottomTabBarProps['state'], 'index' | 'routes'>;
 };
 
-export function DashboardMobileTabBar({
+export function DashboardSmallScreenTabBar({
   navigation,
   reducedMotion,
   state,
-}: DashboardMobileTabBarProps) {
+}: DashboardSmallScreenTabBarProps) {
   const { t } = useTranslation('dashboard');
   const colors = getTokens().color;
   const { bottom: bottomInset } = useSafeAreaInsets();
@@ -60,7 +60,7 @@ export function DashboardMobileTabBar({
 
   return (
     <YStack
-      testID="mobile-bottom-navigation"
+      testID="small-screen-bottom-navigation"
       display="flex"
       height={66 + bottomInset}
       shrink={0}

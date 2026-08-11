@@ -35,3 +35,11 @@ _Avoid_: Daily, daily task
 **Activity Timeline Entry**:
 A scheduled event, banner, maintenance window, or notice relevant to a Game Account.
 _Avoid_: Timeline event, log item
+
+**Layout Size**:
+The viewport-width classification used to select presentation and navigation behavior. It has exactly two values: Small Screen below 768 logical units and Large Screen at or above 768; device type and physical orientation do not participate.
+_Avoid_: Compact, desktop layout, mobile layout, tablet layout
+
+**UI Settings**:
+The application-wide presentation settings owned by Closure, including Layout Size and future Closure-specific UI preferences. Language and framework-owned theme state are separate concerns.
+_Avoid_: App settings, preferences, theme settings

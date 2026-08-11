@@ -1,5 +1,5 @@
 export { NavigationLayout } from './screens/navigation-layout';
-export { DashboardMobileTabBar } from './dashboard-mobile-tab-bar';
+export { DashboardSmallScreenTabBar } from './dashboard-small-screen-tab-bar';
 export {
   resolveNavigationBackAction,
   useNavigationBackHandler,

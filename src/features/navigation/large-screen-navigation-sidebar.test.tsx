@@ -5,7 +5,7 @@ import { TamaguiProvider } from 'tamagui';
 
 import { i18n } from '@/i18n';
 import { tamaguiConfig } from '../../../tamagui.config';
-import { DesktopNavigationSidebar } from './components/desktop-navigation-sidebar';
+import { LargeScreenNavigationSidebar } from './components/large-screen-navigation-sidebar';
 
 async function renderSidebar(scope: 'dashboard' | 'settings' = 'dashboard') {
   const onLogout = jest.fn();
@@ -14,7 +14,7 @@ async function renderSidebar(scope: 'dashboard' | 'settings' = 'dashboard') {
   const screen = await render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <I18nextProvider i18n={i18n}>
-        <DesktopNavigationSidebar
+        <LargeScreenNavigationSidebar
           activeId="overview"
           items={[
             { id: 'overview', icon: Grid2X2, label: 'Overview' },
@@ -32,7 +32,7 @@ async function renderSidebar(scope: 'dashboard' | 'settings' = 'dashboard') {
   return { onLogout, onSelect, onToggleScope, screen };
 }
 
-describe('DesktopNavigationSidebar', () => {
+describe('LargeScreenNavigationSidebar', () => {
   it('renders one supplied navigation list and reports selections', async () => {
     const { onSelect, screen } = await renderSidebar();
 

@@ -2,7 +2,7 @@ import { Tabs as DashboardTabs } from 'expo-router/tabs';
 import { useIsFocused, useRouter } from 'expo-router';
 import { useCallback, useEffect } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
-import { getTokens, useMedia } from 'tamagui';
+import { getTokens } from 'tamagui';
 
 import { resolveAdjacentHorizontalSwipeItem } from '@/components';
 import type { HorizontalSwipeDirection } from '@/components';
@@ -12,13 +12,14 @@ import {
   selectBackdropTint,
   useDashboardState,
 } from '@/features/dashboard';
-import { DashboardMobileTabBar, dashboardNavigation } from '@/features/navigation';
+import { DashboardSmallScreenTabBar, dashboardNavigation } from '@/features/navigation';
 import type { LinkGameAccountCredentials } from '@/schemas/game-account';
 import { getTabScreenOptions, useSessionBackdrop } from '@/features/session';
+import { useUiSettings } from '@/providers/ui-settings-provider';
 
 function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
   const colors = getTokens().color;
-  const media = useMedia();
+  const { layoutSize } = useUiSettings();
   const isFocused = useIsFocused();
   const router = useRouter();
   const { setBackdropTint } = useSessionBackdrop();
@@ -36,8 +37,6 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
     warning: colors.appWarning.val,
     muted: colors.appMuted.val,
   });
-  const isCompact = Boolean(media['max-md']);
-
   useEffect(() => {
     setBackdropTint(backdropTint);
   }, [backdropTint, setBackdropTint]);
@@ -60,7 +59,7 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
     <DashboardShell
       activeGameAccountId={activeGameAccountId}
       gameAccounts={gameAccounts}
-      isContentSwipeEnabled={isFocused && isCompact && gameAccounts.length > 1}
+      isContentSwipeEnabled={isFocused && layoutSize === 'small' && gameAccounts.length > 1}
       isLinkGameAccountSheetOpen={isLinkGameAccountSheetOpen}
       onContentSwipe={handleGameAccountSwipe}
       onLinkGameAccount={handleLinkGameAccount}
@@ -71,8 +70,8 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
       <DashboardTabs
         detachInactiveScreens={process.env.EXPO_OS !== 'ios'}
         screenOptions={getTabScreenOptions(reducedMotion)}
-        tabBar={isCompact
-          ? (props) => <DashboardMobileTabBar {...props} reducedMotion={reducedMotion} />
+        tabBar={layoutSize === 'small'
+          ? (props) => <DashboardSmallScreenTabBar {...props} reducedMotion={reducedMotion} />
           : () => null}
       >
         <DashboardTabs.Screen name="index" options={{ href: null }} />

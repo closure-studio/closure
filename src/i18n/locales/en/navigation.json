@@ -5,7 +5,7 @@
     "network": "// SECURE FRAME LINK · 18MS LATENCY",
     "sync": "// LAYOUT STATE SYNCHRONIZED"
   },
-  "mobile": {
+  "smallScreen": {
     "avatarLabel": "Doctor profile",
     "settingsTabsLabel": "Settings tabs",
     "swipeHint": "SWIPE L/R"

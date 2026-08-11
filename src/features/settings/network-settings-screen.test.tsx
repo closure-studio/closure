@@ -8,6 +8,10 @@ import { SettingsSwipeProvider } from './settings-swipe-context';
 import { SettingsMockProvider } from './settings-mock-context';
 import { NetworkSettingsScreen } from './screens/network-settings-screen';
 
+jest.mock('@/providers/ui-settings-provider', () => ({
+  useUiSettings: () => ({ layoutSize: 'small' }),
+}));
+
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
   const reanimatedMock = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated/mock');

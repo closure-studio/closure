@@ -35,14 +35,9 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-jest.mock('tamagui', () => {
-  const tamagui = jest.requireActual<typeof import('tamagui')>('tamagui');
-
-  return {
-    ...tamagui,
-    useMedia: () => ({ 'max-md': true }),
-  };
-});
+jest.mock('@/providers/ui-settings-provider', () => ({
+  useUiSettings: () => ({ layoutSize: 'small' }),
+}));
 
 jest.mock('./back-navigation', () => ({
   useNavigationBackHandler: jest.fn(),
@@ -64,7 +59,7 @@ function NavigationTestTree({ scope }: { scope: 'dashboard' | 'settings' }) {
   );
 }
 
-describe('compact NavigationLayout header', () => {
+describe('Small Screen NavigationLayout header', () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue('/dashboard/overview');
   });
@@ -74,7 +69,7 @@ describe('compact NavigationLayout header', () => {
 
     expect(screen.getAllByTestId('navigation-layout-header')).toHaveLength(1);
     expect(screen.getAllByTestId('navigation-header')).toHaveLength(1);
-    expect(screen.queryByLabelText('navigation:mobile.settingsTabsLabel')).toBeNull();
+    expect(screen.queryByLabelText('navigation:smallScreen.settingsTabsLabel')).toBeNull();
     expect(screen.getByTestId('dashboard-route-content')).toBeTruthy();
 
     mockUsePathname.mockReturnValue('/settings/network');
@@ -82,8 +77,8 @@ describe('compact NavigationLayout header', () => {
 
     expect(screen.getAllByTestId('navigation-layout-header')).toHaveLength(1);
     expect(screen.queryByTestId('navigation-header')).toBeNull();
-    expect(screen.getAllByLabelText('navigation:mobile.settingsTabsLabel')).toHaveLength(1);
-    expect(screen.getByText('navigation:mobile.swipeHint')).toBeTruthy();
+    expect(screen.getAllByLabelText('navigation:smallScreen.settingsTabsLabel')).toHaveLength(1);
+    expect(screen.getByText('navigation:smallScreen.swipeHint')).toBeTruthy();
     expect(screen.getByTestId('settings-route-content')).toBeTruthy();
     expect(screen.queryByTestId('settings-scope-backdrop')).toBeNull();
   });
