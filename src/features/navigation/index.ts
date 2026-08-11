@@ -1,4 +1,5 @@
-export { NavigationLayout, NavigationScopeScreen } from './screens/navigation-layout';
+export { NavigationLayout } from './screens/navigation-layout';
+export { DashboardSmallScreenTabBar } from './dashboard-small-screen-tab-bar';
 export {
   resolveNavigationBackAction,
   useNavigationBackHandler,

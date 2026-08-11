@@ -1,13 +1,15 @@
-import { DashboardScreen } from '@/features/dashboard';
-import { useSessionBackdrop } from '@/features/session';
+import {
+  ActivityTimelineView,
+  DashboardPageScroll,
+} from '@/features/dashboard';
+import { selectActiveGameAccount, useAppStore } from '@/store';
 
 export default function DashboardActivityRoute() {
-  const { setBackdropTint } = useSessionBackdrop();
+  const activeGameAccount = useAppStore(selectActiveGameAccount);
 
   return (
-    <DashboardScreen
-      activePageId="activity"
-      onBackdropTintChange={setBackdropTint}
-    />
+    <DashboardPageScroll>
+      <ActivityTimelineView entries={activeGameAccount.activityTimeline} />
+    </DashboardPageScroll>
   );
 }

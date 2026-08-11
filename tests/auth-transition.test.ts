@@ -3,6 +3,7 @@ import { Animated } from 'react-native';
 import {
   getRouteScreenOptions,
   getScopeTransitionScreenOptions,
+  getTabScreenOptions,
 } from '@/features/session/navigation/route-transition';
 import { IOS_BACK_GESTURE_EDGE_WIDTH_PT } from '@/constants/back-navigation';
 
@@ -40,6 +41,32 @@ function readTranslateX(cardStyle: unknown): number {
   }
 
   return readAnimatedNumber(Reflect.get(translation, 'translateX'));
+}
+
+function readSceneOpacity(sceneStyle: unknown): number {
+  if (typeof sceneStyle !== 'object' || sceneStyle === null) {
+    throw new Error('Expected a scene style object.');
+  }
+
+  return readAnimatedNumber(Reflect.get(sceneStyle, 'opacity'));
+}
+
+function readSceneScale(sceneStyle: unknown): number {
+  if (typeof sceneStyle !== 'object' || sceneStyle === null) {
+    throw new Error('Expected a scene style object.');
+  }
+
+  const transform = Reflect.get(sceneStyle, 'transform');
+  if (!Array.isArray(transform) || transform.length !== 1) {
+    throw new Error('Expected exactly one scene transform.');
+  }
+
+  const scale = transform[0];
+  if (typeof scale !== 'object' || scale === null) {
+    throw new Error('Expected a scale transform.');
+  }
+
+  return readAnimatedNumber(Reflect.get(scale, 'scale'));
 }
 
 describe('route transition', () => {
@@ -81,6 +108,52 @@ describe('route transition', () => {
       platform: 'web',
     })).toMatchObject({
       gestureEnabled: false,
+    });
+  });
+
+  it('uses a deterministic two-phase fade-scale transition for tabs', () => {
+    const screenOptions = getTabScreenOptions(false);
+
+    expect(screenOptions).toMatchObject({
+      animation: 'fade',
+      headerShown: false,
+      lazy: true,
+      transitionSpec: {
+        config: { duration: PAGE_TRANSITION_TIMING.totalMs },
+      },
+    });
+
+    const sceneStyleInterpolator = screenOptions.sceneStyleInterpolator;
+    if (!sceneStyleInterpolator) throw new Error('Expected a tab scene interpolator.');
+
+    const progress = new Animated.Value(-1);
+    const { sceneStyle } = sceneStyleInterpolator({ current: { progress } });
+
+    expect(readSceneOpacity(sceneStyle)).toBe(0);
+    expect(readSceneScale(sceneStyle)).toBe(0.98);
+
+    progress.setValue(-0.5);
+    expect(readSceneOpacity(sceneStyle)).toBe(0);
+    expect(readSceneScale(sceneStyle)).toBe(0.98);
+
+    progress.setValue(0);
+    expect(readSceneOpacity(sceneStyle)).toBe(1);
+    expect(readSceneScale(sceneStyle)).toBe(1);
+
+    progress.setValue(0.5);
+    expect(readSceneOpacity(sceneStyle)).toBe(0);
+    expect(readSceneScale(sceneStyle)).toBe(0.98);
+
+    progress.setValue(1);
+    expect(readSceneOpacity(sceneStyle)).toBe(0);
+    expect(readSceneScale(sceneStyle)).toBe(0.98);
+  });
+
+  it('disables tab animation when reduced motion is enabled', () => {
+    expect(getTabScreenOptions(true)).toMatchObject({
+      animation: 'none',
+      headerShown: false,
+      lazy: true,
     });
   });
 

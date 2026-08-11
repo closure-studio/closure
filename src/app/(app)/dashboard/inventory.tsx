@@ -1,13 +1,16 @@
-import { DashboardScreen } from '@/features/dashboard';
-import { useSessionBackdrop } from '@/features/session';
+import {
+  DashboardPageScroll,
+  InventoryView,
+  itemTable,
+} from '@/features/dashboard';
+import { selectActiveGameAccount, useAppStore } from '@/store';
 
 export default function DashboardInventoryRoute() {
-  const { setBackdropTint } = useSessionBackdrop();
+  const activeGameAccount = useAppStore(selectActiveGameAccount);
 
   return (
-    <DashboardScreen
-      activePageId="inventory"
-      onBackdropTintChange={setBackdropTint}
-    />
+    <DashboardPageScroll>
+      <InventoryView inventory={activeGameAccount.inventory} itemTable={itemTable} />
+    </DashboardPageScroll>
   );
 }

@@ -1,5 +1,5 @@
 import { PackageOpen } from 'lucide-react-native';
-import { memo, useCallback, useId, useMemo, useState } from 'react';
+import { memo, useId, useMemo, useState } from 'react';
 import Svg, {
   Circle,
   Defs,
@@ -10,11 +10,13 @@ import Svg, {
   Stop,
   Text as SvgText,
 } from 'react-native-svg';
-import { XStack, YStack, getTokens, styled, useMedia } from 'tamagui';
+import { Image, XStack, YStack, getTokens, styled } from 'tamagui';
 
 import { AvatarFilter, MonoText, TerminalPanel, TerminalText } from '@/components';
 import type { ItemTable, ItemTableItem } from '@/schemas/game-data';
 import type { Inventory } from '@/schemas/game-account';
+import { useLayoutSize } from '@/providers/layout-size-provider';
+import type { LayoutSize } from '@/schemas/layout-size';
 import { getItemImageUrl } from '../item-image';
 
 type InventoryEntry = {
@@ -24,15 +26,15 @@ type InventoryEntry = {
 };
 
 const CIRCULAR_ARTWORK_RADIUS = 999;
-const DESKTOP_ITEM_ARTWORK_SCALE = 0.84;
-const MOBILE_ITEM_ARTWORK_SIZE = 40;
-const DESKTOP_ITEM_ARTWORK_SIZE = 100;
-const MOBILE_PREVIEW_ARTWORK_SIZE = 56;
-const DESKTOP_PREVIEW_ARTWORK_SIZE = 160;
-const MOBILE_MIN_ITEM_WIDTH = 128;
-const DESKTOP_MIN_ITEM_WIDTH = 240;
-const DEFAULT_MOBILE_COLUMN_COUNT = 2;
-const DEFAULT_DESKTOP_COLUMN_COUNT = 4;
+const LARGE_SCREEN_ITEM_ARTWORK_SCALE = 0.84;
+const SMALL_SCREEN_ITEM_ARTWORK_SIZE = 40;
+const LARGE_SCREEN_ITEM_ARTWORK_SIZE = 100;
+const SMALL_SCREEN_PREVIEW_ARTWORK_SIZE = 56;
+const LARGE_SCREEN_PREVIEW_ARTWORK_SIZE = 160;
+const SMALL_SCREEN_MIN_ITEM_WIDTH = 128;
+const LARGE_SCREEN_MIN_ITEM_WIDTH = 240;
+const DEFAULT_SMALL_SCREEN_COLUMN_COUNT = 2;
+const DEFAULT_LARGE_SCREEN_COLUMN_COUNT = 4;
 const ITEM_ARTWORK_FEATHER_STOPS = [
   { offset: '0%', opacity: 1, color: '#ffffff' },
   { offset: '58%', opacity: 1, color: '#ffffff' },
@@ -41,7 +43,7 @@ const ITEM_ARTWORK_FEATHER_STOPS = [
   { offset: '93%', opacity: 0.3, color: '#ffffff' },
   { offset: '100%', opacity: 0, color: '#000000' },
 ] as const;
-const DESKTOP_ITEM_ARTWORK_FEATHER_STOPS = [
+const LARGE_SCREEN_ITEM_ARTWORK_FEATHER_STOPS = [
   { offset: '0%', opacity: 1, color: '#ffffff' },
   { offset: '68%', opacity: 1, color: '#ffffff' },
   { offset: '80%', opacity: 0.95, color: '#ffffff' },
@@ -87,14 +89,20 @@ function formatInventoryQuantity(quantity: number): string {
   return `x${quantity.toLocaleString()}`;
 }
 
-function getItemDescription(value: string | undefined): string | undefined {
+function getItemDescription(value: string | null | undefined): string | undefined {
   return value ? value.split('\\n').join('\n') : undefined;
 }
 
-export function getInventoryColumnCount(width: number, compact: boolean, gridGap: number): number {
-  if (width <= 0) return compact ? DEFAULT_MOBILE_COLUMN_COUNT : DEFAULT_DESKTOP_COLUMN_COUNT;
+export function getInventoryColumnCount(width: number, layoutSize: LayoutSize, gridGap: number): number {
+  if (width <= 0) {
+    return layoutSize === 'small'
+      ? DEFAULT_SMALL_SCREEN_COLUMN_COUNT
+      : DEFAULT_LARGE_SCREEN_COLUMN_COUNT;
+  }
 
-  const minimumItemWidth = compact ? MOBILE_MIN_ITEM_WIDTH : DESKTOP_MIN_ITEM_WIDTH;
+  const minimumItemWidth = layoutSize === 'small'
+    ? SMALL_SCREEN_MIN_ITEM_WIDTH
+    : LARGE_SCREEN_MIN_ITEM_WIDTH;
   return Math.max(1, Math.floor((width + gridGap) / (minimumItemWidth + gridGap)));
 }
 
@@ -136,7 +144,7 @@ function ItemArtwork({
   const artworkInset = artworkCenter - artworkRadius;
   const artworkTransform = `translate(${artworkInset} ${artworkInset}) scale(${artworkScale})`;
   const featherStops = artworkScale < 1
-    ? DESKTOP_ITEM_ARTWORK_FEATHER_STOPS
+    ? LARGE_SCREEN_ITEM_ARTWORK_FEATHER_STOPS
     : ITEM_ARTWORK_FEATHER_STOPS;
   const showFallback = imageStatus !== 'ready';
 
@@ -223,31 +231,78 @@ function ItemArtwork({
   );
 }
 
-const InventoryPreview = memo(function InventoryPreview({
-  compact,
-  entry,
+function InventoryItemArtwork({
+  icon,
+  itemId,
+  label,
+  size,
 }: {
-  compact: boolean;
-  entry: InventoryEntry;
+  icon: string;
+  itemId: string;
+  label: string;
+  size: number;
 }) {
-  const artworkSize = compact ? MOBILE_PREVIEW_ARTWORK_SIZE : DESKTOP_PREVIEW_ARTWORK_SIZE;
+  const [imageStatus, setImageStatus] = useState<'loading' | 'ready'>('loading');
+
+  return (
+    <YStack
+      testID={`inventory-item-image-circle-${itemId}`}
+      width={size}
+      height={size}
+      maxW="100%"
+      rounded={CIRCULAR_ARTWORK_RADIUS}
+      overflow="hidden"
+      position="relative"
+      items="center"
+      justify="center"
+    >
+      {imageStatus !== 'ready' ? (
+        <MonoText
+          testID={`inventory-item-image-fallback-character-${itemId}`}
+          position="absolute"
+          size="$4"
+          color="$appMuted"
+          fontWeight="800"
+        >
+          {getFirstCharacter(label)}
+        </MonoText>
+      ) : null}
+      <Image
+        testID={`inventory-item-image-${itemId}`}
+        src={getItemImageUrl(icon)}
+        width="100%"
+        height="100%"
+        objectFit="contain"
+        opacity={imageStatus === 'ready' ? 1 : 0}
+        alt={label}
+        onLoad={() => setImageStatus('ready')}
+      />
+    </YStack>
+  );
+}
+
+const InventoryPreview = memo(function InventoryPreview({ entry }: { entry: InventoryEntry }) {
+  const layoutSize = useLayoutSize();
+  const artworkSize = layoutSize === 'small'
+    ? SMALL_SCREEN_PREVIEW_ARTWORK_SIZE
+    : LARGE_SCREEN_PREVIEW_ARTWORK_SIZE;
   const description = getItemDescription(entry.item.description);
 
   return (
     <XStack
       testID="inventory-preview-details"
       width="100%"
-      p={compact ? '$2.5' : '$3.5'}
+      p={layoutSize === 'small' ? '$2.5' : '$3.5'}
       items="center"
-      gap={compact ? '$2.5' : '$4'}
+      gap={layoutSize === 'small' ? '$2.5' : '$4'}
       bg="$appSurfaceRaisedTranslucent"
       borderBottomWidth={1}
       borderColor="$appRule"
     >
       <YStack
         testID="inventory-preview-artwork"
-        width={compact ? '$7' : '$14'}
-        height={compact ? '$7' : '$14'}
+        width={layoutSize === 'small' ? '$7' : '$14'}
+        height={layoutSize === 'small' ? '$7' : '$14'}
         shrink={0}
         items="center"
         justify="center"
@@ -258,9 +313,9 @@ const InventoryPreview = memo(function InventoryPreview({
           icon={entry.item.icon}
           itemId={entry.itemId}
           label={entry.item.name}
-          iconSize={compact ? 28 : 46}
+          iconSize={layoutSize === 'small' ? 28 : 46}
           artworkSize={artworkSize}
-          artworkScale={compact ? 1 : DESKTOP_ITEM_ARTWORK_SCALE}
+          artworkScale={layoutSize === 'small' ? 1 : LARGE_SCREEN_ITEM_ARTWORK_SCALE}
           maxArtworkSize={artworkSize}
           testIdPrefix="inventory-preview-image"
         />
@@ -272,24 +327,24 @@ const InventoryPreview = memo(function InventoryPreview({
             grow={1}
             shrink={1}
             minW={0}
-            size={compact ? '$4' : '$6'}
-            lineHeight={compact ? '$5' : '$7'}
+            size={layoutSize === 'small' ? '$4' : '$6'}
+            lineHeight={layoutSize === 'small' ? '$5' : '$7'}
             fontWeight="800"
             numberOfLines={1}
           >
             {entry.item.name}
           </TerminalText>
-          <MonoText shrink={0} size={compact ? '$2' : '$3'} color="$appAccent">
+          <MonoText shrink={0} size={layoutSize === 'small' ? '$2' : '$3'} color="$appAccent">
             {formatInventoryQuantity(entry.quantity)}
           </MonoText>
         </XStack>
         {description ? (
           <MonoText
             testID="inventory-preview-description"
-            size={compact ? '$1' : '$2'}
-            lineHeight={compact ? '$2.5' : '$3'}
+            size={layoutSize === 'small' ? '$1' : '$2'}
+            lineHeight={layoutSize === 'small' ? '$2.5' : '$3'}
             color="$appMuted"
-            numberOfLines={compact ? 2 : 3}
+            numberOfLines={layoutSize === 'small' ? 2 : 3}
           >
             {description}
           </MonoText>
@@ -311,21 +366,22 @@ function SelectionCorners({ itemId }: { itemId: string }) {
 }
 
 const InventoryCell = memo(function InventoryCell({
-  compact,
   entry,
   itemWidth,
   onSelect,
   rowGap,
   selected,
 }: {
-  compact: boolean;
   entry: InventoryEntry;
   itemWidth: number | undefined;
   onSelect: (itemId: string) => void;
   rowGap: number;
   selected: boolean;
 }) {
-  const artworkSize = compact ? MOBILE_ITEM_ARTWORK_SIZE : DESKTOP_ITEM_ARTWORK_SIZE;
+  const layoutSize = useLayoutSize();
+  const artworkSize = layoutSize === 'small'
+    ? SMALL_SCREEN_ITEM_ARTWORK_SIZE
+    : LARGE_SCREEN_ITEM_ARTWORK_SIZE;
 
   return (
     <InventoryCellFrame
@@ -344,9 +400,9 @@ const InventoryCell = memo(function InventoryCell({
         width="100%"
         items="center"
         justify="space-between"
-        gap={compact ? '$2' : '$3'}
-        px={compact ? '$2.5' : '$3'}
-        py={compact ? '$1.5' : '$2'}
+        gap={layoutSize === 'small' ? '$2' : '$3'}
+        px={layoutSize === 'small' ? '$2.5' : '$3'}
+        py={layoutSize === 'small' ? '$1.5' : '$2'}
       >
         <YStack
           testID={`inventory-item-artwork-${entry.itemId}`}
@@ -356,20 +412,16 @@ const InventoryCell = memo(function InventoryCell({
           justify="center"
           overflow="hidden"
         >
-          <ItemArtwork
+          <InventoryItemArtwork
             icon={entry.item.icon}
             itemId={entry.itemId}
             label={entry.item.name}
-            iconSize={compact ? 26 : 34}
-            artworkSize={artworkSize}
-            artworkScale={compact ? 1 : DESKTOP_ITEM_ARTWORK_SCALE}
-            maxArtworkSize={artworkSize}
-            testIdPrefix="inventory-item-image"
+            size={artworkSize}
           />
         </YStack>
         <YStack
           testID={`inventory-item-info-${entry.itemId}`}
-          width={compact ? '62%' : '58%'}
+          width={layoutSize === 'small' ? '62%' : '58%'}
           shrink={1}
           minW={0}
           items="flex-end"
@@ -381,8 +433,8 @@ const InventoryCell = memo(function InventoryCell({
             width="100%"
             shrink={1}
             minW={0}
-            size={compact ? '$2.5' : '$3'}
-            lineHeight={compact ? '$3' : '$4'}
+            size={layoutSize === 'small' ? '$2.5' : '$3'}
+            lineHeight={layoutSize === 'small' ? '$3' : '$4'}
             fontWeight="700"
             numberOfLines={2}
             text="right"
@@ -393,8 +445,8 @@ const InventoryCell = memo(function InventoryCell({
             testID={`inventory-item-quantity-${entry.itemId}`}
             width="100%"
             shrink={0}
-            size={compact ? '$2' : '$2.5'}
-            lineHeight={compact ? '$2.5' : '$3'}
+            size={layoutSize === 'small' ? '$2' : '$2.5'}
+            lineHeight={layoutSize === 'small' ? '$2.5' : '$3'}
             color="$appAccent"
             text="right"
           >
@@ -407,6 +459,39 @@ const InventoryCell = memo(function InventoryCell({
   );
 });
 
+const InventoryRow = memo(function InventoryRow({
+  itemWidth,
+  onSelect,
+  row,
+  rowGap,
+  selectedItemId,
+}: {
+  itemWidth: number | undefined;
+  onSelect: (itemId: string) => void;
+  row: readonly InventoryEntry[];
+  rowGap: number;
+  selectedItemId: string | undefined;
+}) {
+  return (
+    <XStack
+      width="100%"
+      justify="flex-start"
+      columnGap={rowGap}
+    >
+      {row.map((entry) => (
+        <InventoryCell
+          key={entry.itemId}
+          entry={entry}
+          itemWidth={itemWidth}
+          onSelect={onSelect}
+          rowGap={rowGap}
+          selected={entry.itemId === selectedItemId}
+        />
+      ))}
+    </XStack>
+  );
+});
+
 export function InventoryView({
   inventory,
   itemTable,
@@ -414,8 +499,7 @@ export function InventoryView({
   inventory: Inventory;
   itemTable: ItemTable;
 }) {
-  const media = useMedia();
-  const compact = Boolean(media['max-md']);
+  const layoutSize = useLayoutSize();
   const entries = useMemo(
     () => Object.entries(inventory).flatMap(([itemId, quantity]) => {
       const item = itemTable[itemId];
@@ -430,8 +514,8 @@ export function InventoryView({
   const selectedEntry = entries.find((entry) => entry.itemId === selectedItemId);
   const [listWidth, setListWidth] = useState(0);
   const spaceTokens = getTokens().space;
-  const gridGap = (compact ? spaceTokens['2'] : spaceTokens['3']).val;
-  const columnCount = getInventoryColumnCount(listWidth, compact, gridGap);
+  const gridGap = (layoutSize === 'small' ? spaceTokens['2'] : spaceTokens['3']).val;
+  const columnCount = getInventoryColumnCount(listWidth, layoutSize, gridGap);
   const itemWidth = getItemWidth(listWidth, columnCount, gridGap);
   const entryRows = useMemo(() => {
     const rows: InventoryEntry[][] = [];
@@ -440,10 +524,6 @@ export function InventoryView({
     }
     return rows;
   }, [columnCount, entries]);
-
-  const handleListLayout = useCallback((width: number) => {
-    setListWidth((currentWidth) => (currentWidth === width ? currentWidth : width));
-  }, []);
 
   if (!selectedEntry) {
     return (
@@ -454,52 +534,32 @@ export function InventoryView({
   }
 
   return (
-    <YStack
-      width="100%"
-      mt="$2"
-      px="$2.5"
-      pb="$4"
-      $md={{ mt: '$3', px: '$5', pb: '$5' }}
-    >
+    <YStack width="100%">
       <TerminalPanel
         testID="inventory-panel"
         cornerBrackets
         width="100%"
         p={0}
       >
-        <InventoryPreview compact={compact} entry={selectedEntry} />
-        <YStack
-          testID="inventory-matrix"
-          pt={0}
-          px={0}
-          pb={0}
-        >
+        <InventoryPreview entry={selectedEntry} />
+        <YStack testID="inventory-matrix">
           <YStack
             testID={`inventory-grid-columns-${columnCount}`}
-            onLayout={(event) => handleListLayout(event.nativeEvent.layout.width)}
+            onLayout={(event) => {
+              const width = event.nativeEvent.layout.width;
+              setListWidth((currentWidth) => (currentWidth === width ? currentWidth : width));
+            }}
           >
-            <YStack width="100%">
-              {entryRows.map((row) => (
-                <XStack
-                  key={row[0]?.itemId ?? 'empty-row'}
-                  width="100%"
-                  justify="flex-start"
-                  columnGap={gridGap}
-                >
-                  {row.map((entry) => (
-                    <InventoryCell
-                      key={entry.itemId}
-                      compact={compact}
-                      entry={entry}
-                      itemWidth={itemWidth}
-                      onSelect={setRequestedItemId}
-                      rowGap={gridGap}
-                      selected={entry.itemId === selectedItemId}
-                    />
-                  ))}
-                </XStack>
-              ))}
-            </YStack>
+            {entryRows.map((row) => (
+              <InventoryRow
+                key={row[0]?.itemId ?? 'empty-row'}
+                itemWidth={itemWidth}
+                onSelect={setRequestedItemId}
+                row={row}
+                rowGap={gridGap}
+                selectedItemId={selectedItemId ?? undefined}
+              />
+            ))}
           </YStack>
         </YStack>
       </TerminalPanel>

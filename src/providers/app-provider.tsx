@@ -24,9 +24,9 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { TamaguiProvider } from 'tamagui';
 
-import { HorizontalSwipeProvider } from '@/components';
 import { tamaguiConfig } from '../../tamagui.config';
 import { LocalizationProvider } from './localization-provider';
+import { LayoutSizeProvider } from './layout-size-provider';
 
 SplashScreen.preventAutoHideAsync().catch((splashError: unknown) => {
   console.warn('Unable to keep the splash screen visible.', splashError);
@@ -60,14 +60,14 @@ export function AppProvider({ children }: PropsWithChildren) {
   return (
     <LocalizationProvider>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <HorizontalSwipeProvider>
+        <LayoutSizeProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
             <ThemeProvider value={DarkTheme}>
               <StatusBar style="light" />
               {children}
             </ThemeProvider>
-          </HorizontalSwipeProvider>
-        </GestureHandlerRootView>
+          </GestureHandlerRootView>
+        </LayoutSizeProvider>
       </TamaguiProvider>
     </LocalizationProvider>
   );

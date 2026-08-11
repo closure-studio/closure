@@ -12,7 +12,7 @@ export type DesktopNavigationItem = {
   label: string;
 };
 
-type DesktopNavigationSidebarProps = {
+type LargeScreenNavigationSidebarProps = {
   activeId: string;
   items: readonly DesktopNavigationItem[];
   onLogout: () => void;
@@ -21,14 +21,14 @@ type DesktopNavigationSidebarProps = {
   scope: NavigationScope;
 };
 
-export function DesktopNavigationSidebar({
+export function LargeScreenNavigationSidebar({
   activeId,
   items,
   onLogout,
   onSelect,
   onToggleScope,
   scope,
-}: DesktopNavigationSidebarProps) {
+}: LargeScreenNavigationSidebarProps) {
   const { t } = useTranslation('navigation');
   const { t: tCommon } = useTranslation('common');
   const { t: tDashboard } = useTranslation('dashboard');

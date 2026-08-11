@@ -1,33 +1,41 @@
-import type { LucideIcon } from 'lucide-react-native';
+import type { BottomTabBarProps } from 'expo-router/tabs';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import { MonoText } from '@/components';
+import { dashboardNavigation } from './navigation-config';
 
-type MobileBottomNavigationItem = {
-  icon: LucideIcon;
-  id: string;
-  label: string;
+const dashboardPages = Object.values(dashboardNavigation.pages)
+  .sort((left, right) => left.sort - right.sort);
+
+type DashboardSmallScreenTabBarProps = {
+  navigation: {
+    emit: (event: {
+      canPreventDefault: true;
+      target: string;
+      type: 'tabPress';
+    }) => { defaultPrevented: boolean };
+    navigate: (name: string, params: object | undefined) => void;
+  };
+  reducedMotion: boolean;
+  state: Pick<BottomTabBarProps['state'], 'index' | 'routes'>;
 };
 
-export function MobileBottomNavigation({
-  activeId,
-  items,
-  onSelect,
+export function DashboardSmallScreenTabBar({
+  navigation,
   reducedMotion,
-}: {
-  activeId: string;
-  items: readonly MobileBottomNavigationItem[];
-  onSelect: (itemId: string) => void;
-  reducedMotion: boolean;
-}) {
+  state,
+}: DashboardSmallScreenTabBarProps) {
+  const { t } = useTranslation('dashboard');
   const colors = getTokens().color;
   const { bottom: bottomInset } = useSafeAreaInsets();
   const [navigationWidth, setNavigationWidth] = useState(0);
-  const activeIndex = Math.max(0, items.findIndex((item) => item.id === activeId));
-  const buttonWidth = items.length > 0 ? Math.max(0, (navigationWidth - 16) / items.length) : 0;
+  const activeRoute = state.routes[state.index];
+  const activeIndex = Math.max(0, dashboardPages.findIndex((page) => page.id === activeRoute?.name));
+  const buttonWidth = Math.max(0, (navigationWidth - 16) / dashboardPages.length);
   const indicatorWidth = Math.max(0, buttonWidth - 16);
   const indicatorLeft = 16 + activeIndex * buttonWidth;
 
@@ -35,9 +43,24 @@ export function MobileBottomNavigation({
     setNavigationWidth(event.nativeEvent.layout.width);
   };
 
+  const handleSelect = (pageId: string) => {
+    const route = state.routes.find((candidate) => candidate.name === pageId);
+    if (!route) return;
+
+    const event = navigation.emit({
+      type: 'tabPress',
+      target: route.key,
+      canPreventDefault: true,
+    });
+
+    if (route.key !== activeRoute?.key && !event.defaultPrevented) {
+      navigation.navigate(route.name, route.params);
+    }
+  };
+
   return (
     <YStack
-      testID="mobile-bottom-navigation"
+      testID="small-screen-bottom-navigation"
       display="flex"
       height={66 + bottomInset}
       shrink={0}
@@ -47,7 +70,6 @@ export function MobileBottomNavigation({
       borderColor="$appBorder"
       bg="$appBackground"
       onLayout={handleLayout}
-      $md={{ display: 'none' }}
     >
       <XStack
         position="absolute"
@@ -68,12 +90,12 @@ export function MobileBottomNavigation({
           bg="$appAccent"
           opacity={navigationWidth > 0 ? 1 : 0}
         />
-        {items.map((item) => {
-          const isActive = item.id === activeId;
-          const Icon = item.icon;
+        {dashboardPages.map((page) => {
+          const isActive = page.id === activeRoute?.name;
+          const Icon = page.icon;
           return (
             <Button
-              key={item.id}
+              key={page.id}
               unstyled
               grow={1}
               minW={0}
@@ -82,7 +104,7 @@ export function MobileBottomNavigation({
               gap="$1"
               hoverStyle={{ bg: '$appAccentSoft' }}
               pressStyle={{ opacity: 0.7 }}
-              onPress={() => onSelect(item.id)}
+              onPress={() => handleSelect(page.id)}
               role="tab"
               aria-selected={isActive}
             >
@@ -96,7 +118,7 @@ export function MobileBottomNavigation({
                 color={isActive ? '$appAccent' : '$appMuted'}
                 numberOfLines={1}
               >
-                {item.label}
+                {t(`navigation.sections.${page.id}.label`)}
               </MonoText>
             </Button>
           );

@@ -15,7 +15,6 @@ import {
   XStack,
   YStack,
   getTokens,
-  useMedia,
 } from 'tamagui';
 
 import {
@@ -30,8 +29,10 @@ import {
   passwordChangeInputSchema,
   passwordChangeIssue,
 } from '@/schemas/user-account';
+import { useLayoutSize } from '@/providers/layout-size-provider';
 import { SettingsPage } from '../components/settings-page';
 import { mockUserAccount } from '../mocks/settings-mocks';
+import { useSettingsSwipe } from '../settings-swipe-context';
 
 type PasswordField = 'currentPassword' | 'newPassword' | 'repeatNewPassword';
 type PasswordIssue = (typeof passwordChangeIssue)[keyof typeof passwordChangeIssue];
@@ -186,11 +187,11 @@ function AccountIdentityPanel({
 }
 
 export function AccountSettingsScreen() {
+  const settingsSwipe = useSettingsSwipe();
   const { t, i18n } = useTranslation('settings');
   const { t: tCommon } = useTranslation('common');
   const colors = getTokens().color;
-  const media = useMedia();
-  const isDesktop = Boolean(media.md);
+  const layoutSize = useLayoutSize();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [repeatNewPassword, setRepeatNewPassword] = useState('');
@@ -286,8 +287,11 @@ export function AccountSettingsScreen() {
   );
 
   return (
-    <SettingsPage isSwipeEnabled={focusedPasswordField === null}>
-      {isDesktop ? (
+    <SettingsPage
+      isSwipeEnabled={settingsSwipe.enabled && focusedPasswordField === null}
+      onSwipe={settingsSwipe.onSwipe}
+    >
+      {layoutSize === 'large' ? (
         <SectionPageHeader
           code={t('account.code')}
           description={t('account.description')}
@@ -298,7 +302,7 @@ export function AccountSettingsScreen() {
       ) : null}
 
       <YStack gap="$3" $md={{ gap: '$5' }}>
-        {!isDesktop ? (
+        {layoutSize === 'small' ? (
           <MonoText size="$2" lineHeight="$3" color="$appText" select="text">
             {t('account.description')}
           </MonoText>

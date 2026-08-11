@@ -5,7 +5,7 @@
     "network": "// 安全框架连接 · 延迟 18MS",
     "sync": "// 布局状态已同步"
   },
-  "mobile": {
+  "smallScreen": {
     "avatarLabel": "博士档案",
     "settingsTabsLabel": "设置标签页",
     "swipeHint": "左右滑动切换"

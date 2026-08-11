@@ -5,7 +5,7 @@ export const itemIdSchema = v.pipe(v.string(), v.minLength(1));
 export const itemTableItemSchema = v.object({
   name: v.pipe(v.string(), v.minLength(1)),
   icon: v.pipe(v.string(), v.minLength(1)),
-  description: v.optional(v.pipe(v.string(), v.minLength(1))),
+  description: v.nullish(v.pipe(v.string(), v.minLength(1))),
 });
 
 export const itemTableSchema = v.record(itemIdSchema, itemTableItemSchema);

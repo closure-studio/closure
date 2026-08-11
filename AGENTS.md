@@ -1,3 +1,40 @@
+# Systemic Simplification Before Patching
+
+Optimize for the smallest necessary system, not merely the fewest physical lines. Correctness, clarity, and a single authoritative source of truth take precedence over clever compression, but production complexity should decrease whenever existing design can absorb the change.
+
+- Before implementing a bug fix or feature, review the repository-wide execution path and blast radius. Identify the owning module, existing seams, authoritative state, duplicated rules, and obsolete code before deciding where to edit.
+- Prefer deleting, replacing, or consolidating existing code over layering new state, effects, wrappers, adapters, dispatchers, flags, fallbacks, or synchronization logic on top of it.
+- Do not mirror framework, router, schema, server, or store state in a second local source of truth. Remove secondary dispatch such as `activeId -> component` when the owning framework already resolves the active implementation.
+- Treat a local patch that leaves duplicated authority or requires ongoing synchronization as a design failure. Refactor the affected path across modules when necessary so the final behavior has one owner and one clear seam.
+- Apply the deletion test to every new module and abstraction: if deleting it makes complexity disappear rather than reappear in multiple callers, do not add it. One implementation does not justify a speculative interface or adapter.
+- Add fallback behavior only for a concrete, named failure mode at a real trust or platform seam. Do not add speculative catch-all branches, silent recovery, or compatibility code without a verified requirement and focused tests.
+- Compare the final production implementation with the starting point. Account for every added state variable, effect, branch, module, and dependency; prefer a net reduction in production code and explain any unavoidable increase. Tests are exempt from line-count pressure and must verify the simplified design.
+- Keep systemic refactoring bounded to the requested behavior and its real dependencies. Preserve unrelated user changes and externally required behavior, and prove the refactor with proportionate tests and the repository quality gates.
+
+# Application Data Flow
+
+Keep application data on one direct, authoritative path:
+
+```text
+Presentational UI <- props
+        ^
+Screen / Route <-> App Store <-> Domain API Module <-> Axios Client <-> Server
+                         ^
+                         |
+                  Zustand Persist <-> MMKV
+```
+
+- Keep one global App Store, organized internally by business domain. Do not create a separate store merely to isolate a feature.
+- Screens and routes may read the App Store through selectors and call its actions directly. Store selectors and actions are the application interface; do not wrap them in a `Feature Public Interface`.
+- Presentational UI receives values, operation state, errors, and callbacks through props. It must not import the App Store, Domain API Modules, Axios, or MMKV.
+- Store actions own application-operation orchestration: set operation-specific request state, call the owning Domain API Module, atomically update authoritative state, and let persistence observe the result. Do not use one global loading flag for unrelated operations.
+- Domain API Modules own endpoints, request/response mapping, and Valibot validation at the server trust seam. They return trusted domain data and must not read from or write to the App Store.
+- The Axios Client owns only shared transport configuration. It must not contain application state or return raw Axios response objects beyond the Domain API Module.
+- Access MMKV only through the Zustand persist adapter. Persist only stable state; exclude actions, loading/error state, Promises, cancellation handles, and Axios objects.
+- Treat both server responses and rehydrated MMKV values as untrusted. Validate them with their owning Valibot schemas before they enter authoritative Store state.
+- Do not add facades, repositories, adapters, or other forwarding modules for hypothetical variation. Apply the deletion test: if removing a module makes complexity disappear instead of moving necessary behavior to multiple callers, remove or avoid that module.
+- Never keep synchronized copies of the same application data in UI state, networking modules, and persistence. The App Store is the client-side authority after ingress validation; the server remains authoritative across synchronization.
+
 # Tamagui-First UI
 
 Use Tamagui as the default UI and styling layer throughout `src/`. Before writing Tamagui code, run `npm run tamagui:generate` and read `.tamagui/prompt.md` so components, themes, tokens, media queries, fonts, and shorthands come from the project's actual configuration.
@@ -11,15 +48,7 @@ Use Tamagui as the default UI and styling layer throughout `src/`. Before writin
 
 Keep direct React Native or Expo APIs when they are the correct platform boundary, including Expo Router integration, native tabs, safe-area measurements, system color-scheme initialization for `TamaguiProvider`, Reanimated-specific views, and third-party components with required native event contracts. Do not add wrappers solely to eliminate React Native imports.
 
-Import the full UI kit and configuration APIs from `tamagui`, keep `TamaguiProvider` in the root layout, and keep direct `tamagui` and `@tamagui/*` package versions aligned. After Tamagui UI or configuration changes, run `npm run tamagui:check`, `npm run tamagui:generate`, `npx tsc --noEmit`, and the relevant web/native bundle checks.
-
-# Expo Bundle Verification
-
-Use `npm run export:all` from the current repository when a change needs Web, iOS, and Android bundle verification. Expo SDK 57 supports `--platform all` natively, so one CLI run should coordinate all three platforms and write to the repository's default `dist/` directory.
-
-- Do not start separate `expo export` commands for Web, iOS, and Android in parallel. Concurrent Metro instances contend over shared project caches and can hang without producing bundles.
-- Do not pass `--output-dir` for routine verification. Use the default ignored `dist/` output in the current repository.
-- Keep the combined export in the foreground and wait for it to finish; do not leave Expo or Metro verification processes running in background terminals.
+Import the full UI kit and configuration APIs from `tamagui`, keep `TamaguiProvider` in the root layout, and keep direct `tamagui` and `@tamagui/*` package versions aligned. After Tamagui UI or configuration changes, run `npm run tamagui:check`, `npm run tamagui:generate`, and `npx tsc --noEmit`.
 
 # Valibot Schema-First Domain Models
 
@@ -56,4 +85,4 @@ Treat AI-generated TypeScript as untrusted until deterministic checks pass.
 - Put user-visible prose in i18n resources and reusable visual values in Tamagui tokens. Preserve punctuation and domain fixture content when they are data rather than interface copy.
 - Do not guess Expo APIs or install plausible package names. Check the Expo 57 documentation and the package's official registry/source, prefer existing dependencies, and install Expo-compatible packages with `npx expo install`.
 - Avoid speculative abstractions, duplicated domain types or rules, catch-all utility modules, silent fallbacks, swallowed errors, prop/state mutation, and unnecessary effects or memoization. Test success, boundary, empty, and failure paths in proportion to the change.
-- Before handing off TypeScript changes, run `npm run quality`. For Tamagui UI/config changes, also regenerate the prompt and run the bundle checks required above.
+- Before handing off TypeScript changes, run `npm run quality`. For Tamagui UI/config changes, also regenerate the prompt.

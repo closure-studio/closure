@@ -11,11 +11,17 @@ jest.mock('react-native-reanimated', () => ({
   useReducedMotion: () => true,
 }));
 
-async function renderLoginForm(onSubmit: React.ComponentProps<typeof LoginForm>['onSubmit']) {
+async function renderLoginForm(
+  onSubmit: React.ComponentProps<typeof LoginForm>['onSubmit'],
+  props: Pick<React.ComponentProps<typeof LoginForm>, 'isSubmitting' | 'submissionError'> = {
+    isSubmitting: false,
+    submissionError: null,
+  },
+) {
   return render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
       <I18nextProvider i18n={i18n}>
-        <LoginForm onSubmit={onSubmit} />
+        <LoginForm {...props} onSubmit={onSubmit} />
       </I18nextProvider>
     </TamaguiProvider>,
   );
@@ -32,7 +38,7 @@ describe('LoginForm', () => {
 
     await fireEvent.press(screen.getByText('Access terminal'));
 
-    expect(screen.getByText(/Enter your login credential/)).toBeTruthy();
+    expect(screen.getByText(/Enter your email/)).toBeTruthy();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -40,15 +46,17 @@ describe('LoginForm', () => {
     const onSubmit = jest.fn().mockRejectedValue(new Error('network unavailable'));
     const screen = await renderLoginForm(onSubmit);
 
-    await fireEvent.changeText(screen.getByPlaceholderText('doctor@rhodes.is'), '  doctor  ');
+    await fireEvent.changeText(screen.getByPlaceholderText('doctor@rhodes.is'), '  doctor@rhodes.is  ');
     await fireEvent.changeText(screen.getByPlaceholderText('••••••••'), 'access-key');
     await fireEvent.press(screen.getByText('Access terminal'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
-        username: 'doctor',
-        password: 'access-key',
-        remember: true,
+        credentials: {
+          email: 'doctor@rhodes.is',
+          password: 'access-key',
+        },
+        rememberSession: true,
       });
       expect(screen.getByText('Unable to establish a connection. Try again.')).toBeTruthy();
     });
@@ -59,17 +67,32 @@ describe('LoginForm', () => {
     const screen = await renderLoginForm(onSubmit);
 
     await fireEvent.press(screen.getByRole('checkbox'));
-    await fireEvent.changeText(screen.getByPlaceholderText('doctor@rhodes.is'), 'doctor');
+    await fireEvent.changeText(screen.getByPlaceholderText('doctor@rhodes.is'), 'doctor@rhodes.is');
     await fireEvent.changeText(screen.getByPlaceholderText('••••••••'), 'access-key');
     await fireEvent.press(screen.getByText('Access terminal'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
-        username: 'doctor',
-        password: 'access-key',
-        remember: false,
+        credentials: {
+          email: 'doctor@rhodes.is',
+          password: 'access-key',
+        },
+        rememberSession: false,
       });
     });
+  });
+
+  it('renders Store-owned operation state through props', async () => {
+    const onSubmit = jest.fn();
+    const screen = await renderLoginForm(onSubmit, {
+      isSubmitting: true,
+      submissionError: 'This account has been suspended.',
+    });
+
+    expect(screen.getByText('Signing in')).toBeTruthy();
+    expect(screen.getByText('This account has been suspended.')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Signing in' }));
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it('masks and reveals the access key', async () => {

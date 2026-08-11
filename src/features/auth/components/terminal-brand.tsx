@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { XStack, YStack, getTokens, useMedia } from 'tamagui';
+import { XStack, YStack, getTokens } from 'tamagui';
 
 import { MonoText, NotchedSurface, TerminalText } from '@/components';
+import { useLayoutSize } from '@/providers/layout-size-provider';
 
 type TerminalBrandProps = Omit<React.ComponentProps<typeof XStack>, 'children' | 'scale'> & {
   mark?: ReactNode;
@@ -18,8 +19,8 @@ export function TerminalBrand({
   ...props
 }: TerminalBrandProps) {
   const colors = getTokens().color;
-  const media = useMedia();
-  const large = scale === 'large' || (scale === 'responsive' && media.md);
+  const layoutSize = useLayoutSize();
+  const large = scale === 'large' || (scale === 'responsive' && layoutSize === 'large');
 
   return (
     <XStack items="center" gap="$3" {...props}>

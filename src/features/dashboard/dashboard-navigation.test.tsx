@@ -4,7 +4,10 @@ import { TamaguiProvider } from 'tamagui';
 
 import { i18n } from '@/i18n';
 import { tamaguiConfig } from '../../../tamagui.config';
-import { GameAccountSwitcher } from './components/dashboard-navigation';
+import {
+  GameAccountSwitcher,
+  resolveScrollOffsetToRevealItem,
+} from './components/dashboard-navigation';
 import { initialGameAccounts } from './mocks/game-accounts';
 
 jest.mock('react-native-reanimated', () => {
@@ -60,5 +63,36 @@ describe('GameAccountSwitcher', () => {
 
     expect(onSelectGameAccount).toHaveBeenCalledWith('acc-02');
     expect(onLinkGameAccount).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('resolveScrollOffsetToRevealItem', () => {
+  it('does not scroll when the active item is already visible', () => {
+    expect(resolveScrollOffsetToRevealItem({
+      itemLayout: { width: 100, x: 120 },
+      scrollOffset: 100,
+      viewportWidth: 320,
+    })).toBeNull();
+  });
+
+  it('reveals items hidden before or after the viewport', () => {
+    expect(resolveScrollOffsetToRevealItem({
+      itemLayout: { width: 100, x: 40 },
+      scrollOffset: 80,
+      viewportWidth: 240,
+    })).toBe(40);
+    expect(resolveScrollOffsetToRevealItem({
+      itemLayout: { width: 100, x: 300 },
+      scrollOffset: 80,
+      viewportWidth: 240,
+    })).toBe(160);
+  });
+
+  it('waits for a measured viewport', () => {
+    expect(resolveScrollOffsetToRevealItem({
+      itemLayout: { width: 100, x: 300 },
+      scrollOffset: 0,
+      viewportWidth: 0,
+    })).toBeNull();
   });
 });

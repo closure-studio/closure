@@ -1,13 +1,15 @@
-import { DashboardScreen } from '@/features/dashboard';
-import { useSessionBackdrop } from '@/features/session';
+import {
+  DashboardPageScroll,
+  OperatorRosterView,
+} from '@/features/dashboard';
+import { selectActiveGameAccount, useAppStore } from '@/store';
 
 export default function DashboardOperatorsRoute() {
-  const { setBackdropTint } = useSessionBackdrop();
+  const activeGameAccount = useAppStore(selectActiveGameAccount);
 
   return (
-    <DashboardScreen
-      activePageId="operators"
-      onBackdropTintChange={setBackdropTint}
-    />
+    <DashboardPageScroll>
+      <OperatorRosterView operators={activeGameAccount.operators} />
+    </DashboardPageScroll>
   );
 }

@@ -4,25 +4,53 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, XStack, YStack, getTokens } from 'tamagui';
 
 import { DecorativeBarcode, FlickeringStatusIndicator, MonoText } from '@/components';
+import type { AuthFailure } from '../api';
+import type { LoginSubmission } from '@/schemas/auth';
 import { AccessOrbit } from '../components/access-orbit';
 import { LoginForm } from '../components/login-form';
 import { TerminalBrand } from '../components/terminal-brand';
 
-const MOCK_AUTHENTICATION_DELAY_MS = 1_100;
 const ACCESS_ORBIT_NODE_ID = '07';
 
-export function AuthScreen({ onAuthenticated }: { onAuthenticated: () => void }) {
+type AuthScreenProps = {
+  isSubmitting: boolean;
+  loginError: AuthFailure | null;
+  onLogin: (submission: LoginSubmission) => Promise<void>;
+};
+
+export function AuthScreen({ isSubmitting, loginError, onLogin }: AuthScreenProps) {
   const { t } = useTranslation('auth');
   const colors = getTokens().color;
   const reducedMotion = useReducedMotion();
-  const handleAuthentication = async () => {
-    await new Promise<void>((resolve) => {
-      setTimeout(() => {
-        onAuthenticated();
-        resolve();
-      }, MOCK_AUTHENTICATION_DELAY_MS);
-    });
-  };
+  const loginErrorMessage = (() => {
+    if (!loginError) return null;
+    switch (loginError.code) {
+      case 'invalid-credentials':
+        return t('login.errors.invalidCredentials');
+      case 'account-banned':
+        return t('login.errors.accountBanned');
+      case 'rate-limited':
+        return t('login.errors.rateLimited');
+      case 'network-unavailable':
+      case 'timeout':
+        return t('login.errors.networkUnavailable');
+      case 'server-error':
+        return t('login.errors.serverError');
+      case 'invalid-response':
+        return t('login.errors.invalidResponse');
+      case 'already-bound':
+      case 'email-already-registered':
+      case 'invalid-input':
+      case 'invalid-oauth-code':
+      case 'invalid-verification-code':
+      case 'permission-denied':
+      case 'session-expired':
+      case 'unknown-business-error':
+      case 'user-not-found':
+      case 'verification-code-expired':
+        return t('login.errors.fallback');
+    }
+  })();
 
   return (
     <KeyboardAvoidingView behavior={process.env.EXPO_OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
@@ -42,7 +70,11 @@ export function AuthScreen({ onAuthenticated }: { onAuthenticated: () => void })
               </YStack>
 
               <YStack width="100%" maxW={440} $md={{ grow: 1 }}>
-                <LoginForm onSubmit={handleAuthentication} />
+                <LoginForm
+                  isSubmitting={isSubmitting}
+                  submissionError={loginErrorMessage}
+                  onSubmit={onLogin}
+                />
               </YStack>
             </XStack>
 

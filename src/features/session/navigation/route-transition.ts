@@ -1,5 +1,6 @@
 import type { ComponentProps } from 'react';
 import { Stack as JsStack } from 'expo-router/js-stack';
+import type { BottomTabNavigationOptions } from 'expo-router/tabs';
 import { Animated, Easing } from 'react-native';
 
 import { IOS_BACK_GESTURE_EDGE_WIDTH_PT } from '@/constants/back-navigation';
@@ -8,6 +9,7 @@ import { PAGE_TRANSITION_TIMING } from '@/constants/page-transition';
 type ExcludeFunction<T> = T extends (...args: never[]) => unknown ? never : T;
 type JsStackScreenOptions = ExcludeFunction<NonNullable<ComponentProps<typeof JsStack>['screenOptions']>>;
 type CardStyleInterpolator = NonNullable<JsStackScreenOptions['cardStyleInterpolator']>;
+type TabSceneStyleInterpolator = NonNullable<BottomTabNavigationOptions['sceneStyleInterpolator']>;
 
 const timingTransition = {
   animation: 'timing',
@@ -49,6 +51,23 @@ const routeCardStyleInterpolator: CardStyleInterpolator = ({ current, next }) =>
     },
   };
 };
+
+const tabSceneStyleInterpolator: TabSceneStyleInterpolator = ({ current }) => ({
+  sceneStyle: {
+    opacity: current.progress.interpolate({
+      inputRange: [-1, -0.5, 0, 0.5, 1],
+      outputRange: [0, 0, 1, 0, 0],
+      extrapolate: 'clamp',
+    }),
+    transform: [{
+      scale: current.progress.interpolate({
+        inputRange: [-1, -0.5, 0, 0.5, 1],
+        outputRange: [0.98, 0.98, 1, 0.98, 0.98],
+        extrapolate: 'clamp',
+      }),
+    }],
+  },
+});
 
 const scopeCardStyleInterpolator: CardStyleInterpolator = ({ current, inverted, layouts, next }) => {
   const translation = next
@@ -110,6 +129,23 @@ export function getRouteScreenOptions(
     gestureEnabled: true,
     gestureResponseDistance: IOS_BACK_GESTURE_EDGE_WIDTH_PT,
   };
+}
+
+export function getTabScreenOptions(reducedMotion: boolean): BottomTabNavigationOptions {
+  const sharedOptions: BottomTabNavigationOptions = {
+    headerShown: false,
+    lazy: true,
+    sceneStyle: { backgroundColor: 'transparent' },
+  };
+
+  return reducedMotion
+    ? { ...sharedOptions, animation: 'none' }
+    : {
+      ...sharedOptions,
+      animation: 'fade',
+      sceneStyleInterpolator: tabSceneStyleInterpolator,
+      transitionSpec: timingTransition,
+    };
 }
 
 export function getScopeTransitionScreenOptions(

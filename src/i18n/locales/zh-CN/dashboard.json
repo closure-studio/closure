@@ -23,8 +23,7 @@
       "activity": { "label": "日程", "subtitle": "时间线" },
       "inventory": { "label": "仓库" },
       "operators": { "label": "干员", "subtitle": "干员列表" },
-      "overview": { "label": "总览", "subtitle": "概览" },
-      "tasks": { "label": "日常", "subtitle": "任务" }
+      "overview": { "label": "总览", "subtitle": "概览" }
     }
   },
   "operators": {
@@ -67,11 +66,6 @@
     "profile": "// 博士档案",
     "recoversAt": "回满 {{time}}",
     "sanity": "理智"
-  },
-  "routine": {
-    "cadence": { "daily": "// 日常", "weekly": "// 周常" },
-    "progressToday": "今日完成度",
-    "title": "日常清单"
   },
   "timeline": {
     "title": "活动与公告",

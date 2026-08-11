@@ -1,6 +1,6 @@
 import type { Href } from 'expo-router';
 
-import type { AuthState } from '../providers/auth-provider';
+import type { UserSession } from '@/schemas/auth';
 
 type PostLoginDestination = Extract<Href, string>;
 
@@ -24,8 +24,8 @@ export function resolvePostLoginDestination(
 }
 
 export function resolveAuthEntryDestination(
-  status: AuthState['status'],
+  session: UserSession | null,
 ): PostLoginDestination {
-  if (status === 'authenticated') return DEFAULT_POST_LOGIN_DESTINATION;
+  if (session) return DEFAULT_POST_LOGIN_DESTINATION;
   return LOGIN_PATH;
 }

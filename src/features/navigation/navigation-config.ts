@@ -3,7 +3,6 @@ import {
   CalendarClock,
   Grid2X2,
   HeartHandshake,
-  ListChecks,
   ShieldCheck,
   UsersRound,
   Wifi,
@@ -13,8 +12,7 @@ const dashboardPages = {
   overview: { id: 'overview', route: '/dashboard/overview', icon: Grid2X2, sort: 10 },
   operators: { id: 'operators', route: '/dashboard/operators', icon: UsersRound, sort: 20 },
   inventory: { id: 'inventory', route: '/dashboard/inventory', icon: Boxes, sort: 30 },
-  tasks: { id: 'tasks', route: '/dashboard/tasks', icon: ListChecks, sort: 40 },
-  activity: { id: 'activity', route: '/dashboard/activity', icon: CalendarClock, sort: 50 },
+  activity: { id: 'activity', route: '/dashboard/activity', icon: CalendarClock, sort: 40 },
 } as const;
 
 export const dashboardNavigation = {

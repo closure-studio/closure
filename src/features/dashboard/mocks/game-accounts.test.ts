@@ -13,18 +13,12 @@ describe('game account fixtures', () => {
     expect(v.safeParse(gameAccountSchema, generatedAccount).success).toBe(true);
   });
 
-  it('keeps generated operator and task values within domain bounds', () => {
+  it('keeps generated operator and inventory values within domain bounds', () => {
     for (const account of initialGameAccounts) {
       for (const operator of account.operators) {
         expect(operator.elite).toBeGreaterThanOrEqual(0);
         expect(operator.elite).toBeLessThanOrEqual(2);
         expect(operator.level).toBeLessThanOrEqual(operator.maxLevel);
-      }
-
-      for (const task of account.routineTasks) {
-        const [current, target] = task.completionProgress;
-        expect(current).toBeLessThanOrEqual(target);
-        expect(task.isCompleted).toBe(current >= target);
       }
 
       for (const [itemId, quantity] of Object.entries(account.inventory)) {

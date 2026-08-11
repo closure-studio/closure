@@ -2,11 +2,9 @@ import { render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider, YStack } from 'tamagui';
 
-import { HorizontalSwipeProvider } from '@/components';
 import { tamaguiConfig } from '../../../tamagui.config';
 import {
   NavigationLayout,
-  NavigationScopeScreen,
 } from './screens/navigation-layout';
 
 const mockUsePathname = jest.fn(() => '/dashboard/overview');
@@ -37,14 +35,9 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-jest.mock('tamagui', () => {
-  const tamagui = jest.requireActual<typeof import('tamagui')>('tamagui');
-
-  return {
-    ...tamagui,
-    useMedia: () => ({ 'max-md': true }),
-  };
-});
+jest.mock('@/providers/layout-size-provider', () => ({
+  useLayoutSize: () => 'small',
+}));
 
 jest.mock('./back-navigation', () => ({
   useNavigationBackHandler: jest.fn(),
@@ -58,19 +51,15 @@ function NavigationTestTree({ scope }: { scope: 'dashboard' | 'settings' }) {
   return (
     <SafeAreaProvider initialMetrics={safeAreaMetrics}>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-        <HorizontalSwipeProvider>
-          <NavigationLayout onLogout={jest.fn()}>
-            <NavigationScopeScreen scope={scope}>
-              <YStack testID={`${scope}-route-content`} />
-            </NavigationScopeScreen>
-          </NavigationLayout>
-        </HorizontalSwipeProvider>
+        <NavigationLayout onLogout={jest.fn()}>
+          <YStack testID={`${scope}-route-content`} />
+        </NavigationLayout>
       </TamaguiProvider>
     </SafeAreaProvider>
   );
 }
 
-describe('compact NavigationLayout header', () => {
+describe('Small Screen NavigationLayout header', () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue('/dashboard/overview');
   });
@@ -80,7 +69,7 @@ describe('compact NavigationLayout header', () => {
 
     expect(screen.getAllByTestId('navigation-layout-header')).toHaveLength(1);
     expect(screen.getAllByTestId('navigation-header')).toHaveLength(1);
-    expect(screen.queryByLabelText('navigation:mobile.settingsTabsLabel')).toBeNull();
+    expect(screen.queryByLabelText('navigation:smallScreen.settingsTabsLabel')).toBeNull();
     expect(screen.getByTestId('dashboard-route-content')).toBeTruthy();
 
     mockUsePathname.mockReturnValue('/settings/network');
@@ -88,8 +77,8 @@ describe('compact NavigationLayout header', () => {
 
     expect(screen.getAllByTestId('navigation-layout-header')).toHaveLength(1);
     expect(screen.queryByTestId('navigation-header')).toBeNull();
-    expect(screen.getAllByLabelText('navigation:mobile.settingsTabsLabel')).toHaveLength(1);
-    expect(screen.getByText('navigation:mobile.swipeHint')).toBeTruthy();
+    expect(screen.getAllByLabelText('navigation:smallScreen.settingsTabsLabel')).toHaveLength(1);
+    expect(screen.getByText('navigation:smallScreen.swipeHint')).toBeTruthy();
     expect(screen.getByTestId('settings-route-content')).toBeTruthy();
     expect(screen.queryByTestId('settings-scope-backdrop')).toBeNull();
   });

@@ -6,18 +6,15 @@ import * as v from 'valibot';
 import { tamaguiConfig } from '../../../tamagui.config';
 import { itemTableSchema } from '@/schemas/game-data';
 import { inventorySchema } from '@/schemas/game-account';
+import type { LayoutSize } from '@/schemas/layout-size';
 import { InventoryView, getInventoryColumnCount } from './components/inventory-view';
 import { getItemImageUrl } from './item-image';
 
-let mockCompactMedia = false;
+let mockLayoutSize: LayoutSize = 'large';
 
-jest.mock('tamagui', () => {
-  const actual = jest.requireActual<typeof import('tamagui')>('tamagui');
-  return {
-    ...actual,
-    useMedia: () => ({ 'max-md': mockCompactMedia }),
-  };
-});
+jest.mock('@/providers/layout-size-provider', () => ({
+  useLayoutSize: () => mockLayoutSize,
+}));
 
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
@@ -70,12 +67,12 @@ function readSvgText(value: unknown): string | undefined {
 describe('InventoryView', () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    mockCompactMedia = false;
+    mockLayoutSize = 'large';
   });
 
   afterEach(() => {
     jest.useRealTimers();
-    mockCompactMedia = false;
+    mockLayoutSize = 'large';
   });
 
   it('renders known inventory entries, selects an item, and skips unknown IDs', async () => {
@@ -119,28 +116,23 @@ describe('InventoryView', () => {
     expect(screen.getByTestId('inventory-selection-top-right-31034')).toBeTruthy();
     expect(screen.getByTestId('inventory-selection-bottom-left-31034')).toBeTruthy();
     expect(screen.getByTestId('inventory-selection-bottom-right-31034')).toBeTruthy();
-    const inventoryImage = screen.getByTestId('inventory-item-image-svg-image-31034', {
+    const inventoryImage = screen.getByTestId('inventory-item-image-31034', {
       includeHiddenElements: true,
     });
-    expect(inventoryImage.props.src).toEqual({
+    expect(inventoryImage.props.source).toEqual(expect.objectContaining({
       uri: 'https://ark-resource.arknights.app/assets/items/MTL_SL_OC4.webp',
-    });
+    }));
     expect(inventoryImage.props.opacity).toBe(0);
     expect(readSvgText(screen.getByTestId('inventory-item-image-fallback-character-31034', {
       includeHiddenElements: true,
     }))).toBe('晶');
     await fireEvent(inventoryImage, 'load');
-    expect(screen.queryByTestId('inventory-item-image-fallback-31034')).toBeNull();
+    expect(screen.queryByTestId('inventory-item-image-fallback-character-31034')).toBeNull();
     expect(inventoryImage.props.opacity).toBe(1);
-    expect(screen.getByTestId('inventory-item-image-filter-31034', {
-      includeHiddenElements: true,
-    })).toBeTruthy();
-    expect(screen.getByTestId('inventory-item-image-feather-31034', {
-      includeHiddenElements: true,
-    })).toBeTruthy();
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-image-circle-31034').props.style)).toEqual(
       expect.objectContaining({
-        aspectRatio: 1,
+        height: 100,
+        width: 100,
         borderTopLeftRadius: 999,
         borderTopRightRadius: 999,
         borderBottomLeftRadius: 999,
@@ -156,8 +148,8 @@ describe('InventoryView', () => {
 
   });
 
-  it('renders the mobile inventory with a compact two-column matrix and preview', async () => {
-    mockCompactMedia = true;
+  it('renders the Small Screen inventory with a two-column matrix and preview', async () => {
+    mockLayoutSize = 'small';
     const screen = await render(
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <InventoryView inventory={inventory} itemTable={itemTable} />
@@ -188,17 +180,19 @@ describe('InventoryView', () => {
     );
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-image-circle-31034').props.style)).toEqual(
       expect.objectContaining({
-        aspectRatio: 1,
+        height: 40,
         borderTopLeftRadius: 999,
         borderTopRightRadius: 999,
         borderBottomLeftRadius: 999,
         borderBottomRightRadius: 999,
       }),
     );
-    expect(screen.getByTestId('inventory-grid-columns-2')).toBeTruthy();
+    const inventoryGrid = screen.getByTestId('inventory-grid-columns-2');
+    expect(inventoryGrid.props.data).toBeUndefined();
+    expect(inventoryGrid.props.renderItem).toBeUndefined();
 
-    expect(getInventoryColumnCount(320, true, 7)).toBe(2);
-    expect(getInventoryColumnCount(400, true, 7)).toBe(3);
+    expect(getInventoryColumnCount(320, 'small', 7)).toBe(2);
+    expect(getInventoryColumnCount(400, 'small', 7)).toBe(3);
   });
 
   it('renders an empty state when no inventory item is known', async () => {

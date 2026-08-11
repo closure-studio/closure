@@ -1,7 +1,6 @@
 import { render } from '@testing-library/react-native';
 import { TamaguiProvider } from 'tamagui';
 
-import { HorizontalSwipeProvider } from '@/components';
 import { tamaguiConfig } from '../../../tamagui.config';
 import {
   SettingsPagerTabs,
@@ -27,15 +26,15 @@ const settingsItems = Object.values(settingsNavigation.pages)
 async function renderSettingsPagerTabs() {
   return render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-      <HorizontalSwipeProvider>
-        <SettingsPagerTabs
-          activeId="network"
-          items={settingsItems}
-          onSelect={jest.fn()}
-          swipeHint="SWIPE L/R"
-          tabListLabel="Settings tabs"
-        />
-      </HorizontalSwipeProvider>
+      <SettingsPagerTabs
+        activeId="network"
+        isSwipeEnabled
+        items={settingsItems}
+        onSelect={jest.fn()}
+        onSwipe={jest.fn()}
+        swipeHint="SWIPE L/R"
+        tabListLabel="Settings tabs"
+      />
     </TamaguiProvider>,
   );
 }

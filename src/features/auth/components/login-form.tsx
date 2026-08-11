@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, LockKeyhole, Mail, UserRound } from 'lucide-react-native';
+import { ArrowLeft, ArrowRight, Check, LockKeyhole, Mail } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useReducedMotion } from 'react-native-reanimated';
@@ -6,10 +6,10 @@ import { AnimatePresence, Button, Form, Spinner, XStack, YStack, getTokens, styl
 
 import { MonoText, TerminalCheckbox, TerminalPanel, TerminalPasswordVisibilityButton, TerminalSectionHeading, TerminalText, TerminalTextField } from '@/components';
 import type { TerminalTextFieldHandle } from '@/components';
-import type { LoginCredentials } from '@/schemas/auth';
+import type { LoginSubmission } from '@/schemas/auth';
 
 type AuthFormMode = 'login' | 'forgot';
-type InvalidLoginField = 'username' | 'password' | null;
+type InvalidLoginField = 'email' | 'password' | null;
 
 const TerminalActionButton = styled(Button, {
   name: 'TerminalActionButton',
@@ -28,33 +28,38 @@ const TerminalActionButton = styled(Button, {
   focusVisibleStyle: { borderColor: '$appAccent', bg: '$appAccentSoft' },
 });
 
-export function LoginForm({ onSubmit }: { onSubmit: (credentials: LoginCredentials) => Promise<void> | void }) {
+type LoginFormProps = {
+  isSubmitting: boolean;
+  onSubmit: (submission: LoginSubmission) => Promise<void>;
+  submissionError: string | null;
+};
+
+export function LoginForm({ isSubmitting, onSubmit, submissionError }: LoginFormProps) {
   const { t } = useTranslation('auth');
   const { t: tCommon } = useTranslation('common');
   const colors = getTokens().color;
   const media = useMedia();
   const reducedMotion = useReducedMotion();
-  const usernameRef = useRef<TerminalTextFieldHandle>(null);
+  const emailRef = useRef<TerminalTextFieldHandle>(null);
   const passwordRef = useRef<TerminalTextFieldHandle>(null);
   const resetRef = useRef<TerminalTextFieldHandle>(null);
   const submittingRef = useRef(false);
   const [mode, setMode] = useState<AuthFormMode>('login');
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberSession, setRememberSession] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [invalidLoginField, setInvalidLoginField] = useState<InvalidLoginField>(null);
-  const [isSubmittingLogin, setIsSubmittingLogin] = useState(false);
-  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [unexpectedSubmissionError, setUnexpectedSubmissionError] = useState<string | null>(null);
   const [recoveryIdentifier, setRecoveryIdentifier] = useState('');
   const [isRecoveryIdentifierMissing, setIsRecoveryIdentifierMissing] = useState(false);
   const [isRecoveryRequestSent, setIsRecoveryRequestSent] = useState(false);
 
   const submitLogin = async () => {
-    if (isSubmittingLogin || submittingRef.current) return;
-    if (!username.trim()) {
-      setInvalidLoginField('username');
-      usernameRef.current?.focus();
+    if (isSubmitting || submittingRef.current) return;
+    if (!email.trim()) {
+      setInvalidLoginField('email');
+      emailRef.current?.focus();
       return;
     }
     if (!password.trim()) {
@@ -64,20 +69,21 @@ export function LoginForm({ onSubmit }: { onSubmit: (credentials: LoginCredentia
     }
 
     setInvalidLoginField(null);
-    setSubmissionError(null);
+    setUnexpectedSubmissionError(null);
     submittingRef.current = true;
-    setIsSubmittingLogin(true);
     try {
-      await onSubmit({ username: username.trim(), password, remember: rememberSession });
+      await onSubmit({
+        credentials: { email: email.trim(), password },
+        rememberSession,
+      });
     } finally {
       submittingRef.current = false;
-      setIsSubmittingLogin(false);
     }
   };
 
   const handleLoginSubmit = () => {
     submitLogin().catch(() => {
-      setSubmissionError(t('login.unexpectedError'));
+      setUnexpectedSubmissionError(t('login.unexpectedError'));
     });
   };
 
@@ -99,21 +105,23 @@ export function LoginForm({ onSubmit }: { onSubmit: (credentials: LoginCredentia
             <TerminalPanel cornerBrackets p="$4.5" gap="$4">
               <TerminalSectionHeading code="01" title={t('login.title')} {...(media.xxs ? { subtitle: 'AUTH' } : {})} />
               <TerminalTextField
-                ref={usernameRef}
-                icon={UserRound}
-                label={t('login.usernameLabel')}
-                value={username}
+                ref={emailRef}
+                icon={Mail}
+                label={t('login.emailLabel')}
+                value={email}
                 onChangeText={(value) => {
-                  setUsername(value);
-                  if (invalidLoginField === 'username') setInvalidLoginField(null);
+                  setEmail(value);
+                  setUnexpectedSubmissionError(null);
+                  if (invalidLoginField === 'email') setInvalidLoginField(null);
                 }}
                 placeholder="doctor@rhodes.is"
-                autoComplete="username"
+                autoComplete="email"
+                keyboardType="email-address"
                 enterKeyHint="next"
                 returnKeyType="next"
                 submitBehavior="submit"
                 onSubmitEditing={() => passwordRef.current?.focus()}
-                {...(invalidLoginField === 'username' ? { error: t('login.usernameRequired') } : {})}
+                {...(invalidLoginField === 'email' ? { error: t('login.emailRequired') } : {})}
               />
               <TerminalTextField
                 ref={passwordRef}
@@ -122,6 +130,7 @@ export function LoginForm({ onSubmit }: { onSubmit: (credentials: LoginCredentia
                 value={password}
                 onChangeText={(value) => {
                   setPassword(value);
+                  setUnexpectedSubmissionError(null);
                   if (invalidLoginField === 'password') setInvalidLoginField(null);
                 }}
                 placeholder="••••••••"
@@ -158,12 +167,16 @@ export function LoginForm({ onSubmit }: { onSubmit: (credentials: LoginCredentia
                 </TerminalActionButton>
               </XStack>
               <Form.Trigger asChild>
-                <Button height="$4.5" borderWidth={1} borderColor="$appAccent" rounded="$0" bg="$appAccentSoft" hoverStyle={{ bg: '$appAccentSoft', borderColor: '$appAccent' }} pressStyle={{ bg: '$appSurfaceRaised' }} focusVisibleStyle={{ borderColor: '$appText' }} disabledStyle={{ opacity: 0.55 }} disabled={isSubmittingLogin} aria-busy={isSubmittingLogin} {...(isSubmittingLogin ? { icon: <Spinner size="small" color="$appAccent" /> } : {})} $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}>
-                  <TerminalText size="$3" color="$appAccent" fontWeight="700">{isSubmittingLogin ? t('login.connecting') : t('login.submit')}</TerminalText>
-                  {!isSubmittingLogin ? <ArrowRight size={16} color={colors.appAccent.val} /> : null}
+                <Button height="$4.5" borderWidth={1} borderColor="$appAccent" rounded="$0" bg="$appAccentSoft" hoverStyle={{ bg: '$appAccentSoft', borderColor: '$appAccent' }} pressStyle={{ bg: '$appSurfaceRaised' }} focusVisibleStyle={{ borderColor: '$appText' }} disabledStyle={{ opacity: 0.55 }} disabled={isSubmitting} aria-busy={isSubmitting} {...(isSubmitting ? { icon: <Spinner size="small" color="$appAccent" /> } : {})} $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}>
+                  <TerminalText size="$3" color="$appAccent" fontWeight="700">{isSubmitting ? t('login.connecting') : t('login.submit')}</TerminalText>
+                  {!isSubmitting ? <ArrowRight size={16} color={colors.appAccent.val} /> : null}
                 </Button>
               </Form.Trigger>
-              {submissionError ? <MonoText size="$2.5" color="$appWarning" accessibilityLiveRegion="polite">{submissionError}</MonoText> : null}
+              {unexpectedSubmissionError || submissionError ? (
+                <MonoText size="$2.5" color="$appWarning" accessibilityLiveRegion="polite">
+                  {unexpectedSubmissionError ?? submissionError}
+                </MonoText>
+              ) : null}
             </TerminalPanel>
           </Form>
           <MonoText size="$2.5" text="center">{t('login.unregistered')}</MonoText>
