@@ -4,9 +4,8 @@ import {
   gameAccountSchema,
   linkGameAccountCredentialsSchema,
   operatorSchema,
-  routineTaskSchema,
 } from '.';
-import type { Operator, RoutineTask } from '.';
+import type { Operator } from '.';
 import { initialGameAccounts } from '@/features/dashboard/mocks/game-accounts';
 
 const validOperator = {
@@ -24,15 +23,6 @@ const validOperator = {
   proficiency: [3, 0, 0],
 } satisfies Operator;
 
-const validRoutineTask = {
-  id: 'task-1',
-  label: 'Task',
-  reward: 'Reward',
-  isCompleted: false,
-  cadence: '日常',
-  completionProgress: [1, 3],
-} satisfies RoutineTask;
-
 describe('Game Account schemas', () => {
   it('accepts the current Game Account fixture shape', () => {
     expect(v.safeParse(gameAccountSchema, initialGameAccounts[0]).success).toBe(true);
@@ -47,19 +37,6 @@ describe('Game Account schemas', () => {
 
   it('enforces the existing Operator level invariant', () => {
     expect(v.safeParse(operatorSchema, { ...validOperator, level: 91 }).success).toBe(false);
-  });
-
-  it('enforces the existing Routine Task progress invariants', () => {
-    expect(v.safeParse(routineTaskSchema, validRoutineTask).success).toBe(true);
-    expect(v.safeParse(routineTaskSchema, {
-      ...validRoutineTask,
-      completionProgress: [4, 3],
-    }).success).toBe(false);
-    expect(v.safeParse(routineTaskSchema, {
-      ...validRoutineTask,
-      completionProgress: [3, 3],
-      isCompleted: false,
-    }).success).toBe(false);
   });
 
   it('validates linked account credentials without changing password content', () => {

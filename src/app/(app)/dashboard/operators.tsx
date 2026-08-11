@@ -1,11 +1,11 @@
 import {
   DashboardPageScroll,
   OperatorRosterView,
-  useDashboardState,
 } from '@/features/dashboard';
+import { selectActiveGameAccount, useAppStore } from '@/store';
 
 export default function DashboardOperatorsRoute() {
-  const { activeGameAccount } = useDashboardState();
+  const activeGameAccount = useAppStore(selectActiveGameAccount);
 
   return (
     <DashboardPageScroll>

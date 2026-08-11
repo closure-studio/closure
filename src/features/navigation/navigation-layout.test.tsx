@@ -35,8 +35,8 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-jest.mock('@/providers/ui-settings-provider', () => ({
-  useUiSettings: () => ({ layoutSize: 'small' }),
+jest.mock('@/providers/layout-size-provider', () => ({
+  useLayoutSize: () => 'small',
 }));
 
 jest.mock('./back-navigation', () => ({

@@ -1,37 +1,33 @@
 import { Tabs as DashboardTabs } from 'expo-router/tabs';
 import { useIsFocused, useRouter } from 'expo-router';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
 import { getTokens } from 'tamagui';
 
 import { resolveAdjacentHorizontalSwipeItem } from '@/components';
 import type { HorizontalSwipeDirection } from '@/components';
 import {
-  DashboardProvider,
   DashboardShell,
   selectBackdropTint,
-  useDashboardState,
 } from '@/features/dashboard';
 import { DashboardSmallScreenTabBar, dashboardNavigation } from '@/features/navigation';
 import type { LinkGameAccountCredentials } from '@/schemas/game-account';
 import { getTabScreenOptions, useSessionBackdrop } from '@/features/session';
-import { useUiSettings } from '@/providers/ui-settings-provider';
+import { useLayoutSize } from '@/providers/layout-size-provider';
+import { selectActiveGameAccount, useAppStore } from '@/store';
 
 function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
   const colors = getTokens().color;
-  const { layoutSize } = useUiSettings();
+  const layoutSize = useLayoutSize();
   const isFocused = useIsFocused();
   const router = useRouter();
   const { setBackdropTint } = useSessionBackdrop();
-  const {
-    activeGameAccount,
-    activeGameAccountId,
-    gameAccounts,
-    isLinkGameAccountSheetOpen,
-    linkGameAccount,
-    selectGameAccount,
-    setIsLinkGameAccountSheetOpen,
-  } = useDashboardState();
+  const activeGameAccount = useAppStore(selectActiveGameAccount);
+  const activeGameAccountId = activeGameAccount.id;
+  const gameAccounts = useAppStore((state) => state.games.gameAccounts);
+  const linkGameAccount = useAppStore((state) => state.linkGameAccount);
+  const selectGameAccount = useAppStore((state) => state.selectGameAccount);
+  const [isLinkGameAccountSheetOpen, setIsLinkGameAccountSheetOpen] = useState(false);
   const backdropTint = selectBackdropTint(activeGameAccount, {
     primary: colors.appAccent.val,
     warning: colors.appWarning.val,
@@ -83,9 +79,5 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
 export default function DashboardLayout() {
   const reducedMotion = useReducedMotion();
 
-  return (
-    <DashboardProvider>
-      <DashboardLayoutContent reducedMotion={reducedMotion} />
-    </DashboardProvider>
-  );
+  return <DashboardLayoutContent reducedMotion={reducedMotion} />;
 }

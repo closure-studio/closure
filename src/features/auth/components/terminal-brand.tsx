@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { XStack, YStack, getTokens } from 'tamagui';
 
 import { MonoText, NotchedSurface, TerminalText } from '@/components';
-import { useUiSettings } from '@/providers/ui-settings-provider';
+import { useLayoutSize } from '@/providers/layout-size-provider';
 
 type TerminalBrandProps = Omit<React.ComponentProps<typeof XStack>, 'children' | 'scale'> & {
   mark?: ReactNode;
@@ -19,7 +19,7 @@ export function TerminalBrand({
   ...props
 }: TerminalBrandProps) {
   const colors = getTokens().color;
-  const { layoutSize } = useUiSettings();
+  const layoutSize = useLayoutSize();
   const large = scale === 'large' || (scale === 'responsive' && layoutSize === 'large');
 
   return (

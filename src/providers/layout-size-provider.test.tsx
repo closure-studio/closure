@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react-native';
 import { Text } from 'react-native';
 
-import { UiSettingsProvider, useUiSettings } from './ui-settings-provider';
+import { LayoutSizeProvider, useLayoutSize } from './layout-size-provider';
 
 let mockMediaMd = false;
 
@@ -10,11 +10,11 @@ jest.mock('tamagui', () => ({
 }));
 
 function LayoutSizeProbe() {
-  const { layoutSize } = useUiSettings();
+  const layoutSize = useLayoutSize();
   return <Text>{layoutSize}</Text>;
 }
 
-describe('UiSettingsProvider', () => {
+describe('LayoutSizeProvider', () => {
   it.each([
     { mediaMd: false, layoutSize: 'small' },
     { mediaMd: true, layoutSize: 'large' },
@@ -22,9 +22,9 @@ describe('UiSettingsProvider', () => {
     mockMediaMd = mediaMd;
 
     await render(
-      <UiSettingsProvider>
+      <LayoutSizeProvider>
         <LayoutSizeProbe />
-      </UiSettingsProvider>,
+      </LayoutSizeProvider>,
     );
 
     expect(screen.getByText(layoutSize)).toBeTruthy();

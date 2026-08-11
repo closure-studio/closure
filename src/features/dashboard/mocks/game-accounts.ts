@@ -2,14 +2,9 @@ import type {
   ActivityTimelineEntry,
   GameAccount,
   Operator,
-  RoutineTask,
   ServerChannel,
 } from '@/schemas/game-account';
 import { inventoryFixture } from './inventory';
-
-type RoutineTaskTemplate = Omit<RoutineTask, 'isCompleted' | 'completionProgress'> & {
-  target: number;
-};
 
 const operatorTemplates: Omit<Operator, 'level' | 'trust' | 'elite'>[] = [
   { id: 'sga', name: '银灰', codename: 'SILVERASH', class: '近卫', rarity: 6, maxLevel: 90, potential: 4, skillLevel: 7, proficiency: [3, 2, 0] },
@@ -20,16 +15,6 @@ const operatorTemplates: Omit<Operator, 'level' | 'trust' | 'elite'>[] = [
   { id: 'ptl', name: '推进之王', codename: 'SIEGE', class: '先锋', rarity: 6, maxLevel: 90, potential: 1, skillLevel: 7, proficiency: [1, 0, 0] },
   { id: 'ken', name: '凯尔希', codename: 'KAL\u2019TSIT', class: '医疗', rarity: 6, maxLevel: 90, potential: 1, skillLevel: 7, proficiency: [0, 2, 0] },
   { id: 'sus', name: '苏苏洛', codename: 'SUSSURRO', class: '医疗', rarity: 5, maxLevel: 80, potential: 3, skillLevel: 7, proficiency: [0, 1, 0] },
-];
-
-const routineTaskTemplates: RoutineTaskTemplate[] = [
-  { id: 'd1', label: '消耗理智 x120', reward: '每日经验 +1000', cadence: '日常', target: 3 },
-  { id: 'd2', label: '完成 4 次公开招募', reward: '龙门币 +5000', cadence: '日常', target: 4 },
-  { id: 'd3', label: '使用 1 次加急许可', reward: '声望 +100', cadence: '日常', target: 1 },
-  { id: 'd4', label: '基建线索交流', reward: '合成玉 +10', cadence: '日常', target: 4 },
-  { id: 'd5', label: '在标准化战术演习获胜 x2', reward: '合成玉 +20', cadence: '周常', target: 2 },
-  { id: 'd6', label: '击败 200 名敌人', reward: '采购凭证 +30', cadence: '周常', target: 200 },
-  { id: 'd7', label: '完成 10 次任何关卡', reward: '龙门币 +10000', cadence: '周常', target: 10 },
 ];
 
 const activityTimeline: ActivityTimelineEntry[] = [
@@ -56,25 +41,14 @@ function createOperators(accountKey: string): Operator[] {
   }));
 }
 
-function createRoutineTasks(accountKey: string): RoutineTask[] {
-  const accountKeyCode = accountKey.charCodeAt(accountKey.length - 1);
-  return routineTaskTemplates.map((task, index) => {
-    const { target, ...routineTask } = task;
-    const current = Math.min(target, (accountKeyCode * (index + 1)) % (target + 1));
-    const completionProgress: [number, number] = [current, target];
-    return { ...routineTask, isCompleted: current >= target, completionProgress };
-  });
-}
-
 function assembleGameAccount(
-  input: Omit<GameAccount, 'operators' | 'inventory' | 'routineTasks' | 'activityTimeline'>,
+  input: Omit<GameAccount, 'operators' | 'inventory' | 'activityTimeline'>,
   accountKey: string,
 ): GameAccount {
   return {
     ...input,
     operators: createOperators(accountKey),
     inventory: { ...inventoryFixture },
-    routineTasks: createRoutineTasks(accountKey),
     activityTimeline,
   };
 }

@@ -2,11 +2,11 @@ import {
   DashboardPageScroll,
   InventoryView,
   itemTable,
-  useDashboardState,
 } from '@/features/dashboard';
+import { selectActiveGameAccount, useAppStore } from '@/store';
 
 export default function DashboardInventoryRoute() {
-  const { activeGameAccount } = useDashboardState();
+  const activeGameAccount = useAppStore(selectActiveGameAccount);
 
   return (
     <DashboardPageScroll>

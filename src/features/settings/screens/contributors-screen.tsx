@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { YStack } from 'tamagui';
 
 import { SectionPageHeader } from '@/components';
-import { useUiSettings } from '@/providers/ui-settings-provider';
+import { useLayoutSize } from '@/providers/layout-size-provider';
 import { ContributorsOperationsRoster } from '../components/contributors-operations-roster';
 import { ContributorsTribute } from '../components/contributors-tribute';
 import { SettingsPage } from '../components/settings-page';
@@ -12,7 +12,7 @@ import { useSettingsSwipe } from '../settings-swipe-context';
 export function ContributorsScreen() {
   const settingsSwipe = useSettingsSwipe();
   const { t } = useTranslation('settings');
-  const { layoutSize } = useUiSettings();
+  const layoutSize = useLayoutSize();
   const operationsTeam = mockContributors.operationsTeam.map((member) => ({
     ...member,
     description: t(`contributors.contributors.${member.id}`),

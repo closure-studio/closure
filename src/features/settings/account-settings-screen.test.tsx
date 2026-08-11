@@ -7,8 +7,8 @@ import { tamaguiConfig } from '../../../tamagui.config';
 import { SettingsSwipeProvider } from './settings-swipe-context';
 import { AccountSettingsScreen } from './screens/account-settings-screen';
 
-jest.mock('@/providers/ui-settings-provider', () => ({
-  useUiSettings: () => ({ layoutSize: 'small' }),
+jest.mock('@/providers/layout-size-provider', () => ({
+  useLayoutSize: () => 'small',
 }));
 
 jest.mock('react-native-reanimated', () => {

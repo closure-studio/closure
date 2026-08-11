@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, XStack, YStack, getTokens } from 'tamagui';
 
 import { DecorativeBarcode, FlickeringStatusIndicator, MonoText } from '@/components';
+import type { LoginCredentials } from '@/schemas/auth';
 import { AccessOrbit } from '../components/access-orbit';
 import { LoginForm } from '../components/login-form';
 import { TerminalBrand } from '../components/terminal-brand';
@@ -11,14 +12,14 @@ import { TerminalBrand } from '../components/terminal-brand';
 const MOCK_AUTHENTICATION_DELAY_MS = 1_100;
 const ACCESS_ORBIT_NODE_ID = '07';
 
-export function AuthScreen({ onAuthenticated }: { onAuthenticated: () => void }) {
+export function AuthScreen({ onAuthenticated }: { onAuthenticated: (credentials: LoginCredentials) => void }) {
   const { t } = useTranslation('auth');
   const colors = getTokens().color;
   const reducedMotion = useReducedMotion();
-  const handleAuthentication = async () => {
+  const handleAuthentication = async (credentials: LoginCredentials) => {
     await new Promise<void>((resolve) => {
       setTimeout(() => {
-        onAuthenticated();
+        onAuthenticated(credentials);
         resolve();
       }, MOCK_AUTHENTICATION_DELAY_MS);
     });

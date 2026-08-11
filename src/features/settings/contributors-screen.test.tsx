@@ -8,8 +8,8 @@ import { SettingsSwipeProvider } from './settings-swipe-context';
 import { mockContributors } from './mocks/settings-mocks';
 import { ContributorsScreen } from './screens/contributors-screen';
 
-jest.mock('@/providers/ui-settings-provider', () => ({
-  useUiSettings: () => ({ layoutSize: 'small' }),
+jest.mock('@/providers/layout-size-provider', () => ({
+  useLayoutSize: () => 'small',
 }));
 
 jest.mock('react-native-reanimated', () => {

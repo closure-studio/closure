@@ -33,7 +33,7 @@ import {
   TerminalPanel,
   TerminalText,
 } from '@/components';
-import { useUiSettings } from '@/providers/ui-settings-provider';
+import { useLayoutSize } from '@/providers/layout-size-provider';
 import { apiNodeIdSchema } from '@/schemas/api-node';
 import type { ApiNode } from '@/schemas/api-node';
 import { SettingsPage } from '../components/settings-page';
@@ -58,7 +58,7 @@ export function NetworkSettingsScreen() {
   const settingsSwipe = useSettingsSwipe();
   const { t } = useTranslation('settings');
   const colors = getTokens().color;
-  const { layoutSize } = useUiSettings();
+  const layoutSize = useLayoutSize();
   const reducedMotion = useReducedMotion();
   const { selectApiNode, selectedApiNodeId } = useSettingsMockState();
   const [detectionRun, setDetectionRun] = useState(0);

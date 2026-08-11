@@ -1,19 +1,20 @@
 import type { PropsWithChildren } from 'react';
 import { render } from '@testing-library/react-native';
 
-import type { LayoutSize } from '@/schemas/ui-settings';
+import type { LayoutSize } from '@/schemas/layout-size';
 
 const mockDashboardTabs = jest.fn((_props: unknown) => null);
 const mockDashboardTabsScreen = jest.fn(() => null);
 const mockDashboardSmallScreenTabBar = jest.fn(() => null);
 const mockDashboardShell = jest.fn(({ children }: PropsWithChildren) => children);
+const mockLinkGameAccount = jest.fn();
 const mockSelectGameAccount = jest.fn();
 const mockGetTabScreenOptions = jest.fn((reducedMotion: boolean) => ({
   animation: reducedMotion ? 'none' : 'fade',
 }));
 const mockUseReducedMotion = jest.fn(() => false);
 const mockUseIsFocused = jest.fn(() => true);
-const mockUseUiSettings = jest.fn((): { layoutSize: LayoutSize } => ({ layoutSize: 'small' }));
+const mockUseLayoutSize = jest.fn((): LayoutSize => 'small');
 
 jest.mock('expo-router', () => ({
   useIsFocused: mockUseIsFocused,
@@ -47,8 +48,8 @@ jest.mock('tamagui', () => ({
   }),
 }));
 
-jest.mock('@/providers/ui-settings-provider', () => ({
-  useUiSettings: mockUseUiSettings,
+jest.mock('@/providers/layout-size-provider', () => ({
+  useLayoutSize: mockUseLayoutSize,
 }));
 
 jest.mock('@/components', () => {
@@ -62,17 +63,18 @@ jest.mock('@/components', () => {
 });
 
 jest.mock('@/features/dashboard', () => ({
-  DashboardProvider: ({ children }: PropsWithChildren) => children,
   DashboardShell: mockDashboardShell,
   selectBackdropTint: () => '#00ff00',
-  useDashboardState: () => ({
-    activeGameAccount: { color: 'primary' },
-    activeGameAccountId: 'account-1',
-    gameAccounts: [{ id: 'account-1' }, { id: 'account-2' }],
-    isLinkGameAccountSheetOpen: false,
-    linkGameAccount: jest.fn(),
+}));
+
+jest.mock('@/store', () => ({
+  selectActiveGameAccount: () => ({ color: 'primary', id: 'account-1' }),
+  useAppStore: (selector: (state: object) => unknown) => selector({
+    games: {
+      gameAccounts: [{ id: 'account-1' }, { id: 'account-2' }],
+    },
+    linkGameAccount: mockLinkGameAccount,
     selectGameAccount: mockSelectGameAccount,
-    setIsLinkGameAccountSheetOpen: jest.fn(),
   }),
 }));
 
@@ -99,14 +101,15 @@ describe('DashboardLayout route transitions', () => {
   beforeEach(() => {
     mockDashboardTabs.mockClear();
     mockDashboardShell.mockClear();
+    mockLinkGameAccount.mockClear();
     mockSelectGameAccount.mockClear();
     mockGetTabScreenOptions.mockClear();
     mockUseReducedMotion.mockReset();
     mockUseReducedMotion.mockReturnValue(false);
     mockUseIsFocused.mockReset();
     mockUseIsFocused.mockReturnValue(true);
-    mockUseUiSettings.mockReset();
-    mockUseUiSettings.mockReturnValue({ layoutSize: 'small' });
+    mockUseLayoutSize.mockReset();
+    mockUseLayoutSize.mockReturnValue('small');
   });
 
   it('enables Dashboard route transitions when reduced motion is disabled', async () => {
@@ -156,7 +159,7 @@ describe('DashboardLayout route transitions', () => {
   });
 
   it('renders no Dashboard tab bar on Large Screen', async () => {
-    mockUseUiSettings.mockReturnValue({ layoutSize: 'large' });
+    mockUseLayoutSize.mockReturnValue('large');
 
     await render(<DashboardLayout />);
 

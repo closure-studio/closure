@@ -5,7 +5,12 @@ import DashboardActivityRoute from '../src/app/(app)/dashboard/activity';
 import DashboardInventoryRoute from '../src/app/(app)/dashboard/inventory';
 import DashboardOperatorsRoute from '../src/app/(app)/dashboard/operators';
 import DashboardOverviewRoute from '../src/app/(app)/dashboard/overview';
-import DashboardTasksRoute from '../src/app/(app)/dashboard/tasks';
+
+const mockActiveGameAccount = {
+  activityTimeline: [],
+  inventory: {},
+  operators: [],
+};
 
 jest.mock('@/features/dashboard', () => {
   const { Text, View } = jest.requireActual<typeof import('react-native')>('react-native');
@@ -17,18 +22,13 @@ jest.mock('@/features/dashboard', () => {
     GameAccountOverviewView: () => <Text testID="overview-screen" />,
     InventoryView: () => <Text testID="inventory-screen" />,
     OperatorRosterView: () => <Text testID="operators-screen" />,
-    RoutineTasksView: () => <Text testID="tasks-screen" />,
-    useDashboardState: () => ({
-      activeGameAccount: {
-        activityTimeline: [],
-        inventory: {},
-        operators: [],
-        routineTasks: [],
-      },
-      toggleRoutineTaskCompletion: jest.fn(),
-    }),
   };
 });
+
+jest.mock('@/store', () => ({
+  selectActiveGameAccount: () => mockActiveGameAccount,
+  useAppStore: (selector: (state: object) => unknown) => selector({}),
+}));
 
 jest.mock('@/features/dashboard/item-table', () => {
   return { itemTable: {} };
@@ -40,7 +40,6 @@ describe('dashboard routes', () => {
     ['inventory', DashboardInventoryRoute],
     ['operators', DashboardOperatorsRoute],
     ['overview', DashboardOverviewRoute],
-    ['tasks', DashboardTasksRoute],
   ] as const)('renders the dedicated %s screen', async (screenId, Route) => {
     const screen = await render(<Route />);
 

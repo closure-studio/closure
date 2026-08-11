@@ -15,7 +15,7 @@ features -> components public entry -> components/ui
 - `app/` contains Expo Router route and layout files only. Route files mount feature or shared layout entry points and always export a default component.
 - `(auth)` and `(app)` route groups separate public authentication from protected application routes without adding group names to public URLs.
 - `providers/` contains application-wide provider composition such as fonts, splash lifecycle, localization, Tamagui, and Router theme.
-- `features/session/` owns in-memory authentication state, protected navigation intent, and the shared terminal shell used across authentication and application routes.
+- `features/session/` owns protected navigation intent and the shared terminal shell used across authentication and application routes. The global store owns the persisted User Session.
 - `features/<feature>/index.ts` is the feature's public API. Routes and other features must not import its internal files directly.
 - `features/<feature>/screens/` contains feature entry screens and business-state composition boundaries.
 - `features/<feature>/components/` contains feature-specific presentation and interaction components.
@@ -25,7 +25,7 @@ features -> components public entry -> components/ui
 - `features/<feature>/mocks/` contains development fixtures and mock construction boundaries; it is not a production data layer.
 - `components/index.ts` is the public API for globally reusable UI. `components/ui/` contains business-agnostic Tamagui primitives and visual effects; `components/layout/` contains reusable page layouts.
 - `i18n/` contains locale resolution, typed resources, and feature-oriented translation namespaces. Its React provider lives in `providers/`.
-- `lib/` is reserved for third-party initialization shared by the application. Placeholder directories for `services/`, `store/`, `config/`, global `hooks/`, `constants/`, and `utils/` contain ownership notes; add implementation files only when a real cross-feature owner exists.
+- `lib/` owns shared third-party initialization, including the MMKV adapter. `store/` owns the single cross-feature Zustand store; placeholder directories for `services/`, `config/`, global `hooks/`, `constants/`, and `utils/` contain ownership notes.
 - Tamagui tokens, themes, media queries, fonts, and animations remain centralized in the root `tamagui.config.ts`; do not duplicate them under `src/theme/`.
 - `types/` contains ambient and module declarations only; domain types are inferred from schemas under `schemas/`.
 
@@ -33,7 +33,7 @@ features -> components public entry -> components/ui
 
 Shared UI and feature presentation components receive business data and actions through props. They may still use local UI state, refs, animation hooks, measurements, accessibility hooks, and Tamagui theme APIs.
 
-Examples of local UI state include password visibility, the selected filter, form validation messages, sheet visibility, and animation progress. Authentication state, the active Game Account, server data, and persisted user preferences belong in a feature screen, feature hook, or a store once multiple features share that state.
+Examples of local UI state include password visibility, the selected filter, form validation messages, sheet visibility, and animation progress. The global store owns authentication state, the active Game Account, and their persisted data. A store slice should own a UI preference only after a user can explicitly choose it and it must survive restart.
 
 Large components do not automatically become state-connected. For example, an Operator Roster remains props-driven while a thin feature screen or container selects Operators from the store and passes them down.
 
@@ -49,7 +49,7 @@ Large components do not automatically become state-connected. For example, an Op
 ## Placement
 
 - Put a component in `components/ui/` only when it is reusable across features and does not use business model types.
-- Put a component in `features/<feature>/components/` when it represents feature language such as login credentials, Game Accounts, Operator Rosters, Inventories, or Routine Tasks.
+- Put a component in `features/<feature>/components/` when it represents feature language such as login credentials, Game Accounts, Operator Rosters, or Inventories.
 - Feature presentation components import domain types from `@/schemas/<domain>` and may import their own feature's `utils.ts` through a single-level relative import, but they do not import mocks, APIs, stores, or screens.
 - Put store, context, API, and routing access in the feature screen or feature hook that composes those components.
 - Export feature entry points explicitly from `index.ts`. Do not import another feature's internal files.

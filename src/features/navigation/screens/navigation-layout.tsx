@@ -7,7 +7,7 @@ import { XStack, YStack } from 'tamagui';
 
 import type { HorizontalSwipeDirection } from '@/components';
 import { SettingsSwipeProvider } from '@/features/settings';
-import { useUiSettings } from '@/providers/ui-settings-provider';
+import { useLayoutSize } from '@/providers/layout-size-provider';
 import { LargeScreenNavigationSidebar } from '../components/large-screen-navigation-sidebar';
 import { NavigationHeader } from '../components/navigation-header';
 import {
@@ -35,7 +35,7 @@ type NavigationLayoutProps = PropsWithChildren<{
 export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) {
   const { t } = useTranslation('navigation');
   const { t: tDashboard } = useTranslation('dashboard');
-  const { layoutSize } = useUiSettings();
+  const layoutSize = useLayoutSize();
   const pathname = usePathname();
   const router = useRouter();
   const scope = getNavigationScope(pathname);

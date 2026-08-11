@@ -15,8 +15,8 @@ import { Image, XStack, YStack, getTokens, styled } from 'tamagui';
 import { AvatarFilter, MonoText, TerminalPanel, TerminalText } from '@/components';
 import type { ItemTable, ItemTableItem } from '@/schemas/game-data';
 import type { Inventory } from '@/schemas/game-account';
-import { useUiSettings } from '@/providers/ui-settings-provider';
-import type { LayoutSize } from '@/schemas/ui-settings';
+import { useLayoutSize } from '@/providers/layout-size-provider';
+import type { LayoutSize } from '@/schemas/layout-size';
 import { getItemImageUrl } from '../item-image';
 
 type InventoryEntry = {
@@ -282,7 +282,7 @@ function InventoryItemArtwork({
 }
 
 const InventoryPreview = memo(function InventoryPreview({ entry }: { entry: InventoryEntry }) {
-  const { layoutSize } = useUiSettings();
+  const layoutSize = useLayoutSize();
   const artworkSize = layoutSize === 'small'
     ? SMALL_SCREEN_PREVIEW_ARTWORK_SIZE
     : LARGE_SCREEN_PREVIEW_ARTWORK_SIZE;
@@ -378,7 +378,7 @@ const InventoryCell = memo(function InventoryCell({
   rowGap: number;
   selected: boolean;
 }) {
-  const { layoutSize } = useUiSettings();
+  const layoutSize = useLayoutSize();
   const artworkSize = layoutSize === 'small'
     ? SMALL_SCREEN_ITEM_ARTWORK_SIZE
     : LARGE_SCREEN_ITEM_ARTWORK_SIZE;
@@ -499,7 +499,7 @@ export function InventoryView({
   inventory: Inventory;
   itemTable: ItemTable;
 }) {
-  const { layoutSize } = useUiSettings();
+  const layoutSize = useLayoutSize();
   const entries = useMemo(
     () => Object.entries(inventory).flatMap(([itemId, quantity]) => {
       const item = itemTable[itemId];

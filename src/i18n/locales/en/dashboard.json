@@ -23,8 +23,7 @@
       "activity": { "label": "Timeline", "subtitle": "TIMELINE" },
       "inventory": { "label": "Inventory" },
       "operators": { "label": "Operators", "subtitle": "OPERATORS" },
-      "overview": { "label": "Overview", "subtitle": "OVERVIEW" },
-      "tasks": { "label": "Routine", "subtitle": "ROUTINE" }
+      "overview": { "label": "Overview", "subtitle": "OVERVIEW" }
     }
   },
   "operators": {
@@ -67,11 +66,6 @@
     "profile": "// OPERATOR PROFILE",
     "recoversAt": "FULL AT {{time}}",
     "sanity": "Sanity"
-  },
-  "routine": {
-    "cadence": { "daily": "// DAILY", "weekly": "// WEEKLY" },
-    "progressToday": "TODAY'S PROGRESS",
-    "title": "Routine checklist"
   },
   "timeline": {
     "title": "Events and notices",

@@ -12,13 +12,13 @@ import Svg, { Circle, G, Line, Path } from 'react-native-svg';
 import { YStack, getTokens } from 'tamagui';
 
 import { MonoText, TerminalText } from '@/components';
-import { useUiSettings } from '@/providers/ui-settings-provider';
+import { useLayoutSize } from '@/providers/layout-size-provider';
 
 const AMBIENT_ORBIT_DURATION_MS = 18_000;
 
 export function AccessOrbit({ label, nodeId }: { label: string; nodeId: string }) {
   const colors = getTokens().color;
-  const { layoutSize } = useUiSettings();
+  const layoutSize = useLayoutSize();
   const reducedMotion = useReducedMotion();
   const rotation = useSharedValue(0);
   const size = layoutSize === 'large' ? 430 : 144;

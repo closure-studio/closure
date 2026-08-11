@@ -3,11 +3,11 @@ import { useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SettingsMockProvider } from '@/features/settings';
-import { useUiSettings } from '@/providers/ui-settings-provider';
+import { useLayoutSize } from '@/providers/layout-size-provider';
 import { getRouteScreenOptions } from '@/features/session';
 
 export default function SettingsLayout() {
-  const { layoutSize } = useUiSettings();
+  const layoutSize = useLayoutSize();
   const reducedMotion = useReducedMotion();
 
   return (

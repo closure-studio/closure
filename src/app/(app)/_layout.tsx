@@ -5,26 +5,27 @@ import { useReducedMotion } from 'react-native-reanimated';
 import {
   getRouteScreenOptions,
   getScopeTransitionScreenOptions,
-  useAuth,
   useSessionBackdrop,
 } from '@/features/session';
 import {
   NavigationLayout,
 } from '@/features/navigation';
-import { useUiSettings } from '@/providers/ui-settings-provider';
+import { useLayoutSize } from '@/providers/layout-size-provider';
+import { useAppStore } from '@/store';
 
 export default function AppLayout() {
-  const { layoutSize } = useUiSettings();
+  const layoutSize = useLayoutSize();
   const pathname = usePathname();
   const router = useRouter();
   const reducedMotion = useReducedMotion();
-  const { authState, signOut } = useAuth();
+  const authStatus = useAppStore((state) => state.user.status);
+  const signOut = useAppStore((state) => state.signOut);
   const { resetBackdropTint } = useSessionBackdrop();
   const screenOptions = layoutSize === 'small'
     ? getScopeTransitionScreenOptions(reducedMotion)
     : getRouteScreenOptions(reducedMotion, { enableIosBackGesture: true });
 
-  if (authState.status !== 'authenticated') {
+  if (authStatus !== 'authenticated') {
     return <Redirect href={{ pathname: '/login', params: { returnTo: pathname } }} />;
   }
 

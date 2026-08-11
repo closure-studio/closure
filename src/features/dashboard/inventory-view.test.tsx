@@ -6,14 +6,14 @@ import * as v from 'valibot';
 import { tamaguiConfig } from '../../../tamagui.config';
 import { itemTableSchema } from '@/schemas/game-data';
 import { inventorySchema } from '@/schemas/game-account';
-import type { LayoutSize } from '@/schemas/ui-settings';
+import type { LayoutSize } from '@/schemas/layout-size';
 import { InventoryView, getInventoryColumnCount } from './components/inventory-view';
 import { getItemImageUrl } from './item-image';
 
 let mockLayoutSize: LayoutSize = 'large';
 
-jest.mock('@/providers/ui-settings-provider', () => ({
-  useUiSettings: () => ({ layoutSize: mockLayoutSize }),
+jest.mock('@/providers/layout-size-provider', () => ({
+  useLayoutSize: () => mockLayoutSize,
 }));
 
 jest.mock('react-native-reanimated', () => {

@@ -40,7 +40,6 @@ describe('navigation config', () => {
       { id: 'overview', route: '/dashboard/overview' },
       { id: 'operators', route: '/dashboard/operators' },
       { id: 'inventory', route: '/dashboard/inventory' },
-      { id: 'tasks', route: '/dashboard/tasks' },
       { id: 'activity', route: '/dashboard/activity' },
     ]);
     expect(settingsPages.map(({ id, route }) => ({ id, route }))).toEqual([

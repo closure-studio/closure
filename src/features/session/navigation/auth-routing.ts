@@ -1,6 +1,6 @@
 import type { Href } from 'expo-router';
 
-import type { AuthState } from '../providers/auth-provider';
+import type { AuthState } from '@/schemas/auth';
 
 type PostLoginDestination = Extract<Href, string>;
 

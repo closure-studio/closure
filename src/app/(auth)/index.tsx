@@ -1,10 +1,11 @@
 import { Redirect } from 'expo-router';
 
-import { resolveAuthEntryDestination, useAuth } from '@/features/session';
+import { resolveAuthEntryDestination } from '@/features/session';
+import { useAppStore } from '@/store';
 
 export default function AuthIndexRoute() {
-  const { authState } = useAuth();
-  const destination = resolveAuthEntryDestination(authState.status);
+  const authStatus = useAppStore((state) => state.user.status);
+  const destination = resolveAuthEntryDestination(authStatus);
 
   return <Redirect href={destination} />;
 }
