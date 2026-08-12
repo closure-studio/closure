@@ -3,11 +3,11 @@ import { I18nextProvider } from 'react-i18next';
 import { TamaguiProvider, YStack } from 'tamagui';
 
 import { i18n } from '@/i18n';
-import { initialGameAccounts } from './mocks/game-accounts';
-import { tamaguiConfig } from '../../../tamagui.config';
-import { DashboardShell } from './components/dashboard-shell';
+import { initialGameAccounts } from '../mocks/game-accounts';
+import { tamaguiConfig } from '../../../../tamagui.config';
+import { DashboardShell } from './dashboard-shell';
 
-jest.mock('./components/link-game-account-sheet', () => ({
+jest.mock('./link-game-account-sheet', () => ({
   LinkGameAccountSheet: () => null,
 }));
 

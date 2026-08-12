@@ -3,11 +3,11 @@ import { YStack } from 'tamagui';
 
 import { SectionPageHeader } from '@/components';
 import { useLayoutSize } from '@/providers/layout-size-provider';
+import { SettingsPage } from '../../components/settings-page';
+import { useSettingsSwipe } from '../../settings-swipe-context';
 import { ContributorsOperationsRoster } from '../components/contributors-operations-roster';
 import { ContributorsTribute } from '../components/contributors-tribute';
-import { SettingsPage } from '../components/settings-page';
-import { mockContributors } from '../mocks/settings-mocks';
-import { useSettingsSwipe } from '../settings-swipe-context';
+import { mockContributors } from '../mocks/contributors-fixture';
 
 export function ContributorsScreen() {
   const settingsSwipe = useSettingsSwipe();

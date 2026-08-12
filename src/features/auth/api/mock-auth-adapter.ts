@@ -72,13 +72,7 @@ export class MockAuthAdapter implements AuthAdapter {
 
   async login(input: LoginCredentials): Promise<AuthResult<UserSession>> {
     await this.#wait();
-    if (input.password !== MOCK_AUTH_VALUES.password) return failure('invalid-credentials');
-
-    const session = [mockActiveSession, mockAdminSession, mockBannedSession]
-      .find((candidate) => candidate.principal.email === input.email);
-    if (!session) return failure('invalid-credentials');
-    if (session.principal.status === 'banned') return failure('account-banned');
-    return success(session);
+    return success(mockActiveSession);
   }
 
   async loginAsAdmin(input: AdminLoginInput): Promise<AuthResult<UserSession>> {

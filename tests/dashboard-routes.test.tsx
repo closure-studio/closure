@@ -30,10 +30,6 @@ jest.mock('@/store', () => ({
   useAppStore: (selector: (state: object) => unknown) => selector({}),
 }));
 
-jest.mock('@/features/dashboard/item-table', () => {
-  return { itemTable: {} };
-});
-
 describe('dashboard routes', () => {
   it.each([
     ['activity', DashboardActivityRoute],

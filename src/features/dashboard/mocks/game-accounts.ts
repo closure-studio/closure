@@ -4,7 +4,7 @@ import type {
   Operator,
   ServerChannel,
 } from '@/schemas/game-account';
-import { inventoryFixture } from './inventory';
+import { inventoryFixture } from '../inventory/mocks/inventory';
 
 const operatorTemplates: Omit<Operator, 'level' | 'trust' | 'elite'>[] = [
   { id: 'sga', name: '银灰', codename: 'SILVERASH', class: '近卫', rarity: 6, maxLevel: 90, potential: 4, skillLevel: 7, proficiency: [3, 2, 0] },

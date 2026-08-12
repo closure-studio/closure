@@ -1,1 +1,0 @@
-export const IOS_BACK_GESTURE_EDGE_WIDTH_PT = 24;

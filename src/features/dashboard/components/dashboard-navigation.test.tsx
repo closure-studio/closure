@@ -3,12 +3,12 @@ import { I18nextProvider } from 'react-i18next';
 import { TamaguiProvider } from 'tamagui';
 
 import { i18n } from '@/i18n';
-import { tamaguiConfig } from '../../../tamagui.config';
+import { tamaguiConfig } from '../../../../tamagui.config';
 import {
   GameAccountSwitcher,
   resolveScrollOffsetToRevealItem,
-} from './components/dashboard-navigation';
-import { initialGameAccounts } from './mocks/game-accounts';
+} from './dashboard-navigation';
+import { initialGameAccounts } from '../mocks/game-accounts';
 
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');

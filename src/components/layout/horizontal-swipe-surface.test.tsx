@@ -12,7 +12,6 @@ const mockGesture = {
   cancelsTouchesInView: jest.fn().mockReturnThis(),
   enabled: mockEnabled,
   failOffsetY: jest.fn().mockReturnThis(),
-  hitSlop: jest.fn().mockReturnThis(),
   onEnd: jest.fn((handler: PanEndHandler) => {
     mockEndHandler = handler;
   }),

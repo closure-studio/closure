@@ -69,8 +69,8 @@ module.exports = defineConfig([
   },
   {
     files: [
-      "src/features/*/hooks/**/*.{ts,tsx}",
-      "src/features/*/{selectors,utils}.ts",
+      "src/features/**/hooks/**/*.{ts,tsx}",
+      "src/features/**/{selectors,utils}.ts",
       "src/{lib,services,store}/**/*.{ts,tsx}",
     ],
     rules: {
@@ -147,7 +147,8 @@ module.exports = defineConfig([
     },
   },
   {
-    files: ["src/features/*/components/**/*.{ts,tsx}"],
+    files: ["src/features/**/components/**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**", "**/*.{spec,test}.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
