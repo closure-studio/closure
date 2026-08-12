@@ -24,24 +24,6 @@ function readAnimatedNumber(value: unknown): number {
   return result;
 }
 
-function readTranslateX(cardStyle: unknown): number {
-  if (typeof cardStyle !== 'object' || cardStyle === null) {
-    throw new Error('Expected a card style object.');
-  }
-
-  const transform = Reflect.get(cardStyle, 'transform');
-  if (!Array.isArray(transform) || transform.length !== 1) {
-    throw new Error('Expected exactly one card transform.');
-  }
-
-  const translation = transform[0];
-  if (typeof translation !== 'object' || translation === null) {
-    throw new Error('Expected a translateX transform.');
-  }
-
-  return readAnimatedNumber(Reflect.get(translation, 'translateX'));
-}
-
 function readSceneOpacity(sceneStyle: unknown): number {
   if (typeof sceneStyle !== 'object' || sceneStyle === null) {
     throw new Error('Expected a scene style object.');
@@ -144,7 +126,7 @@ describe('route transition', () => {
     });
   });
 
-  it('uses the shared timing for the compact Dashboard and Settings scene push', () => {
+  it('uses the shared fade-scale timing for compact Dashboard and Settings scope changes', () => {
     const screenOptions = getScopeTransitionScreenOptions(false);
 
     expect(typeof screenOptions.cardStyleInterpolator).toBe('function');
@@ -153,7 +135,7 @@ describe('route transition', () => {
       animationTypeForReplace: 'push',
       cardOverlayEnabled: false,
       cardShadowEnabled: false,
-      detachPreviousScreen: false,
+      detachPreviousScreen: true,
       gestureEnabled: false,
       transitionSpec: {
         open: { config: { duration: PAGE_TRANSITION_TIMING.totalMs } },
@@ -166,8 +148,7 @@ describe('route transition', () => {
     const cardStyleInterpolator = screenOptions.cardStyleInterpolator;
     if (!cardStyleInterpolator) throw new Error('Expected a compact scope card interpolator.');
 
-    const incomingProgressValue = new Animated.Value(0.5);
-    const incomingProgress = incomingProgressValue.interpolate({
+    const incomingProgress = new Animated.Value(0.5).interpolate({
       inputRange: [0, 1],
       outputRange: [0, 1],
     });
@@ -175,8 +156,7 @@ describe('route transition', () => {
       inputRange: [0, 1],
       outputRange: [0, 1],
     });
-    const nextProgressValue = new Animated.Value(0.5);
-    const nextProgress = nextProgressValue.interpolate({
+    const nextProgress = new Animated.Value(0.5).interpolate({
       inputRange: [0, 1],
       outputRange: [0, 1],
     });
@@ -184,8 +164,7 @@ describe('route transition', () => {
       inputRange: [0, 1],
       outputRange: [0, 1],
     });
-    const directionValue = new Animated.Value(1);
-    const direction = directionValue.interpolate<1 | -1>({
+    const direction = new Animated.Value(1).interpolate<1 | -1>({
       inputRange: [0, 1],
       outputRange: [-1, 1],
     });
@@ -210,27 +189,11 @@ describe('route transition', () => {
     });
 
     expect(incomingStyle.cardStyle).not.toHaveProperty('backgroundColor');
-    expect(incomingStyle.cardStyle).not.toHaveProperty('opacity');
+    expect(incomingStyle.cardStyle).toHaveProperty('opacity');
     expect(outgoingStyle.cardStyle).not.toHaveProperty('backgroundColor');
-    expect(outgoingStyle.cardStyle).not.toHaveProperty('opacity');
-    expect(readTranslateX(incomingStyle.cardStyle)).toBe(195);
-    expect(readTranslateX(outgoingStyle.cardStyle)).toBe(-195);
+    expect(outgoingStyle.cardStyle).toHaveProperty('opacity');
 
-    incomingProgressValue.setValue(0);
-    nextProgressValue.setValue(0);
-    expect(readTranslateX(incomingStyle.cardStyle)).toBe(390);
-    expect(readTranslateX(outgoingStyle.cardStyle)).toBe(0);
-
-    incomingProgressValue.setValue(1);
-    nextProgressValue.setValue(1);
-    expect(readTranslateX(incomingStyle.cardStyle)).toBe(0);
-    expect(readTranslateX(outgoingStyle.cardStyle)).toBe(-390);
-
-    incomingProgressValue.setValue(0.5);
-    nextProgressValue.setValue(0.5);
-    directionValue.setValue(0);
-    expect(readTranslateX(incomingStyle.cardStyle)).toBe(-195);
-    expect(readTranslateX(outgoingStyle.cardStyle)).toBe(195);
+    expect(outgoingStyle.cardStyle).toHaveProperty('transform');
   });
 
   it('disables compact scene motion where required', () => {

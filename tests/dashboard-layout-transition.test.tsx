@@ -118,6 +118,8 @@ describe('DashboardLayout route transitions', () => {
     expect(mockGetTabScreenOptions).toHaveBeenCalledWith(false);
     expect(mockDashboardShell).toHaveBeenCalledWith(
       expect.objectContaining({
+        canSwipeNext: true,
+        canSwipePrevious: false,
         isContentSwipeEnabled: true,
         onContentSwipe: expect.any(Function),
       }),

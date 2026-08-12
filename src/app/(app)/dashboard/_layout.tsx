@@ -28,6 +28,7 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
   const linkGameAccount = useAppStore((state) => state.linkGameAccount);
   const selectGameAccount = useAppStore((state) => state.selectGameAccount);
   const [isLinkGameAccountSheetOpen, setIsLinkGameAccountSheetOpen] = useState(false);
+  const activeGameAccountIndex = gameAccounts.findIndex((gameAccount) => gameAccount.id === activeGameAccountId);
   const backdropTint = selectBackdropTint(activeGameAccount, {
     primary: colors.appAccent.val,
     warning: colors.appWarning.val,
@@ -54,6 +55,8 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <DashboardShell
       activeGameAccountId={activeGameAccountId}
+      canSwipeNext={activeGameAccountIndex >= 0 && activeGameAccountIndex < gameAccounts.length - 1}
+      canSwipePrevious={activeGameAccountIndex > 0}
       gameAccounts={gameAccounts}
       isContentSwipeEnabled={isFocused && layoutSize === 'small' && gameAccounts.length > 1}
       isLinkGameAccountSheetOpen={isLinkGameAccountSheetOpen}

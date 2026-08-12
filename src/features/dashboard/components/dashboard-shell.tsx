@@ -8,11 +8,16 @@ import { DashboardSecondaryHeader, type DashboardSecondaryHeaderProps } from './
 const DASHBOARD_CONTENT_MAX_WIDTH = 1152;
 
 type DashboardShellProps = DashboardSecondaryHeaderProps & {
+  canSwipeNext: boolean;
+  canSwipePrevious: boolean;
   isContentSwipeEnabled: boolean;
   onContentSwipe: (direction: HorizontalSwipeDirection) => void;
 };
 
 export function DashboardShell({
+  activeGameAccountId,
+  canSwipeNext,
+  canSwipePrevious,
   children,
   isContentSwipeEnabled,
   onContentSwipe,
@@ -20,8 +25,11 @@ export function DashboardShell({
 }: PropsWithChildren<DashboardShellProps>) {
   return (
     <YStack grow={1} shrink={1} minH={0} overflow="hidden">
-      <DashboardSecondaryHeader {...headerProps} />
+      <DashboardSecondaryHeader activeGameAccountId={activeGameAccountId} {...headerProps} />
       <HorizontalSwipeSurface
+        canSwipeLeft={canSwipeNext}
+        canSwipeRight={canSwipePrevious}
+        contentKey={activeGameAccountId}
         enabled={isContentSwipeEnabled}
         onSwipe={onContentSwipe}
       >

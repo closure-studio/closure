@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react';
 import { Stack as JsStack } from 'expo-router/js-stack';
 import type { BottomTabNavigationOptions } from 'expo-router/tabs';
-import { Animated, Easing } from 'react-native';
+import { Easing } from 'react-native';
 
 import { PAGE_TRANSITION_TIMING } from '@/constants/page-transition';
 
@@ -68,26 +68,6 @@ const tabSceneStyleInterpolator: TabSceneStyleInterpolator = ({ current }) => ({
   },
 });
 
-const scopeCardStyleInterpolator: CardStyleInterpolator = ({ current, inverted, layouts, next }) => {
-  const translation = next
-    ? next.progress.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0, -layouts.screen.width],
-        extrapolate: 'clamp',
-      })
-    : current.progress.interpolate({
-        inputRange: [0, 1],
-        outputRange: [layouts.screen.width, 0],
-        extrapolate: 'clamp',
-      });
-
-  return {
-    cardStyle: {
-      transform: [{ translateX: Animated.multiply(translation, inverted) }],
-    },
-  };
-};
-
 export function getRouteScreenOptions(
   reducedMotion: boolean,
 ): JsStackScreenOptions {
@@ -127,31 +107,11 @@ export function getTabScreenOptions(reducedMotion: boolean): BottomTabNavigation
     };
 }
 
-export function getScopeTransitionScreenOptions(
-  reducedMotion: boolean,
-): JsStackScreenOptions {
-  const sharedOptions: JsStackScreenOptions = {
-    cardOverlayEnabled: false,
-    cardShadowEnabled: false,
-    cardStyle: { backgroundColor: 'transparent' },
-    detachPreviousScreen: false,
-    gestureEnabled: false,
-    headerShown: false,
-  };
-
-  if (reducedMotion) {
-    return {
-      ...sharedOptions,
-      animation: 'none',
-      detachPreviousScreen: true,
-    };
-  }
-
+export function getScopeTransitionScreenOptions(reducedMotion: boolean): JsStackScreenOptions {
+  const options = getRouteScreenOptions(reducedMotion);
   return {
-    ...sharedOptions,
-    animation: 'default',
-    animationTypeForReplace: 'push',
-    cardStyleInterpolator: scopeCardStyleInterpolator,
-    transitionSpec,
+    ...options,
+    cardShadowEnabled: false,
+    detachPreviousScreen: true,
   };
 }

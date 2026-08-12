@@ -28,6 +28,8 @@ function DashboardShellTestTree({ pageId }: { pageId: string }) {
       <I18nextProvider i18n={i18n}>
         <DashboardShell
           activeGameAccountId="acc-01"
+          canSwipeNext
+          canSwipePrevious={false}
           gameAccounts={initialGameAccounts}
           isContentSwipeEnabled
           isLinkGameAccountSheetOpen={false}

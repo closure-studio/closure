@@ -2,10 +2,7 @@ import { render } from '@testing-library/react-native';
 import { TamaguiProvider } from 'tamagui';
 
 import { tamaguiConfig } from '../../../tamagui.config';
-import {
-  SettingsPagerTabs,
-  resolveSettingsSwipeAction,
-} from './components/settings-swipe-pager';
+import { SettingsPagerTabs } from './components/settings-swipe-pager';
 import { settingsNavigation } from './navigation-config';
 
 jest.mock('react-native-reanimated', () => {
@@ -28,6 +25,8 @@ async function renderSettingsPagerTabs() {
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <SettingsPagerTabs
         activeId="network"
+        hasNextStep
+        hasPreviousStep={false}
         items={settingsItems}
         onSelect={jest.fn()}
         swipeHint="SWIPE L/R"
@@ -72,37 +71,5 @@ describe('SettingsPagerTabs', () => {
     expect(screen.getByTestId('settings-swipe-hint')).toHaveStyle({
       transform: [{ translateX: 0 }],
     });
-  });
-});
-
-describe('resolveSettingsSwipeAction', () => {
-  it('moves forward for a left swipe at the threshold', () => {
-    expect(resolveSettingsSwipeAction({
-      activeId: 'network',
-      direction: 'left',
-      items: settingsItems,
-    })).toEqual({ pageId: 'account', type: 'select-page' });
-  });
-
-  it('moves backward for a right swipe', () => {
-    expect(resolveSettingsSwipeAction({
-      activeId: 'contributors',
-      direction: 'right',
-      items: settingsItems,
-    })).toEqual({ pageId: 'account', type: 'select-page' });
-  });
-
-  it('exits settings for a right swipe from the first page', () => {
-    expect(resolveSettingsSwipeAction({
-      activeId: 'network',
-      direction: 'right',
-      items: settingsItems,
-    })).toEqual({ type: 'exit' });
-  });
-
-  it.each([
-    { activeId: 'contributors', direction: 'left' },
-  ] as const)('does not navigate past the final page', (gesture) => {
-    expect(resolveSettingsSwipeAction({ ...gesture, items: settingsItems })).toBeNull();
   });
 });
