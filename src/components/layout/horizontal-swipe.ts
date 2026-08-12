@@ -1,6 +1,16 @@
-export const HORIZONTAL_SWIPE_THRESHOLD_PT = 40;
+export const HORIZONTAL_SWIPE_DISTANCE_THRESHOLD_PT = 40;
+export const HORIZONTAL_SWIPE_DISTANCE_CAPTURE_OFFSET_PT = 39;
+export const HORIZONTAL_SWIPE_FLICK_MIN_DISTANCE_PT = 12;
+export const HORIZONTAL_SWIPE_FLICK_VELOCITY_THRESHOLD_PT_PER_SECOND = 800;
 
 export type HorizontalSwipeDirection = 'left' | 'right';
+
+export type HorizontalSwipeMotion = {
+  translationX: number;
+  translationY: number;
+  velocityX: number;
+  velocityY: number;
+};
 
 export function resolveAdjacentHorizontalSwipeItem<Item extends { id: string }>({
   activeId,
@@ -18,17 +28,23 @@ export function resolveAdjacentHorizontalSwipeItem<Item extends { id: string }>(
   return items[adjacentIndex] ?? null;
 }
 
-export function resolveHorizontalSwipeDirection({
-  translationX,
-  translationY,
-}: {
-  translationX: number;
-  translationY: number;
-}): HorizontalSwipeDirection | null {
+export function resolveHorizontalSwipeDirection(motion: HorizontalSwipeMotion): HorizontalSwipeDirection | null {
+  const { translationX, translationY, velocityX, velocityY } = motion;
   const horizontalDistance = Math.abs(translationX);
-  if (horizontalDistance < HORIZONTAL_SWIPE_THRESHOLD_PT || horizontalDistance <= Math.abs(translationY)) {
-    return null;
+
+  if (horizontalDistance <= Math.abs(translationY)) return null;
+
+  if (horizontalDistance >= HORIZONTAL_SWIPE_DISTANCE_THRESHOLD_PT) {
+    return translationX < 0 ? 'left' : 'right';
   }
+
+  if (horizontalDistance < HORIZONTAL_SWIPE_FLICK_MIN_DISTANCE_PT) return null;
+
+  if (Math.abs(velocityX) <= Math.abs(velocityY)) return null;
+
+  if (Math.abs(velocityX) < HORIZONTAL_SWIPE_FLICK_VELOCITY_THRESHOLD_PT_PER_SECOND) return null;
+
+  if (Math.sign(translationX) !== Math.sign(velocityX)) return null;
 
   return translationX < 0 ? 'left' : 'right';
 }

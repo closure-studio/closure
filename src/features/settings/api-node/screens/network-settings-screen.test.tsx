@@ -4,7 +4,6 @@ import { TamaguiProvider } from 'tamagui';
 
 import { i18n } from '@/i18n';
 import { tamaguiConfig } from '../../../../../tamagui.config';
-import { SettingsSwipeProvider } from '../../settings-swipe-context';
 import { ApiNodeMockProvider } from '../api-node-mock-context';
 import { NetworkSettingsScreen } from './network-settings-screen';
 
@@ -27,11 +26,9 @@ async function renderNetworkSettings() {
   return render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <I18nextProvider i18n={i18n}>
-        <SettingsSwipeProvider enabled onSwipe={jest.fn()}>
-          <ApiNodeMockProvider>
-            <NetworkSettingsScreen />
-          </ApiNodeMockProvider>
-        </SettingsSwipeProvider>
+        <ApiNodeMockProvider>
+          <NetworkSettingsScreen />
+        </ApiNodeMockProvider>
       </I18nextProvider>
     </TamaguiProvider>,
   );

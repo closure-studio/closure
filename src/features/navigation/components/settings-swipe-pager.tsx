@@ -13,7 +13,6 @@ import Animated, {
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import {
-  HorizontalSwipeSurface,
   MonoText,
   resolveAdjacentHorizontalSwipeItem,
   SlidingSelection,
@@ -133,18 +132,14 @@ function AnimatedSwipeHint({ children }: { children: string }) {
 
 export function SettingsPagerTabs({
   activeId,
-  isSwipeEnabled,
   items,
   onSelect,
-  onSwipe,
   swipeHint,
   tabListLabel,
 }: {
   activeId: SettingsPageId;
-  isSwipeEnabled: boolean;
   items: readonly SettingsPagerItem[];
   onSelect: (pageId: SettingsPageId) => void;
-  onSwipe: (direction: HorizontalSwipeDirection) => void;
   swipeHint: string;
   tabListLabel: string;
 }) {
@@ -153,8 +148,7 @@ export function SettingsPagerTabs({
   const hasNextStep = hasAdjacentSettingsPage({ activeId, direction: 'left', items });
 
   return (
-    <HorizontalSwipeSurface enabled={isSwipeEnabled} onSwipe={onSwipe}>
-      <YStack
+    <YStack
         display="flex"
         shrink={0}
         position="relative"
@@ -255,6 +249,5 @@ export function SettingsPagerTabs({
           </YStack>
         </XStack>
       </YStack>
-    </HorizontalSwipeSurface>
   );
 }

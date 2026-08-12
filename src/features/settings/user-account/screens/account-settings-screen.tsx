@@ -31,7 +31,6 @@ import {
 } from '@/schemas/user-account';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import { SettingsPage } from '../../components/settings-page';
-import { useSettingsSwipe } from '../../settings-swipe-context';
 import { mockUserAccount } from '../mocks/user-account-fixture';
 
 type PasswordField = 'currentPassword' | 'newPassword' | 'repeatNewPassword';
@@ -187,7 +186,6 @@ function AccountIdentityPanel({
 }
 
 export function AccountSettingsScreen() {
-  const settingsSwipe = useSettingsSwipe();
   const { t, i18n } = useTranslation('settings');
   const { t: tCommon } = useTranslation('common');
   const colors = getTokens().color;
@@ -195,7 +193,6 @@ export function AccountSettingsScreen() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [repeatNewPassword, setRepeatNewPassword] = useState('');
-  const [focusedPasswordField, setFocusedPasswordField] = useState<PasswordField | null>(null);
   const [visiblePasswordField, setVisiblePasswordField] = useState<PasswordField | null>(null);
   const [passwordErrors, setPasswordErrors] = useState<PasswordErrors>({});
   const registeredAt = new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, {
@@ -223,10 +220,6 @@ export function AccountSettingsScreen() {
       delete nextErrors[field];
       return nextErrors;
     });
-  };
-
-  const handlePasswordFieldBlur = (field: PasswordField) => {
-    setFocusedPasswordField((focusedField) => focusedField === field ? null : focusedField);
   };
 
   const handlePasswordSubmit = () => {
@@ -266,9 +259,7 @@ export function AccountSettingsScreen() {
       icon={KeyRound}
       label={label}
       value={value}
-      onBlur={() => handlePasswordFieldBlur(field)}
       onChangeText={onChangeText}
-      onFocus={() => setFocusedPasswordField(field)}
       placeholder={t('account.passwordPlaceholder')}
       secureTextEntry={visiblePasswordField !== field}
       autoComplete={autoComplete}
@@ -287,10 +278,7 @@ export function AccountSettingsScreen() {
   );
 
   return (
-    <SettingsPage
-      isSwipeEnabled={settingsSwipe.enabled && focusedPasswordField === null}
-      onSwipe={settingsSwipe.onSwipe}
-    >
+    <SettingsPage>
       {layoutSize === 'large' ? (
         <SectionPageHeader
           code={t('account.code')}

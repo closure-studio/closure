@@ -4,13 +4,11 @@ import { YStack } from 'tamagui';
 import { SectionPageHeader } from '@/components';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import { SettingsPage } from '../../components/settings-page';
-import { useSettingsSwipe } from '../../settings-swipe-context';
 import { ContributorsOperationsRoster } from '../components/contributors-operations-roster';
 import { ContributorsTribute } from '../components/contributors-tribute';
 import { mockContributors } from '../mocks/contributors-fixture';
 
 export function ContributorsScreen() {
-  const settingsSwipe = useSettingsSwipe();
   const { t } = useTranslation('settings');
   const layoutSize = useLayoutSize();
   const operationsTeam = mockContributors.operationsTeam.map((member) => ({
@@ -19,10 +17,7 @@ export function ContributorsScreen() {
   }));
 
   return (
-    <SettingsPage
-      isSwipeEnabled={settingsSwipe.enabled}
-      onSwipe={settingsSwipe.onSwipe}
-    >
+    <SettingsPage>
       {layoutSize === 'large' ? (
         <SectionPageHeader
           code={t('contributors.code')}
