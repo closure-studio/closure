@@ -5,23 +5,17 @@ import { usePathname, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { XStack, YStack } from 'tamagui';
 
-import { HorizontalSwipeSurface } from '@/components';
-import type { HorizontalSwipeDirection } from '@/components';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import { LargeScreenNavigationSidebar } from '../components/large-screen-navigation-sidebar';
 import { NavigationHeader } from '../components/navigation-header';
-import {
-  SettingsPagerTabs,
-  resolveSettingsSwipeAction,
-} from '../components/settings-swipe-pager';
 import {
   dashboardNavigation,
   getNavigationScope,
   settingsNavigation,
 } from '../navigation-config';
 import {
+  navigateBackToDashboard,
   useNavigationBackHandler,
-  useSettingsBackNavigation,
 } from '../back-navigation';
 
 const dashboardPages = Object.values(dashboardNavigation.pages).sort((left, right) => left.sort - right.sort);
@@ -46,25 +40,18 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
   const headerTitle = scope === 'dashboard'
     ? tDashboard(`navigation.sections.${activeDashboardPage.id}.label`)
     : t(`pages.${activeSettingsPage.id}.label`);
-  const isSettingsSwipeEnabled = scope === 'settings' && layoutSize === 'small';
-  const { enterSettings, returnToDashboard } = useSettingsBackNavigation({
-    pathname,
-    router,
-    settingsRoute: activeSettingsPage.route,
-  });
-
   const handleExitSettings = useCallback(() => {
-    returnToDashboard();
-  }, [returnToDashboard]);
+    navigateBackToDashboard(router);
+  }, [router]);
 
   const handleScopePress = useCallback(() => {
     if (scope === 'dashboard') {
-      enterSettings(settingsNavigation.defaultPage.route);
+      router.push(settingsNavigation.defaultPage.route);
       return;
     }
 
     handleExitSettings();
-  }, [enterSettings, handleExitSettings, scope]);
+  }, [handleExitSettings, router, scope]);
 
   useNavigationBackHandler(pathname, handleExitSettings);
 
@@ -79,22 +66,6 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
 
     router.replace(page.route);
   }, [pathname, router]);
-
-  const handleSettingsSwipe = useCallback((direction: HorizontalSwipeDirection) => {
-    const action = resolveSettingsSwipeAction({
-      activeId: activeSettingsPage.id,
-      direction,
-      items: settingsPages,
-    });
-    if (!action) return;
-
-    if (action.type === 'exit') {
-      handleExitSettings();
-      return;
-    }
-
-    handleSelectSettingsPage(action.pageId);
-  }, [activeSettingsPage.id, handleExitSettings, handleSelectSettingsPage]);
 
   const dashboardItems = dashboardPages.map((page) => ({
     icon: page.icon,
@@ -128,45 +99,32 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
             scope={scope}
           />
 
-          <HorizontalSwipeSurface
-            enabled={isSettingsSwipeEnabled}
-            onSwipe={handleSettingsSwipe}
-          >
-            <YStack grow={1} shrink={1} minW={0} minH={0}>
-              <YStack testID="navigation-layout-header" shrink={0}>
-                {layoutSize === 'small' && scope === 'settings' ? (
-                  <SettingsPagerTabs
-                    activeId={activeSettingsPage.id}
-                    items={settingsItems}
-                    onSelect={handleSelectSettingsPage}
-                    swipeHint={t('smallScreen.swipeHint')}
-                    tabListLabel={t('smallScreen.settingsTabsLabel')}
+          <YStack grow={1} shrink={1} minW={0} minH={0}>
+            <YStack testID="navigation-layout-header" shrink={0}>
+              {layoutSize === 'small' && scope === 'settings' ? null : (
+                <YStack
+                  shrink={0}
+                  borderBottomWidth={1}
+                  borderColor="$appBorder"
+                >
+                  <NavigationHeader
+                    avatarLabel={t('smallScreen.avatarLabel')}
+                    avatarUrl={MOCK_PROFILE_AVATAR_URL}
+                    isSettingsActive={scope === 'settings'}
+                    onSettingsPress={handleScopePress}
+                    settingsLabel={t(scope === 'dashboard' ? 'scopeSwitcher.openSettings' : 'scopeSwitcher.returnToDashboard')}
+                    title={headerTitle}
                   />
-                ) : (
-                  <YStack
-                    shrink={0}
-                    borderBottomWidth={1}
-                    borderColor="$appBorder"
-                  >
-                    <NavigationHeader
-                      avatarLabel={t('smallScreen.avatarLabel')}
-                      avatarUrl={MOCK_PROFILE_AVATAR_URL}
-                      isSettingsActive={scope === 'settings'}
-                      onSettingsPress={handleScopePress}
-                      settingsLabel={t(scope === 'dashboard' ? 'scopeSwitcher.openSettings' : 'scopeSwitcher.returnToDashboard')}
-                      title={headerTitle}
-                    />
-                  </YStack>
-                )}
-              </YStack>
-
-              <YStack grow={1} shrink={1} minW={0} minH={0} overflow="hidden">
-                <YStack grow={1} shrink={1} minH={0}>
-                  {children}
                 </YStack>
+              )}
+            </YStack>
+
+            <YStack grow={1} shrink={1} minW={0} minH={0} overflow="hidden">
+              <YStack grow={1} shrink={1} minH={0}>
+                {children}
               </YStack>
             </YStack>
-          </HorizontalSwipeSurface>
+          </YStack>
         </XStack>
       </YStack>
     </SafeAreaView>

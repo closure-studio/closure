@@ -14,11 +14,9 @@ import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import {
   MonoText,
-  resolveAdjacentHorizontalSwipeItem,
   SlidingSelection,
   TerminalText,
 } from '@/components';
-import type { HorizontalSwipeDirection } from '@/components';
 import { NavigationHeaderEdge } from './navigation-header-edge';
 import type { SettingsPageId } from '../navigation-config';
 
@@ -33,39 +31,6 @@ type SettingsPagerItem = {
   id: SettingsPageId;
   label: string;
 };
-
-export type SettingsSwipeAction =
-  | { type: 'exit' }
-  | { pageId: SettingsPageId; type: 'select-page' };
-
-export function resolveSettingsSwipeAction({
-  activeId,
-  direction,
-  items,
-}: {
-  activeId: SettingsPageId;
-  direction: HorizontalSwipeDirection;
-  items: readonly { id: SettingsPageId }[];
-}): SettingsSwipeAction | null {
-  if (items[0]?.id === activeId && direction === 'right') {
-    return { type: 'exit' };
-  }
-
-  const nextPage = resolveAdjacentHorizontalSwipeItem({ activeId, direction, items });
-  return nextPage ? { pageId: nextPage.id, type: 'select-page' } : null;
-}
-
-export function hasAdjacentSettingsPage({
-  activeId,
-  direction,
-  items,
-}: {
-  activeId: SettingsPageId;
-  direction: HorizontalSwipeDirection;
-  items: readonly { id: SettingsPageId }[];
-}) {
-  return resolveSettingsSwipeAction({ activeId, direction, items })?.type === 'select-page';
-}
 
 function SettingsPagerTick() {
   return (
@@ -132,20 +97,22 @@ function AnimatedSwipeHint({ children }: { children: string }) {
 
 export function SettingsPagerTabs({
   activeId,
+  hasNextStep,
+  hasPreviousStep,
   items,
   onSelect,
   swipeHint,
   tabListLabel,
 }: {
   activeId: SettingsPageId;
+  hasNextStep: boolean;
+  hasPreviousStep: boolean;
   items: readonly SettingsPagerItem[];
   onSelect: (pageId: SettingsPageId) => void;
   swipeHint: string;
   tabListLabel: string;
 }) {
   const colors = getTokens().color;
-  const hasPreviousStep = hasAdjacentSettingsPage({ activeId, direction: 'right', items });
-  const hasNextStep = hasAdjacentSettingsPage({ activeId, direction: 'left', items });
 
   return (
     <YStack

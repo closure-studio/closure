@@ -1,22 +1,16 @@
-import { render } from '@testing-library/react-native';
-import type { ReactElement } from 'react';
+import { fireEvent, render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider, YStack } from 'tamagui';
 
-import type { HorizontalSwipeDirection } from '@/components';
 import { tamaguiConfig } from '../../../tamagui.config';
 import {
   NavigationLayout,
 } from './screens/navigation-layout';
 
 const mockUsePathname = jest.fn(() => '/dashboard/overview');
+const mockRouterPush = jest.fn();
 const mockRouterReplace = jest.fn();
-const mockReturnToDashboard = jest.fn();
 let mockLayoutSize: 'small' | 'large' = 'small';
-const mockSurfaceRecords: {
-  enabled: boolean;
-  onSwipe: (direction: HorizontalSwipeDirection) => void;
-}[] = [];
 const safeAreaMetrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
   insets: { top: 47, right: 0, bottom: 34, left: 0 },
@@ -24,7 +18,12 @@ const safeAreaMetrics = {
 
 jest.mock('expo-router', () => ({
   usePathname: () => mockUsePathname(),
-  useRouter: () => ({ replace: mockRouterReplace }),
+  useRouter: () => ({
+    back: jest.fn(),
+    canDismiss: jest.fn(() => true),
+    push: mockRouterPush,
+    replace: mockRouterReplace,
+  }),
 }));
 
 jest.mock('react-i18next', () => ({
@@ -49,32 +48,9 @@ jest.mock('@/providers/layout-size-provider', () => ({
 }));
 
 jest.mock('./back-navigation', () => ({
+  navigateBackToDashboard: jest.fn(),
   useNavigationBackHandler: jest.fn(),
-  useSettingsBackNavigation: () => ({
-    enterSettings: jest.fn(),
-    returnToDashboard: mockReturnToDashboard,
-  }),
 }));
-
-jest.mock('@/components', () => {
-  const actual = jest.requireActual<typeof import('@/components')>('@/components');
-
-  return {
-    ...actual,
-    HorizontalSwipeSurface: ({
-      children,
-      enabled,
-      onSwipe,
-    }: {
-      children: ReactElement;
-      enabled: boolean;
-      onSwipe: (direction: HorizontalSwipeDirection) => void;
-    }) => {
-      mockSurfaceRecords.push({ enabled, onSwipe });
-      return children;
-    },
-  };
-});
 
 function NavigationTestTree({ scope }: { scope: 'dashboard' | 'settings' }) {
   return (
@@ -91,10 +67,9 @@ function NavigationTestTree({ scope }: { scope: 'dashboard' | 'settings' }) {
 describe('Small Screen NavigationLayout header', () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue('/dashboard/overview');
+    mockRouterPush.mockClear();
     mockRouterReplace.mockClear();
-    mockReturnToDashboard.mockClear();
     mockLayoutSize = 'small';
-    mockSurfaceRecords.length = 0;
   });
 
   it('keeps exactly one top-level header while the navigation scope changes', async () => {
@@ -110,74 +85,17 @@ describe('Small Screen NavigationLayout header', () => {
 
     expect(screen.getAllByTestId('navigation-layout-header')).toHaveLength(1);
     expect(screen.queryByTestId('navigation-header')).toBeNull();
-    expect(screen.getAllByLabelText('navigation:smallScreen.settingsTabsLabel')).toHaveLength(1);
-    expect(screen.getByText('navigation:smallScreen.swipeHint')).toBeTruthy();
     expect(screen.getByTestId('settings-route-content')).toBeTruthy();
     expect(screen.queryByTestId('settings-scope-backdrop')).toBeNull();
   });
-});
 
-describe('NavigationLayout settings swipe surface', () => {
-  beforeEach(() => {
-    mockUsePathname.mockReturnValue('/settings/network');
-    mockRouterReplace.mockClear();
-    mockReturnToDashboard.mockClear();
-    mockLayoutSize = 'small';
-    mockSurfaceRecords.length = 0;
-  });
-
-  it('keeps a single enabled surface wrapping the pager header and route content on Small Screen Settings', async () => {
-    const screen = await render(<NavigationTestTree scope="settings" />);
-
-    expect(mockSurfaceRecords).toHaveLength(1);
-    expect(mockSurfaceRecords[0]?.enabled).toBe(true);
-    expect(screen.getAllByLabelText('navigation:smallScreen.settingsTabsLabel')).toHaveLength(1);
-    expect(screen.getByTestId('settings-route-content')).toBeTruthy();
-  });
-
-  it('keeps the same surface mounted but disabled on Dashboard', async () => {
-    mockUsePathname.mockReturnValue('/dashboard/overview');
+  it('issues one navigation command when opening Settings', async () => {
     const screen = await render(<NavigationTestTree scope="dashboard" />);
 
-    expect(mockSurfaceRecords).toHaveLength(1);
-    expect(mockSurfaceRecords[0]?.enabled).toBe(false);
-    expect(screen.getByTestId('dashboard-route-content')).toBeTruthy();
-  });
+    await fireEvent.press(screen.getByLabelText('navigation:scopeSwitcher.openSettings'));
 
-  it('keeps the same surface mounted but disabled on Large Screen Settings', async () => {
-    mockLayoutSize = 'large';
-    const screen = await render(<NavigationTestTree scope="settings" />);
-
-    expect(mockSurfaceRecords).toHaveLength(1);
-    expect(mockSurfaceRecords[0]?.enabled).toBe(false);
-    expect(screen.getByTestId('settings-route-content')).toBeTruthy();
-  });
-
-  it('selects the next Settings Page for a left swipe', async () => {
-    await render(<NavigationTestTree scope="settings" />);
-
-    mockSurfaceRecords[0]?.onSwipe('left');
-
-    expect(mockRouterReplace).toHaveBeenCalledWith('/settings/account');
-    expect(mockReturnToDashboard).not.toHaveBeenCalled();
-  });
-
-  it('returns to Dashboard for a right swipe from the first Settings Page', async () => {
-    await render(<NavigationTestTree scope="settings" />);
-
-    mockSurfaceRecords[0]?.onSwipe('right');
-
-    expect(mockReturnToDashboard).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).toHaveBeenCalledWith('/settings/network');
     expect(mockRouterReplace).not.toHaveBeenCalled();
-  });
-
-  it('does not navigate for a left swipe past the final Settings Page', async () => {
-    mockUsePathname.mockReturnValue('/settings/contributors');
-    await render(<NavigationTestTree scope="settings" />);
-
-    mockSurfaceRecords[0]?.onSwipe('left');
-
-    expect(mockRouterReplace).not.toHaveBeenCalled();
-    expect(mockReturnToDashboard).not.toHaveBeenCalled();
   });
 });

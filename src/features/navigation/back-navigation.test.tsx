@@ -1,13 +1,13 @@
-import { act, renderHook } from '@testing-library/react-native';
+import { renderHook } from '@testing-library/react-native';
 import type { ImperativeRouter } from 'expo-router';
 import { usePreventRemove } from 'expo-router/react-navigation';
 import { BackHandler } from 'react-native';
 
 import { useBackDismissal } from '@/hooks/use-back-dismissal';
 import {
+  navigateBackToDashboard,
   resolveNavigationBackAction,
   useNavigationBackHandler,
-  useSettingsBackNavigation,
 } from './back-navigation';
 
 jest.mock('expo-router/react-navigation', () => ({
@@ -143,83 +143,21 @@ describe('back navigation', () => {
     await unmount();
   });
 
-  it('pushes Settings directly when Dashboard Overview is active', async () => {
+  it('returns to the existing Dashboard route when Settings was pushed', () => {
     const router = createRouter();
-    const { result, unmount } = await renderHook(() => useSettingsBackNavigation({
-      pathname: '/dashboard/overview',
-      router,
-      settingsRoute: '/settings/network',
-    }));
+    navigateBackToDashboard(router);
 
-    await act(() => result.current.enterSettings('/settings/account'));
-
-    expect(router.push).toHaveBeenCalledWith('/settings/account');
-    expect(router.replace).not.toHaveBeenCalled();
-    await unmount();
-  });
-
-  it('preserves the source Dashboard page below Settings', async () => {
-    const router = createRouter();
-    const { result, unmount } = await renderHook(() => useSettingsBackNavigation({
-      pathname: '/dashboard/operators',
-      router,
-      settingsRoute: '/settings/network',
-    }));
-
-    await act(() => result.current.enterSettings('/settings/account'));
-    expect(router.push).toHaveBeenCalledWith('/settings/account');
-    expect(router.replace).not.toHaveBeenCalled();
-
-    await unmount();
-  });
-
-  it('builds the same history anchor for a direct Settings entry', async () => {
-    const router = createRouter();
-    jest.mocked(router.canDismiss).mockReturnValue(false);
-    const { rerender, unmount } = await renderHook(
-      ({ pathname }: { pathname: string }) => useSettingsBackNavigation({
-        pathname,
-        router,
-        settingsRoute: '/settings/contributors',
-      }),
-      { initialProps: { pathname: '/settings/contributors' } },
-    );
-
-    expect(router.replace).toHaveBeenCalledWith('/dashboard/overview');
-    await rerender({ pathname: '/dashboard/overview' });
-    expect(router.push).toHaveBeenCalledWith('/settings/contributors');
-
-    await unmount();
-  });
-
-  it('does not rebuild an existing Settings stack and returns to its source route', async () => {
-    const router = createRouter();
-    const { result, unmount } = await renderHook(() => useSettingsBackNavigation({
-      pathname: '/settings/network',
-      router,
-      settingsRoute: '/settings/network',
-    }));
-
-    expect(router.replace).not.toHaveBeenCalled();
-    await act(() => result.current.returnToDashboard());
     expect(router.back).toHaveBeenCalledTimes(1);
-
-    await unmount();
+    expect(router.replace).not.toHaveBeenCalled();
   });
 
-  it('falls back to Dashboard Overview when Settings has no source route', async () => {
+  it('falls back to Dashboard Overview when Settings has no source route', () => {
     const router = createRouter();
     jest.mocked(router.canDismiss).mockReturnValue(false);
-    const { result, unmount } = await renderHook(() => useSettingsBackNavigation({
-      pathname: '/settings/network',
-      router,
-      settingsRoute: '/settings/network',
-    }));
+    navigateBackToDashboard(router);
 
-    await act(() => result.current.returnToDashboard());
     expect(router.replace).toHaveBeenCalledWith('/dashboard/overview');
-
-    await unmount();
+    expect(router.back).not.toHaveBeenCalled();
   });
 
   it('removes the hardware listener when navigation unmounts', async () => {

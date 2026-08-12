@@ -1,9 +1,10 @@
 export { NavigationLayout } from './screens/navigation-layout';
 export { DashboardSmallScreenTabBar } from './dashboard-small-screen-tab-bar';
+export { SettingsPagerTabs } from './components/settings-swipe-pager';
 export {
+  navigateBackToDashboard,
   resolveNavigationBackAction,
   useNavigationBackHandler,
-  useSettingsBackNavigation,
 } from './back-navigation';
 export type { NavigationBackAction } from './back-navigation';
 export {
