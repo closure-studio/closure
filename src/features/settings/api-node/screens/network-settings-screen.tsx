@@ -37,7 +37,6 @@ import { useLayoutSize } from '@/providers/layout-size-provider';
 import { apiNodeIdSchema } from '@/schemas/api-node';
 import type { ApiNode } from '@/schemas/api-node';
 import { SettingsPage } from '../../components/settings-page';
-import { useSettingsSwipe } from '../../settings-swipe-context';
 import { useApiNodeMockState } from '../api-node-mock-context';
 import { mockApiNodes } from '../mocks/api-node-fixtures';
 
@@ -55,7 +54,6 @@ function resolveLatencyTone(latencyMs: number): LatencyTone {
 }
 
 export function NetworkSettingsScreen() {
-  const settingsSwipe = useSettingsSwipe();
   const { t } = useTranslation('settings');
   const colors = getTokens().color;
   const layoutSize = useLayoutSize();
@@ -139,10 +137,7 @@ export function NetworkSettingsScreen() {
   } as const;
 
   return (
-    <SettingsPage
-      isSwipeEnabled={settingsSwipe.enabled}
-      onSwipe={settingsSwipe.onSwipe}
-    >
+    <SettingsPage>
       {layoutSize === 'large' ? (
         <SectionPageHeader
           code={t('network.code')}

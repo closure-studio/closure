@@ -1,17 +1,7 @@
 import type { PropsWithChildren } from 'react';
 import { ScrollView, YStack } from 'tamagui';
 
-import { HorizontalSwipeSurface } from '@/components';
-import type { HorizontalSwipeDirection } from '@/components';
-
-export function SettingsPage({
-  children,
-  isSwipeEnabled,
-  onSwipe,
-}: PropsWithChildren<{
-  isSwipeEnabled: boolean;
-  onSwipe: (direction: HorizontalSwipeDirection) => void;
-}>) {
+export function SettingsPage({ children }: PropsWithChildren) {
   return (
     <ScrollView
       grow={1}
@@ -21,23 +11,18 @@ export function SettingsPage({
       contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={{ grow: 1 }}
     >
-      <HorizontalSwipeSurface
-        enabled={isSwipeEnabled}
-        onSwipe={onSwipe}
+      <YStack
+        grow={1}
+        width="100%"
+        maxW={1180}
+        self="center"
+        p="$3.5"
+        pb="$8"
+        gap="$5"
+        $md={{ p: '$5', pb: '$9' }}
       >
-        <YStack
-          grow={1}
-          width="100%"
-          maxW={1180}
-          self="center"
-          p="$3.5"
-          pb="$8"
-          gap="$5"
-          $md={{ p: '$5', pb: '$9' }}
-        >
-          {children}
-        </YStack>
-      </HorizontalSwipeSurface>
+        {children}
+      </YStack>
     </ScrollView>
   );
 }

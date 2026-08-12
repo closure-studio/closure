@@ -28,10 +28,8 @@ async function renderSettingsPagerTabs() {
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <SettingsPagerTabs
         activeId="network"
-        isSwipeEnabled
         items={settingsItems}
         onSelect={jest.fn()}
-        onSwipe={jest.fn()}
         swipeHint="SWIPE L/R"
         tabListLabel="Settings tabs"
       />

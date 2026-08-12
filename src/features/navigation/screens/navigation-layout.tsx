@@ -5,8 +5,8 @@ import { usePathname, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { XStack, YStack } from 'tamagui';
 
+import { HorizontalSwipeSurface } from '@/components';
 import type { HorizontalSwipeDirection } from '@/components';
-import { SettingsSwipeProvider } from '@/features/settings';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import { LargeScreenNavigationSidebar } from '../components/large-screen-navigation-sidebar';
 import { NavigationHeader } from '../components/navigation-header';
@@ -46,6 +46,7 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
   const headerTitle = scope === 'dashboard'
     ? tDashboard(`navigation.sections.${activeDashboardPage.id}.label`)
     : t(`pages.${activeSettingsPage.id}.label`);
+  const isSettingsSwipeEnabled = scope === 'settings' && layoutSize === 'small';
   const { enterSettings, returnToDashboard } = useSettingsBackNavigation({
     pathname,
     router,
@@ -112,34 +113,32 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
     : handleSelectSettingsPage;
 
   return (
-    <SettingsSwipeProvider
-      enabled={scope === 'settings' && layoutSize === 'small'}
-      onSwipe={handleSettingsSwipe}
+    <SafeAreaView
+      edges={layoutSize === 'small' ? [] : ['bottom']}
+      style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
     >
-      <SafeAreaView
-        edges={layoutSize === 'small' ? [] : ['bottom']}
-        style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
-      >
-        <YStack grow={1} height="100%" maxH="100%" overflow="hidden">
-          <XStack grow={1} shrink={1} minH={0}>
-            <LargeScreenNavigationSidebar
-              activeId={activeSidebarId}
-              items={sidebarItems}
-              onLogout={onLogout}
-              onSelect={handleSelectSidebarPage}
-              onToggleScope={handleScopePress}
-              scope={scope}
-            />
+      <YStack grow={1} height="100%" maxH="100%" overflow="hidden">
+        <XStack grow={1} shrink={1} minH={0}>
+          <LargeScreenNavigationSidebar
+            activeId={activeSidebarId}
+            items={sidebarItems}
+            onLogout={onLogout}
+            onSelect={handleSelectSidebarPage}
+            onToggleScope={handleScopePress}
+            scope={scope}
+          />
 
+          <HorizontalSwipeSurface
+            enabled={isSettingsSwipeEnabled}
+            onSwipe={handleSettingsSwipe}
+          >
             <YStack grow={1} shrink={1} minW={0} minH={0}>
               <YStack testID="navigation-layout-header" shrink={0}>
                 {layoutSize === 'small' && scope === 'settings' ? (
                   <SettingsPagerTabs
                     activeId={activeSettingsPage.id}
-                    isSwipeEnabled
                     items={settingsItems}
                     onSelect={handleSelectSettingsPage}
-                    onSwipe={handleSettingsSwipe}
                     swipeHint={t('smallScreen.swipeHint')}
                     tabListLabel={t('smallScreen.settingsTabsLabel')}
                   />
@@ -167,9 +166,9 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
                 </YStack>
               </YStack>
             </YStack>
-          </XStack>
-        </YStack>
-      </SafeAreaView>
-    </SettingsSwipeProvider>
+          </HorizontalSwipeSurface>
+        </XStack>
+      </YStack>
+    </SafeAreaView>
   );
 }

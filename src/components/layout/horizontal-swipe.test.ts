@@ -37,16 +37,134 @@ describe('resolveAdjacentHorizontalSwipeItem', () => {
 });
 
 describe('resolveHorizontalSwipeDirection', () => {
-  it('resolves horizontal swipes at the threshold', () => {
-    expect(resolveHorizontalSwipeDirection({ translationX: -40, translationY: 4 })).toBe('left');
-    expect(resolveHorizontalSwipeDirection({ translationX: 40, translationY: 4 })).toBe('right');
+  it('resolves a distance swipe at exactly 40pt in either direction', () => {
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 40,
+      translationY: 0,
+      velocityX: 0,
+      velocityY: 0,
+    })).toBe('right');
+    expect(resolveHorizontalSwipeDirection({
+      translationX: -40,
+      translationY: 4,
+      velocityX: 0,
+      velocityY: 0,
+    })).toBe('left');
+  });
+
+  it('rejects a 39pt movement with slow velocity', () => {
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 39,
+      translationY: 0,
+      velocityX: 799,
+      velocityY: 0,
+    })).toBeNull();
+  });
+
+  it('resolves a short fast flick in either direction', () => {
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 20,
+      translationY: 2,
+      velocityX: 1200,
+      velocityY: 50,
+    })).toBe('right');
+    expect(resolveHorizontalSwipeDirection({
+      translationX: -20,
+      translationY: 2,
+      velocityX: -1200,
+      velocityY: 50,
+    })).toBe('left');
+  });
+
+  it('resolves a flick at the exact minimum distance and velocity boundaries', () => {
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 12,
+      translationY: 0,
+      velocityX: 800,
+      velocityY: 0,
+    })).toBe('right');
+    expect(resolveHorizontalSwipeDirection({
+      translationX: -12,
+      translationY: 0,
+      velocityX: -800,
+      velocityY: 0,
+    })).toBe('left');
+  });
+
+  it('rejects movements below the minimum flick distance even at high velocity', () => {
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 11.99,
+      translationY: 0,
+      velocityX: 2000,
+      velocityY: 0,
+    })).toBeNull();
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 0,
+      translationY: 0,
+      velocityX: 2000,
+      velocityY: 0,
+    })).toBeNull();
+  });
+
+  it('rejects flicks below the velocity threshold', () => {
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 20,
+      translationY: 2,
+      velocityX: 700,
+      velocityY: 0,
+    })).toBeNull();
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 20,
+      translationY: 2,
+      velocityX: 799,
+      velocityY: 0,
+    })).toBeNull();
+  });
+
+  it('rejects flicks whose velocity is not strictly horizontally dominant', () => {
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 20,
+      translationY: 2,
+      velocityX: 800,
+      velocityY: 800,
+    })).toBeNull();
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 20,
+      translationY: 2,
+      velocityX: 0,
+      velocityY: 1500,
+    })).toBeNull();
   });
 
   it.each([
-    { translationX: 39, translationY: 0 },
-    { translationX: 60, translationY: 60 },
-    { translationX: 40, translationY: 80 },
-  ])('rejects a gesture below the threshold or dominated by vertical movement', (translation) => {
-    expect(resolveHorizontalSwipeDirection(translation)).toBeNull();
+    { translationX: 20, translationY: 21, velocityX: 1200, velocityY: 0 },
+    { translationX: 20, translationY: 20, velocityX: 1200, velocityY: 0 },
+    { translationX: 60, translationY: 60, velocityX: 1200, velocityY: 0 },
+  ])('rejects flicks whose translation is not strictly horizontally dominant', (motion) => {
+    expect(resolveHorizontalSwipeDirection(motion)).toBeNull();
+  });
+
+  it('rejects a short flick whose translation and velocity disagree in direction', () => {
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 20,
+      translationY: 2,
+      velocityX: -1200,
+      velocityY: 0,
+    })).toBeNull();
+  });
+
+  it('prefers the distance path after 40pt regardless of lift-off velocity', () => {
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 60,
+      translationY: 0,
+      velocityX: -2000,
+      velocityY: 0,
+    })).toBe('right');
+    expect(resolveHorizontalSwipeDirection({
+      translationX: 60,
+      translationY: 59,
+      velocityX: 0,
+      velocityY: 2000,
+    })).toBe('right');
   });
 });
