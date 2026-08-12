@@ -15,8 +15,6 @@ import { Image, XStack, YStack, getTokens, styled } from 'tamagui';
 import { AvatarFilter, MonoText, TerminalPanel, TerminalText } from '@/components';
 import type { ItemTable, ItemTableItem } from '@/schemas/game-data';
 import type { Inventory } from '@/schemas/game-account';
-import { useLayoutSize } from '@/providers/layout-size-provider';
-import type { LayoutSize } from '@/schemas/layout-size';
 import { getItemImageUrl } from '../item-image';
 
 type InventoryEntry = {
@@ -26,29 +24,17 @@ type InventoryEntry = {
 };
 
 const CIRCULAR_ARTWORK_RADIUS = 999;
-const LARGE_SCREEN_ITEM_ARTWORK_SCALE = 0.84;
-const SMALL_SCREEN_ITEM_ARTWORK_SIZE = 40;
-const LARGE_SCREEN_ITEM_ARTWORK_SIZE = 100;
-const SMALL_SCREEN_PREVIEW_ARTWORK_SIZE = 56;
-const LARGE_SCREEN_PREVIEW_ARTWORK_SIZE = 160;
-const SMALL_SCREEN_MIN_ITEM_WIDTH = 128;
-const LARGE_SCREEN_MIN_ITEM_WIDTH = 240;
-const DEFAULT_SMALL_SCREEN_COLUMN_COUNT = 2;
-const DEFAULT_LARGE_SCREEN_COLUMN_COUNT = 4;
-const ITEM_ARTWORK_FEATHER_STOPS = [
+const INVENTORY_MIN_ITEM_WIDTH = 128;
+const INVENTORY_GRID_GAP_TOKEN = '$2';
+const ITEM_ARTWORK_SIZE = 40;
+const PREVIEW_ARTWORK_SIZE = 56;
+const PREVIEW_FALLBACK_ICON_SIZE = 28;
+const PREVIEW_ARTWORK_FEATHER_STOPS = [
   { offset: '0%', opacity: 1, color: '#ffffff' },
   { offset: '58%', opacity: 1, color: '#ffffff' },
   { offset: '70%', opacity: 0.95, color: '#ffffff' },
   { offset: '82%', opacity: 0.7, color: '#ffffff' },
   { offset: '93%', opacity: 0.3, color: '#ffffff' },
-  { offset: '100%', opacity: 0, color: '#000000' },
-] as const;
-const LARGE_SCREEN_ITEM_ARTWORK_FEATHER_STOPS = [
-  { offset: '0%', opacity: 1, color: '#ffffff' },
-  { offset: '68%', opacity: 1, color: '#ffffff' },
-  { offset: '80%', opacity: 0.95, color: '#ffffff' },
-  { offset: '90%', opacity: 0.7, color: '#ffffff' },
-  { offset: '97%', opacity: 0.3, color: '#ffffff' },
   { offset: '100%', opacity: 0, color: '#000000' },
 ] as const;
 
@@ -93,43 +79,30 @@ function getItemDescription(value: string | null | undefined): string | undefine
   return value ? value.split('\\n').join('\n') : undefined;
 }
 
-export function getInventoryColumnCount(width: number, layoutSize: LayoutSize, gridGap: number): number {
-  if (width <= 0) {
-    return layoutSize === 'small'
-      ? DEFAULT_SMALL_SCREEN_COLUMN_COUNT
-      : DEFAULT_LARGE_SCREEN_COLUMN_COUNT;
+export function getInventoryGridLayout(containerWidth: number, gap: number) {
+  if (containerWidth <= 0) {
+    return { columnCount: 1, itemWidth: undefined };
   }
 
-  const minimumItemWidth = layoutSize === 'small'
-    ? SMALL_SCREEN_MIN_ITEM_WIDTH
-    : LARGE_SCREEN_MIN_ITEM_WIDTH;
-  return Math.max(1, Math.floor((width + gridGap) / (minimumItemWidth + gridGap)));
+  const columnCount = Math.max(
+    1,
+    Math.floor((containerWidth + gap) / (INVENTORY_MIN_ITEM_WIDTH + gap)),
+  );
+
+  return {
+    columnCount,
+    itemWidth: (containerWidth - gap * (columnCount - 1)) / columnCount,
+  };
 }
 
-function getItemWidth(width: number, columnCount: number, gridGap: number): number | undefined {
-  if (width <= 0) return undefined;
-
-  return (width - gridGap * (columnCount - 1)) / columnCount;
-}
-
-function ItemArtwork({
+function InventoryPreviewArtwork({
   icon,
   itemId,
   label,
-  iconSize,
-  artworkSize,
-  artworkScale,
-  maxArtworkSize,
-  testIdPrefix,
 }: {
   icon: string;
   itemId: string;
   label: string;
-  iconSize: number;
-  artworkSize: number;
-  artworkScale: number;
-  maxArtworkSize: number;
-  testIdPrefix: string;
 }) {
   const [imageStatus, setImageStatus] = useState<'loading' | 'ready'>('loading');
   const fallbackCharacter = getFirstCharacter(label);
@@ -139,20 +112,14 @@ function ItemArtwork({
   const maskId = `item-artwork-mask-${artworkId}`;
   const maskFill = `url(#${maskGradientId})`;
   const artworkImageUrl = getItemImageUrl(icon);
-  const artworkCenter = artworkSize / 2;
-  const artworkRadius = (artworkSize * artworkScale) / 2;
-  const artworkInset = artworkCenter - artworkRadius;
-  const artworkTransform = `translate(${artworkInset} ${artworkInset}) scale(${artworkScale})`;
-  const featherStops = artworkScale < 1
-    ? LARGE_SCREEN_ITEM_ARTWORK_FEATHER_STOPS
-    : ITEM_ARTWORK_FEATHER_STOPS;
+  const artworkCenter = PREVIEW_ARTWORK_SIZE / 2;
   const showFallback = imageStatus !== 'ready';
 
   return (
     <YStack width="100%" items="center" justify="center">
       <YStack
-        testID={`${testIdPrefix}-circle-${itemId}`}
-        width={maxArtworkSize}
+        testID={`inventory-preview-image-circle-${itemId}`}
+        width={PREVIEW_ARTWORK_SIZE}
         maxW="100%"
         aspectRatio={1}
         rounded={CIRCULAR_ARTWORK_RADIUS}
@@ -160,15 +127,15 @@ function ItemArtwork({
         position="relative"
       >
         <Svg
-          testID={`${testIdPrefix}-feather-${itemId}`}
+          testID={`inventory-preview-image-feather-${itemId}`}
           width="100%"
           height="100%"
-          viewBox={`0 0 ${artworkSize} ${artworkSize}`}
+          viewBox={`0 0 ${PREVIEW_ARTWORK_SIZE} ${PREVIEW_ARTWORK_SIZE}`}
           preserveAspectRatio="none"
         >
           <Defs>
             <SvgRadialGradient id={maskGradientId} cx="50%" cy="50%" r="50%">
-              {featherStops.map((stop) => (
+              {PREVIEW_ARTWORK_FEATHER_STOPS.map((stop) => (
                 <Stop
                   key={stop.offset}
                   offset={stop.offset}
@@ -178,51 +145,49 @@ function ItemArtwork({
               ))}
             </SvgRadialGradient>
             <Mask
-              testID={`${testIdPrefix}-feather-mask-${itemId}`}
+              testID={`inventory-preview-image-feather-mask-${itemId}`}
               id={maskId}
-              width={artworkSize}
-              height={artworkSize}
+              width={PREVIEW_ARTWORK_SIZE}
+              height={PREVIEW_ARTWORK_SIZE}
               maskUnits="userSpaceOnUse"
               maskContentUnits="userSpaceOnUse"
             >
               <Circle
                 cx={artworkCenter}
                 cy={artworkCenter}
-                r={artworkRadius}
+                r={artworkCenter}
                 fill={maskFill}
               />
             </Mask>
           </Defs>
           <G mask={`url(#${maskId})`}>
-            <G transform={artworkTransform}>
-              {showFallback ? (
-                <G testID={`${testIdPrefix}-fallback-${itemId}`} aria-hidden>
-                  <SvgText
-                    testID={`${testIdPrefix}-fallback-character-${itemId}`}
-                    transform={`translate(${artworkCenter} ${artworkCenter})`}
-                    dy={(iconSize * 0.35) / artworkScale}
-                    fill={colors.appMuted.val}
-                    fontSize={iconSize / artworkScale}
-                    fontWeight="800"
-                    textAnchor="middle"
-                  >
-                    {fallbackCharacter}
-                  </SvgText>
-                </G>
-              ) : null}
-              <SvgImage
-                testID={`${testIdPrefix}-svg-image-${itemId}`}
-                href={artworkImageUrl}
-                width={artworkSize}
-                height={artworkSize}
-                preserveAspectRatio="xMidYMid meet"
-                opacity={imageStatus === 'ready' ? 1 : 0}
-                onLoad={() => setImageStatus('ready')}
-                accessibilityLabel={label}
-              />
-              <G testID={`${testIdPrefix}-filter-${itemId}`} aria-hidden>
-                <AvatarFilter testID={`${testIdPrefix}-filter-svg-${itemId}`} />
+            {showFallback ? (
+              <G testID={`inventory-preview-image-fallback-${itemId}`} aria-hidden>
+                <SvgText
+                  testID={`inventory-preview-image-fallback-character-${itemId}`}
+                  transform={`translate(${artworkCenter} ${artworkCenter})`}
+                  dy={PREVIEW_FALLBACK_ICON_SIZE * 0.35}
+                  fill={colors.appMuted.val}
+                  fontSize={PREVIEW_FALLBACK_ICON_SIZE}
+                  fontWeight="800"
+                  textAnchor="middle"
+                >
+                  {fallbackCharacter}
+                </SvgText>
               </G>
+            ) : null}
+            <SvgImage
+              testID={`inventory-preview-image-svg-image-${itemId}`}
+              href={artworkImageUrl}
+              width={PREVIEW_ARTWORK_SIZE}
+              height={PREVIEW_ARTWORK_SIZE}
+              preserveAspectRatio="xMidYMid meet"
+              opacity={imageStatus === 'ready' ? 1 : 0}
+              onLoad={() => setImageStatus('ready')}
+              accessibilityLabel={label}
+            />
+            <G testID={`inventory-preview-image-filter-${itemId}`} aria-hidden>
+              <AvatarFilter testID={`inventory-preview-image-filter-svg-${itemId}`} />
             </G>
           </G>
         </Svg>
@@ -235,20 +200,18 @@ function InventoryItemArtwork({
   icon,
   itemId,
   label,
-  size,
 }: {
   icon: string;
   itemId: string;
   label: string;
-  size: number;
 }) {
   const [imageStatus, setImageStatus] = useState<'loading' | 'ready'>('loading');
 
   return (
     <YStack
       testID={`inventory-item-image-circle-${itemId}`}
-      width={size}
-      height={size}
+      width={ITEM_ARTWORK_SIZE}
+      height={ITEM_ARTWORK_SIZE}
       maxW="100%"
       rounded={CIRCULAR_ARTWORK_RADIUS}
       overflow="hidden"
@@ -282,42 +245,33 @@ function InventoryItemArtwork({
 }
 
 const InventoryPreview = memo(function InventoryPreview({ entry }: { entry: InventoryEntry }) {
-  const layoutSize = useLayoutSize();
-  const artworkSize = layoutSize === 'small'
-    ? SMALL_SCREEN_PREVIEW_ARTWORK_SIZE
-    : LARGE_SCREEN_PREVIEW_ARTWORK_SIZE;
   const description = getItemDescription(entry.item.description);
 
   return (
     <XStack
       testID="inventory-preview-details"
       width="100%"
-      p={layoutSize === 'small' ? '$2.5' : '$3.5'}
+      p="$2.5"
       items="center"
-      gap={layoutSize === 'small' ? '$2.5' : '$4'}
+      gap="$2.5"
       bg="$appSurfaceRaisedTranslucent"
       borderBottomWidth={1}
       borderColor="$appRule"
     >
       <YStack
         testID="inventory-preview-artwork"
-        width={layoutSize === 'small' ? '$7' : '$14'}
-        height={layoutSize === 'small' ? '$7' : '$14'}
+        width="$7"
+        height="$7"
         shrink={0}
         items="center"
         justify="center"
         overflow="hidden"
       >
-        <ItemArtwork
+        <InventoryPreviewArtwork
           key={entry.itemId}
           icon={entry.item.icon}
           itemId={entry.itemId}
           label={entry.item.name}
-          iconSize={layoutSize === 'small' ? 28 : 46}
-          artworkSize={artworkSize}
-          artworkScale={layoutSize === 'small' ? 1 : LARGE_SCREEN_ITEM_ARTWORK_SCALE}
-          maxArtworkSize={artworkSize}
-          testIdPrefix="inventory-preview-image"
         />
       </YStack>
       <YStack grow={1} shrink={1} minW={0} gap="$1.5">
@@ -327,24 +281,24 @@ const InventoryPreview = memo(function InventoryPreview({ entry }: { entry: Inve
             grow={1}
             shrink={1}
             minW={0}
-            size={layoutSize === 'small' ? '$4' : '$6'}
-            lineHeight={layoutSize === 'small' ? '$5' : '$7'}
+            size="$4"
+            lineHeight="$5"
             fontWeight="800"
             numberOfLines={1}
           >
             {entry.item.name}
           </TerminalText>
-          <MonoText shrink={0} size={layoutSize === 'small' ? '$2' : '$3'} color="$appAccent">
+          <MonoText shrink={0} size="$2" color="$appAccent">
             {formatInventoryQuantity(entry.quantity)}
           </MonoText>
         </XStack>
         {description ? (
           <MonoText
             testID="inventory-preview-description"
-            size={layoutSize === 'small' ? '$1' : '$2'}
-            lineHeight={layoutSize === 'small' ? '$2.5' : '$3'}
+            size="$1"
+            lineHeight="$2.5"
             color="$appMuted"
-            numberOfLines={layoutSize === 'small' ? 2 : 3}
+            numberOfLines={2}
           >
             {description}
           </MonoText>
@@ -369,20 +323,13 @@ const InventoryCell = memo(function InventoryCell({
   entry,
   itemWidth,
   onSelect,
-  rowGap,
   selected,
 }: {
   entry: InventoryEntry;
   itemWidth: number | undefined;
   onSelect: (itemId: string) => void;
-  rowGap: number;
   selected: boolean;
 }) {
-  const layoutSize = useLayoutSize();
-  const artworkSize = layoutSize === 'small'
-    ? SMALL_SCREEN_ITEM_ARTWORK_SIZE
-    : LARGE_SCREEN_ITEM_ARTWORK_SIZE;
-
   return (
     <InventoryCellFrame
       testID={`inventory-item-${entry.itemId}`}
@@ -391,22 +338,20 @@ const InventoryCell = memo(function InventoryCell({
       aria-selected={selected}
       onPress={() => onSelect(entry.itemId)}
       selected={selected}
-      width={itemWidth}
-      grow={itemWidth === undefined ? 1 : 0}
-      mb={rowGap}
+      width={itemWidth ?? '100%'}
     >
       <XStack
         testID={`inventory-item-content-${entry.itemId}`}
         width="100%"
         items="center"
         justify="space-between"
-        gap={layoutSize === 'small' ? '$2' : '$3'}
-        px={layoutSize === 'small' ? '$2.5' : '$3'}
-        py={layoutSize === 'small' ? '$1.5' : '$2'}
+        gap="$2"
+        px="$2.5"
+        py="$1.5"
       >
         <YStack
           testID={`inventory-item-artwork-${entry.itemId}`}
-          width={artworkSize}
+          width={ITEM_ARTWORK_SIZE}
           shrink={0}
           items="center"
           justify="center"
@@ -416,12 +361,11 @@ const InventoryCell = memo(function InventoryCell({
             icon={entry.item.icon}
             itemId={entry.itemId}
             label={entry.item.name}
-            size={artworkSize}
           />
         </YStack>
         <YStack
           testID={`inventory-item-info-${entry.itemId}`}
-          width={layoutSize === 'small' ? '62%' : '58%'}
+          width="62%"
           shrink={1}
           minW={0}
           items="flex-end"
@@ -433,8 +377,8 @@ const InventoryCell = memo(function InventoryCell({
             width="100%"
             shrink={1}
             minW={0}
-            size={layoutSize === 'small' ? '$2.5' : '$3'}
-            lineHeight={layoutSize === 'small' ? '$3' : '$4'}
+            size="$2.5"
+            lineHeight="$3"
             fontWeight="700"
             numberOfLines={2}
             text="right"
@@ -445,8 +389,8 @@ const InventoryCell = memo(function InventoryCell({
             testID={`inventory-item-quantity-${entry.itemId}`}
             width="100%"
             shrink={0}
-            size={layoutSize === 'small' ? '$2' : '$2.5'}
-            lineHeight={layoutSize === 'small' ? '$2.5' : '$3'}
+            size="$2"
+            lineHeight="$2.5"
             color="$appAccent"
             text="right"
           >
@@ -459,39 +403,6 @@ const InventoryCell = memo(function InventoryCell({
   );
 });
 
-const InventoryRow = memo(function InventoryRow({
-  itemWidth,
-  onSelect,
-  row,
-  rowGap,
-  selectedItemId,
-}: {
-  itemWidth: number | undefined;
-  onSelect: (itemId: string) => void;
-  row: readonly InventoryEntry[];
-  rowGap: number;
-  selectedItemId: string | undefined;
-}) {
-  return (
-    <XStack
-      width="100%"
-      justify="flex-start"
-      columnGap={rowGap}
-    >
-      {row.map((entry) => (
-        <InventoryCell
-          key={entry.itemId}
-          entry={entry}
-          itemWidth={itemWidth}
-          onSelect={onSelect}
-          rowGap={rowGap}
-          selected={entry.itemId === selectedItemId}
-        />
-      ))}
-    </XStack>
-  );
-});
-
 export function InventoryView({
   inventory,
   itemTable,
@@ -499,7 +410,6 @@ export function InventoryView({
   inventory: Inventory;
   itemTable: ItemTable;
 }) {
-  const layoutSize = useLayoutSize();
   const entries = useMemo(
     () => Object.entries(inventory).flatMap(([itemId, quantity]) => {
       const item = itemTable[itemId];
@@ -513,17 +423,8 @@ export function InventoryView({
     : entries[0]?.itemId;
   const selectedEntry = entries.find((entry) => entry.itemId === selectedItemId);
   const [listWidth, setListWidth] = useState(0);
-  const spaceTokens = getTokens().space;
-  const gridGap = (layoutSize === 'small' ? spaceTokens['2'] : spaceTokens['3']).val;
-  const columnCount = getInventoryColumnCount(listWidth, layoutSize, gridGap);
-  const itemWidth = getItemWidth(listWidth, columnCount, gridGap);
-  const entryRows = useMemo(() => {
-    const rows: InventoryEntry[][] = [];
-    for (let index = 0; index < entries.length; index += columnCount) {
-      rows.push(entries.slice(index, index + columnCount));
-    }
-    return rows;
-  }, [columnCount, entries]);
+  const gridGap = getTokens().space[INVENTORY_GRID_GAP_TOKEN].val;
+  const { columnCount, itemWidth } = getInventoryGridLayout(listWidth, gridGap);
 
   if (!selectedEntry) {
     return (
@@ -542,26 +443,26 @@ export function InventoryView({
         p={0}
       >
         <InventoryPreview entry={selectedEntry} />
-        <YStack testID="inventory-matrix">
-          <YStack
-            testID={`inventory-grid-columns-${columnCount}`}
-            onLayout={(event) => {
-              const width = event.nativeEvent.layout.width;
-              setListWidth((currentWidth) => (currentWidth === width ? currentWidth : width));
-            }}
-          >
-            {entryRows.map((row) => (
-              <InventoryRow
-                key={row[0]?.itemId ?? 'empty-row'}
-                itemWidth={itemWidth}
-                onSelect={setRequestedItemId}
-                row={row}
-                rowGap={gridGap}
-                selectedItemId={selectedItemId ?? undefined}
-              />
-            ))}
-          </YStack>
-        </YStack>
+        <XStack
+          testID={`inventory-grid-columns-${columnCount}`}
+          width="100%"
+          flexWrap="wrap"
+          gap={gridGap}
+          onLayout={(event) => {
+            const width = event.nativeEvent.layout.width;
+            setListWidth((currentWidth) => (currentWidth === width ? currentWidth : width));
+          }}
+        >
+          {entries.map((entry) => (
+            <InventoryCell
+              key={entry.itemId}
+              entry={entry}
+              itemWidth={itemWidth}
+              onSelect={setRequestedItemId}
+              selected={entry.itemId === selectedItemId}
+            />
+          ))}
+        </XStack>
       </TerminalPanel>
     </YStack>
   );
