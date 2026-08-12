@@ -60,7 +60,7 @@
     "typescript-eslint": "^8.65.0"
   },
   "scripts": {
-    "start": "expo start --dev-client --localhost",
+    "start": "expo start --dev-client",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios --device",
