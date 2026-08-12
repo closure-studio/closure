@@ -15,8 +15,8 @@ function expectSuccess<T>(result: { data: T; ok: true } | { error: unknown; ok: 
 describe('MockAuthAdapter', () => {
   it('implements every auth operation with deterministic successful data', async () => {
     const login = expectSuccess(await adapter.login({
-      email: MOCK_AUTH_VALUES.activeEmail,
-      password: MOCK_AUTH_VALUES.password,
+      email: 'any-user@example.com',
+      password: 'any-password',
     }));
     const registration = expectSuccess(await adapter.register({
       code: MOCK_AUTH_VALUES.registrationCode,
@@ -72,13 +72,13 @@ describe('MockAuthAdapter', () => {
     expect(oauthLogin).toEqual(mockActiveSession);
   });
 
-  it.each([
-    [MOCK_AUTH_VALUES.activeEmail, 'incorrect', 'invalid-credentials'],
-    [MOCK_AUTH_VALUES.bannedEmail, MOCK_AUTH_VALUES.password, 'account-banned'],
-  ] as const)('returns a typed login failure for %s', async (email, password, code) => {
-    const result = await adapter.login({ email, password });
+  it('accepts any valid email and password for mock login', async () => {
+    const result = expectSuccess(await adapter.login({
+      email: 'another-user@example.com',
+      password: 'anything-at-all',
+    }));
 
-    expect(result).toEqual({ error: { code, kind: 'business' }, ok: false });
+    expect(result).toEqual(mockActiveSession);
   });
 
   it('distinguishes authorization, session, binding, and OAuth failures', async () => {

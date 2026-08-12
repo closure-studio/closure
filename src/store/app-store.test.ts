@@ -77,17 +77,17 @@ describe('app store', () => {
     });
   });
 
-  it('records typed login failures without initializing authenticated data', async () => {
+  it('records invalid login input without initializing authenticated data', async () => {
     const memory = createMemoryStorage();
     const store = createAppStore(memory.storage, new MockAuthAdapter(0));
 
     await store.getState().login({
-      credentials: { ...persistentLogin.credentials, password: 'incorrect' },
+      credentials: { ...persistentLogin.credentials, password: '' },
       rememberSession: true,
     });
 
     expect(store.getState().auth).toMatchObject({
-      loginError: { code: 'invalid-credentials', kind: 'business' },
+      loginError: { code: 'invalid-input', kind: 'business' },
       loginStatus: 'failed',
       rememberSession: false,
       session: null,
