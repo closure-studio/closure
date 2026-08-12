@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { ReactElement } from 'react';
+import { TextInput } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 import {
@@ -7,6 +8,16 @@ import {
   resolveHorizontalSwipeDirection,
 } from './horizontal-swipe';
 import type { HorizontalSwipeDirection } from './horizontal-swipe';
+
+function isTextInputFocused() {
+  const focusedInput = TextInput.State.currentlyFocusedInput?.();
+
+  if (focusedInput !== undefined) return focusedInput !== null;
+  if (typeof document === 'undefined') return false;
+
+  return document.activeElement?.tagName === 'INPUT'
+    || document.activeElement?.tagName === 'TEXTAREA';
+}
 
 export function HorizontalSwipeSurface({
   children,
@@ -27,6 +38,8 @@ export function HorizontalSwipeSurface({
         .runOnJS(true);
 
       return gesture.onEnd(({ translationX, translationY }) => {
+        if (isTextInputFocused()) return;
+
         const direction = resolveHorizontalSwipeDirection({ translationX, translationY });
         if (direction) onSwipe(direction);
       });
