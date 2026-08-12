@@ -3,9 +3,9 @@ import { I18nextProvider } from 'react-i18next';
 import { TamaguiProvider } from 'tamagui';
 
 import { i18n } from '@/i18n';
-import { tamaguiConfig } from '../../../tamagui.config';
-import { SettingsSwipeProvider } from './settings-swipe-context';
-import { AccountSettingsScreen } from './screens/account-settings-screen';
+import { tamaguiConfig } from '../../../../../tamagui.config';
+import { SettingsSwipeProvider } from '../../settings-swipe-context';
+import { AccountSettingsScreen } from './account-settings-screen';
 
 jest.mock('@/providers/layout-size-provider', () => ({
   useLayoutSize: () => 'small',

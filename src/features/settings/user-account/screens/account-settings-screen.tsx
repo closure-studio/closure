@@ -30,9 +30,9 @@ import {
   passwordChangeIssue,
 } from '@/schemas/user-account';
 import { useLayoutSize } from '@/providers/layout-size-provider';
-import { SettingsPage } from '../components/settings-page';
-import { mockUserAccount } from '../mocks/settings-mocks';
-import { useSettingsSwipe } from '../settings-swipe-context';
+import { SettingsPage } from '../../components/settings-page';
+import { useSettingsSwipe } from '../../settings-swipe-context';
+import { mockUserAccount } from '../mocks/user-account-fixture';
 
 type PasswordField = 'currentPassword' | 'newPassword' | 'repeatNewPassword';
 type PasswordIssue = (typeof passwordChangeIssue)[keyof typeof passwordChangeIssue];

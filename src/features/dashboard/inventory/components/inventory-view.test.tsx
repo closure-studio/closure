@@ -3,11 +3,11 @@ import { StyleSheet } from 'react-native';
 import { TamaguiProvider } from 'tamagui';
 import * as v from 'valibot';
 
-import { tamaguiConfig } from '../../../tamagui.config';
+import { tamaguiConfig } from '../../../../../tamagui.config';
 import { itemTableSchema } from '@/schemas/game-data';
 import { inventorySchema } from '@/schemas/game-account';
-import { InventoryView, getInventoryGridLayout } from './components/inventory-view';
-import { getItemImageUrl } from './item-image';
+import { getItemImageUrl } from '../item-image';
+import { InventoryView, getInventoryGridLayout } from './inventory-view';
 
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');

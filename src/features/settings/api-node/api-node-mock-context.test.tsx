@@ -1,19 +1,19 @@
 import { act, renderHook } from '@testing-library/react-native';
 import type { PropsWithChildren } from 'react';
 
-import { SettingsMockProvider, useSettingsMockState } from './settings-mock-context';
+import { ApiNodeMockProvider, useApiNodeMockState } from './api-node-mock-context';
 
-function SettingsMockTestProvider({ children }: PropsWithChildren) {
-  return <SettingsMockProvider>{children}</SettingsMockProvider>;
+function ApiNodeMockTestProvider({ children }: PropsWithChildren) {
+  return <ApiNodeMockProvider>{children}</ApiNodeMockProvider>;
 }
 
-describe('SettingsMockProvider', () => {
+describe('ApiNodeMockProvider', () => {
   it('keeps the selected API Node while its routed child changes', async () => {
     const { rerender, result } = await renderHook(
-      ({ pageId }: { pageId: string }) => ({ pageId, settings: useSettingsMockState() }),
+      ({ pageId }: { pageId: string }) => ({ pageId, settings: useApiNodeMockState() }),
       {
         initialProps: { pageId: 'network' },
-        wrapper: SettingsMockTestProvider,
+        wrapper: ApiNodeMockTestProvider,
       },
     );
 

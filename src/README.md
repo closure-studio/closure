@@ -17,8 +17,9 @@ features -> components public entry -> components/ui
 - `providers/` contains application-wide provider composition such as fonts, splash lifecycle, localization, Tamagui, and Router theme.
 - `features/session/` owns protected navigation intent and the shared terminal shell used across authentication and application routes. The global store owns the persisted User Session.
 - `features/<feature>/index.ts` is the feature's public API. Routes and other features must not import its internal files directly.
+- A mature responsibility may live under `features/<feature>/<slice>/` when it owns multiple real artifacts. Internal slices are ownership boundaries inside a feature, not additional public features.
 - `features/<feature>/screens/` contains feature entry screens and business-state composition boundaries.
-- `features/<feature>/components/` contains feature-specific presentation and interaction components.
+- `features/<feature>/components/` contains presentation shared by multiple internal slices or by the feature shell. A slice's own `components/` contains presentation used only by that slice.
 - `features/<feature>/hooks/` contains feature-owned controllers and data hooks. It is not a destination for globally reusable hooks.
 - `schemas/<domain>/` contains Valibot schemas and exports stable domain and input types with `InferOutput`. Domain barrels are the canonical import boundary for both schema values and inferred types; see `schemas/README.md` for the schema-first contract.
 - Feature selectors derive screen-ready data, and `features/<feature>/utils.ts` contains feature-local pure helpers.
@@ -49,10 +50,11 @@ Large components do not automatically become state-connected. For example, an Op
 ## Placement
 
 - Put a component in `components/ui/` only when it is reusable across features and does not use business model types.
-- Put a component in `features/<feature>/components/` when it represents feature language such as login credentials, Game Accounts, Operator Rosters, or Inventories.
+- Put presentation shared by a feature shell or multiple slices in `features/<feature>/components/`. Put slice-owned presentation, such as Inventory or Operator Roster UI, in `features/<feature>/<slice>/components/`.
+- Create slice `components/`, `screens/`, `mocks/`, `api/`, and helper modules only when real owned files exist. Do not create empty folders for symmetry.
 - Feature presentation components import domain types from `@/schemas/<domain>` and may import their own feature's `utils.ts` through a single-level relative import, but they do not import mocks, APIs, stores, or screens.
 - Put store, context, API, and routing access in the feature screen or feature hook that composes those components.
-- Export feature entry points explicitly from `index.ts`. Do not import another feature's internal files.
+- Export feature entry points explicitly from `features/<feature>/index.ts`. Do not add public slice barrels or import another feature's internal files.
 - Import shared UI through `@/components`; internal shared UI files use relative imports to avoid barrel cycles.
 
 ESLint enforces the critical import boundaries for shared UI and feature presentation components.

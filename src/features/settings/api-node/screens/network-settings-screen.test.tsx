@@ -3,10 +3,10 @@ import { I18nextProvider } from 'react-i18next';
 import { TamaguiProvider } from 'tamagui';
 
 import { i18n } from '@/i18n';
-import { tamaguiConfig } from '../../../tamagui.config';
-import { SettingsSwipeProvider } from './settings-swipe-context';
-import { SettingsMockProvider } from './settings-mock-context';
-import { NetworkSettingsScreen } from './screens/network-settings-screen';
+import { tamaguiConfig } from '../../../../../tamagui.config';
+import { SettingsSwipeProvider } from '../../settings-swipe-context';
+import { ApiNodeMockProvider } from '../api-node-mock-context';
+import { NetworkSettingsScreen } from './network-settings-screen';
 
 jest.mock('@/providers/layout-size-provider', () => ({
   useLayoutSize: () => 'small',
@@ -28,9 +28,9 @@ async function renderNetworkSettings() {
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <I18nextProvider i18n={i18n}>
         <SettingsSwipeProvider enabled onSwipe={jest.fn()}>
-          <SettingsMockProvider>
+          <ApiNodeMockProvider>
             <NetworkSettingsScreen />
-          </SettingsMockProvider>
+          </ApiNodeMockProvider>
         </SettingsSwipeProvider>
       </I18nextProvider>
     </TamaguiProvider>,

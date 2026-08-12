@@ -5,14 +5,14 @@ import type { ApiNodeId } from '@/schemas/api-node';
 
 const DEFAULT_API_NODE_ID = 'domestic' satisfies ApiNodeId;
 
-type SettingsMockContextValue = {
+type ApiNodeMockContextValue = {
   selectApiNode: (apiNodeId: ApiNodeId) => void;
   selectedApiNodeId: ApiNodeId;
 };
 
-const SettingsMockContext = createContext<SettingsMockContextValue | null>(null);
+const ApiNodeMockContext = createContext<ApiNodeMockContextValue | null>(null);
 
-export function SettingsMockProvider({ children }: PropsWithChildren) {
+export function ApiNodeMockProvider({ children }: PropsWithChildren) {
   const [selectedApiNodeId, setSelectedApiNodeId] = useState<ApiNodeId>(DEFAULT_API_NODE_ID);
   const selectApiNode = useCallback((apiNodeId: ApiNodeId) => {
     setSelectedApiNodeId(apiNodeId);
@@ -23,17 +23,17 @@ export function SettingsMockProvider({ children }: PropsWithChildren) {
   );
 
   return (
-    <SettingsMockContext.Provider value={contextValue}>
+    <ApiNodeMockContext.Provider value={contextValue}>
       {children}
-    </SettingsMockContext.Provider>
+    </ApiNodeMockContext.Provider>
   );
 }
 
-export function useSettingsMockState() {
-  const settingsMockState = useContext(SettingsMockContext);
-  if (!settingsMockState) {
-    throw new Error('useSettingsMockState must be used within a SettingsMockProvider.');
+export function useApiNodeMockState() {
+  const apiNodeMockState = useContext(ApiNodeMockContext);
+  if (!apiNodeMockState) {
+    throw new Error('useApiNodeMockState must be used within an ApiNodeMockProvider.');
   }
 
-  return settingsMockState;
+  return apiNodeMockState;
 }

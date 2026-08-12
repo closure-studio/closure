@@ -36,10 +36,10 @@ import {
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import { apiNodeIdSchema } from '@/schemas/api-node';
 import type { ApiNode } from '@/schemas/api-node';
-import { SettingsPage } from '../components/settings-page';
-import { mockApiNodes } from '../mocks/settings-mocks';
-import { useSettingsMockState } from '../settings-mock-context';
-import { useSettingsSwipe } from '../settings-swipe-context';
+import { SettingsPage } from '../../components/settings-page';
+import { useSettingsSwipe } from '../../settings-swipe-context';
+import { useApiNodeMockState } from '../api-node-mock-context';
+import { mockApiNodes } from '../mocks/api-node-fixtures';
 
 const API_NODE_DETECTION_DELAY_MS = 650;
 const LOW_LATENCY_MAX_MS = 80;
@@ -60,7 +60,7 @@ export function NetworkSettingsScreen() {
   const colors = getTokens().color;
   const layoutSize = useLayoutSize();
   const reducedMotion = useReducedMotion();
-  const { selectApiNode, selectedApiNodeId } = useSettingsMockState();
+  const { selectApiNode, selectedApiNodeId } = useApiNodeMockState();
   const [detectionRun, setDetectionRun] = useState(0);
   const [isChecking, setIsChecking] = useState(true);
   const selectedApiNode: ApiNode | undefined = mockApiNodes.find(
