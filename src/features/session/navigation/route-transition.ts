@@ -3,7 +3,6 @@ import { Stack as JsStack } from 'expo-router/js-stack';
 import type { BottomTabNavigationOptions } from 'expo-router/tabs';
 import { Animated, Easing } from 'react-native';
 
-import { IOS_BACK_GESTURE_EDGE_WIDTH_PT } from '@/constants/back-navigation';
 import { PAGE_TRANSITION_TIMING } from '@/constants/page-transition';
 
 type ExcludeFunction<T> = T extends (...args: never[]) => unknown ? never : T;
@@ -89,18 +88,8 @@ const scopeCardStyleInterpolator: CardStyleInterpolator = ({ current, inverted, 
   };
 };
 
-type RouteScreenOptionsPolicy = {
-  enableIosBackGesture?: boolean;
-  platform?: string;
-};
-
-type ScopeTransitionScreenOptionsPolicy = {
-  platform?: string;
-};
-
 export function getRouteScreenOptions(
   reducedMotion: boolean,
-  policy: RouteScreenOptionsPolicy = {},
 ): JsStackScreenOptions {
   const sharedOptions: JsStackScreenOptions = {
     cardOverlayEnabled: false,
@@ -110,7 +99,7 @@ export function getRouteScreenOptions(
     headerShown: false,
   };
 
-  const routeOptions: JsStackScreenOptions = reducedMotion
+  return reducedMotion
     ? { ...sharedOptions, animation: 'none' }
     : {
       ...sharedOptions,
@@ -119,16 +108,6 @@ export function getRouteScreenOptions(
       cardStyleInterpolator: routeCardStyleInterpolator,
       transitionSpec,
     };
-
-  const platform = policy.platform ?? process.env.EXPO_OS;
-  if (!policy.enableIosBackGesture || platform !== 'ios') return routeOptions;
-
-  return {
-    ...routeOptions,
-    gestureDirection: 'horizontal',
-    gestureEnabled: true,
-    gestureResponseDistance: IOS_BACK_GESTURE_EDGE_WIDTH_PT,
-  };
 }
 
 export function getTabScreenOptions(reducedMotion: boolean): BottomTabNavigationOptions {
@@ -150,7 +129,6 @@ export function getTabScreenOptions(reducedMotion: boolean): BottomTabNavigation
 
 export function getScopeTransitionScreenOptions(
   reducedMotion: boolean,
-  policy: ScopeTransitionScreenOptionsPolicy = {},
 ): JsStackScreenOptions {
   const sharedOptions: JsStackScreenOptions = {
     cardOverlayEnabled: false,
@@ -160,7 +138,6 @@ export function getScopeTransitionScreenOptions(
     gestureEnabled: false,
     headerShown: false,
   };
-  const platform = policy.platform ?? process.env.EXPO_OS;
 
   if (reducedMotion) {
     return {
@@ -175,9 +152,6 @@ export function getScopeTransitionScreenOptions(
     animation: 'default',
     animationTypeForReplace: 'push',
     cardStyleInterpolator: scopeCardStyleInterpolator,
-    gestureDirection: 'horizontal',
-    gestureEnabled: platform === 'ios',
-    gestureResponseDistance: IOS_BACK_GESTURE_EDGE_WIDTH_PT,
     transitionSpec,
   };
 }

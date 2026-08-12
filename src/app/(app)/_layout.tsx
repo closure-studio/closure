@@ -23,7 +23,7 @@ export default function AppLayout() {
   const { resetBackdropTint } = useSessionBackdrop();
   const screenOptions = layoutSize === 'small'
     ? getScopeTransitionScreenOptions(reducedMotion)
-    : getRouteScreenOptions(reducedMotion, { enableIosBackGesture: true });
+    : getRouteScreenOptions(reducedMotion);
 
   if (!session) {
     return <Redirect href={{ pathname: '/login', params: { returnTo: pathname } }} />;

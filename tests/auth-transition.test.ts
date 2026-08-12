@@ -5,7 +5,6 @@ import {
   getScopeTransitionScreenOptions,
   getTabScreenOptions,
 } from '@/features/session/navigation/route-transition';
-import { IOS_BACK_GESTURE_EDGE_WIDTH_PT } from '@/constants/back-navigation';
 
 function readAnimatedNumber(value: unknown): number {
   if (typeof value !== 'object' || value === null) {
@@ -88,25 +87,13 @@ describe('route transition', () => {
     });
   });
 
-  it('enables only the iOS app-stack edge-back gesture', () => {
-    expect(getRouteScreenOptions(false, {
-      enableIosBackGesture: true,
-      platform: 'ios',
-    })).toMatchObject({
-      gestureDirection: 'horizontal',
-      gestureEnabled: true,
-      gestureResponseDistance: IOS_BACK_GESTURE_EDGE_WIDTH_PT,
-    });
-    expect(getRouteScreenOptions(false, {
-      enableIosBackGesture: true,
-      platform: 'android',
-    })).toMatchObject({
+  it('keeps interactive route-back gestures disabled', () => {
+    expect(getRouteScreenOptions(false)).toMatchObject({
       gestureEnabled: false,
     });
-    expect(getRouteScreenOptions(false, {
-      enableIosBackGesture: true,
-      platform: 'web',
-    })).toMatchObject({
+
+    expect(getRouteScreenOptions(true)).toMatchObject({
+      animation: 'none',
       gestureEnabled: false,
     });
   });
@@ -158,9 +145,7 @@ describe('route transition', () => {
   });
 
   it('uses the shared timing for the compact Dashboard and Settings scene push', () => {
-    const screenOptions = getScopeTransitionScreenOptions(false, {
-      platform: 'ios',
-    });
+    const screenOptions = getScopeTransitionScreenOptions(false);
 
     expect(typeof screenOptions.cardStyleInterpolator).toBe('function');
     expect(screenOptions).toMatchObject({
@@ -169,14 +154,14 @@ describe('route transition', () => {
       cardOverlayEnabled: false,
       cardShadowEnabled: false,
       detachPreviousScreen: false,
-      gestureDirection: 'horizontal',
-      gestureEnabled: true,
-      gestureResponseDistance: IOS_BACK_GESTURE_EDGE_WIDTH_PT,
+      gestureEnabled: false,
       transitionSpec: {
         open: { config: { duration: PAGE_TRANSITION_TIMING.totalMs } },
         close: { config: { duration: PAGE_TRANSITION_TIMING.totalMs } },
       },
     });
+    expect(screenOptions).not.toHaveProperty('gestureDirection');
+    expect(screenOptions).not.toHaveProperty('gestureResponseDistance');
 
     const cardStyleInterpolator = screenOptions.cardStyleInterpolator;
     if (!cardStyleInterpolator) throw new Error('Expected a compact scope card interpolator.');
@@ -248,17 +233,12 @@ describe('route transition', () => {
     expect(readTranslateX(outgoingStyle.cardStyle)).toBe(195);
   });
 
-  it('disables compact scene motion and non-iOS gestures where required', () => {
-    expect(getScopeTransitionScreenOptions(true, {
-      platform: 'ios',
-    })).toMatchObject({
+  it('disables compact scene motion where required', () => {
+    expect(getScopeTransitionScreenOptions(true)).toMatchObject({
       animation: 'none',
       cardStyle: { backgroundColor: 'transparent' },
       detachPreviousScreen: true,
       gestureEnabled: false,
     });
-    expect(getScopeTransitionScreenOptions(false, {
-      platform: 'android',
-    })).toMatchObject({ gestureEnabled: false });
   });
 });
