@@ -68,6 +68,7 @@
     "web": "expo start --web",
     "export:all": "expo export --platform all",
     "i18n:check": "node ./scripts/check-translations.mjs",
+    "loc": "node ./scripts/audit-loc.mjs",
     "lint": "expo lint --max-warnings 0",
     "postinstall": "node ./scripts/copy-canvaskit.mjs",
     "quality": "npm run tamagui:check && npm run typecheck && npm run lint && npm run i18n:check && npm test",
