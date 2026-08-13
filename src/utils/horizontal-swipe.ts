@@ -39,11 +39,8 @@ export function resolveHorizontalSwipeDirection(motion: HorizontalSwipeMotion): 
   }
 
   if (horizontalDistance < HORIZONTAL_SWIPE_FLICK_MIN_DISTANCE_PT) return null;
-
   if (Math.abs(velocityX) <= Math.abs(velocityY)) return null;
-
   if (Math.abs(velocityX) < HORIZONTAL_SWIPE_FLICK_VELOCITY_THRESHOLD_PT_PER_SECOND) return null;
-
   if (Math.sign(translationX) !== Math.sign(velocityX)) return null;
 
   return translationX < 0 ? 'left' : 'right';

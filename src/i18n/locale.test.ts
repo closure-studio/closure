@@ -1,4 +1,5 @@
-import { defaultLocale, resolveLocale } from './locale';
+import { DEFAULT_LOCALE } from '@/constants/locales';
+import { resolveLocale } from './locale';
 
 describe('resolveLocale', () => {
   it('selects the first supported language preference', () => {
@@ -13,6 +14,6 @@ describe('resolveLocale', () => {
   });
 
   it('falls back when no preference is supported', () => {
-    expect(resolveLocale([{ languageCode: 'fr', languageTag: 'fr-FR' }])).toBe(defaultLocale);
+    expect(resolveLocale([{ languageCode: 'fr', languageTag: 'fr-FR' }])).toBe(DEFAULT_LOCALE);
   });
 });

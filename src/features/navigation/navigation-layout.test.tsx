@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider, YStack } from 'tamagui';
 
-import type { HorizontalSwipeDirection } from '@/components';
+import type { HorizontalSwipeDirection } from '@/utils/horizontal-swipe';
 import { tamaguiConfig } from '../../../tamagui.config';
 import {
   NavigationLayout,

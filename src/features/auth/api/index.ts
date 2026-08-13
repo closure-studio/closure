@@ -4,7 +4,7 @@ export type {
   AuthFailure,
   AuthResult,
 } from './auth-adapter';
-export { MockAuthAdapter, MOCK_AUTHENTICATION_DELAY_MS } from './mock-auth-adapter';
+export { MockAuthAdapter } from './mock-auth-adapter';
 export {
   MOCK_AUTH_VALUES,
   mockActiveSession,

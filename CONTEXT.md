@@ -36,9 +36,21 @@ _Avoid_: Operators view, unit list
 The item quantities owned by a Game Account, keyed by the game item ID and displayed with the bundled item table metadata.
 _Avoid_: Material Inventory, Resources, depot data
 
-**Activity Timeline Entry**:
-A scheduled event, banner, maintenance window, or notice relevant to a Game Account.
-_Avoid_: Timeline event, log item
+**ArkHost Snapshot**:
+The last successfully loaded ArkHost system, Game Account, detail, character, ranking, log, and event data retained for a User Session. It is reused across application restarts until logout, a different User Account signs in, or validation fails.
+_Avoid_: Live server state, dashboard mock, cache fallback
+
+**Game Log Entry**:
+An operational record emitted by ArkHost for one Game Account, identified by its monotonically assigned log ID.
+_Avoid_: Activity Timeline Entry, notification
+
+**Character Progression**:
+The ArkHost-reported level, elite phase, and potential rank for a character owned by a Game Account.
+_Avoid_: Operator metadata, Operator Roster profile
+
+**Game Resource Catalog**:
+Reference metadata that resolves stable game identifiers into display information for items, stages, and characters. Each table has a bundled baseline that may be replaced by a newer validated table without affecting a Game Account's ArkHost Snapshot.
+_Avoid_: ArkHost Snapshot, Game Account data
 
 **Layout Size**:
 The viewport-width classification used to select presentation and navigation behavior. It has exactly two values: Small Screen below 768 logical units and Large Screen at or above 768; device type and physical orientation do not participate.

@@ -7,8 +7,8 @@ const mockDashboardTabs = jest.fn((_props: unknown) => null);
 const mockDashboardTabsScreen = jest.fn(() => null);
 const mockDashboardSmallScreenTabBar = jest.fn(() => null);
 const mockDashboardShell = jest.fn(({ children }: PropsWithChildren) => children);
-const mockLinkGameAccount = jest.fn();
 const mockSelectGameAccount = jest.fn();
+const mockInitializeGames = jest.fn(async () => undefined);
 const mockGetTabScreenOptions = jest.fn((reducedMotion: boolean) => ({
   animation: reducedMotion ? 'none' : 'fade',
 }));
@@ -52,15 +52,7 @@ jest.mock('@/providers/layout-size-provider', () => ({
   useLayoutSize: mockUseLayoutSize,
 }));
 
-jest.mock('@/components', () => {
-  const horizontalSwipe = jest.requireActual<
-    typeof import('../src/components/layout/horizontal-swipe')
-  >('../src/components/layout/horizontal-swipe');
-
-  return {
-    resolveAdjacentHorizontalSwipeItem: horizontalSwipe.resolveAdjacentHorizontalSwipeItem,
-  };
-});
+jest.mock('@/components', () => ({}));
 
 jest.mock('@/features/dashboard', () => ({
   DashboardShell: mockDashboardShell,
@@ -68,12 +60,13 @@ jest.mock('@/features/dashboard', () => ({
 }));
 
 jest.mock('@/store', () => ({
-  selectActiveGameAccount: () => ({ color: 'primary', id: 'account-1' }),
+  selectActiveGameAccount: () => ({ account: 'account-1', color: 'primary' }),
   useAppStore: (selector: (state: object) => unknown) => selector({
     games: {
-      gameAccounts: [{ id: 'account-1' }, { id: 'account-2' }],
+      data: { gameAccounts: [{ account: 'account-1' }, { account: 'account-2' }] },
+      loadStatus: 'succeeded',
     },
-    linkGameAccount: mockLinkGameAccount,
+    initializeGames: mockInitializeGames,
     selectGameAccount: mockSelectGameAccount,
   }),
 }));
@@ -101,7 +94,7 @@ describe('DashboardLayout route transitions', () => {
   beforeEach(() => {
     mockDashboardTabs.mockClear();
     mockDashboardShell.mockClear();
-    mockLinkGameAccount.mockClear();
+    mockInitializeGames.mockClear();
     mockSelectGameAccount.mockClear();
     mockGetTabScreenOptions.mockClear();
     mockUseReducedMotion.mockReset();

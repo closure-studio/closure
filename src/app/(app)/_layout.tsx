@@ -2,6 +2,7 @@ import { Redirect, usePathname, useRouter } from 'expo-router';
 import { Stack as AppStack } from 'expo-router/js-stack';
 import { useReducedMotion } from 'react-native-reanimated';
 
+import { ROUTES } from '@/constants/routes';
 import {
   getRouteScreenOptions,
   getScopeTransitionScreenOptions,
@@ -26,12 +27,12 @@ export default function AppLayout() {
     : getRouteScreenOptions(reducedMotion);
 
   if (!session) {
-    return <Redirect href={{ pathname: '/login', params: { returnTo: pathname } }} />;
+    return <Redirect href={{ pathname: ROUTES.login, params: { returnTo: pathname } }} />;
   }
 
   const handleLogout = () => {
     resetBackdropTint();
-    router.replace('/login');
+    router.replace(ROUTES.login);
     logout();
   };
 

@@ -1,9 +1,7 @@
 import { getLocales, type Locale } from 'expo-localization';
 
-export const supportedLocales = ['zh-CN', 'en'] as const;
-export type SupportedLocale = (typeof supportedLocales)[number];
-
-export const defaultLocale: SupportedLocale = 'zh-CN';
+import { DEFAULT_LOCALE } from '@/constants/locales';
+import type { SupportedLocale } from '@/constants/locales';
 
 type LocalePreference = Pick<Locale, 'languageCode' | 'languageTag'>;
 
@@ -16,9 +14,9 @@ export function resolveLocale(preferences: readonly LocalePreference[]): Support
     if (language === 'en') return 'en';
   }
 
-  return defaultLocale;
+  return DEFAULT_LOCALE;
 }
 
 export function getInitialLocale(): SupportedLocale {
-  return process.env.EXPO_OS === 'web' ? defaultLocale : resolveLocale(getLocales());
+  return process.env.EXPO_OS === 'web' ? DEFAULT_LOCALE : resolveLocale(getLocales());
 }

@@ -2,12 +2,10 @@ import type { ImperativeRouter } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
 import { BackHandler } from 'react-native';
 
+import { ROUTES } from '@/constants/routes';
 import { dismissTopBackOverlay } from '@/hooks/use-back-dismissal';
 import { dashboardNavigation } from './navigation-config';
 import type { SettingsPageRoute } from './navigation-config';
-
-const DASHBOARD_PATH = '/dashboard';
-const SETTINGS_PATH = '/settings';
 
 export type NavigationBackAction = 'delegate' | 'exit-app' | 'return-dashboard';
 
@@ -16,8 +14,8 @@ function isPathOrDescendant(pathname: string, parentPath: string): boolean {
 }
 
 export function resolveNavigationBackAction(pathname: string): NavigationBackAction {
-  if (isPathOrDescendant(pathname, SETTINGS_PATH)) return 'return-dashboard';
-  if (isPathOrDescendant(pathname, DASHBOARD_PATH)) return 'exit-app';
+  if (isPathOrDescendant(pathname, ROUTES.settings)) return 'return-dashboard';
+  if (isPathOrDescendant(pathname, ROUTES.dashboard)) return 'exit-app';
   return 'delegate';
 }
 
@@ -79,7 +77,7 @@ export function useSettingsBackNavigation({
 
     if (
       initialSettingsHistoryChecked.current
-      || !isPathOrDescendant(pathname, SETTINGS_PATH)
+      || !isPathOrDescendant(pathname, ROUTES.settings)
     ) {
       return;
     }

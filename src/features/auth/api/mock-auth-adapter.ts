@@ -23,7 +23,7 @@ import {
   mockBannedSession,
 } from './mock-auth-fixtures';
 
-export const MOCK_AUTHENTICATION_DELAY_MS = 1_100;
+const MOCK_AUTHENTICATION_DELAY_MS = 1_100;
 
 function success<T>(data: T): AuthResult<T> {
   return { data, ok: true };

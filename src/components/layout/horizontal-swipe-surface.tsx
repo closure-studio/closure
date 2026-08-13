@@ -8,8 +8,8 @@ import {
   HORIZONTAL_SWIPE_DISTANCE_THRESHOLD_PT,
   HORIZONTAL_SWIPE_FLICK_VELOCITY_THRESHOLD_PT_PER_SECOND,
   resolveHorizontalSwipeDirection,
-} from './horizontal-swipe';
-import type { HorizontalSwipeDirection, HorizontalSwipeMotion } from './horizontal-swipe';
+} from '@/utils/horizontal-swipe';
+import type { HorizontalSwipeDirection, HorizontalSwipeMotion } from '@/utils/horizontal-swipe';
 
 function isTextInputFocused() {
   const focusedInput = TextInput.State.currentlyFocusedInput?.();

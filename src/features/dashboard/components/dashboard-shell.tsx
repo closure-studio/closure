@@ -2,7 +2,7 @@ import type { PropsWithChildren } from 'react';
 import { ScrollView, YStack } from 'tamagui';
 
 import { HorizontalSwipeSurface } from '@/components';
-import type { HorizontalSwipeDirection } from '@/components';
+import type { HorizontalSwipeDirection } from '@/utils/horizontal-swipe';
 import { DashboardSecondaryHeader, type DashboardSecondaryHeaderProps } from './dashboard-secondary-header';
 
 const DASHBOARD_CONTENT_MAX_WIDTH = 1152;

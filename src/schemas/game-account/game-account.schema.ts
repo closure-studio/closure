@@ -1,42 +1,29 @@
 import * as v from 'valibot';
 
-import { activityTimelineEntrySchema } from './activity-timeline-entry.schema';
-import { inventorySchema } from './inventory.schema';
-import { operatorSchema } from './operator.schema';
+import {
+  arkHostAvatarSchema,
+  arkHostCaptchaInfoSchema,
+  arkHostGameConfigSchema,
+} from '@/schemas/arkhost';
 
-const gameAccountColorSchema = v.picklist(['primary', 'warning', 'muted']);
-const gameAccountStatSchema = v.object({
-  label: v.string(),
-  value: v.string(),
-  trend: v.string(),
-  warn: v.optional(v.boolean()),
-});
+export const gameAccountColorSchema = v.picklist(['primary', 'warning', 'muted']);
 
 export const gameAccountSchema = v.object({
-  id: v.string(),
-  callsign: v.string(),
-  uid: v.string(),
-  server: v.string(),
-  avatar: v.string(),
+  account: v.pipe(v.string(), v.minLength(1)),
+  ap: v.pipe(v.number(), v.integer(), v.minValue(0)),
+  avatar: arkHostAvatarSchema,
+  captchaInfo: arkHostCaptchaInfoSchema,
   color: gameAccountColorSchema,
-  doctorLevel: v.number(),
-  exp: v.tuple([v.number(), v.number()]),
-  ap: v.tuple([v.number(), v.number()]),
-  apRecoverAt: v.string(),
-  lmd: v.number(),
-  orundum: v.number(),
-  originium: v.number(),
-  recruitTickets: v.number(),
-  drTitle: v.string(),
-  progress: v.string(),
-  online: v.string(),
-  baseMood: v.number(),
-  factoryLoad: v.number(),
-  trainingLoad: v.number(),
-  stats: v.array(gameAccountStatSchema),
-  operators: v.array(operatorSchema),
-  inventory: inventorySchema,
-  activityTimeline: v.array(activityTimelineEntrySchema),
+  config: arkHostGameConfigSchema,
+  createdAt: v.pipe(v.number(), v.integer(), v.minValue(0)),
+  isVerified: v.boolean(),
+  level: v.pipe(v.number(), v.integer(), v.minValue(0)),
+  nickname: v.string(),
+  platform: v.pipe(v.number(), v.integer()),
+  statusCode: v.pipe(v.number(), v.integer()),
+  statusText: v.string(),
+  userId: v.pipe(v.string(), v.minLength(1)),
 });
 
 export type GameAccount = v.InferOutput<typeof gameAccountSchema>;
+export type GameAccountColor = v.InferOutput<typeof gameAccountColorSchema>;

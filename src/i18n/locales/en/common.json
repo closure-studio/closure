@@ -1,4 +1,8 @@
 {
+  "states": {
+    "disabled": "Disabled",
+    "enabled": "Enabled"
+  },
   "actions": {
     "add": "Add",
     "cancel": "Cancel",

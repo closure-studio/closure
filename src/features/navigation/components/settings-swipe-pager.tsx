@@ -14,11 +14,11 @@ import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import {
   MonoText,
-  resolveAdjacentHorizontalSwipeItem,
   SlidingSelection,
   TerminalText,
 } from '@/components';
-import type { HorizontalSwipeDirection } from '@/components';
+import { resolveAdjacentHorizontalSwipeItem } from '@/utils/horizontal-swipe';
+import type { HorizontalSwipeDirection } from '@/utils/horizontal-swipe';
 import { NavigationHeaderEdge } from './navigation-header-edge';
 import type { SettingsPageId } from '../navigation-config';
 

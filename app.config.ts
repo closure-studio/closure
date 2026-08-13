@@ -2,6 +2,8 @@ import { env } from 'node:process';
 
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
+import { SUPPORTED_LOCALES } from './src/constants/locales.ts';
+
 type AppVariant = 'development' | 'production';
 
 type AppIdentity = {
@@ -47,5 +49,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       ...config.android,
       package: identity.applicationId,
     },
+    plugins: [
+      ...(config.plugins ?? []),
+      ['expo-localization', { supportedLocales: [...SUPPORTED_LOCALES] }],
+    ],
   };
 };

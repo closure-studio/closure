@@ -1,4 +1,5 @@
 import { Stack as RootStack } from 'expo-router/js-stack';
+import { useEffect } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
 
 import {
@@ -6,6 +7,7 @@ import {
   SessionShell,
 } from '@/features/session';
 import { AppProvider } from '@/providers';
+import { useAppStore } from '@/store';
 
 export default function RootLayout() {
   return (
@@ -18,7 +20,14 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
+  const initializeGameResources = useAppStore((state) => state.initializeGameResources);
   const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    initializeGameResources().catch((error: unknown) => {
+      console.error('Unable to update game resources.', error);
+    });
+  }, [initializeGameResources]);
 
   return (
     <RootStack screenOptions={getRouteScreenOptions(reducedMotion)}>

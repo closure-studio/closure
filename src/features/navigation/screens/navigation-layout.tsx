@@ -6,8 +6,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { XStack, YStack } from 'tamagui';
 
 import { HorizontalSwipeSurface } from '@/components';
-import type { HorizontalSwipeDirection } from '@/components';
+import { ARK_RESOURCES_ORIGIN } from '@/config/ark-resources';
 import { useLayoutSize } from '@/providers/layout-size-provider';
+import type { HorizontalSwipeDirection } from '@/utils/horizontal-swipe';
 import { LargeScreenNavigationSidebar } from '../components/large-screen-navigation-sidebar';
 import { NavigationHeader } from '../components/navigation-header';
 import {
@@ -26,7 +27,7 @@ import {
 
 const dashboardPages = Object.values(dashboardNavigation.pages).sort((left, right) => left.sort - right.sort);
 const settingsPages = Object.values(settingsNavigation.pages).sort((left, right) => left.sort - right.sort);
-const MOCK_PROFILE_AVATAR_URL = 'https://ark-resource.arknights.app/assets/avatar/ASSISTANT/char_003_kalts_sale_14.webp';
+const MOCK_PROFILE_AVATAR_URL = `${ARK_RESOURCES_ORIGIN}/assets/avatar/ASSISTANT/char_003_kalts_sale_14.webp`;
 
 type NavigationLayoutProps = PropsWithChildren<{
   onLogout: () => void;
