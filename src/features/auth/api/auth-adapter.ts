@@ -5,6 +5,7 @@ import type {
   LinuxDoLoginInput,
   LoginCredentials,
   PasswordResetInput,
+  PasswordRecoveryRequestInput,
   PasswordUpdateInput,
   QqBindCodeInput,
   RegistrationCodeInput,
@@ -59,6 +60,7 @@ export interface AuthAdapter {
   queryUsers(input: AdminUserQueryInput): Promise<AuthResult<AdminUser[]>>;
   refreshSession(input: SessionRefreshInput): Promise<AuthResult<UserSession>>;
   register(input: RegistrationInput): Promise<AuthResult<UserSession>>;
+  requestPasswordRecovery(input: PasswordRecoveryRequestInput): Promise<AuthResult<void>>;
   resetPassword(input: PasswordResetInput): Promise<AuthResult<UserSession>>;
   sendRegistrationCode(input: RegistrationCodeInput): Promise<AuthResult<void>>;
   updatePassword(input: PasswordUpdateInput): Promise<AuthResult<void>>;

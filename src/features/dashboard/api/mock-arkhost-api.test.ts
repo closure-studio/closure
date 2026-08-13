@@ -1,4 +1,5 @@
-import { MockArkHostApi, mockArkHostGachaEvents } from ".";
+import { mockArkHostGachaEvents } from '@/mocks/arkhost';
+import { MockArkHostApi } from './mock-arkhost-api';
 
 describe("MockArkHostApi", () => {
   it("serves core and account-scoped ArkHost data", async () => {

@@ -9,7 +9,6 @@ import {
   Signal,
   SignalZero,
 } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import {
@@ -35,17 +34,24 @@ import {
 } from '@/components';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import { apiNodeIdSchema } from '@/schemas/api-node';
-import type { ApiNode } from '@/schemas/api-node';
+import type { ApiNode, ApiNodeId } from '@/schemas/api-node';
+import type { ApiNodeFailure } from '../api';
 import { SettingsPage } from '../../components/settings-page';
-import { useApiNodeMockState } from '../api-node-mock-context';
-import { mockApiNodes } from '../mocks/api-node-fixtures';
-
-const API_NODE_DETECTION_DELAY_MS = 650;
 const LOW_LATENCY_MAX_MS = 80;
 const ELEVATED_LATENCY_MAX_MS = 150;
 
 type LatencyTone = '$appSuccess' | '$appWarning' | '$appDanger';
 type DetectionStatus = 'checking' | 'reachable' | 'unreachable';
+type OperationStatus = 'failed' | 'idle' | 'pending' | 'succeeded';
+
+export type NetworkSettingsScreenProps = {
+  nodes: readonly ApiNode[];
+  onRefresh: () => Promise<void>;
+  onSelectApiNode: (apiNodeId: ApiNodeId) => void;
+  queryError: ApiNodeFailure | null;
+  queryStatus: OperationStatus;
+  selectedApiNodeId: ApiNodeId;
+};
 
 function resolveLatencyTone(latencyMs: number): LatencyTone {
   if (latencyMs <= LOW_LATENCY_MAX_MS) return '$appSuccess';
@@ -53,46 +59,37 @@ function resolveLatencyTone(latencyMs: number): LatencyTone {
   return '$appDanger';
 }
 
-export function NetworkSettingsScreen() {
+export function NetworkSettingsScreen({
+  nodes,
+  onRefresh,
+  onSelectApiNode,
+  queryError,
+  queryStatus,
+  selectedApiNodeId,
+}: NetworkSettingsScreenProps) {
   const { t } = useTranslation('settings');
   const colors = getTokens().color;
   const layoutSize = useLayoutSize();
   const reducedMotion = useReducedMotion();
-  const { selectApiNode, selectedApiNodeId } = useApiNodeMockState();
-  const [detectionRun, setDetectionRun] = useState(0);
-  const [isChecking, setIsChecking] = useState(true);
-  const selectedApiNode: ApiNode | undefined = mockApiNodes.find(
+  const selectedApiNode: ApiNode | undefined = nodes.find(
     (apiNode) => apiNode.id === selectedApiNodeId,
-  );
-
-  if (!selectedApiNode) {
-    throw new Error(`Selected mock API Node is missing: ${selectedApiNodeId}`);
-  }
-
-  useEffect(() => {
-    const detectionTimer = setTimeout(() => {
-      setIsChecking(false);
-    }, API_NODE_DETECTION_DELAY_MS);
-
-    return () => clearTimeout(detectionTimer);
-  }, [detectionRun]);
+  ) ?? nodes[0];
 
   const handleNodeChange = (candidateNodeId: string) => {
     const result = v.safeParse(apiNodeIdSchema, candidateNodeId);
     if (!result.success || result.output === selectedApiNodeId) return;
 
-    selectApiNode(result.output);
-    console.info('Mock API Node selected.', { apiNodeId: result.output });
+    onSelectApiNode(result.output);
   };
 
   const handleRetest = () => {
-    setIsChecking(true);
-    setDetectionRun((run) => run + 1);
+    onRefresh().catch(() => undefined);
   };
 
+  const isChecking = queryStatus === 'pending';
   const detectionStatus: DetectionStatus = isChecking
     ? 'checking'
-    : selectedApiNode.outcome;
+    : selectedApiNode?.outcome ?? 'unreachable';
   const detectionComplete = detectionStatus !== 'checking';
   const detectionPresentation = {
     buttonBackground: detectionComplete ? '$appAccentSoft' : '$appWarningSoft',
@@ -104,8 +101,8 @@ export function NetworkSettingsScreen() {
     buttonLabel: t(detectionComplete ? 'network.retest' : 'network.checking'),
     buttonTone: detectionComplete ? '$appAccent' : '$appWarning',
     latencyAnimationKey: detectionComplete
-      ? `latency-${selectedApiNode.id}`
-      : `checking-${detectionRun}`,
+      ? `latency-${selectedApiNode?.id ?? 'none'}`
+      : 'checking',
     panelIndicatorOpacity: detectionComplete ? 0.55 : 1,
     panelIndicatorTone: detectionComplete ? '$appAccent' : '$appWarning',
     panelRingScale: detectionComplete ? 1 : 1.08,
@@ -120,8 +117,8 @@ export function NetworkSettingsScreen() {
         statusTone: '$appWarning',
       },
       reachable: {
-        latencyTone: resolveLatencyTone(selectedApiNode.mockLatencyMs),
-        latencyValue: selectedApiNode.mockLatencyMs,
+        latencyTone: resolveLatencyTone(selectedApiNode?.latencyMs ?? 0),
+        latencyValue: selectedApiNode?.latencyMs ?? '--',
         statusIcon: <Signal size={15} color={colors.appSuccess.val} strokeWidth={1.8} />,
         statusLabel: t('network.connected'),
         statusTone: '$appSuccess',
@@ -135,6 +132,30 @@ export function NetworkSettingsScreen() {
       },
     } as const)[detectionStatus],
   } as const;
+
+  if (!selectedApiNode) {
+    return (
+      <SettingsPage>
+        <YStack gap="$3" $md={{ gap: '$5' }}>
+          <TerminalNotice tone="danger">
+            {queryError ? t('network.queryError') : t('network.checking')}
+          </TerminalNotice>
+          <Button
+            borderWidth={1}
+            borderColor="$appAccentBorder"
+            bg="$appAccentSoft"
+            disabled={isChecking}
+            onPress={handleRetest}
+          >
+            {isChecking ? <Spinner size="small" color="$appWarning" /> : null}
+            <MonoText size="$2.5" color="$appAccent">
+              {t(isChecking ? 'network.checking' : 'network.retest')}
+            </MonoText>
+          </Button>
+        </YStack>
+      </SettingsPage>
+    );
+  }
 
   return (
     <SettingsPage>
@@ -291,7 +312,7 @@ export function NetworkSettingsScreen() {
               />
             </YStack>
             <Clock3 size={13} color={colors.appMuted.val} strokeWidth={1.5} />
-            <MonoText size="$1">{t('network.sessionOnly')}</MonoText>
+            <MonoText size="$1">{t('network.persistenceLabel')}</MonoText>
           </XStack>
           </TerminalPanel>
         ) : null}
@@ -363,11 +384,11 @@ export function NetworkSettingsScreen() {
               gap="$3"
               $lg={{ flexDirection: 'row' }}
             >
-              {mockApiNodes.map((apiNode, index) => {
+              {nodes.map((apiNode, index) => {
                 const isSelected = apiNode.id === selectedApiNodeId;
                 const isReachable = apiNode.outcome === 'reachable';
                 const latencyTone = isReachable
-                  ? resolveLatencyTone(apiNode.mockLatencyMs)
+                  ? resolveLatencyTone(apiNode.latencyMs)
                   : '$appDanger';
                 const SelectionIcon = isSelected ? CircleDot : Circle;
 
@@ -451,7 +472,7 @@ export function NetworkSettingsScreen() {
                               fontVariant={['tabular-nums']}
                               $md={{ size: '$7', lineHeight: '$7' }}
                             >
-                              {detectionComplete && isReachable ? apiNode.mockLatencyMs : '--'}
+                              {detectionComplete && isReachable ? apiNode.latencyMs : '--'}
                             </TerminalText>
                             <MonoText size="$1" color={detectionComplete ? latencyTone : '$appMuted'}>
                               {t('network.latencyUnit')}
@@ -467,6 +488,11 @@ export function NetworkSettingsScreen() {
               })}
             </SlidingSelection>
           </RadioGroup>
+          {queryError ? (
+            <TerminalNotice tone="danger">
+              {t('network.queryError')}
+            </TerminalNotice>
+          ) : null}
         </YStack>
 
         <TerminalNotice>{t('network.mockNotice')}</TerminalNotice>

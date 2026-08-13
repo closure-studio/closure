@@ -5,6 +5,7 @@ import type {
   LinuxDoLoginInput,
   LoginCredentials,
   PasswordResetInput,
+  PasswordRecoveryRequestInput,
   PasswordUpdateInput,
   QqBindCodeInput,
   RegistrationCodeInput,
@@ -21,7 +22,7 @@ import {
   mockAdminSession,
   mockAdminUsers,
   mockBannedSession,
-} from './mock-auth-fixtures';
+} from '@/mocks/auth';
 
 const MOCK_AUTHENTICATION_DELAY_MS = 1_100;
 
@@ -113,11 +114,11 @@ export class MockAuthAdapter implements AuthAdapter {
 
     return success({
       ...mockActiveSession,
-      accessToken: 'mock-registered-session-token',
+      accessToken: MOCK_AUTH_VALUES.registeredToken,
       principal: {
         ...mockActiveSession.principal,
         email: input.email,
-        id: 'user-closure-registered',
+        id: MOCK_AUTH_VALUES.registeredUserId,
       },
     });
   }
@@ -128,6 +129,17 @@ export class MockAuthAdapter implements AuthAdapter {
     const session = [mockActiveSession, mockAdminSession, mockBannedSession]
       .find((candidate) => candidate.principal.email === input.email);
     return session ? success(session) : failure('user-not-found');
+  }
+
+  async requestPasswordRecovery(input: PasswordRecoveryRequestInput): Promise<AuthResult<void>> {
+    await this.#wait();
+    const identifier = input.identifier.toLocaleLowerCase();
+    const knownUser = [mockActiveSession, mockAdminSession, mockBannedSession]
+      .some((session) => (
+        session.principal.email.toLocaleLowerCase() === identifier
+        || session.principal.id.toLocaleLowerCase() === identifier
+      ));
+    return knownUser ? success(undefined) : failure('user-not-found');
   }
 
   async sendRegistrationCode(input: RegistrationCodeInput): Promise<AuthResult<void>> {

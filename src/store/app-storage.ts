@@ -1,18 +1,17 @@
 import * as v from 'valibot';
 import type { PersistStorage } from 'zustand/middleware';
 
+import { gameResourcesStateSchema } from '@/schemas/game-data';
 import {
-  gameResourcesStateSchema,
-} from '@/schemas/game-data';
-import {
+  gamesStateSchema,
   persistedAppStateSchema,
 } from '@/schemas/local-state';
+import type { PersistedAppState, PersistedStoreState } from '@/schemas/local-state';
 import type {
   GameResourcesState,
 } from '@/schemas/game-data';
-import type {
-  PersistedStoreState,
-} from '@/schemas/local-state';
+import { userSessionSchema } from '@/schemas/auth';
+import { apiNodeIdSchema } from '@/schemas/api-node';
 
 export const APP_STORE_STORAGE_KEY = 'closure.app-store';
 export const GAME_RESOURCES_STORAGE_KEY = 'closure.game-resources';
@@ -23,8 +22,14 @@ export type SyncStateStorage = {
   setItem: (name: string, value: string) => unknown;
 };
 
+const appStateMigrationSchema = v.object({
+  auth: v.object({ session: v.nullable(userSessionSchema) }),
+  games: gamesStateSchema,
+  network: v.optional(v.unknown()),
+});
+
 const previousAppStateSchema = v.object({
-  state: persistedAppStateSchema,
+  state: appStateMigrationSchema,
   version: v.optional(v.number()),
 });
 
@@ -42,10 +47,30 @@ function parseStored<T>(
   }
 }
 
-function parseAppState(raw: string | null) {
+function parseAppState(raw: string | null): PersistedAppState | null {
   const current = parseStored(raw, persistedAppStateSchema);
   if (current) return current;
-  return parseStored(raw, previousAppStateSchema)?.state ?? null;
+
+  const bare = parseStored(raw, appStateMigrationSchema);
+  const previous = bare ? null : parseStored(raw, previousAppStateSchema);
+  const state = bare ?? previous?.state;
+  if (!state) return null;
+  const networkValue = state.network;
+  const candidateNodeId = typeof networkValue === 'object'
+    && networkValue !== null
+    && 'selectedApiNodeId' in networkValue
+    ? networkValue.selectedApiNodeId
+    : undefined;
+  const selectedApiNodeId = v.safeParse(apiNodeIdSchema, candidateNodeId);
+  return {
+    auth: state.auth,
+    games: state.games,
+    network: {
+      selectedApiNodeId: selectedApiNodeId.success
+        ? selectedApiNodeId.output
+        : 'domestic',
+    },
+  };
 }
 
 export function createAppPersistStorage(
@@ -73,7 +98,11 @@ export function createAppPersistStorage(
       resources = nextResources;
       return {
         state: {
-          app: app ?? { auth: { session: null }, games: null },
+          app: app ?? {
+            auth: { session: null },
+            games: null,
+            network: { selectedApiNodeId: 'domestic' },
+          },
           gameResources: nextResources,
         },
       };

@@ -12,6 +12,7 @@ import * as v from 'valibot';
 import {
   Button,
   Form,
+  Spinner,
   XStack,
   YStack,
   getTokens,
@@ -25,17 +26,65 @@ import {
   TerminalText,
   TerminalTextField,
 } from '@/components';
+import type { AuthFailure } from '@/features/auth';
+import { USER_PERMISSION } from '@/schemas/auth';
+import type { SessionPrincipal } from '@/schemas/auth';
 import {
   passwordChangeInputSchema,
   passwordChangeIssue,
 } from '@/schemas/user-account';
+import type { PasswordChangeInput } from '@/schemas/user-account';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import { SettingsPage } from '../../components/settings-page';
-import { mockUserAccount } from '../mocks/user-account-fixture';
 
 type PasswordField = 'currentPassword' | 'newPassword' | 'repeatNewPassword';
 type PasswordIssue = (typeof passwordChangeIssue)[keyof typeof passwordChangeIssue];
 type PasswordErrors = Partial<Record<PasswordField, PasswordIssue>>;
+type PasswordUpdateStatus = 'failed' | 'idle' | 'pending' | 'succeeded';
+
+export type AccountSettingsScreenProps = {
+  onUpdatePassword: (input: PasswordChangeInput) => Promise<boolean>;
+  passwordUpdateError: AuthFailure | null;
+  passwordUpdateStatus: PasswordUpdateStatus;
+  principal: SessionPrincipal;
+};
+
+function hasSuperAdminPermission(permission: number): boolean {
+  return (permission & USER_PERMISSION.superAdmin) === USER_PERMISSION.superAdmin;
+}
+
+function passwordUpdateErrorMessage(
+  error: AuthFailure | null,
+  translate: (key: string) => string,
+): string | null {
+  if (!error) return null;
+  switch (error.code) {
+    case 'invalid-credentials':
+      return translate('account.errors.invalidCredentials');
+    case 'account-banned':
+      return translate('account.errors.accountBanned');
+    case 'session-expired':
+      return translate('account.errors.sessionExpired');
+    case 'network-unavailable':
+    case 'rate-limited':
+    case 'timeout':
+    case 'server-error':
+      return translate('account.errors.serverError');
+    case 'invalid-response':
+      return translate('account.errors.invalidResponse');
+    case 'already-bound':
+    case 'email-already-registered':
+    case 'invalid-input':
+    case 'invalid-oauth-code':
+    case 'invalid-verification-code':
+    case 'permission-denied':
+    case 'unknown-business-error':
+    case 'user-not-found':
+    case 'verification-code-expired':
+      return translate('account.errors.fallback');
+  }
+  return translate('account.errors.fallback');
+}
 
 function passwordErrorsFromIssues(issues: readonly { message: string }[]): PasswordErrors {
   const errors: PasswordErrors = {};
@@ -185,7 +234,12 @@ function AccountIdentityPanel({
   );
 }
 
-export function AccountSettingsScreen() {
+export function AccountSettingsScreen({
+  onUpdatePassword,
+  passwordUpdateError,
+  passwordUpdateStatus,
+  principal,
+}: AccountSettingsScreenProps) {
   const { t, i18n } = useTranslation('settings');
   const { t: tCommon } = useTranslation('common');
   const colors = getTokens().color;
@@ -195,10 +249,14 @@ export function AccountSettingsScreen() {
   const [repeatNewPassword, setRepeatNewPassword] = useState('');
   const [visiblePasswordField, setVisiblePasswordField] = useState<PasswordField | null>(null);
   const [passwordErrors, setPasswordErrors] = useState<PasswordErrors>({});
+  const [passwordWasUpdated, setPasswordWasUpdated] = useState(false);
+  const role = hasSuperAdminPermission(principal.permission) ? 'administrator' : 'member';
   const registeredAt = new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, {
     dateStyle: 'medium',
     timeStyle: 'short',
-  }).format(new Date(mockUserAccount.registeredAt));
+  }).format(new Date(principal.registeredAt));
+  const translatedPasswordUpdateError = passwordUpdateErrorMessage(passwordUpdateError, t);
+  const showPasswordUpdateSuccess = passwordUpdateStatus === 'succeeded' && passwordWasUpdated;
 
   const translatePasswordError = (errorCode: PasswordIssue) => {
     switch (errorCode) {
@@ -235,11 +293,15 @@ export function AccountSettingsScreen() {
     }
 
     setPasswordErrors({});
-    setCurrentPassword('');
-    setNewPassword('');
-    setRepeatNewPassword('');
-    setVisiblePasswordField(null);
-    console.info('Mock password change accepted.', { userAccountId: mockUserAccount.id });
+    setPasswordWasUpdated(false);
+    onUpdatePassword(result.output).then((updated) => {
+      if (!updated) return;
+      setCurrentPassword('');
+      setNewPassword('');
+      setRepeatNewPassword('');
+      setVisiblePasswordField(null);
+      setPasswordWasUpdated(true);
+    }).catch(() => undefined);
   };
 
   const renderPasswordField = ({
@@ -299,12 +361,12 @@ export function AccountSettingsScreen() {
         <XStack minW={0} flexDirection="column" gap="$4" $lg={{ flexDirection: 'row', items: 'flex-start' }}>
           <YStack width="100%" gap="$4" shrink={0} $lg={{ width: '34%', maxW: 380 }}>
             <AccountIdentityPanel
-              email={mockUserAccount.email}
+              email={principal.email}
               registeredAt={registeredAt}
               registeredAtLabel={t('account.registeredAt')}
-              role={t(`account.roles.${mockUserAccount.role}`)}
+              role={t(`account.roles.${role}`)}
               roleLabel={t('account.role')}
-              status={t('account.status')}
+              status={t(`account.identityStatuses.${principal.status}`)}
               statusLabel={t('account.identityStatus')}
               title={t('account.identityTitle')}
               titleCode={t('account.identityCode')}
@@ -331,6 +393,7 @@ export function AccountSettingsScreen() {
                   label: t('account.currentPassword'),
                   onChangeText: (value) => {
                     setCurrentPassword(value);
+                    setPasswordWasUpdated(false);
                     clearPasswordError('currentPassword');
                   },
                   value: currentPassword,
@@ -344,6 +407,7 @@ export function AccountSettingsScreen() {
                       label: t('account.newPassword'),
                       onChangeText: (value) => {
                         setNewPassword(value);
+                        setPasswordWasUpdated(false);
                         clearPasswordError('newPassword');
                         clearPasswordError('repeatNewPassword');
                       },
@@ -357,6 +421,7 @@ export function AccountSettingsScreen() {
                       label: t('account.repeatNewPassword'),
                       onChangeText: (value) => {
                         setRepeatNewPassword(value);
+                        setPasswordWasUpdated(false);
                         clearPasswordError('repeatNewPassword');
                       },
                       value: repeatNewPassword,
@@ -376,6 +441,12 @@ export function AccountSettingsScreen() {
                     hoverStyle={{ bg: '$appSurfaceRaised', borderColor: '$appAccent' }}
                     pressStyle={{ opacity: 0.75 }}
                     focusVisibleStyle={{ borderColor: '$appText' }}
+                    disabled={passwordUpdateStatus === 'pending'}
+                    disabledStyle={{ opacity: 0.55 }}
+                    aria-busy={passwordUpdateStatus === 'pending'}
+                    {...(passwordUpdateStatus === 'pending'
+                      ? { icon: <Spinner size="small" color="$appAccent" /> }
+                      : {})}
                   >
                     <XStack items="center" gap="$2">
                       <ShieldCheck size={15} color={colors.appAccent.val} strokeWidth={1.8} />
@@ -385,6 +456,16 @@ export function AccountSettingsScreen() {
                     </XStack>
                   </Button>
                 </Form.Trigger>
+                {translatedPasswordUpdateError ? (
+                  <MonoText size="$2.5" color="$appWarning" accessibilityLiveRegion="polite">
+                    {translatedPasswordUpdateError}
+                  </MonoText>
+                ) : null}
+                {showPasswordUpdateSuccess ? (
+                  <MonoText size="$2.5" color="$appSuccess" accessibilityLiveRegion="polite">
+                    {t('account.passwordUpdated')}
+                  </MonoText>
+                ) : null}
               </TerminalPanel>
             </Form>
           </YStack>

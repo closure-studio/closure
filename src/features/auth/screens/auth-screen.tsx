@@ -5,7 +5,7 @@ import { ScrollView, XStack, YStack, getTokens } from 'tamagui';
 
 import { DecorativeBarcode, FlickeringStatusIndicator, MonoText } from '@/components';
 import type { AuthFailure } from '../api';
-import type { LoginSubmission } from '@/schemas/auth';
+import type { LoginSubmission, PasswordRecoveryRequestInput } from '@/schemas/auth';
 import { AccessOrbit } from '../components/access-orbit';
 import { LoginForm } from '../components/login-form';
 import { TerminalBrand } from '../components/terminal-brand';
@@ -16,41 +16,86 @@ type AuthScreenProps = {
   isSubmitting: boolean;
   loginError: AuthFailure | null;
   onLogin: (submission: LoginSubmission) => Promise<void>;
+  onPasswordRecovery: (input: PasswordRecoveryRequestInput) => Promise<void>;
+  onResetPasswordRecovery: () => void;
+  passwordRecoveryError: AuthFailure | null;
+  passwordRecoveryStatus: 'failed' | 'idle' | 'pending' | 'succeeded';
 };
 
-export function AuthScreen({ isSubmitting, loginError, onLogin }: AuthScreenProps) {
+function loginFailureMessage(error: AuthFailure | null, translate: (key: string) => string): string | null {
+  if (!error) return null;
+  switch (error.code) {
+    case 'invalid-credentials':
+      return translate('login.errors.invalidCredentials');
+    case 'account-banned':
+      return translate('login.errors.accountBanned');
+    case 'rate-limited':
+      return translate('login.errors.rateLimited');
+    case 'network-unavailable':
+    case 'timeout':
+      return translate('login.errors.networkUnavailable');
+    case 'server-error':
+      return translate('login.errors.serverError');
+    case 'invalid-response':
+      return translate('login.errors.invalidResponse');
+    case 'already-bound':
+    case 'email-already-registered':
+    case 'invalid-input':
+    case 'invalid-oauth-code':
+    case 'invalid-verification-code':
+    case 'permission-denied':
+    case 'session-expired':
+    case 'unknown-business-error':
+    case 'user-not-found':
+    case 'verification-code-expired':
+      return translate('login.errors.fallback');
+  }
+  return translate('login.errors.fallback');
+}
+
+function recoveryFailureMessage(error: AuthFailure | null, translate: (key: string) => string): string | null {
+  if (!error) return null;
+  switch (error.code) {
+    case 'user-not-found':
+      return translate('recovery.errors.userNotFound');
+    case 'network-unavailable':
+    case 'timeout':
+      return translate('recovery.errors.networkUnavailable');
+    case 'server-error':
+      return translate('recovery.errors.serverError');
+    case 'invalid-response':
+      return translate('recovery.errors.invalidResponse');
+    case 'account-banned':
+    case 'already-bound':
+    case 'email-already-registered':
+    case 'invalid-credentials':
+    case 'invalid-input':
+    case 'invalid-oauth-code':
+    case 'invalid-verification-code':
+    case 'permission-denied':
+    case 'rate-limited':
+    case 'session-expired':
+    case 'unknown-business-error':
+    case 'verification-code-expired':
+      return translate('recovery.errors.fallback');
+  }
+  return translate('recovery.errors.fallback');
+}
+
+export function AuthScreen({
+  isSubmitting,
+  loginError,
+  onLogin,
+  onPasswordRecovery,
+  onResetPasswordRecovery,
+  passwordRecoveryError,
+  passwordRecoveryStatus,
+}: AuthScreenProps) {
   const { t } = useTranslation('auth');
   const colors = getTokens().color;
   const reducedMotion = useReducedMotion();
-  const loginErrorMessage = (() => {
-    if (!loginError) return null;
-    switch (loginError.code) {
-      case 'invalid-credentials':
-        return t('login.errors.invalidCredentials');
-      case 'account-banned':
-        return t('login.errors.accountBanned');
-      case 'rate-limited':
-        return t('login.errors.rateLimited');
-      case 'network-unavailable':
-      case 'timeout':
-        return t('login.errors.networkUnavailable');
-      case 'server-error':
-        return t('login.errors.serverError');
-      case 'invalid-response':
-        return t('login.errors.invalidResponse');
-      case 'already-bound':
-      case 'email-already-registered':
-      case 'invalid-input':
-      case 'invalid-oauth-code':
-      case 'invalid-verification-code':
-      case 'permission-denied':
-      case 'session-expired':
-      case 'unknown-business-error':
-      case 'user-not-found':
-      case 'verification-code-expired':
-        return t('login.errors.fallback');
-    }
-  })();
+  const loginErrorMessage = loginFailureMessage(loginError, t);
+  const recoveryErrorMessage = recoveryFailureMessage(passwordRecoveryError, t);
 
   return (
     <KeyboardAvoidingView behavior={process.env.EXPO_OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
@@ -72,7 +117,12 @@ export function AuthScreen({ isSubmitting, loginError, onLogin }: AuthScreenProp
               <YStack width="100%" maxW={440} $md={{ grow: 1 }}>
                 <LoginForm
                   isSubmitting={isSubmitting}
+                  isRecoverySubmitting={passwordRecoveryStatus === 'pending'}
+                  recoveryStatus={passwordRecoveryStatus}
+                  recoverySubmissionError={recoveryErrorMessage}
                   submissionError={loginErrorMessage}
+                  onRecoveryRequest={onPasswordRecovery}
+                  onResetPasswordRecovery={onResetPasswordRecovery}
                   onSubmit={onLogin}
                 />
               </YStack>

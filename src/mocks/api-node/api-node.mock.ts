@@ -4,13 +4,13 @@ export const mockApiNodes = [
   {
     id: 'domestic',
     description: 'LTSC API Server',
-    mockLatencyMs: 48,
+    latencyMs: 48,
     outcome: 'reachable',
   },
   {
     id: 'overseas',
     description: 'Cloudflare API Server',
-    mockLatencyMs: 126,
+    latencyMs: 126,
     outcome: 'reachable',
   },
 ] satisfies [ApiNode, ApiNode];

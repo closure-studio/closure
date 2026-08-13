@@ -1,6 +1,6 @@
 import * as v from 'valibot';
 
-import { mockActiveSession } from '@/features/auth/api/mock-auth-fixtures';
+import { mockActiveSession } from '@/mocks/auth';
 import { adminUserSchema, userSessionSchema } from './user-session.schema';
 
 describe('userSessionSchema', () => {

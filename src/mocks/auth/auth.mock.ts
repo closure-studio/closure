@@ -12,6 +12,8 @@ export const MOCK_AUTH_VALUES = {
   password: 'closure-password',
   qqBindCode: 'mock-qq-bind-code',
   registrationCode: '246810',
+  registeredToken: 'mock-registered-session-token',
+  registeredUserId: 'user-closure-registered',
 } as const;
 
 const sessionExpiry = '2100-01-01T00:00:00.000Z';

@@ -26,7 +26,7 @@ import {
   mockArkHostSecondaryCharactersResponse,
   mockArkHostSystemConfigResponse,
   mockArkHostTertiaryCharactersResponse,
-} from "./mock-arkhost-fixtures";
+} from "@/mocks/arkhost";
 
 const MOCK_ARKHOST_DELAY_MS = 250;
 

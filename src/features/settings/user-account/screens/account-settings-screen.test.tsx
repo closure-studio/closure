@@ -5,6 +5,16 @@ import { TamaguiProvider } from 'tamagui';
 import { i18n } from '@/i18n';
 import { tamaguiConfig } from '../../../../../tamagui.config';
 import { AccountSettingsScreen } from './account-settings-screen';
+import type { SessionPrincipal } from '@/schemas/auth';
+
+const principal = {
+  email: 'doctor@rhodes.is',
+  id: 'user-closure-01',
+  permission: 112,
+  registeredAt: '2025-01-14T08:30:00.000Z',
+  slotLimit: 3,
+  status: 'active',
+} satisfies SessionPrincipal;
 
 jest.mock('@/providers/layout-size-provider', () => ({
   useLayoutSize: () => 'small',
@@ -25,7 +35,12 @@ async function renderAccountSettings() {
   return render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <I18nextProvider i18n={i18n}>
-        <AccountSettingsScreen />
+        <AccountSettingsScreen
+          onUpdatePassword={jest.fn<Promise<boolean>, [Parameters<React.ComponentProps<typeof AccountSettingsScreen>['onUpdatePassword']>[0]]>().mockResolvedValue(true)}
+          passwordUpdateError={null}
+          passwordUpdateStatus="idle"
+          principal={principal}
+        />
       </I18nextProvider>
     </TamaguiProvider>,
   );

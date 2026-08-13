@@ -8,7 +8,7 @@ import {
   GameAccountSwitcher,
   resolveScrollOffsetToRevealItem,
 } from './dashboard-navigation';
-import { mockArkHostGameListResponse } from '../api';
+import { mockArkHostGameListResponse } from '@/mocks/arkhost';
 
 const initialGameAccounts = mockArkHostGameListResponse.code === 1
   ? mockArkHostGameListResponse.data.map((entry, index) => ({

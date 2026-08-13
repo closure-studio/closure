@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 
 export const loginCredentialsSchema = v.object({
-  email: v.pipe(v.string(), v.trim(), v.email()),
+  identifier: v.pipe(v.string(), v.trim(), v.check((value) => value.length > 0)),
   password: v.pipe(v.string(), v.check((value) => value.trim().length > 0)),
 });
 

@@ -1,6 +1,6 @@
 import * as v from "valibot";
 
-import { mockArkHostGameListResponse } from "@/features/dashboard/api";
+import { mockArkHostGameListResponse } from "@/mocks/arkhost";
 import { gameAccountSchema, operatorSchema } from ".";
 
 const firstEntry =

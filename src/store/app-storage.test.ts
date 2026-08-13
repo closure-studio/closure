@@ -22,6 +22,12 @@ const emptyResources = {
   stage: null,
 };
 
+const emptyApp = {
+  auth: { session: null },
+  games: null,
+  network: { selectedApiNodeId: 'domestic' as const },
+};
+
 describe('App persist storage', () => {
   it('stores app and game resources in two fixed keys', () => {
     const { storage, values } = createMemoryStorage();
@@ -29,7 +35,7 @@ describe('App persist storage', () => {
 
     persistStorage.setItem('ignored', {
       state: {
-        app: { auth: { session: null }, games: null },
+        app: emptyApp,
         gameResources: emptyResources,
       },
     });
@@ -42,7 +48,7 @@ describe('App persist storage', () => {
     const setItem = jest.spyOn(storage, 'setItem');
     const persistStorage = createAppPersistStorage(storage);
     const state = {
-      app: { auth: { session: null }, games: null },
+      app: emptyApp,
       gameResources: emptyResources,
     };
     persistStorage.setItem('ignored', { state });
@@ -62,7 +68,7 @@ describe('App persist storage', () => {
 
     expect(persistStorage.getItem('ignored')).toEqual({
       state: {
-        app: { auth: { session: null }, games: null },
+        app: emptyApp,
         gameResources: emptyResources,
       },
     });
@@ -71,7 +77,7 @@ describe('App persist storage', () => {
   });
 
   it('restores the previous Zustand envelope stored under the app key', () => {
-    const app = { auth: { session: null }, games: null };
+    const app = emptyApp;
     const { storage } = createMemoryStorage({
       [APP_STORE_STORAGE_KEY]: JSON.stringify({ state: app, version: 0 }),
     });
@@ -79,6 +85,33 @@ describe('App persist storage', () => {
 
     expect(persistStorage.getItem('ignored')).toEqual({
       state: { app, gameResources: emptyResources },
+    });
+  });
+
+  it('migrates a legacy bare app state and defaults the API Node selection', () => {
+    const legacyApp = { auth: { session: null }, games: null };
+    const { storage } = createMemoryStorage({
+      [APP_STORE_STORAGE_KEY]: JSON.stringify(legacyApp),
+    });
+    const persistStorage = createAppPersistStorage(storage);
+
+    expect(persistStorage.getItem('ignored')).toEqual({
+      state: { app: emptyApp, gameResources: emptyResources },
+    });
+  });
+
+  it('keeps valid app data while defaulting an invalid API Node selection', () => {
+    const { storage } = createMemoryStorage({
+      [APP_STORE_STORAGE_KEY]: JSON.stringify({
+        auth: { session: null },
+        games: null,
+        network: { selectedApiNodeId: 'invalid' },
+      }),
+    });
+    const persistStorage = createAppPersistStorage(storage);
+
+    expect(persistStorage.getItem('ignored')).toEqual({
+      state: { app: emptyApp, gameResources: emptyResources },
     });
   });
 });

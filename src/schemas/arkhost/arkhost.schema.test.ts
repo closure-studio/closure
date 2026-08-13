@@ -9,7 +9,7 @@ import {
   mockArkHostSecondaryCharactersResponse,
   mockArkHostSystemConfigResponse,
   mockArkHostTertiaryCharactersResponse,
-} from "@/features/dashboard/api";
+} from "@/mocks/arkhost";
 import {
   arkHostApCostResponseSchema,
   arkHostCharactersResponseSchema,

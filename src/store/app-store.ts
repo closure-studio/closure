@@ -13,6 +13,11 @@ import type {
   ArkHostSseSubscription,
   GameResourcesApi,
 } from '@/features/dashboard/api';
+import { MockApiNodeAdapter } from '@/features/settings/api-node/api';
+import type {
+  ApiNodeAdapter,
+  ApiNodeFailure,
+} from '@/features/settings/api-node/api';
 import {
   bundledCharacterTable,
   bundledGameResources,
@@ -20,11 +25,23 @@ import {
   bundledStageTable,
 } from '@/features/dashboard/game-data';
 import { mmkvStateStorage } from '@/lib/mmkv';
-import { loginSubmissionSchema } from '@/schemas/auth';
-import type { LoginSubmission } from '@/schemas/auth';
+import {
+  loginSubmissionSchema,
+  passwordRecoveryRequestInputSchema,
+} from '@/schemas/auth';
+import type {
+  LoginSubmission,
+  PasswordRecoveryRequestInput,
+} from '@/schemas/auth';
 import { ARK_HOST_GAME_STATUS_CODE } from '@/schemas/arkhost';
 import type { ArkHostCharacters, ArkHostGameDetail, ArkHostGameListEntry, ArkHostGameLogs } from '@/schemas/arkhost';
+import { apiNodeIdSchema } from '@/schemas/api-node';
+import type { ApiNode, ApiNodeId } from '@/schemas/api-node';
 import type { GameAccount } from '@/schemas/game-account';
+import {
+  passwordChangeInputSchema,
+} from '@/schemas/user-account';
+import type { PasswordChangeInput } from '@/schemas/user-account';
 import { persistedStoreStateSchema } from '@/schemas/local-state';
 import type { CharacterTable, GameResourcesState, ItemTable, StageTable } from '@/schemas/game-data';
 import type { GamesState, PersistedAppState, PersistedStoreState } from '@/schemas/local-state';
@@ -37,7 +54,18 @@ type LoginStatus = OperationStatus;
 type AuthStoreState = PersistedAppState['auth'] & {
   loginError: AuthFailure | null;
   loginStatus: LoginStatus;
+  passwordRecoveryError: AuthFailure | null;
+  passwordRecoveryStatus: OperationStatus;
+  passwordUpdateError: AuthFailure | null;
+  passwordUpdateStatus: OperationStatus;
   rememberSession: boolean;
+};
+
+type NetworkStoreState = {
+  nodes: ApiNode[];
+  queryError: ApiNodeFailure | null;
+  queryStatus: OperationStatus;
+  selectedApiNodeId: ApiNodeId;
 };
 
 type GamesStoreState = {
@@ -53,13 +81,25 @@ type AppStoreState = {
   auth: AuthStoreState;
   gameResources: GameResourcesState;
   games: GamesStoreState;
+  network: NetworkStoreState;
 };
 
 const unauthenticatedAuthState: AuthStoreState = {
   loginError: null,
   loginStatus: 'idle',
+  passwordRecoveryError: null,
+  passwordRecoveryStatus: 'idle',
+  passwordUpdateError: null,
+  passwordUpdateStatus: 'idle',
   rememberSession: false,
   session: null,
+};
+
+const emptyNetworkStoreState: NetworkStoreState = {
+  nodes: [],
+  queryError: null,
+  queryStatus: 'idle',
+  selectedApiNodeId: 'domestic',
 };
 
 const emptyGamesStoreState: GamesStoreState = {
@@ -88,13 +128,19 @@ const GAME_RESOURCES_CHECK_INTERVAL_MS = HOURS_PER_DAY
   * MILLISECONDS_PER_SECOND;
 
 type AppStoreActions = {
+  initializeApiNodes: () => Promise<void>;
   initializeGameResources: () => Promise<void>;
   initializeGames: () => Promise<void>;
   loadGameDetail: (account: string) => Promise<void>;
   loadGameLogs: (account: string) => Promise<void>;
   login: (submission: LoginSubmission) => Promise<void>;
   logout: () => void;
+  refreshApiNodes: () => Promise<void>;
+  resetPasswordRecovery: () => void;
+  requestPasswordRecovery: (input: PasswordRecoveryRequestInput) => Promise<void>;
+  selectApiNode: (apiNodeId: ApiNodeId) => void;
   selectGameAccount: (gameAccountId: string) => void;
+  updatePassword: (input: PasswordChangeInput) => Promise<boolean>;
   updateGameResources: () => Promise<void>;
 };
 
@@ -126,10 +172,14 @@ function mapGameAccount(entry: ArkHostGameListEntry): GameAccount {
 }
 
 function persistedAppStateFromStore(state: AppStore): PersistedAppState {
-  if (!state.auth.rememberSession || !state.auth.session) {
-    return { auth: { session: null }, games: null };
-  }
-  return { auth: { session: state.auth.session }, games: state.games.data };
+  const rememberedSession = state.auth.rememberSession && state.auth.session
+    ? state.auth.session
+    : null;
+  return {
+    auth: { session: rememberedSession },
+    games: rememberedSession ? state.games.data : null,
+    network: { selectedApiNodeId: state.network.selectedApiNodeId },
+  };
 }
 
 function persistedStateFromStore(state: AppStore): PersistedStoreState {
@@ -166,13 +216,24 @@ function restoredGameResources(resources: GameResourcesState): GameResourcesStat
   };
 }
 
-export function createAppStore(
-  storage: SyncStateStorage = mmkvStateStorage,
-  authAdapter: AuthAdapter = new MockAuthAdapter(),
-  arkHostApi: ArkHostApi = new MockArkHostApi(),
-  gameResourcesApi: GameResourcesApi = new RemoteGameResourcesApi(),
-) {
+export type AppStoreDependencies = {
+  apiNodeAdapter: ApiNodeAdapter;
+  arkHostApi: ArkHostApi;
+  authAdapter: AuthAdapter;
+  gameResourcesApi: GameResourcesApi;
+  storage: SyncStateStorage;
+};
+
+export function createAppStore(overrides: Partial<AppStoreDependencies> = {}) {
+  const {
+    apiNodeAdapter = new MockApiNodeAdapter(),
+    arkHostApi = new MockArkHostApi(),
+    authAdapter = new MockAuthAdapter(),
+    gameResourcesApi = new RemoteGameResourcesApi(),
+    storage = mmkvStateStorage,
+  } = overrides;
   let gameResourcesRequest: Promise<void> | null = null;
+  let apiNodeRequest: Promise<void> | null = null;
   let sseSubscription: ArkHostSseSubscription | null = null;
 
   const persistStorage = createAppPersistStorage(storage);
@@ -235,10 +296,49 @@ export function createAppStore(
           });
         };
 
+        const refreshApiNodes = (): Promise<void> => {
+          if (apiNodeRequest) return apiNodeRequest;
+          set((state) => {
+            state.network.queryError = null;
+            state.network.queryStatus = 'pending';
+          });
+          const request = Promise.resolve().then(() => apiNodeAdapter.queryNodes()).then((result) => {
+            set((state) => {
+              if (!result.ok) {
+                state.network.queryError = result.error;
+                state.network.queryStatus = 'failed';
+                return;
+              }
+              state.network.nodes = result.data;
+              state.network.queryError = null;
+              state.network.queryStatus = 'succeeded';
+            });
+          }).catch((error: unknown) => {
+            set((state) => {
+              state.network.queryError = {
+                code: 'server-error',
+                diagnosticMessage: error instanceof Error ? error.message : 'Unexpected API Node error.',
+                kind: 'transport',
+              };
+              state.network.queryStatus = 'failed';
+            });
+          }).finally(() => {
+            apiNodeRequest = null;
+          });
+          apiNodeRequest = request;
+          return request;
+        };
+
         return {
           auth: unauthenticatedAuthState,
           gameResources: emptyGameResourcesState,
           games: emptyGamesStoreState,
+          network: emptyNetworkStoreState,
+          initializeApiNodes: async () => {
+            const status = get().network.queryStatus;
+            if (status === 'pending' || status === 'succeeded') return;
+            await refreshApiNodes();
+          },
           initializeGameResources: async () => {
             const checkedAt = get().gameResources.checkedAt;
             if (checkedAt !== null && Date.now() - checkedAt < GAME_RESOURCES_CHECK_INTERVAL_MS) return;
@@ -364,6 +464,52 @@ export function createAppStore(
               state.games = emptyGamesStoreState;
             });
           },
+          refreshApiNodes,
+          resetPasswordRecovery: () => {
+            set((state) => {
+              state.auth.passwordRecoveryError = null;
+              state.auth.passwordRecoveryStatus = 'idle';
+            });
+          },
+          requestPasswordRecovery: async (input) => {
+            if (get().auth.passwordRecoveryStatus === 'pending') return;
+            const parsedInput = v.safeParse(passwordRecoveryRequestInputSchema, input);
+            if (!parsedInput.success) {
+              set((state) => {
+                state.auth.passwordRecoveryError = { code: 'invalid-input', kind: 'business' };
+                state.auth.passwordRecoveryStatus = 'failed';
+              });
+              return;
+            }
+            set((state) => {
+              state.auth.passwordRecoveryError = null;
+              state.auth.passwordRecoveryStatus = 'pending';
+            });
+            try {
+              const result = await authAdapter.requestPasswordRecovery(parsedInput.output);
+              set((state) => {
+                state.auth.passwordRecoveryError = result.ok ? null : result.error;
+                state.auth.passwordRecoveryStatus = result.ok ? 'succeeded' : 'failed';
+              });
+            } catch (error: unknown) {
+              set((state) => {
+                state.auth.passwordRecoveryError = {
+                  code: 'server-error',
+                  diagnosticMessage: error instanceof Error ? error.message : 'Unexpected recovery error.',
+                  kind: 'transport',
+                };
+                state.auth.passwordRecoveryStatus = 'failed';
+              });
+            }
+          },
+          selectApiNode: (apiNodeId) => {
+            const parsedApiNodeId = v.safeParse(apiNodeIdSchema, apiNodeId);
+            if (!parsedApiNodeId.success) return;
+            if (parsedApiNodeId.output === get().network.selectedApiNodeId) return;
+            set((state) => {
+              state.network.selectedApiNodeId = parsedApiNodeId.output;
+            });
+          },
           selectGameAccount: (gameAccountId) => {
             const snapshot = get().games.data;
             if (!snapshot?.gameAccounts.some((account) => account.account === gameAccountId)) return;
@@ -379,6 +525,52 @@ export function createAppStore(
                   };
                 });
               });
+            }
+          },
+          updatePassword: async (input) => {
+            if (get().auth.passwordUpdateStatus === 'pending') return false;
+            const parsedInput = v.safeParse(passwordChangeInputSchema, input);
+            if (!parsedInput.success) {
+              set((state) => {
+                state.auth.passwordUpdateError = { code: 'invalid-input', kind: 'business' };
+                state.auth.passwordUpdateStatus = 'failed';
+              });
+              return false;
+            }
+            const session = get().auth.session;
+            if (!session) {
+              set((state) => {
+                state.auth.passwordUpdateError = { code: 'session-expired', kind: 'business' };
+                state.auth.passwordUpdateStatus = 'failed';
+              });
+              return false;
+            }
+            set((state) => {
+              state.auth.passwordUpdateError = null;
+              state.auth.passwordUpdateStatus = 'pending';
+            });
+            try {
+              const result = await authAdapter.updatePassword({
+                accessToken: session.accessToken,
+                currentPassword: parsedInput.output.currentPassword,
+                email: session.principal.email,
+                newPassword: parsedInput.output.newPassword,
+              });
+              set((state) => {
+                state.auth.passwordUpdateError = result.ok ? null : result.error;
+                state.auth.passwordUpdateStatus = result.ok ? 'succeeded' : 'failed';
+              });
+              return result.ok;
+            } catch (error: unknown) {
+              set((state) => {
+                state.auth.passwordUpdateError = {
+                  code: 'server-error',
+                  diagnosticMessage: error instanceof Error ? error.message : 'Unexpected password update error.',
+                  kind: 'transport',
+                };
+                state.auth.passwordUpdateStatus = 'failed';
+              });
+              return false;
             }
           },
           updateGameResources: () => {
@@ -458,6 +650,10 @@ export function createAppStore(
               ...currentState.games,
               data: games,
               loadStatus: games ? 'succeeded' : 'idle',
+            },
+            network: {
+              ...currentState.network,
+              selectedApiNodeId: storedState.app.network.selectedApiNodeId,
             },
           };
         },

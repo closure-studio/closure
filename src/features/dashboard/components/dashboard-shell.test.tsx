@@ -3,7 +3,7 @@ import { I18nextProvider } from 'react-i18next';
 import { TamaguiProvider, YStack } from 'tamagui';
 
 import { i18n } from '@/i18n';
-import { mockArkHostGameListResponse } from '../api';
+import { mockArkHostGameListResponse } from '@/mocks/arkhost';
 import { tamaguiConfig } from '../../../../tamagui.config';
 import { DashboardShell } from './dashboard-shell';
 

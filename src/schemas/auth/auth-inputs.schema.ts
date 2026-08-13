@@ -29,6 +29,10 @@ export const passwordUpdateInputSchema = v.object({
   newPassword: nonBlankStringSchema,
 });
 
+export const passwordRecoveryRequestInputSchema = v.object({
+  identifier: v.pipe(v.string(), v.trim(), v.minLength(1)),
+});
+
 export const adminUserQueryInputSchema = v.object({
   accessToken: accessTokenSchema,
   query: v.pipe(v.string(), v.trim(), v.minLength(1)),
@@ -59,6 +63,7 @@ export const linuxDoLoginInputSchema = v.object({
 export type RegistrationInput = v.InferOutput<typeof registrationInputSchema>;
 export type PasswordResetInput = v.InferOutput<typeof passwordResetInputSchema>;
 export type PasswordUpdateInput = v.InferOutput<typeof passwordUpdateInputSchema>;
+export type PasswordRecoveryRequestInput = v.InferOutput<typeof passwordRecoveryRequestInputSchema>;
 export type AdminUserQueryInput = v.InferOutput<typeof adminUserQueryInputSchema>;
 export type UserPermissionUpdateInput = v.InferOutput<typeof userPermissionUpdateInputSchema>;
 export type RegistrationCodeInput = v.InferOutput<typeof registrationCodeInputSchema>;

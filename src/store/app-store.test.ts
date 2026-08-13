@@ -1,8 +1,7 @@
 import { MockAuthAdapter } from "@/features/auth/api";
-import {
-  MockArkHostApi,
-  mockArkHostGachaEvents,
-} from "@/features/dashboard/api";
+import { MockArkHostApi } from "@/features/dashboard/api";
+import { mockArkHostGachaEvents } from "@/mocks/arkhost";
+import type { ApiNodeAdapter } from "@/features/settings/api-node/api";
 import type { GameResourcesApi } from "@/features/dashboard/api";
 import {
   bundledGameResources,
@@ -33,7 +32,7 @@ function createMemoryStorage(): SyncStateStorage {
 }
 
 const submission = {
-  credentials: { email: "doctor@example.com", password: "secret" },
+  credentials: { identifier: "doctor", password: "secret" },
   rememberSession: true,
 };
 const EXPECTED_GAME_ACCOUNT_COUNT = 3;
@@ -54,9 +53,7 @@ function createGameResourcesApi(overrides: Partial<GameResourcesApi> = {}): Game
 describe("App Store ArkHost integration", () => {
   it("loads core ArkHost data and the active account immediately after login", async () => {
     const store = createAppStore(
-      createMemoryStorage(),
-      new MockAuthAdapter(0),
-      new MockArkHostApi(0),
+      { storage: createMemoryStorage(), authAdapter: new MockAuthAdapter(0), arkHostApi: new MockArkHostApi(0) },
     );
     await store.getState().login(submission);
     expect(store.getState().games.loadStatus).toBe("succeeded");
@@ -76,9 +73,7 @@ describe("App Store ArkHost integration", () => {
 
   it("loads the selected game account's distinct character roster", async () => {
     const store = createAppStore(
-      createMemoryStorage(),
-      new MockAuthAdapter(0),
-      new MockArkHostApi(0),
+      { storage: createMemoryStorage(), authAdapter: new MockAuthAdapter(0), arkHostApi: new MockArkHostApi(0) },
     );
     await store.getState().login(submission);
     store.getState().selectGameAccount("G16601716973");
@@ -96,9 +91,7 @@ describe("App Store ArkHost integration", () => {
   it("applies controlled SSE events and clears all game data on logout", async () => {
     const api = new MockArkHostApi(0);
     const store = createAppStore(
-      createMemoryStorage(),
-      new MockAuthAdapter(0),
-      api,
+      { storage: createMemoryStorage(), authAdapter: new MockAuthAdapter(0), arkHostApi: api },
     );
     await store.getState().login(submission);
     api.emit({ data: mockArkHostGachaEvents, type: "ssr" });
@@ -114,17 +107,13 @@ describe("App Store ArkHost integration", () => {
     const storage = createMemoryStorage();
     const firstApi = new MockArkHostApi(0);
     const firstStore = createAppStore(
-      storage,
-      new MockAuthAdapter(0),
-      firstApi,
+      { storage, authAdapter: new MockAuthAdapter(0), arkHostApi: firstApi },
     );
     await firstStore.getState().login(submission);
     const secondApi = new MockArkHostApi(0);
     const fetchGameList = jest.spyOn(secondApi, "fetchGameList");
     const secondStore = createAppStore(
-      storage,
-      new MockAuthAdapter(0),
-      secondApi,
+      { storage, authAdapter: new MockAuthAdapter(0), arkHostApi: secondApi },
     );
     await secondStore.persist.rehydrate();
     await secondStore.getState().initializeGames();
@@ -132,6 +121,94 @@ describe("App Store ArkHost integration", () => {
       EXPECTED_GAME_ACCOUNT_COUNT,
     );
     expect(fetchGameList).not.toHaveBeenCalled();
+  });
+});
+
+describe("App Store API Node and auth operations", () => {
+  it("queries API Nodes once, persists selection, and keeps it through logout", async () => {
+    const storage = createMemoryStorage();
+    const queryNodes = jest.fn().mockResolvedValue({
+        data: [
+          { id: "domestic", description: "Domestic", latencyMs: 20, outcome: "reachable" },
+          { id: "overseas", description: "Overseas", latencyMs: 120, outcome: "reachable" },
+        ],
+        ok: true,
+      });
+    const apiNodeAdapter: ApiNodeAdapter = {
+      queryNodes,
+    };
+    const store = createAppStore({
+      apiNodeAdapter,
+      authAdapter: new MockAuthAdapter(0),
+      arkHostApi: new MockArkHostApi(0),
+      storage,
+    });
+
+    expect(store.getState().network.selectedApiNodeId).toBe("domestic");
+    await Promise.all([
+      store.getState().initializeApiNodes(),
+      store.getState().initializeApiNodes(),
+    ]);
+    expect(queryNodes).toHaveBeenCalledTimes(1);
+    expect(store.getState().network.nodes).toHaveLength(2);
+    store.getState().selectApiNode("overseas");
+    store.getState().logout();
+    expect(store.getState().network.selectedApiNodeId).toBe("overseas");
+
+    const rehydratedStore = createAppStore({ storage });
+    await rehydratedStore.persist.rehydrate();
+    expect(rehydratedStore.getState().network.selectedApiNodeId).toBe("overseas");
+  });
+
+  it("keeps nodes when a refresh fails", async () => {
+    let shouldFail = false;
+    const apiNodeAdapter: ApiNodeAdapter = {
+      queryNodes: jest.fn().mockImplementation(() => Promise.resolve(shouldFail
+        ? { error: { code: "timeout", kind: "transport" }, ok: false }
+        : {
+          data: [{ id: "domestic", description: "Domestic", latencyMs: 20, outcome: "reachable" }],
+          ok: true,
+        })),
+    };
+    const store = createAppStore({
+      apiNodeAdapter,
+      authAdapter: new MockAuthAdapter(0),
+      arkHostApi: new MockArkHostApi(0),
+      storage: createMemoryStorage(),
+    });
+    await store.getState().initializeApiNodes();
+    shouldFail = true;
+    await store.getState().refreshApiNodes();
+    expect(store.getState().network.nodes).toHaveLength(1);
+    expect(store.getState().network.queryStatus).toBe("failed");
+    expect(store.getState().network.queryError?.code).toBe("timeout");
+  });
+
+  it("coordinates recovery and password update through the auth adapter", async () => {
+    const store = createAppStore({
+      authAdapter: new MockAuthAdapter(0),
+      arkHostApi: new MockArkHostApi(0),
+      storage: createMemoryStorage(),
+    });
+    await store.getState().requestPasswordRecovery({ identifier: " doctor@rhodes.is " });
+    expect(store.getState().auth.passwordRecoveryStatus).toBe("succeeded");
+    await store.getState().requestPasswordRecovery({ identifier: "unknown@example.com" });
+    expect(store.getState().auth.passwordRecoveryStatus).toBe("failed");
+    expect(store.getState().auth.passwordRecoveryError?.code).toBe("user-not-found");
+
+    await store.getState().updatePassword({
+      currentPassword: "closure-password",
+      newPassword: "new-password",
+      repeatNewPassword: "new-password",
+    });
+    expect(store.getState().auth.passwordUpdateError?.code).toBe("session-expired");
+    await store.getState().login(submission);
+    await store.getState().updatePassword({
+      currentPassword: "closure-password",
+      newPassword: "new-password",
+      repeatNewPassword: "new-password",
+    });
+    expect(store.getState().auth.passwordUpdateStatus).toBe("succeeded");
   });
 });
 
@@ -148,10 +225,7 @@ describe("App Store game resources", () => {
       fetchStage: () => Promise.reject(new Error("offline")),
     });
     const store = createAppStore(
-      createMemoryStorage(),
-      new MockAuthAdapter(0),
-      new MockArkHostApi(0),
-      api,
+      { storage: createMemoryStorage(), authAdapter: new MockAuthAdapter(0), arkHostApi: new MockArkHostApi(0), gameResourcesApi: api },
     );
 
     await store.getState().updateGameResources();
@@ -178,10 +252,7 @@ describe("App Store game resources", () => {
       }),
     });
     const store = createAppStore(
-      createMemoryStorage(),
-      new MockAuthAdapter(0),
-      new MockArkHostApi(0),
-      api,
+      { storage: createMemoryStorage(), authAdapter: new MockAuthAdapter(0), arkHostApi: new MockArkHostApi(0), gameResourcesApi: api },
     );
 
     await store.getState().updateGameResources();
@@ -200,10 +271,7 @@ describe("App Store game resources", () => {
     const api = createGameResourcesApi({ fetchItem: () => itemResult });
     const fetchItem = jest.spyOn(api, "fetchItem");
     const store = createAppStore(
-      createMemoryStorage(),
-      new MockAuthAdapter(0),
-      new MockArkHostApi(0),
-      api,
+      { storage: createMemoryStorage(), authAdapter: new MockAuthAdapter(0), arkHostApi: new MockArkHostApi(0), gameResourcesApi: api },
     );
 
     const first = store.getState().updateGameResources();

@@ -6,12 +6,12 @@ import { useLayoutSize } from '@/providers/layout-size-provider';
 import { SettingsPage } from '../../components/settings-page';
 import { ContributorsOperationsRoster } from '../components/contributors-operations-roster';
 import { ContributorsTribute } from '../components/contributors-tribute';
-import { mockContributors } from '../mocks/contributors-fixture';
+import { contributorsContent } from '../contributors-content';
 
 export function ContributorsScreen() {
   const { t } = useTranslation('settings');
   const layoutSize = useLayoutSize();
-  const operationsTeam = mockContributors.operationsTeam.map((member) => ({
+  const operationsTeam = contributorsContent.operationsTeam.map((member) => ({
     ...member,
     description: t(`contributors.contributors.${member.id}`),
   }));
@@ -31,7 +31,7 @@ export function ContributorsScreen() {
         <ContributorsTribute
           body={t('contributors.intro')}
           recipientCode={t('contributors.recipientCode')}
-          recipientCallsign={mockContributors.recipient.callsign}
+          recipientCallsign={contributorsContent.recipient.callsign}
           recipientPrefix={t('contributors.recipientPrefix')}
           recipientTitle={t('contributors.recipientTitle')}
         />

@@ -2,12 +2,12 @@ import * as v from 'valibot';
 
 import { apiNodeSchema } from '@/schemas/api-node';
 import type { ApiNode } from '@/schemas/api-node';
-import { mockApiNodes } from './api-node-fixtures';
+import { mockApiNodes } from './api-node.mock';
 
 const mockFailedApiNode = {
   id: 'overseas',
   description: 'Cloudflare API Server',
-  mockLatencyMs: 0,
+  latencyMs: 0,
   outcome: 'unreachable',
 } satisfies ApiNode;
 

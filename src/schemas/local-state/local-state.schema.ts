@@ -11,6 +11,7 @@ import {
 import { userSessionSchema } from '@/schemas/auth';
 import { gameAccountSchema } from '@/schemas/game-account';
 import { gameResourcesStateSchema } from '@/schemas/game-data';
+import { apiNodeIdSchema } from '@/schemas/api-node';
 
 const gamesSnapshotSchema = v.pipe(
   v.object({
@@ -37,6 +38,7 @@ export const gamesStateSchema = v.nullable(gamesSnapshotSchema);
 export const persistedAppStateSchema = v.object({
   auth: v.object({ session: v.nullable(userSessionSchema) }),
   games: gamesStateSchema,
+  network: v.object({ selectedApiNodeId: apiNodeIdSchema }),
 });
 
 export const persistedStoreStateSchema = v.object({

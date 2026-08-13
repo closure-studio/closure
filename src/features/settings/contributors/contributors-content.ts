@@ -1,6 +1,6 @@
 import type { Contributors } from '@/schemas/contributor';
 
-export const mockContributors = {
+export const contributorsContent = {
   recipient: {
     gameAccountId: 'acc-01',
     callsign: 'AMIYA-MAIN',

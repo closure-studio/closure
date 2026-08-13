@@ -4,7 +4,7 @@ import {
   mockArkHostApCostResponse,
   mockArkHostGameListResponse,
   mockArkHostSystemConfigResponse,
-} from '@/features/dashboard/api';
+} from '@/mocks/arkhost';
 import { persistedAppStateSchema } from './local-state.schema';
 
 if (mockArkHostGameListResponse.code !== 1 || mockArkHostApCostResponse.code !== 1 || mockArkHostSystemConfigResponse.code !== 1) {
@@ -25,13 +25,29 @@ const games = {
 
 describe('persistedAppStateSchema', () => {
   it('accepts signed-out state and complete ArkHost snapshot', () => {
-    expect(v.safeParse(persistedAppStateSchema, { auth: { session: null }, games: null }).success).toBe(true);
-    expect(v.safeParse(persistedAppStateSchema, { auth: { session: null }, games }).success).toBe(true);
+    expect(v.safeParse(persistedAppStateSchema, {
+      auth: { session: null },
+      games: null,
+      network: { selectedApiNodeId: 'domestic' },
+    }).success).toBe(true);
+    expect(v.safeParse(persistedAppStateSchema, {
+      auth: { session: null },
+      games,
+      network: { selectedApiNodeId: 'domestic' },
+    }).success).toBe(true);
   });
   it('rejects active IDs outside the ArkHost account collection', () => {
-    expect(v.safeParse(persistedAppStateSchema, { auth: { session: null }, games: { ...games, activeGameAccountId: 'missing' } }).success).toBe(false);
+    expect(v.safeParse(persistedAppStateSchema, {
+      auth: { session: null },
+      games: { ...games, activeGameAccountId: 'missing' },
+      network: { selectedApiNodeId: 'domestic' },
+    }).success).toBe(false);
   });
   it('rejects malformed nested ArkHost data', () => {
-    expect(v.safeParse(persistedAppStateSchema, { auth: { session: null }, games: { ...games, gameAccounts: [{ ...gameAccounts[0], ap: -1 }] } }).success).toBe(false);
+    expect(v.safeParse(persistedAppStateSchema, {
+      auth: { session: null },
+      games: { ...games, gameAccounts: [{ ...gameAccounts[0], ap: -1 }] },
+      network: { selectedApiNodeId: 'domestic' },
+    }).success).toBe(false);
   });
 });

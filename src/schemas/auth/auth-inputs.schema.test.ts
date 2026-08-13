@@ -5,6 +5,7 @@ import {
   adminUserQueryInputSchema,
   linuxDoLoginInputSchema,
   passwordResetInputSchema,
+  passwordRecoveryRequestInputSchema,
   passwordUpdateInputSchema,
   qqBindCodeInputSchema,
   registrationCodeInputSchema,
@@ -20,6 +21,7 @@ describe('auth input schemas', () => {
     [registrationInputSchema, { code: '123456', email: 'user@example.com', noise: 'noise', password: 'secret', sign: 'sign' }],
     [passwordResetInputSchema, { code: '123456', email: 'user@example.com', newPassword: 'new-secret' }],
     [passwordUpdateInputSchema, { accessToken, currentPassword: 'current', email: 'user@example.com', newPassword: 'new-secret' }],
+    [passwordRecoveryRequestInputSchema, { identifier: ' user@example.com ' }],
     [adminUserQueryInputSchema, { accessToken, query: 'user' }],
     [userPermissionUpdateInputSchema, { accessToken, permission: 3, userId: 'user-1' }],
     [registrationCodeInputSchema, { email: 'user@example.com' }],
@@ -42,5 +44,12 @@ describe('auth input schemas', () => {
     expect(v.safeParse(linuxDoLoginInputSchema, {
       code: 'oauth-code', redirectUri: 'relative/path',
     }).success).toBe(false);
+    expect(v.safeParse(passwordRecoveryRequestInputSchema, { identifier: '   ' }).success).toBe(false);
+  });
+
+  it('trims a password recovery identifier at the input boundary', () => {
+    const result = v.safeParse(passwordRecoveryRequestInputSchema, { identifier: ' user@example.com ' });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.output.identifier).toBe('user@example.com');
   });
 });

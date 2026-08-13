@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 
 import { adminUserSchema, userSessionSchema } from '@/schemas/auth';
-import { MOCK_AUTH_VALUES, mockActiveSession, mockAdminSession } from './mock-auth-fixtures';
+import { MOCK_AUTH_VALUES, mockActiveSession, mockAdminSession } from '@/mocks/auth';
 import { MockAuthAdapter } from './mock-auth-adapter';
 
 const adapter = new MockAuthAdapter(0);
@@ -15,7 +15,7 @@ function expectSuccess<T>(result: { data: T; ok: true } | { error: unknown; ok: 
 describe('MockAuthAdapter', () => {
   it('implements every auth operation with deterministic successful data', async () => {
     const login = expectSuccess(await adapter.login({
-      email: 'any-user@example.com',
+      identifier: 'any-user',
       password: 'any-password',
     }));
     const registration = expectSuccess(await adapter.register({
@@ -46,6 +46,7 @@ describe('MockAuthAdapter', () => {
       userId: mockActiveSession.principal.id,
     }));
     expectSuccess(await adapter.sendRegistrationCode({ email: 'new-user@example.com' }));
+    expectSuccess(await adapter.requestPasswordRecovery({ identifier: MOCK_AUTH_VALUES.activeEmail }));
     const adminLogin = expectSuccess(await adapter.loginAsAdmin({
       accessToken: MOCK_AUTH_VALUES.adminToken,
       userId: mockActiveSession.principal.id,
@@ -72,9 +73,9 @@ describe('MockAuthAdapter', () => {
     expect(oauthLogin).toEqual(mockActiveSession);
   });
 
-  it('accepts any valid email and password for mock login', async () => {
+  it('accepts any credential string and password for mock login', async () => {
     const result = expectSuccess(await adapter.login({
-      email: 'another-user@example.com',
+      identifier: 'another-user',
       password: 'anything-at-all',
     }));
 
@@ -94,5 +95,7 @@ describe('MockAuthAdapter', () => {
       code: 'incorrect',
       redirectUri: 'https://example.com/auth/callback',
     })).resolves.toEqual({ error: { code: 'invalid-oauth-code', kind: 'business' }, ok: false });
+    await expect(adapter.requestPasswordRecovery({ identifier: 'unknown@example.com' }))
+      .resolves.toEqual({ error: { code: 'user-not-found', kind: 'business' }, ok: false });
   });
 });
