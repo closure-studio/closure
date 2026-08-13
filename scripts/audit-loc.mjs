@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const sourceDirectory = path.resolve(scriptDirectory, '../src');
 const excludeTestFiles = !process.argv.includes('--with-tests');
+const excludeMockFiles = !process.argv.includes('--with-mocks');
 const excludeEmptyLines = process.argv.includes('--no-empty');
 
 async function collectFiles(directory) {
@@ -13,7 +14,11 @@ async function collectFiles(directory) {
     const fullPath = path.join(directory, entry.name);
     if (entry.isDirectory()) {
       files.push(...await collectFiles(fullPath));
-    } else if (/\.tsx?$/.test(entry.name) && !(excludeTestFiles && /\.test\./.test(entry.name))) {
+    } else if (
+      /\.tsx?$/.test(entry.name)
+      && !(excludeTestFiles && /\.test\./.test(entry.name))
+      && !(excludeMockFiles && /\.mock\./.test(entry.name))
+    ) {
       files.push(fullPath);
     }
   }
@@ -47,9 +52,13 @@ for (const entry of entries) {
   byDirectory.set(entry.topDirectory, bucket);
 }
 
+const excludedKinds = [
+  ...(excludeTestFiles ? ['test'] : []),
+  ...(excludeMockFiles ? ['mock'] : []),
+];
 const width = Math.max(...entries.map((entry) => entry.path.length));
 console.log(
-  `src LOC audit (${excludeTestFiles ? 'excluding' : 'including'} test files, ` +
+  `src LOC audit (${excludedKinds.length === 0 ? 'including all files' : `excluding ${excludedKinds.join(' and ')} files`}, ` +
   `${excludeEmptyLines ? 'non-empty lines' : 'all lines'})`
 );
 console.log(`total: ${totalLines} lines across ${entries.length} files`);
