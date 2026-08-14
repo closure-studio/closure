@@ -83,7 +83,7 @@
     "typecheck": "tsc --noEmit"
   },
   "jest": {
-    "setupFiles": [
+    "setupFilesAfterEnv": [
       "<rootDir>/tests/mocks/flash-list.tsx"
     ],
     "moduleNameMapper": {

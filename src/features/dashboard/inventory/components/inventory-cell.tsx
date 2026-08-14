@@ -15,7 +15,7 @@ export const INVENTORY_CELL_ARTWORK_SIZE_TOKEN = {
   small: '$4.5',
   large: '$10',
 } as const;
-type InventoryEntry = {
+export type InventoryEntry = {
   item: ItemTableItem;
   itemId: string;
   quantity: number;

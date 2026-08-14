@@ -1,5 +1,7 @@
+import { useCallback } from 'react';
+
 import {
-  DashboardPageScroll,
+  DashboardPageFrame,
   getCharacterDisplayName,
   OperatorRosterView,
   useSelectedCharacters,
@@ -9,13 +11,17 @@ import {
 export default function DashboardOperatorsRoute() {
   const characters = useSelectedCharacters();
   const characterTable = useCharacterTable();
+  const getCharacterName = useCallback(
+    (characterId: string) => getCharacterDisplayName(characterTable, characterId),
+    [characterTable],
+  );
 
   return (
-    <DashboardPageScroll>
+    <DashboardPageFrame>
       <OperatorRosterView
-        getCharacterName={(characterId) => getCharacterDisplayName(characterTable, characterId)}
+        getCharacterName={getCharacterName}
         operators={characters.chars}
       />
-    </DashboardPageScroll>
+    </DashboardPageFrame>
   );
 }
