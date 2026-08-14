@@ -41,8 +41,6 @@
     "accountLevel": "LV.{{level}}",
     "level": "LV {{level}}/{{maxLevel}}",
     "skillLevel": "技能 L{{level}}",
-    "title": "干员练度",
-    "unitCount": "{{count}} 名干员",
     "upgradeProgress": "升级进度"
   },
   "overview": {

@@ -41,8 +41,6 @@
     "accountLevel": "LV.{{level}}",
     "level": "LV {{level}}/{{maxLevel}}",
     "skillLevel": "SKILL L{{level}}",
-    "title": "Operator development",
-    "unitCount": "{{count}} UNITS",
     "upgradeProgress": "UPGRADE PROGRESS"
   },
   "overview": {
