@@ -120,7 +120,12 @@ describe('InventoryView', () => {
       </TamaguiProvider>,
     );
 
-    expect(screen.getByTestId('inventory-grid-columns-1')).toBeTruthy();
+    // No placeholder single-column grid content renders before the container is measured.
+    expect(screen.queryByTestId('inventory-item-31034')).toBeNull();
+    expect(screen.queryByTestId('inventory-item-EPGS_COIN')).toBeNull();
+
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(320));
+    expect(screen.getByTestId('inventory-grid-columns-2')).toBeTruthy();
     expect(screen.getByTestId('inventory-item-31034')).toBeTruthy();
     expect(screen.getByTestId('inventory-item-EPGS_COIN')).toBeTruthy();
     expect(screen.getByTestId('inventory-preview-details')).toBeTruthy();

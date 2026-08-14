@@ -11,12 +11,13 @@ export function useResponsiveGridRows<T, TLayout extends { columnCount: number }
   const layout = getLayout(listWidth);
 
   const rows = useMemo(() => {
+    if (listWidth <= 0) return [];
     const chunks: T[][] = [];
     for (let index = 0; index < items.length; index += layout.columnCount) {
       chunks.push(items.slice(index, index + layout.columnCount));
     }
     return chunks;
-  }, [items, layout.columnCount]);
+  }, [items, layout.columnCount, listWidth]);
 
   const handleLayout = useCallback((event: LayoutChangeEvent) => {
     const width = event.nativeEvent.layout.width;
