@@ -1,0 +1,46 @@
+name: Library updates check
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Run dependency checks
+        id: checks
+        continue-on-error: true
+        run: npm run check:updates -- --report "$RUNNER_TEMP/dependency-report.md"
+      - name: Sync issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT_PATH: ${{ runner.temp }}/dependency-report.md
+          CHECKS_PASSED: ${{ steps.checks.outcome == 'success' }}
+          ISSUE_TITLE: Dependency updates needed
+        run: |
+          set -euo pipefail
+          NUMBER="$(gh issue list --repo "$GITHUB_REPOSITORY" --search "in:title \"$ISSUE_TITLE\"" --state open --json number --jq '.[0].number // empty')"
+          if [[ "$CHECKS_PASSED" == "true" ]]; then
+            if [[ -n "$NUMBER" ]]; then
+              gh issue close "$NUMBER" --repo "$GITHUB_REPOSITORY" --comment "All checks passed on $(date -u +'%Y-%m-%d %H:%M UTC')."
+            fi
+          else
+            gh label create dependencies --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || true
+            if [[ -n "$NUMBER" ]]; then
+              gh issue edit "$NUMBER" --repo "$GITHUB_REPOSITORY" --body-file "$REPORT_PATH" --add-label dependencies
+            else
+              gh issue create --repo "$GITHUB_REPOSITORY" --title "$ISSUE_TITLE" --body-file "$REPORT_PATH" --label dependencies
+            fi
+          fi
