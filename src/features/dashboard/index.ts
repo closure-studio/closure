@@ -12,7 +12,6 @@ export { OperatorRosterView } from './operator-roster/components/operator-roster
 export {
   useArkHostSync,
   useCharactersQuery,
-  useDeleteGameAccount,
   useGameAccountsQuery,
   useGameDetailQuery,
   useGameLogsQuery,
@@ -24,7 +23,6 @@ export {
 export {
   useCharacterTable,
   useItemTable,
-  useRefreshGameResources,
   useStageTable,
 } from './resources';
 export { selectBackdropTint } from './selectors';

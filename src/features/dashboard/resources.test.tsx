@@ -12,7 +12,6 @@ import {
 import {
   useCharacterTable,
   useItemTable,
-  useRefreshGameResources,
   useStageTable,
 } from './resources';
 import { mmkvStateStorage } from '@/lib/mmkv';
@@ -166,30 +165,6 @@ describe('Game resource queries', () => {
 
     await waitFor(() => {
       expect(result.current.item).toEqual(bundledItemTable);
-    });
-  });
-
-  it('refetches the game resource queries on manual refresh', async () => {
-    const fetchItem = jest.fn().mockResolvedValue({ kind: 'not-modified' });
-    configureQueryDependencies({
-      gameResourcesApi: createGameResourcesApi({ fetchItem }),
-    });
-    const { wrapper } = createWrapper();
-    const { result } = await renderHook(
-      () => ({ item: useItemTable(), refresh: useRefreshGameResources() }),
-      { wrapper },
-    );
-    await waitFor(() => {
-      expect(result.current.item).toEqual(bundledItemTable);
-    });
-    const callsBefore = fetchItem.mock.calls.length;
-
-    await act(() => {
-      result.current.refresh();
-    });
-
-    await waitFor(() => {
-      expect(fetchItem).toHaveBeenCalledTimes(callsBefore + 1);
     });
   });
 });

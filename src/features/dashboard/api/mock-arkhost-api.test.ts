@@ -2,20 +2,15 @@ import { mockArkHostGachaEvents } from '@/mocks/arkhost';
 import { MockArkHostApi } from './arkhost-api.mock';
 
 describe("MockArkHostApi", () => {
-  it("serves core and account-scoped ArkHost data", async () => {
+  it("serves core ArkHost data", async () => {
     const api = new MockArkHostApi(0);
-    const [config, games, ranking, detail, characters, logs] =
-      await Promise.all([
-        api.fetchSystemConfig(),
-        api.fetchGameList(),
-        api.fetchApCostRanking(),
-        api.fetchGameDetail("G18928069156"),
-        api.fetchCharacters("G18928069156"),
-        api.fetchGameLogs("G18928069156", 0),
-      ]);
-    expect(config.ok && config.data.apiVersion).toBe(1);
+    const [games, detail, characters, logs] = await Promise.all([
+      api.fetchGameList(),
+      api.fetchGameDetail("G18928069156"),
+      api.fetchCharacters("G18928069156"),
+      api.fetchGameLogs("G18928069156", 0),
+    ]);
     expect(games.ok && games.data).toHaveLength(3);
-    expect(ranking.ok && ranking.data).toHaveLength(10);
     expect(detail.ok && detail.data?.inventory?.["31034"]).toBe(131);
     expect(characters.ok && characters.data.total).toBe(422);
     expect(logs.ok && logs.data.logs).toHaveLength(10);
@@ -33,21 +28,6 @@ describe("MockArkHostApi", () => {
     expect(secondary.ok && secondary.data.total).toBe(60);
     expect(tertiary.ok && tertiary.data.total).toBe(103);
     expect(unknown.ok && unknown.data).toEqual({ chars: [], total: 0 });
-  });
-
-  it("updates mock-owned state through write operations", async () => {
-    const api = new MockArkHostApi(0);
-    expect(
-      await api.updateGameConfig("G18928069156", { is_stopped: true }),
-    ).toEqual({ data: undefined, ok: true });
-    expect(await api.updateSystemConfig({ announcement: "updated" })).toEqual({
-      data: undefined,
-      ok: true,
-    });
-    const games = await api.fetchGameList();
-    const config = await api.fetchSystemConfig();
-    expect(games.ok && games.data[0]?.game_config.is_stopped).toBe(true);
-    expect(config.ok && config.data.announcement).toBe("updated");
   });
 
   it("deletes a game account and keeps server reads consistent", async () => {

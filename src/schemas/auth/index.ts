@@ -1,79 +1,15 @@
 export {
-  adminLoginInputSchema,
-  adminUserQueryInputSchema,
-  linuxDoLoginInputSchema,
-  passwordResetInputSchema,
   passwordRecoveryRequestInputSchema,
   passwordUpdateInputSchema,
-  qqBindCodeInputSchema,
-  registrationCodeInputSchema,
-  registrationInputSchema,
-  sessionRefreshInputSchema,
-  userPermissionUpdateInputSchema,
 } from './auth-inputs.schema';
 export type {
-  AdminLoginInput,
-  AdminUserQueryInput,
-  LinuxDoLoginInput,
-  PasswordResetInput,
   PasswordRecoveryRequestInput,
   PasswordUpdateInput,
-  QqBindCodeInput,
-  RegistrationCodeInput,
-  RegistrationInput,
-  SessionRefreshInput,
-  UserPermissionUpdateInput,
 } from './auth-inputs.schema';
 export {
-  authAdminUsersResponseSchema,
-  authEmptyResponseSchema,
-  authResponseCodeSchema,
-  authServerAdminUserSchema,
-  authServerAdminLoginRequestSchema,
-  authServerAdminUserQuerySchema,
-  authServerJwtClaimsSchema,
-  authServerLinuxDoLoginRequestSchema,
-  authServerLoginRequestSchema,
-  authServerPasswordResetRequestSchema,
-  authServerPasswordUpdateRequestSchema,
-  authServerRegistrationCodeRequestSchema,
-  authServerRegistrationRequestSchema,
-  authServerUserPermissionUpdateSchema,
-  authStringResponseSchema,
-  authTokenDataSchema,
-  authTokenResponseSchema,
-} from './auth-server-contract.schema';
-export type {
-  AuthAdminUsersResponse,
-  AuthEmptyResponse,
-  AuthResponseCode,
-  AuthServerAdminUser,
-  AuthServerAdminLoginRequest,
-  AuthServerAdminUserQuery,
-  AuthServerJwtClaims,
-  AuthServerLinuxDoLoginRequest,
-  AuthServerLoginRequest,
-  AuthServerPasswordResetRequest,
-  AuthServerPasswordUpdateRequest,
-  AuthServerRegistrationCodeRequest,
-  AuthServerRegistrationRequest,
-  AuthServerUserPermissionUpdate,
-  AuthStringResponse,
-  AuthTokenData,
-  AuthTokenResponse,
-} from './auth-server-contract.schema';
-export { loginCredentialsSchema, loginSubmissionSchema } from './login-credentials.schema';
+  loginCredentialsSchema,
+  loginSubmissionSchema,
+} from './login-credentials.schema';
 export type { LoginCredentials, LoginSubmission } from './login-credentials.schema';
-export {
-  adminUserSchema,
-  sessionPrincipalSchema,
-  sessionPrincipalStatusSchema,
-  userSessionSchema,
-  USER_PERMISSION,
-} from './user-session.schema';
-export type {
-  AdminUser,
-  SessionPrincipal,
-  SessionPrincipalStatus,
-  UserSession,
-} from './user-session.schema';
+export { userSessionSchema, USER_PERMISSION } from './user-session.schema';
+export type { SessionPrincipal, UserSession } from './user-session.schema';

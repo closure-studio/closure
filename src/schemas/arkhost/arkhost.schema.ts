@@ -39,8 +39,6 @@ export const arkHostGameConfigSchema = v.object({
   recruit_reserve: nonNegativeIntegerSchema,
 });
 
-export const arkHostGameConfigPatchSchema = v.partial(arkHostGameConfigSchema);
-
 export const arkHostCaptchaInfoSchema = v.object({
   account: v.optional(v.string()),
   captcha_type: v.string(),
@@ -139,14 +137,6 @@ export const arkHostCharactersSchema = v.object({
   total: nonNegativeIntegerSchema,
 });
 
-export const arkHostApCostEntrySchema = v.object({
-  account: v.string(),
-  avatar: arkHostAvatarSchema,
-  level: nonNegativeIntegerSchema,
-  nickName: v.string(),
-  totalAPCosts: nonNegativeIntegerSchema,
-});
-
 export const arkHostGachaEventSchema = v.object({
   account: v.string(),
   avatar: arkHostAvatarSchema,
@@ -155,48 +145,6 @@ export const arkHostGachaEventSchema = v.object({
   gachaInfo: v.string(),
   nickName: v.string(),
 });
-
-const shutdownTaskConfigSchema = v.object({
-  allowGameCreate: v.boolean(),
-  allowGameDelete: v.boolean(),
-  allowGameLogin: v.boolean(),
-  allowGameUpdate: v.boolean(),
-});
-
-export const arkHostSystemConfigSchema = v.object({
-  allowGameCreate: v.boolean(),
-  allowGameDelete: v.boolean(),
-  allowGameLogin: v.boolean(),
-  allowGameUpdate: v.boolean(),
-  announcement: v.string(),
-  apiVersion: v.union([v.string(), v.number()]),
-  captcha: v.object({ autoPassV3: v.boolean(), autoPassV4: v.boolean() }),
-  database: v.object({
-    apiLogBatchSize: nonNegativeIntegerSchema,
-    gameLogBatchSize: nonNegativeIntegerSchema,
-    gameStatBatchSize: nonNegativeIntegerSchema,
-  }),
-  isDebugMode: v.boolean(),
-  isUnderMaintenance: v.boolean(),
-  recaptchaScore: v.nullable(v.number()),
-  shutdownTasks: v.array(
-    v.object({
-      config: shutdownTaskConfigSchema,
-      timestamp: nonNegativeIntegerSchema,
-    }),
-  ),
-});
-
-export const arkHostSystemConfigPatchSchema = v.partial(
-  v.pick(arkHostSystemConfigSchema, [
-    "allowGameCreate",
-    "allowGameDelete",
-    "allowGameLogin",
-    "allowGameUpdate",
-    "announcement",
-    "shutdownTasks",
-  ]),
-);
 
 const responseMessageSchema = v.string();
 function responseSchema<
@@ -216,9 +164,6 @@ function responseSchema<
   ]);
 }
 
-export const arkHostSystemConfigResponseSchema = responseSchema(
-  arkHostSystemConfigSchema,
-);
 export const arkHostGameListResponseSchema = responseSchema(
   v.array(arkHostGameListEntrySchema),
 );
@@ -228,26 +173,11 @@ export const arkHostGameDetailResponseSchema = responseSchema(
 export const arkHostGameLogsResponseSchema = responseSchema(
   arkHostGameLogsSchema,
 );
-export const arkHostApCostResponseSchema = responseSchema(
-  v.array(arkHostApCostEntrySchema),
-);
-export const arkHostEmptyResponseSchema = responseSchema(v.null_());
-
 export const arkHostCharactersResponseSchema = responseSchema(
   arkHostCharactersSchema,
 );
 
-export const arkHostCaptchaSubmissionSchema = v.record(
-  nonBlankStringSchema,
-  v.union([v.string(), v.number(), v.boolean()]),
-);
-
 export type ArkHostAvatar = v.InferOutput<typeof arkHostAvatarSchema>;
-export type ArkHostGameConfig = v.InferOutput<typeof arkHostGameConfigSchema>;
-export type ArkHostGameConfigPatch = v.InferOutput<
-  typeof arkHostGameConfigPatchSchema
->;
-export type ArkHostCaptchaInfo = v.InferOutput<typeof arkHostCaptchaInfoSchema>;
 export type ArkHostGameListEntry = v.InferOutput<
   typeof arkHostGameListEntrySchema
 >;
@@ -258,14 +188,4 @@ export type ArkHostGameLogEntry = v.InferOutput<
 >;
 export type ArkHostCharacter = v.InferOutput<typeof arkHostCharacterSchema>;
 export type ArkHostCharacters = v.InferOutput<typeof arkHostCharactersSchema>;
-export type ArkHostApCostEntry = v.InferOutput<typeof arkHostApCostEntrySchema>;
 export type ArkHostGachaEvent = v.InferOutput<typeof arkHostGachaEventSchema>;
-export type ArkHostSystemConfig = v.InferOutput<
-  typeof arkHostSystemConfigSchema
->;
-export type ArkHostSystemConfigPatch = v.InferOutput<
-  typeof arkHostSystemConfigPatchSchema
->;
-export type ArkHostCaptchaSubmission = v.InferOutput<
-  typeof arkHostCaptchaSubmissionSchema
->;

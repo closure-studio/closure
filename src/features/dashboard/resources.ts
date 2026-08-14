@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { GameResourceResult } from './api';
@@ -118,14 +118,4 @@ export function useStageTable(): StageTable {
     stageBundled,
     (updatedAt) => getQueryDependencies().gameResourcesApi.fetchStage(updatedAt),
   ).data.table;
-}
-
-export function useRefreshGameResources(): () => void {
-  const queryClient = useQueryClient();
-  return useCallback(() => {
-    void queryClient.refetchQueries({
-      queryKey: [GAME_RESOURCE_QUERY_KEY],
-      type: 'all',
-    });
-  }, [queryClient]);
 }

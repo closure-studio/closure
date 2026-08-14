@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
 import { ARK_HOST_GAME_STATUS_CODE } from '@/schemas/arkhost';
@@ -130,28 +130,6 @@ export function useSelectedLogs(): ArkHostGameLogs {
   const account = useSelectedGameAccount();
   const logsQuery = useGameLogsQuery(account?.account ?? null);
   return logsQuery.data ?? EMPTY_GAME_LOGS;
-}
-
-export function useDeleteGameAccount() {
-  const session = useAppStore((state) => state.auth.session);
-  const queryClient = useQueryClient();
-  const userId = session?.principal.id ?? '';
-  return useMutation({
-    mutationFn: async (accountId: string) => {
-      const { arkHostApi } = getQueryDependencies();
-      const result = await arkHostApi.deleteGame(accountId);
-      if (!result.ok || result.data !== true) {
-        throw new FailureError({ code: 'operation-rejected', kind: 'business' });
-      }
-      return true;
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: arkHostQueryKeys.gameAccounts(userId),
-        exact: true,
-      });
-    },
-  });
 }
 
 export function useArkHostSync() {

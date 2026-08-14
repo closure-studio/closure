@@ -1,14 +1,6 @@
-import * as v from "valibot";
-
-import {
-  arkHostCaptchaSubmissionSchema,
-  arkHostGameConfigPatchSchema,
-  arkHostSystemConfigPatchSchema,
-} from "@/schemas/arkhost";
 import type {
   ArkHostGameDetail,
   ArkHostGameListEntry,
-  ArkHostSystemConfig,
 } from "@/schemas/arkhost";
 import type {
   ArkHostApi,
@@ -18,13 +10,11 @@ import type {
   ArkHostSseSubscription,
 } from "./arkhost-api";
 import {
-  mockArkHostApCostResponse,
   mockArkHostCharactersResponse,
   mockArkHostGameDetailResponse,
   mockArkHostGameListResponse,
   mockArkHostGameLogsResponse,
   mockArkHostSecondaryCharactersResponse,
-  mockArkHostSystemConfigResponse,
   mockArkHostTertiaryCharactersResponse,
 } from "@/mocks/arkhost";
 
@@ -83,7 +73,6 @@ export class MockArkHostApi implements ArkHostApi {
   readonly #delayMs: number;
   readonly #subscriptions = new Set<MockSseSubscription>();
   #gameList: ArkHostGameListEntry[];
-  #systemConfig: ArkHostSystemConfig;
   #detail: ArkHostGameDetail | null;
 
   constructor(delayMs = MOCK_ARKHOST_DELAY_MS) {
@@ -92,12 +81,6 @@ export class MockArkHostApi implements ArkHostApi {
       mockArkHostGameListResponse.code === 1
         ? structuredClone(mockArkHostGameListResponse.data)
         : [];
-    this.#systemConfig =
-      mockArkHostSystemConfigResponse.code === 1
-        ? structuredClone(mockArkHostSystemConfigResponse.data)
-        : (() => {
-            throw new Error("Mock System Config must be successful.");
-          })();
     this.#detail =
       mockArkHostGameDetailResponse.code === 1
         ? structuredClone(mockArkHostGameDetailResponse.data)
@@ -132,14 +115,6 @@ export class MockArkHostApi implements ArkHostApi {
     return success(true);
   }
 
-  async fetchApCostRanking() {
-    await this.#wait();
-    return success(
-      mockArkHostApCostResponse.code === 1
-        ? structuredClone(mockArkHostApCostResponse.data)
-        : [],
-    );
-  }
   async fetchCharacters(account: string) {
     await this.#wait();
     const response = mockCharactersByAccount.get(account);
@@ -178,28 +153,6 @@ export class MockArkHostApi implements ArkHostApi {
       logs: structuredClone(logs),
     });
   }
-  async fetchGameLogsAsAdmin(
-    account: string,
-    _userId: string,
-    afterId: number,
-  ) {
-    return this.fetchGameLogs(account, afterId);
-  }
-  async fetchSystemConfig() {
-    await this.#wait();
-    return success(structuredClone(this.#systemConfig));
-  }
-  async loginGame(account: string, captchaToken: string) {
-    await this.#wait();
-    return account && captchaToken ? success(undefined) : failure<void>();
-  }
-  async submitCaptcha(account: string, submission: unknown) {
-    await this.#wait();
-    return account &&
-      v.safeParse(arkHostCaptchaSubmissionSchema, submission).success
-      ? success(undefined)
-      : failure<void>();
-  }
   subscribe(
     _accessToken: string,
     listener: ArkHostSseListener,
@@ -212,24 +165,5 @@ export class MockArkHostApi implements ArkHostApi {
         subscription.unsubscribe();
       },
     };
-  }
-  async updateGameConfig(account: string, patch: unknown) {
-    await this.#wait();
-    const parsed = v.safeParse(arkHostGameConfigPatchSchema, patch);
-    const game = this.#gameList.find(
-      (entry) => entry.status.account === account,
-    );
-    if (!parsed.success || !game) return failure<void>();
-    Object.assign(game.game_config, parsed.output, { account });
-    if (this.#detail?.config.account === account)
-      Object.assign(this.#detail.config, parsed.output, { account });
-    return success(undefined);
-  }
-  async updateSystemConfig(patch: unknown) {
-    await this.#wait();
-    const parsed = v.safeParse(arkHostSystemConfigPatchSchema, patch);
-    if (!parsed.success) return failure<void>();
-    Object.assign(this.#systemConfig, parsed.output);
-    return success(undefined);
   }
 }

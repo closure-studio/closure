@@ -1,32 +1,22 @@
 import * as v from "valibot";
 
 import {
-  mockArkHostApCostResponse,
   mockArkHostCharactersResponse,
   mockArkHostGameDetailResponse,
   mockArkHostGameListResponse,
   mockArkHostGameLogsResponse,
   mockArkHostSecondaryCharactersResponse,
-  mockArkHostSystemConfigResponse,
   mockArkHostTertiaryCharactersResponse,
 } from "@/mocks/arkhost";
 import {
-  arkHostApCostResponseSchema,
   arkHostCharactersResponseSchema,
   arkHostGameDetailResponseSchema,
   arkHostGameListResponseSchema,
   arkHostGameLogsResponseSchema,
-  arkHostSystemConfigResponseSchema,
 } from ".";
 
 describe("ArkHost server contracts", () => {
   it("accepts every supplied ArkHost response fixture", () => {
-    expect(
-      v.safeParse(
-        arkHostSystemConfigResponseSchema,
-        mockArkHostSystemConfigResponse,
-      ).success,
-    ).toBe(true);
     expect(
       v.safeParse(arkHostGameListResponseSchema, mockArkHostGameListResponse)
         .success,
@@ -39,10 +29,6 @@ describe("ArkHost server contracts", () => {
     ).toBe(true);
     expect(
       v.safeParse(arkHostGameLogsResponseSchema, mockArkHostGameLogsResponse)
-        .success,
-    ).toBe(true);
-    expect(
-      v.safeParse(arkHostApCostResponseSchema, mockArkHostApCostResponse)
         .success,
     ).toBe(true);
     expect(
@@ -98,13 +84,6 @@ describe("ArkHost server contracts", () => {
       v.safeParse(arkHostGameLogsResponseSchema, {
         code: 1,
         data: { hasMore: "yes", logs: [] },
-        message: "ok",
-      }).success,
-    ).toBe(false);
-    expect(
-      v.safeParse(arkHostSystemConfigResponseSchema, {
-        code: 1,
-        data: {},
         message: "ok",
       }).success,
     ).toBe(false);

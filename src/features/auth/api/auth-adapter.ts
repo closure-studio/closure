@@ -1,17 +1,7 @@
 import type {
-  AdminLoginInput,
-  AdminUser,
-  AdminUserQueryInput,
-  LinuxDoLoginInput,
   LoginCredentials,
-  PasswordResetInput,
   PasswordRecoveryRequestInput,
   PasswordUpdateInput,
-  QqBindCodeInput,
-  RegistrationCodeInput,
-  RegistrationInput,
-  SessionRefreshInput,
-  UserPermissionUpdateInput,
   UserSession,
 } from '@/schemas/auth';
 
@@ -53,16 +43,7 @@ export type AuthResult<T> =
   | { error: AuthFailure; ok: false };
 
 export interface AuthAdapter {
-  fetchQqBindCode(input: QqBindCodeInput): Promise<AuthResult<string>>;
   login(input: LoginCredentials): Promise<AuthResult<UserSession>>;
-  loginAsAdmin(input: AdminLoginInput): Promise<AuthResult<UserSession>>;
-  loginWithLinuxDo(input: LinuxDoLoginInput): Promise<AuthResult<UserSession>>;
-  queryUsers(input: AdminUserQueryInput): Promise<AuthResult<AdminUser[]>>;
-  refreshSession(input: SessionRefreshInput): Promise<AuthResult<UserSession>>;
-  register(input: RegistrationInput): Promise<AuthResult<UserSession>>;
   requestPasswordRecovery(input: PasswordRecoveryRequestInput): Promise<AuthResult<void>>;
-  resetPassword(input: PasswordResetInput): Promise<AuthResult<UserSession>>;
-  sendRegistrationCode(input: RegistrationCodeInput): Promise<AuthResult<void>>;
   updatePassword(input: PasswordUpdateInput): Promise<AuthResult<void>>;
-  updateUserPermission(input: UserPermissionUpdateInput): Promise<AuthResult<void>>;
 }

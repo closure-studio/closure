@@ -1,39 +1,10 @@
 import * as v from "valibot";
 
 import {
-  arkHostApCostResponseSchema,
   arkHostGameDetailResponseSchema,
   arkHostGameListResponseSchema,
   arkHostGameLogsResponseSchema,
-  arkHostSystemConfigResponseSchema,
 } from "@/schemas/arkhost";
-
-export const mockArkHostSystemConfigResponse = v.parse(
-  arkHostSystemConfigResponseSchema,
-  {
-    code: 1,
-    data: {
-      allowGameCreate: true,
-      allowGameDelete: true,
-      allowGameLogin: true,
-      allowGameUpdate: true,
-      announcement:
-        "本次维护已结束，现已可以正常使用\n本次额外更新内容如下\n1.基建会客室会送线索\n2.新增识别仓库材料，可在网站直接看到材料数量\n3.在材料足够的情况下，可以自动专精下一级当前技能",
-      apiVersion: 1,
-      captcha: { autoPassV3: false, autoPassV4: false },
-      database: {
-        apiLogBatchSize: 1000,
-        gameLogBatchSize: 10,
-        gameStatBatchSize: 10,
-      },
-      isDebugMode: false,
-      isUnderMaintenance: false,
-      recaptchaScore: 0.6,
-      shutdownTasks: [],
-    },
-    message: "大成功!",
-  },
-);
 
 const userId = "492f6025-e5da-4ad0-9ced-de2a641816d7";
 const gameConfig = (
@@ -295,29 +266,6 @@ export const mockArkHostGameLogsResponse = v.parse(
     message: "大成功!",
   },
 );
-
-export const mockArkHostApCostResponse = v.parse(arkHostApCostResponseSchema, {
-  code: 1,
-  data: [
-    ["安吉拉", 120, "ICON", "avatar_dyn_04", 93522],
-    ["嘎嘎乱杀", 110, "", "", 86553],
-    ["OnRa", 120, "ICON", "avatar_special_83", 85863],
-    ["趣味生煎", 120, "ICON", "avatar_special_80", 84096],
-    ["童年乐趣", 120, "ASSISTANT", "char_1028_texas2@epoque#36", 82464],
-    ["Dr泷", 119, "", "", 80724],
-    ["响木天音", 120, "ASSISTANT", "char_1012_skadi2#2", 79560],
-    ["独孤先生", 120, "", "", 79437],
-    ["春风又绿江南岸", 120, "ASSISTANT", "char_1041_angel2#1", 77517],
-    ["水色群青", 120, "ICON", "avatar_special_10", 77448],
-  ].map(([nickName, level, type, id, totalAPCosts]) => ({
-    account: "",
-    avatar: { id, type },
-    level,
-    nickName,
-    totalAPCosts,
-  })),
-  message: "successful!",
-});
 
 export const mockArkHostGachaEvents = [
   ["这里是国服吗", "ICON", "avatar_dyn_05", "char_1015_aglna2", 1786404941],

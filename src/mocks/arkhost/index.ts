@@ -1,10 +1,8 @@
 export {
-  mockArkHostApCostResponse,
   mockArkHostGameDetailResponse,
   mockArkHostGameListResponse,
   mockArkHostGameLogsResponse,
   mockArkHostGachaEvents,
-  mockArkHostSystemConfigResponse,
 } from './arkhost.mock';
 export {
   mockArkHostCharactersResponse,
