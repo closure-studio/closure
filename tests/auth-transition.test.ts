@@ -1,4 +1,4 @@
-import { PAGE_TRANSITION_TIMING } from '@/constants/page-transition';
+import { PAGE_TRANSITION_DURATION_MS } from '@/constants/page-transition';
 import { Animated } from 'react-native';
 import {
   getRouteScreenOptions,
@@ -81,8 +81,8 @@ describe('route transition', () => {
       animation: 'default',
       animationTypeForReplace: 'push',
       transitionSpec: {
-        open: { config: { duration: PAGE_TRANSITION_TIMING.totalMs } },
-        close: { config: { duration: PAGE_TRANSITION_TIMING.totalMs } },
+        open: { config: { duration: PAGE_TRANSITION_DURATION_MS } },
+        close: { config: { duration: PAGE_TRANSITION_DURATION_MS } },
       },
     });
   });
@@ -106,7 +106,7 @@ describe('route transition', () => {
       headerShown: false,
       lazy: true,
       transitionSpec: {
-        config: { duration: PAGE_TRANSITION_TIMING.totalMs },
+        config: { duration: PAGE_TRANSITION_DURATION_MS },
       },
     });
 
@@ -156,8 +156,8 @@ describe('route transition', () => {
       detachPreviousScreen: false,
       gestureEnabled: false,
       transitionSpec: {
-        open: { config: { duration: PAGE_TRANSITION_TIMING.totalMs } },
-        close: { config: { duration: PAGE_TRANSITION_TIMING.totalMs } },
+        open: { config: { duration: PAGE_TRANSITION_DURATION_MS } },
+        close: { config: { duration: PAGE_TRANSITION_DURATION_MS } },
       },
     });
     expect(screenOptions).not.toHaveProperty('gestureDirection');

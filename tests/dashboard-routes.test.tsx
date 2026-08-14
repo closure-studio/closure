@@ -6,10 +6,9 @@ import DashboardInventoryRoute from '../src/app/(app)/dashboard/inventory';
 import DashboardOperatorsRoute from '../src/app/(app)/dashboard/operators';
 import DashboardOverviewRoute from '../src/app/(app)/dashboard/overview';
 
-const mockActiveGameAccount = {
-  activityTimeline: [],
-  inventory: {},
-  operators: [],
+const mockSelectedGameAccount = {
+  account: 'G1',
+  config: { map_id: 'main_01-07' },
 };
 
 jest.mock('@/features/dashboard', () => {
@@ -20,15 +19,19 @@ jest.mock('@/features/dashboard', () => {
       <View testID="dashboard-page-scroll">{children}</View>
     ),
     GameAccountOverviewView: () => <Text testID="overview-screen" />,
+    getCharacterDisplayName: (_table: object, characterId: string) => characterId,
+    getStageDisplayLabel: (_table: object, stageId: string) => stageId,
     InventoryView: () => <Text testID="inventory-screen" />,
     OperatorRosterView: () => <Text testID="operators-screen" />,
+    useSelectedCharacters: () => ({ chars: [], total: 0 }),
+    useSelectedGameAccount: () => mockSelectedGameAccount,
+    useSelectedGameDetail: () => ({ inventory: {} }),
+    useSelectedLogs: () => ({ hasMore: false, logs: [] }),
+    useCharacterTable: () => ({}),
+    useItemTable: () => ({}),
+    useStageTable: () => ({}),
   };
 });
-
-jest.mock('@/store', () => ({
-  selectActiveGameAccount: () => mockActiveGameAccount,
-  useAppStore: (selector: (state: object) => unknown) => selector({}),
-}));
 
 describe('dashboard routes', () => {
   it.each([

@@ -3,7 +3,7 @@ import { Stack as JsStack } from 'expo-router/js-stack';
 import type { BottomTabNavigationOptions } from 'expo-router/tabs';
 import { Animated, Easing } from 'react-native';
 
-import { PAGE_TRANSITION_TIMING } from '@/constants/page-transition';
+import { PAGE_TRANSITION_DURATION_MS } from '@/constants/page-transition';
 
 type ExcludeFunction<T> = T extends (...args: never[]) => unknown ? never : T;
 type JsStackScreenOptions = ExcludeFunction<NonNullable<ComponentProps<typeof JsStack>['screenOptions']>>;
@@ -13,7 +13,7 @@ type TabSceneStyleInterpolator = NonNullable<BottomTabNavigationOptions['sceneSt
 const timingTransition = {
   animation: 'timing',
   config: {
-    duration: PAGE_TRANSITION_TIMING.totalMs,
+    duration: PAGE_TRANSITION_DURATION_MS,
     easing: Easing.inOut(Easing.ease),
   },
 } as const;

@@ -6,7 +6,7 @@ export const apiNodeOutcomeSchema = v.picklist(['reachable', 'unreachable']);
 export const apiNodeSchema = v.object({
   id: apiNodeIdSchema,
   description: v.pipe(v.string(), v.minLength(1)),
-  mockLatencyMs: v.pipe(v.number(), v.integer(), v.minValue(0)),
+  latencyMs: v.pipe(v.number(), v.integer(), v.minValue(0)),
   outcome: apiNodeOutcomeSchema,
 });
 

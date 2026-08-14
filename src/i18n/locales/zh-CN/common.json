@@ -1,4 +1,8 @@
 {
+  "states": {
+    "disabled": "关闭",
+    "enabled": "开启"
+  },
   "actions": {
     "add": "添加",
     "cancel": "取消",

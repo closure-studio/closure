@@ -1,15 +1,21 @@
 import {
   DashboardPageScroll,
+  getCharacterDisplayName,
   OperatorRosterView,
+  useSelectedCharacters,
+  useCharacterTable,
 } from '@/features/dashboard';
-import { selectActiveGameAccount, useAppStore } from '@/store';
 
 export default function DashboardOperatorsRoute() {
-  const activeGameAccount = useAppStore(selectActiveGameAccount);
+  const characters = useSelectedCharacters();
+  const characterTable = useCharacterTable();
 
   return (
     <DashboardPageScroll>
-      <OperatorRosterView operators={activeGameAccount.operators} />
+      <OperatorRosterView
+        getCharacterName={(characterId) => getCharacterDisplayName(characterTable, characterId)}
+        operators={characters.chars}
+      />
     </DashboardPageScroll>
   );
 }

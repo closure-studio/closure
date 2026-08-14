@@ -1,41 +1,44 @@
 import * as v from 'valibot';
 
-import { initialGameAccounts } from '@/features/dashboard/mocks/game-accounts';
-import { persistedAppStateSchema } from './local-state.schema';
+import { mockActiveSession } from '@/mocks/auth';
+import { persistedStoreStateSchema } from './local-state.schema';
 
-describe('persistedAppStateSchema', () => {
-  it('accepts an empty signed-out state and a complete Game Account state', () => {
-    expect(v.safeParse(persistedAppStateSchema, {
+describe('persistedStoreStateSchema', () => {
+  it('accepts a signed-out client state', () => {
+    expect(v.safeParse(persistedStoreStateSchema, {
       auth: { session: null },
-      games: { activeGameAccountId: null, gameAccounts: [] },
-    }).success).toBe(true);
-    expect(v.safeParse(persistedAppStateSchema, {
-      auth: { session: null },
-      games: {
-        activeGameAccountId: initialGameAccounts[0].id,
-        gameAccounts: initialGameAccounts,
-      },
+      selectedApiNodeId: 'domestic',
     }).success).toBe(true);
   });
 
-  it('rejects active IDs outside the Game Account collection', () => {
-    expect(v.safeParse(persistedAppStateSchema, {
-      auth: { session: null },
-      games: { activeGameAccountId: 'missing', gameAccounts: initialGameAccounts },
-    }).success).toBe(false);
-    expect(v.safeParse(persistedAppStateSchema, {
-      auth: { session: null },
-      games: { activeGameAccountId: null, gameAccounts: initialGameAccounts },
-    }).success).toBe(false);
+  it('accepts a remembered session with a selected node', () => {
+    expect(v.safeParse(persistedStoreStateSchema, {
+      auth: { session: mockActiveSession },
+      selectedApiNodeId: 'overseas',
+    }).success).toBe(true);
   });
 
-  it('rejects malformed nested Game Account data', () => {
-    expect(v.safeParse(persistedAppStateSchema, {
+  it('drops the old development-only game account selection field', () => {
+    const result = v.safeParse(persistedStoreStateSchema, {
+      activeGameAccountId: 'G18928069156',
+      auth: { session: mockActiveSession },
+      selectedApiNodeId: 'domestic',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect('activeGameAccountId' in result.output).toBe(false);
+      expect('selectedGameAccountId' in result.output).toBe(false);
+    }
+  });
+
+  it('rejects malformed sessions and node selections', () => {
+    expect(v.safeParse(persistedStoreStateSchema, {
+      auth: { session: { accessToken: '' } },
+      selectedApiNodeId: 'domestic',
+    }).success).toBe(false);
+    expect(v.safeParse(persistedStoreStateSchema, {
       auth: { session: null },
-      games: {
-        activeGameAccountId: initialGameAccounts[0].id,
-        gameAccounts: [{ ...initialGameAccounts[0], exp: [1] }],
-      },
+      selectedApiNodeId: 'mars',
     }).success).toBe(false);
   });
 });

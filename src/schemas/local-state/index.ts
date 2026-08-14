@@ -1,2 +1,6 @@
-export { gamesStateSchema, persistedAppStateSchema } from './local-state.schema';
-export type { GamesState, PersistedAppState } from './local-state.schema';
+export {
+  persistedStoreStateSchema,
+} from './local-state.schema';
+export type {
+  PersistedStoreState,
+} from './local-state.schema';

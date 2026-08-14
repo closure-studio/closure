@@ -1,15 +1,23 @@
 import {
   DashboardPageScroll,
   GameAccountOverviewView,
+  getStageDisplayLabel,
+  useSelectedGameAccount,
+  useSelectedGameDetail,
+  useStageTable,
 } from '@/features/dashboard';
-import { selectActiveGameAccount, useAppStore } from '@/store';
 
 export default function DashboardOverviewRoute() {
-  const activeGameAccount = useAppStore(selectActiveGameAccount);
+  const selectedGameAccount = useSelectedGameAccount();
+  const detail = useSelectedGameDetail();
+  const stageTable = useStageTable();
+
+  if (!selectedGameAccount) return null;
+  const stageLabel = getStageDisplayLabel(stageTable, selectedGameAccount.config.map_id, '—');
 
   return (
     <DashboardPageScroll>
-      <GameAccountOverviewView gameAccount={activeGameAccount} />
+      <GameAccountOverviewView detail={detail} gameAccount={selectedGameAccount} stageLabel={stageLabel} />
     </DashboardPageScroll>
   );
 }

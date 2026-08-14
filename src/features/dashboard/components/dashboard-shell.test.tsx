@@ -3,13 +3,13 @@ import { I18nextProvider } from 'react-i18next';
 import { TamaguiProvider, YStack } from 'tamagui';
 
 import { i18n } from '@/i18n';
-import { initialGameAccounts } from '../mocks/game-accounts';
+import { mockArkHostGameListResponse } from '@/mocks/arkhost';
 import { tamaguiConfig } from '../../../../tamagui.config';
 import { DashboardShell } from './dashboard-shell';
 
-jest.mock('./link-game-account-sheet', () => ({
-  LinkGameAccountSheet: () => null,
-}));
+const initialGameAccounts = mockArkHostGameListResponse.code === 1
+  ? mockArkHostGameListResponse.data.map((entry) => ({ account: entry.status.account, ap: entry.status.ap, avatar: entry.status.avatar, captchaInfo: entry.captcha_info, color: 'primary' as const, config: entry.game_config, createdAt: entry.status.created_at, isVerified: entry.status.is_verify, level: entry.status.level, nickname: entry.status.nick_name, platform: entry.status.platform, statusCode: entry.status.code, statusText: entry.status.text, userId: entry.status.uuid }))
+  : [];
 
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
@@ -27,14 +27,10 @@ function DashboardShellTestTree({ pageId }: { pageId: string }) {
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <I18nextProvider i18n={i18n}>
         <DashboardShell
-          activeGameAccountId="acc-01"
+          selectedGameAccountId="G18928069156"
           gameAccounts={initialGameAccounts}
           isContentSwipeEnabled
-          isLinkGameAccountSheetOpen={false}
           onContentSwipe={jest.fn()}
-          onLinkGameAccount={jest.fn()}
-          onLinkGameAccountSheetOpenChange={jest.fn()}
-          onOpenLinkGameAccount={jest.fn()}
           onSelectGameAccount={jest.fn()}
         >
           <YStack testID={`dashboard-page-${pageId}`} />
@@ -50,13 +46,13 @@ describe('DashboardShell', () => {
 
     expect(screen.getAllByTestId('dashboard-secondary-header')).toHaveLength(1);
     expect(screen.getByTestId('dashboard-page-overview')).toBeTruthy();
-    expect(screen.getByTestId('game-account-option-acc-01')).toBeTruthy();
+    expect(screen.getByTestId('game-account-option-G18928069156')).toBeTruthy();
 
     await screen.rerender(<DashboardShellTestTree pageId="inventory" />);
 
     expect(screen.getAllByTestId('dashboard-secondary-header')).toHaveLength(1);
     expect(screen.getByTestId('dashboard-page-inventory')).toBeTruthy();
-    expect(screen.getByTestId('game-account-option-acc-01')).toBeTruthy();
+    expect(screen.getByTestId('game-account-option-G18928069156')).toBeTruthy();
     expect(screen.queryByTestId('dashboard-page-overview')).toBeNull();
   });
 });

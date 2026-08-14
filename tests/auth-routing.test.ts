@@ -2,7 +2,7 @@ import {
   resolveAuthEntryDestination,
   resolvePostLoginDestination,
 } from '@/features/session';
-import { mockActiveSession } from '@/features/auth/api/mock-auth-fixtures';
+import { mockActiveSession } from '@/mocks/auth';
 
 describe('auth routing', () => {
   it('routes startup from auth according to the current session state', () => {

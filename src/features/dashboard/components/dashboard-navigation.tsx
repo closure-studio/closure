@@ -1,4 +1,3 @@
-import { Plus } from 'lucide-react-native';
 import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
@@ -9,7 +8,7 @@ import type {
   ScrollView as ReactNativeScrollView,
 } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
-import { ScrollView, XStack, YStack, getTokens } from 'tamagui';
+import { ScrollView, XStack, YStack } from 'tamagui';
 
 import {
   MonoText,
@@ -18,8 +17,8 @@ import {
   SlidingSelection,
   TerminalText,
 } from '@/components';
+import { ARK_HOST_GAME_STATUS_CODE } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
-import { formatCompactNumber } from '../utils';
 
 const SCROLL_EVENT_THROTTLE_MS = 16;
 
@@ -42,7 +41,7 @@ export function resolveScrollOffsetToRevealItem({
   return itemEnd > viewportEnd ? Math.max(0, itemEnd - viewportWidth) : null;
 }
 
-function GameAccountButton({ gameAccount, isActive, onPress }: { gameAccount: GameAccount; isActive: boolean; onPress: () => void }) {
+function GameAccountButton({ gameAccount, isSelected, onPress }: { gameAccount: GameAccount; isSelected: boolean; onPress: () => void }) {
   const { t } = useTranslation('dashboard');
   const avatarTone = gameAccount.color === 'warning'
     ? '$appWarningRing'
@@ -57,8 +56,8 @@ function GameAccountButton({ gameAccount, isActive, onPress }: { gameAccount: Ga
 
   return (
     <NotchedButton
-      isSelected={isActive}
-      testID={`game-account-option-${gameAccount.id}`}
+      isSelected={isSelected}
+      testID={`game-account-option-${gameAccount.account}`}
       height={50}
       px={12}
       py={8}
@@ -66,60 +65,31 @@ function GameAccountButton({ gameAccount, isActive, onPress }: { gameAccount: Ga
       items="center"
       justify="flex-start"
       onPress={onPress}
-      aria-pressed={isActive}
+      aria-pressed={isSelected}
     >
       <XStack position="relative" z="$1" items="center" gap={10}>
         <YStack width={32} height={32} shrink={0} items="center" justify="center" bg="$appSurfaceStrong" borderWidth={1} borderColor={avatarTone}>
-          <TerminalText size="$3" fontWeight="700" color={avatarColor}>{gameAccount.avatar}</TerminalText>
+          <TerminalText size="$3" fontWeight="700" color={avatarColor}>{gameAccount.nickname.slice(0, 1).toUpperCase() || '?'}</TerminalText>
         </YStack>
         <YStack shrink={0}>
-          <MonoText size="$2" lineHeight="$1" letterSpacing={0} color={isActive ? '$appText' : '$appMuted'} fontWeight="600" numberOfLines={1}>{gameAccount.callsign}</MonoText>
-          <MonoText size="$1" letterSpacing={0} textTransform="uppercase" numberOfLines={1}>{t('operators.accountLevel', { level: gameAccount.doctorLevel })} · {formatCompactNumber(gameAccount.orundum)} ♦</MonoText>
+          <MonoText size="$2" lineHeight="$1" letterSpacing={0} color={isSelected ? '$appText' : '$appMuted'} fontWeight="600" numberOfLines={1}>{gameAccount.nickname || gameAccount.account}</MonoText>
+          <MonoText size="$1" letterSpacing={0} textTransform="uppercase" numberOfLines={1}>{t('operators.accountLevel', { level: gameAccount.level })} · {gameAccount.statusText}</MonoText>
         </YStack>
-        <YStack width={6} height={6} shrink={0} rounded="$10" bg={gameAccount.online === '在线' ? '$appSuccess' : '$appMuted'} opacity={gameAccount.online === '在线' ? 1 : 0.5} />
+        <YStack width={6} height={6} shrink={0} rounded="$10" bg={gameAccount.statusCode === ARK_HOST_GAME_STATUS_CODE.running ? '$appSuccess' : '$appMuted'} opacity={gameAccount.statusCode === ARK_HOST_GAME_STATUS_CODE.running ? 1 : 0.5} />
       </XStack>
     </NotchedButton>
   );
 }
 
-function LinkGameAccountButton({ onPress }: { onPress: () => void }) {
-  const { t } = useTranslation('common');
-  const { t: tDashboard } = useTranslation('dashboard');
-  const colors = getTokens().color;
-
-  return (
-    <NotchedButton
-      dashed
-      testID="link-game-account-option"
-      height={50}
-      px={12}
-      py={8}
-      flexDirection="row"
-      items="center"
-      onPress={onPress}
-      aria-label={tDashboard('account.title')}
-    >
-      <XStack position="relative" z="$1" items="center" gap={8}>
-        <YStack width={32} height={32} items="center" justify="center" bg="$appSurfaceStrong">
-          <Plus size={16} color={colors.appMuted.val} />
-        </YStack>
-        <MonoText size="$2" letterSpacing={0} fontWeight="600" color="$appMuted" textTransform="uppercase">
-          {t('actions.add')}
-        </MonoText>
-      </XStack>
-    </NotchedButton>
-  );
-}
-
-export function GameAccountSwitcher({ gameAccounts, activeGameAccountId, onSelectGameAccount, onLinkGameAccount }: { gameAccounts: readonly GameAccount[]; activeGameAccountId: string; onSelectGameAccount: (gameAccountId: string) => void; onLinkGameAccount: () => void }) {
+export function GameAccountSwitcher({ gameAccounts, selectedGameAccountId, onSelectGameAccount }: { gameAccounts: readonly GameAccount[]; selectedGameAccountId: string; onSelectGameAccount: (gameAccountId: string) => void }) {
   const reducedMotion = useReducedMotion();
   const scrollViewRef = useRef<ReactNativeScrollView>(null);
   const accountLayouts = useRef(new Map<string, HorizontalItemLayout>());
   const scrollOffset = useRef(0);
   const viewportWidth = useRef(0);
 
-  const revealActiveGameAccount = useCallback(() => {
-    const itemLayout = accountLayouts.current.get(activeGameAccountId);
+  const revealSelectedGameAccount = useCallback(() => {
+    const itemLayout = accountLayouts.current.get(selectedGameAccountId);
     if (!itemLayout) return;
 
     const nextScrollOffset = resolveScrollOffsetToRevealItem({
@@ -135,15 +105,15 @@ export function GameAccountSwitcher({ gameAccounts, activeGameAccountId, onSelec
       x: nextScrollOffset,
       y: 0,
     });
-  }, [activeGameAccountId, reducedMotion]);
+  }, [selectedGameAccountId, reducedMotion]);
 
   useEffect(() => {
-    revealActiveGameAccount();
-  }, [revealActiveGameAccount]);
+    revealSelectedGameAccount();
+  }, [revealSelectedGameAccount]);
 
   const handleViewportLayout = (event: LayoutChangeEvent) => {
     viewportWidth.current = event.nativeEvent.layout.width;
-    revealActiveGameAccount();
+    revealSelectedGameAccount();
   };
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -153,7 +123,7 @@ export function GameAccountSwitcher({ gameAccounts, activeGameAccountId, onSelec
   const handleAccountLayout = (gameAccountId: string, event: LayoutChangeEvent) => {
     const { width, x } = event.nativeEvent.layout;
     accountLayouts.current.set(gameAccountId, { width, x });
-    if (gameAccountId === activeGameAccountId) revealActiveGameAccount();
+    if (gameAccountId === selectedGameAccountId) revealSelectedGameAccount();
   };
 
   return (
@@ -169,21 +139,20 @@ export function GameAccountSwitcher({ gameAccounts, activeGameAccountId, onSelec
       $md={{ mx: '$-5' }}
     >
       <SlidingSelection
-        value={activeGameAccountId}
+        value={selectedGameAccountId}
         indicator={<NotchedSelectionIndicator />}
         px="$3.5"
         $md={{ px: '$5' }}
       >
         {gameAccounts.map((gameAccount) => (
           <SlidingSelection.Item
-            key={gameAccount.id}
-            value={gameAccount.id}
-            onLayout={(event) => handleAccountLayout(gameAccount.id, event)}
+            key={gameAccount.account}
+            value={gameAccount.account}
+            onLayout={(event) => handleAccountLayout(gameAccount.account, event)}
           >
-            <GameAccountButton gameAccount={gameAccount} isActive={gameAccount.id === activeGameAccountId} onPress={() => onSelectGameAccount(gameAccount.id)} />
+            <GameAccountButton gameAccount={gameAccount} isSelected={gameAccount.account === selectedGameAccountId} onPress={() => onSelectGameAccount(gameAccount.account)} />
           </SlidingSelection.Item>
         ))}
-        <LinkGameAccountButton onPress={onLinkGameAccount} />
       </SlidingSelection>
     </ScrollView>
   );

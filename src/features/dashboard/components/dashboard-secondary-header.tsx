@@ -2,9 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { YStack } from 'tamagui';
 
 import { TerminalMarquee } from '@/components';
-import type { LinkGameAccountCredentials, GameAccount } from '@/schemas/game-account';
+import type { GameAccount } from '@/schemas/game-account';
 import { GameAccountSwitcher } from './dashboard-navigation';
-import { LinkGameAccountSheet } from './link-game-account-sheet';
 
 const dashboardMarqueeMessages = [
   { id: 'network', translationKey: 'marquee.network', tone: 'accent' },
@@ -14,26 +13,17 @@ const dashboardMarqueeMessages = [
 ] as const;
 
 export type DashboardSecondaryHeaderProps = {
-  activeGameAccountId: string;
+  selectedGameAccountId: string;
   gameAccounts: readonly GameAccount[];
-  isLinkGameAccountSheetOpen: boolean;
-  onLinkGameAccount: (credentials: LinkGameAccountCredentials) => void;
-  onLinkGameAccountSheetOpenChange: (open: boolean) => void;
-  onOpenLinkGameAccount: () => void;
   onSelectGameAccount: (gameAccountId: string) => void;
 };
 
 export function DashboardSecondaryHeader({
-  activeGameAccountId,
+  selectedGameAccountId,
   gameAccounts,
-  isLinkGameAccountSheetOpen,
-  onLinkGameAccount,
-  onLinkGameAccountSheetOpenChange,
-  onOpenLinkGameAccount,
   onSelectGameAccount,
 }: DashboardSecondaryHeaderProps) {
   const { t } = useTranslation('navigation');
-
   return (
     <YStack testID="dashboard-secondary-header" shrink={0}>
       <TerminalMarquee items={dashboardMarqueeMessages.map((message) => ({
@@ -45,17 +35,11 @@ export function DashboardSecondaryHeader({
         <YStack px="$3.5" py="$3" $md={{ px: '$5' }}>
           <GameAccountSwitcher
             gameAccounts={gameAccounts}
-            activeGameAccountId={activeGameAccountId}
+            selectedGameAccountId={selectedGameAccountId}
             onSelectGameAccount={onSelectGameAccount}
-            onLinkGameAccount={onOpenLinkGameAccount}
           />
         </YStack>
       </YStack>
-      <LinkGameAccountSheet
-        open={isLinkGameAccountSheetOpen}
-        onOpenChange={onLinkGameAccountSheetOpenChange}
-        onSubmit={onLinkGameAccount}
-      />
     </YStack>
   );
 }

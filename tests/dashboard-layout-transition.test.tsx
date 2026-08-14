@@ -7,7 +7,6 @@ const mockDashboardTabs = jest.fn((_props: unknown) => null);
 const mockDashboardTabsScreen = jest.fn(() => null);
 const mockDashboardSmallScreenTabBar = jest.fn(() => null);
 const mockDashboardShell = jest.fn(({ children }: PropsWithChildren) => children);
-const mockLinkGameAccount = jest.fn();
 const mockSelectGameAccount = jest.fn();
 const mockGetTabScreenOptions = jest.fn((reducedMotion: boolean) => ({
   animation: reducedMotion ? 'none' : 'fade',
@@ -15,6 +14,23 @@ const mockGetTabScreenOptions = jest.fn((reducedMotion: boolean) => ({
 const mockUseReducedMotion = jest.fn(() => false);
 const mockUseIsFocused = jest.fn(() => true);
 const mockUseLayoutSize = jest.fn((): LayoutSize => 'small');
+
+let mockSelectedGameAccountId: string | null = 'account-1';
+let mockSelectedGameAccount: { account: string; color: string } | null = {
+  account: 'account-1',
+  color: 'primary',
+};
+let mockGameAccountsQuery: {
+  data: { account: string }[] | undefined;
+  isError: boolean;
+  isPending: boolean;
+  isSuccess: boolean;
+} = {
+  data: [{ account: 'account-1' }, { account: 'account-2' }],
+  isError: false,
+  isPending: false,
+  isSuccess: true,
+};
 
 jest.mock('expo-router', () => ({
   useIsFocused: mockUseIsFocused,
@@ -38,42 +54,43 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-jest.mock('tamagui', () => ({
-  getTokens: () => ({
-    color: {
-      appAccent: { val: '#00ff00' },
-      appMuted: { val: '#888888' },
-      appWarning: { val: '#ffff00' },
-    },
-  }),
-}));
+jest.mock('tamagui', () => {
+  const { View } = jest.requireActual<typeof import('react-native')>('react-native');
+  return {
+    Spinner: () => null,
+    YStack: ({ children }: PropsWithChildren) => <View>{children}</View>,
+    getTokens: () => ({
+      color: {
+        appAccent: { val: '#00ff00' },
+        appMuted: { val: '#888888' },
+        appWarning: { val: '#ffff00' },
+      },
+    }),
+  };
+});
 
 jest.mock('@/providers/layout-size-provider', () => ({
   useLayoutSize: mockUseLayoutSize,
 }));
 
 jest.mock('@/components', () => {
-  const horizontalSwipe = jest.requireActual<
-    typeof import('../src/components/layout/horizontal-swipe')
-  >('../src/components/layout/horizontal-swipe');
-
+  const { Text } = jest.requireActual<typeof import('react-native')>('react-native');
   return {
-    resolveAdjacentHorizontalSwipeItem: horizontalSwipe.resolveAdjacentHorizontalSwipeItem,
+    MonoText: ({ children }: PropsWithChildren) => <Text>{children}</Text>,
   };
 });
 
 jest.mock('@/features/dashboard', () => ({
   DashboardShell: mockDashboardShell,
   selectBackdropTint: () => '#00ff00',
+  useSelectedGameAccount: () => mockSelectedGameAccount,
+  useArkHostSync: () => undefined,
+  useGameAccountsQuery: () => mockGameAccountsQuery,
 }));
 
 jest.mock('@/store', () => ({
-  selectActiveGameAccount: () => ({ color: 'primary', id: 'account-1' }),
   useAppStore: (selector: (state: object) => unknown) => selector({
-    games: {
-      gameAccounts: [{ id: 'account-1' }, { id: 'account-2' }],
-    },
-    linkGameAccount: mockLinkGameAccount,
+    selectedGameAccountId: mockSelectedGameAccountId,
     selectGameAccount: mockSelectGameAccount,
   }),
 }));
@@ -101,7 +118,6 @@ describe('DashboardLayout route transitions', () => {
   beforeEach(() => {
     mockDashboardTabs.mockClear();
     mockDashboardShell.mockClear();
-    mockLinkGameAccount.mockClear();
     mockSelectGameAccount.mockClear();
     mockGetTabScreenOptions.mockClear();
     mockUseReducedMotion.mockReset();
@@ -110,6 +126,14 @@ describe('DashboardLayout route transitions', () => {
     mockUseIsFocused.mockReturnValue(true);
     mockUseLayoutSize.mockReset();
     mockUseLayoutSize.mockReturnValue('small');
+    mockSelectedGameAccountId = 'account-1';
+    mockSelectedGameAccount = { account: 'account-1', color: 'primary' };
+    mockGameAccountsQuery = {
+      data: [{ account: 'account-1' }, { account: 'account-2' }],
+      isError: false,
+      isPending: false,
+      isSuccess: true,
+    };
   });
 
   it('enables Dashboard route transitions when reduced motion is disabled', async () => {
@@ -118,6 +142,7 @@ describe('DashboardLayout route transitions', () => {
     expect(mockGetTabScreenOptions).toHaveBeenCalledWith(false);
     expect(mockDashboardShell).toHaveBeenCalledWith(
       expect.objectContaining({
+        selectedGameAccountId: 'account-1',
         isContentSwipeEnabled: true,
         onContentSwipe: expect.any(Function),
       }),
@@ -198,5 +223,65 @@ describe('DashboardLayout route transitions', () => {
       expect.objectContaining({ screenOptions: { animation: 'none' } }),
       undefined,
     );
+  });
+});
+
+describe('Dashboard selection reconciliation', () => {
+  beforeEach(() => {
+    mockDashboardShell.mockClear();
+    mockSelectGameAccount.mockClear();
+    mockUseLayoutSize.mockReset();
+    mockUseLayoutSize.mockReturnValue('small');
+    mockSelectedGameAccountId = 'account-1';
+    mockSelectedGameAccount = { account: 'account-1', color: 'primary' };
+    mockGameAccountsQuery = {
+      data: [{ account: 'account-1' }, { account: 'account-2' }],
+      isError: false,
+      isPending: false,
+      isSuccess: true,
+    };
+  });
+
+  it('selects the first account when the list first loads without a selection', async () => {
+    mockSelectedGameAccountId = null;
+    mockSelectedGameAccount = null;
+    const screen = await render(<DashboardLayout />);
+
+    expect(mockSelectGameAccount).toHaveBeenCalledWith('account-1');
+    expect(screen.getByText('LOADING ARKHOST DATA')).toBeTruthy();
+    expect(screen.queryByText('NO GAME ACCOUNTS')).toBeNull();
+  });
+
+  it('preserves a valid selection across list refreshes', async () => {
+    await render(<DashboardLayout />);
+
+    expect(mockSelectGameAccount).not.toHaveBeenCalled();
+    expect(mockDashboardShell).toHaveBeenCalledWith(
+      expect.objectContaining({ selectedGameAccountId: 'account-1' }),
+      undefined,
+    );
+  });
+
+  it('reconciles an invalid selection to the first returned account', async () => {
+    mockSelectedGameAccountId = 'account-9';
+    mockSelectedGameAccount = null;
+    await render(<DashboardLayout />);
+
+    expect(mockSelectGameAccount).toHaveBeenCalledWith('account-1');
+  });
+
+  it('clears the selection and shows the no-accounts state for an empty list', async () => {
+    mockSelectedGameAccountId = 'account-1';
+    mockSelectedGameAccount = null;
+    mockGameAccountsQuery = {
+      data: [],
+      isError: false,
+      isPending: false,
+      isSuccess: true,
+    };
+    const screen = await render(<DashboardLayout />);
+
+    expect(mockSelectGameAccount).toHaveBeenCalledWith(null);
+    expect(screen.getByText('NO GAME ACCOUNTS')).toBeTruthy();
   });
 });

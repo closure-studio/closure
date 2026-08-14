@@ -41,8 +41,6 @@
     "accountLevel": "LV.{{level}}",
     "level": "LV {{level}}/{{maxLevel}}",
     "skillLevel": "技能 L{{level}}",
-    "title": "干员练度",
-    "unitCount": "{{count}} 名干员",
     "upgradeProgress": "升级进度"
   },
   "overview": {
@@ -59,15 +57,26 @@
       "mood": "干员心情",
       "trainingLoad": "训练室进度"
     },
+    "channels": {
+      "bilibili": "B服",
+      "official": "官服"
+    },
     "experience": "经验",
     "level": "等级",
     "operationMetrics": "作战概览",
+    "metrics": {
+      "autoBattle": "自动战斗",
+      "baseArrange": "基建排班",
+      "keepingAp": "保留理智",
+      "map": "当前关卡"
+    },
     "overflow": "已溢出",
     "profile": "// 博士档案",
     "recoversAt": "回满 {{time}}",
     "sanity": "理智"
   },
   "timeline": {
+    "logLevel": "级别 {{level}}",
     "title": "活动与公告",
     "status": {
       "active": "进行中",

@@ -3,30 +3,7 @@ import * as v from 'valibot';
 import {
   passwordChangeInputSchema,
   passwordChangeIssue,
-  userAccountSchema,
 } from './user-account.schema';
-
-const validUserAccount = {
-  id: 'user-closure-01',
-  email: 'doctor@rhodes.is',
-  registeredAt: '2025-01-14T08:30:00.000Z',
-  role: 'member',
-} as const;
-
-describe('userAccountSchema', () => {
-  it('accepts a complete User Account', () => {
-    expect(v.safeParse(userAccountSchema, validUserAccount).success).toBe(true);
-  });
-
-  it.each([
-    { ...validUserAccount, id: '' },
-    { ...validUserAccount, email: 'doctor' },
-    { ...validUserAccount, registeredAt: '14 January 2025' },
-    { ...validUserAccount, role: 'operator' },
-  ])('rejects malformed User Account data', (input) => {
-    expect(v.safeParse(userAccountSchema, input).success).toBe(false);
-  });
-});
 
 describe('passwordChangeInputSchema', () => {
   it('accepts matching passwords without changing their content', () => {

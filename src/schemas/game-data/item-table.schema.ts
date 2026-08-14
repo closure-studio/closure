@@ -8,7 +8,10 @@ export const itemTableItemSchema = v.object({
   description: v.nullish(v.pipe(v.string(), v.minLength(1))),
 });
 
-export const itemTableSchema = v.record(itemIdSchema, itemTableItemSchema);
+export const itemTableSchema = v.pipe(
+  v.record(itemIdSchema, itemTableItemSchema),
+  v.check((table) => Object.keys(table).length > 0, 'The Item Table must not be empty.'),
+);
 
 export type ItemId = v.InferOutput<typeof itemIdSchema>;
 export type ItemTableItem = v.InferOutput<typeof itemTableItemSchema>;

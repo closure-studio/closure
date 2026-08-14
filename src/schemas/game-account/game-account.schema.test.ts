@@ -1,58 +1,49 @@
-import * as v from 'valibot';
+import * as v from "valibot";
 
-import {
-  gameAccountSchema,
-  linkGameAccountCredentialsSchema,
-  operatorSchema,
-} from '.';
-import type { Operator } from '.';
-import { initialGameAccounts } from '@/features/dashboard/mocks/game-accounts';
+import { mockArkHostGameListResponse } from "@/mocks/arkhost";
+import { gameAccountSchema, operatorSchema } from ".";
 
-const validOperator = {
-  id: 'operator-1',
-  name: 'Operator',
-  codename: 'OPERATOR',
-  class: '近卫',
-  rarity: 6,
-  level: 60,
-  maxLevel: 90,
-  elite: 2,
-  potential: 1,
-  trust: 100,
-  skillLevel: 7,
-  proficiency: [3, 0, 0],
-} satisfies Operator;
+const firstEntry =
+  mockArkHostGameListResponse.code === 1
+    ? mockArkHostGameListResponse.data[0]
+    : undefined;
+if (!firstEntry) throw new Error("Expected ArkHost Game Account fixture.");
+const gameAccount = {
+  account: firstEntry.status.account,
+  ap: firstEntry.status.ap,
+  avatar: firstEntry.status.avatar,
+  captchaInfo: firstEntry.captcha_info,
+  color: "primary",
+  config: firstEntry.game_config,
+  createdAt: firstEntry.status.created_at,
+  isVerified: firstEntry.status.is_verify,
+  level: firstEntry.status.level,
+  nickname: firstEntry.status.nick_name,
+  platform: firstEntry.status.platform,
+  statusCode: firstEntry.status.code,
+  statusText: firstEntry.status.text,
+  userId: firstEntry.status.uuid,
+};
 
-describe('Game Account schemas', () => {
-  it('accepts the current Game Account fixture shape', () => {
-    expect(v.safeParse(gameAccountSchema, initialGameAccounts[0]).success).toBe(true);
+describe("Game Account schemas", () => {
+  it("accepts a normalized ArkHost account and complete character progression", () => {
+    expect(v.safeParse(gameAccountSchema, gameAccount).success).toBe(true);
+    expect(
+      v.safeParse(operatorSchema, {
+        charId: "char_4017_puzzle",
+        evolvePhase: 0,
+        level: 1,
+        potentialRank: 5,
+      }).success,
+    ).toBe(true);
   });
-
-  it('rejects unknown literals and malformed tuples', () => {
-    expect(v.safeParse(operatorSchema, { ...validOperator, rarity: 2 }).success).toBe(false);
-    expect(v.safeParse(operatorSchema, { ...validOperator, proficiency: [3, 0] }).success).toBe(false);
-    expect(v.safeParse(gameAccountSchema, { ...initialGameAccounts[0], color: 'unknown' }).success).toBe(false);
-    expect(v.safeParse(gameAccountSchema, { ...initialGameAccounts[0], exp: [1] }).success).toBe(false);
-  });
-
-  it('enforces the existing Operator level invariant', () => {
-    expect(v.safeParse(operatorSchema, { ...validOperator, level: 91 }).success).toBe(false);
-  });
-
-  it('validates linked account credentials without changing password content', () => {
-    const result = v.safeParse(linkGameAccountCredentialsSchema, {
-      accountIdentifier: '  doctor  ',
-      password: ' access-key ',
-      serverChannel: '官服',
-    });
-
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.output).toEqual({
-        accountIdentifier: 'doctor',
-        password: ' access-key ',
-        serverChannel: '官服',
-      });
-    }
+  it("rejects malformed account and character values", () => {
+    expect(
+      v.safeParse(gameAccountSchema, { ...gameAccount, color: "unknown" })
+        .success,
+    ).toBe(false);
+    expect(v.safeParse(operatorSchema, { charId: "", level: -1 }).success).toBe(
+      false,
+    );
   });
 });

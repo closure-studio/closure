@@ -22,6 +22,7 @@ import { StatusBar } from 'expo-status-bar';
 import type { PropsWithChildren } from 'react';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TamaguiProvider } from 'tamagui';
 
 import { tamaguiConfig } from '../../tamagui.config';
@@ -30,6 +31,12 @@ import { LayoutSizeProvider } from './layout-size-provider';
 
 SplashScreen.preventAutoHideAsync().catch((splashError: unknown) => {
   console.warn('Unable to keep the splash screen visible.', splashError);
+});
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+  },
 });
 
 export function AppProvider({ children }: PropsWithChildren) {
@@ -61,12 +68,14 @@ export function AppProvider({ children }: PropsWithChildren) {
     <LocalizationProvider>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <LayoutSizeProvider>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <ThemeProvider value={DarkTheme}>
-              <StatusBar style="light" />
-              {children}
-            </ThemeProvider>
-          </GestureHandlerRootView>
+          <QueryClientProvider client={queryClient}>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <ThemeProvider value={DarkTheme}>
+                <StatusBar style="light" />
+                {children}
+              </ThemeProvider>
+            </GestureHandlerRootView>
+          </QueryClientProvider>
         </LayoutSizeProvider>
       </TamaguiProvider>
     </LocalizationProvider>

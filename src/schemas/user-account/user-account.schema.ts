@@ -1,16 +1,5 @@
 import * as v from 'valibot';
 
-export const userAccountRoleSchema = v.picklist(['member', 'administrator']);
-
-export const userAccountSchema = v.object({
-  id: v.pipe(v.string(), v.minLength(1)),
-  email: v.pipe(v.string(), v.email()),
-  registeredAt: v.pipe(v.string(), v.isoTimestamp()),
-  role: userAccountRoleSchema,
-});
-
-export type UserAccount = v.InferOutput<typeof userAccountSchema>;
-
 export const passwordChangeIssue = {
   currentPasswordRequired: 'currentPasswordRequired',
   newPasswordRequired: 'newPasswordRequired',

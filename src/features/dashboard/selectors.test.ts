@@ -1,4 +1,3 @@
-import { initialGameAccounts } from './mocks/game-accounts';
 import { selectBackdropTint } from './selectors';
 
 const backdropTints = {
@@ -9,6 +8,7 @@ const backdropTints = {
 
 describe('dashboard selectors', () => {
   it('maps account tone through injected theme colors', () => {
-    expect(selectBackdropTint(initialGameAccounts[1], backdropTints)).toBe('warning-token');
+    expect(selectBackdropTint({ color: 'warning' }, backdropTints)).toBe('warning-token');
+    expect(selectBackdropTint(null, backdropTints)).toBe('muted-token');
   });
 });

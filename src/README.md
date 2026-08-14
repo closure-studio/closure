@@ -34,7 +34,7 @@ features -> components public entry -> components/ui
 
 Shared UI and feature presentation components receive business data and actions through props. They may still use local UI state, refs, animation hooks, measurements, accessibility hooks, and Tamagui theme APIs.
 
-Examples of local UI state include password visibility, the selected filter, form validation messages, sheet visibility, and animation progress. The global store owns authentication state, the active Game Account, and their persisted data. A store slice should own a UI preference only after a user can explicitly choose it and it must survive restart.
+Examples of local UI state include password visibility, the selected filter, form validation messages, sheet visibility, and animation progress. The global store owns the User Session, the selected API Node, and the runtime Game Account selection reference. Game Account data and account-scoped server data are owned by TanStack Query; the Store never mirrors them, and the selection is never persisted. A store slice should own a UI preference only after a user can explicitly choose it and it must survive restart.
 
 Large components do not automatically become state-connected. For example, an Operator Roster remains props-driven while a thin feature screen or container selects Operators from the store and passes them down.
 

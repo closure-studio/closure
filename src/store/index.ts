@@ -1,2 +1,2 @@
-export { selectActiveGameAccount, useAppStore } from './app-store';
-export type { AppStore } from './app-store';
+export { appStore, useAppStore } from './app-store';
+export type { AppStore, AppStoreOptions } from './app-store';

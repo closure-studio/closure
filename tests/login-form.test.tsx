@@ -21,7 +21,15 @@ async function renderLoginForm(
   return render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
       <I18nextProvider i18n={i18n}>
-        <LoginForm {...props} onSubmit={onSubmit} />
+        <LoginForm
+          {...props}
+          isRecoverySubmitting={false}
+          onRecoveryRequest={jest.fn<Promise<void>, [{ identifier: string }]>(() => Promise.resolve())}
+          onResetPasswordRecovery={jest.fn()}
+          recoveryStatus="idle"
+          recoverySubmissionError={null}
+          onSubmit={onSubmit}
+        />
       </I18nextProvider>
     </TamaguiProvider>,
   );
@@ -38,7 +46,7 @@ describe('LoginForm', () => {
 
     await fireEvent.press(screen.getByText('Access terminal'));
 
-    expect(screen.getByText(/Enter your email/)).toBeTruthy();
+    expect(screen.getByText(/Enter your login credential/)).toBeTruthy();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -46,39 +54,18 @@ describe('LoginForm', () => {
     const onSubmit = jest.fn().mockRejectedValue(new Error('network unavailable'));
     const screen = await renderLoginForm(onSubmit);
 
-    await fireEvent.changeText(screen.getByPlaceholderText('doctor@rhodes.is'), '  doctor@rhodes.is  ');
+    await fireEvent.changeText(screen.getByPlaceholderText('doctor'), '  doctor  ');
     await fireEvent.changeText(screen.getByPlaceholderText('••••••••'), 'access-key');
     await fireEvent.press(screen.getByText('Access terminal'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
         credentials: {
-          email: 'doctor@rhodes.is',
+          identifier: 'doctor',
           password: 'access-key',
         },
-        rememberSession: true,
       });
       expect(screen.getByText('Unable to establish a connection. Try again.')).toBeTruthy();
-    });
-  });
-
-  it('submits an unchecked persistent session preference', async () => {
-    const onSubmit = jest.fn();
-    const screen = await renderLoginForm(onSubmit);
-
-    await fireEvent.press(screen.getByRole('checkbox'));
-    await fireEvent.changeText(screen.getByPlaceholderText('doctor@rhodes.is'), 'doctor@rhodes.is');
-    await fireEvent.changeText(screen.getByPlaceholderText('••••••••'), 'access-key');
-    await fireEvent.press(screen.getByText('Access terminal'));
-
-    await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith({
-        credentials: {
-          email: 'doctor@rhodes.is',
-          password: 'access-key',
-        },
-        rememberSession: false,
-      });
     });
   });
 
