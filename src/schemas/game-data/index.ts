@@ -30,10 +30,8 @@ export type {
 } from './stage-table.schema';
 export {
   bundledGameResourcesSchema,
-  gameResourcesStateSchema,
   gameResourceUpdatedAtSchema,
 } from './game-resources.schema';
 export type {
   BundledGameResources,
-  GameResourcesState,
 } from './game-resources.schema';

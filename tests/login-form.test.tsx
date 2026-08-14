@@ -64,29 +64,8 @@ describe('LoginForm', () => {
           identifier: 'doctor',
           password: 'access-key',
         },
-        rememberSession: true,
       });
       expect(screen.getByText('Unable to establish a connection. Try again.')).toBeTruthy();
-    });
-  });
-
-  it('submits an unchecked persistent session preference', async () => {
-    const onSubmit = jest.fn();
-    const screen = await renderLoginForm(onSubmit);
-
-    await fireEvent.press(screen.getByRole('checkbox'));
-    await fireEvent.changeText(screen.getByPlaceholderText('doctor'), 'doctor@rhodes.is');
-    await fireEvent.changeText(screen.getByPlaceholderText('••••••••'), 'access-key');
-    await fireEvent.press(screen.getByText('Access terminal'));
-
-    await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith({
-        credentials: {
-          identifier: 'doctor@rhodes.is',
-          password: 'access-key',
-        },
-        rememberSession: false,
-      });
     });
   });
 

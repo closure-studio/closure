@@ -1,28 +1,27 @@
-import { NetworkSettingsScreen } from '@/features/settings';
-import { useEffect } from 'react';
+import { NetworkSettingsScreen, useApiNodesQuery } from '@/features/settings';
 import { useAppStore } from '@/store';
 
+type OperationStatus = 'failed' | 'idle' | 'pending' | 'succeeded';
+
 export default function SettingsNetworkRoute() {
-  const nodes = useAppStore((state) => state.network.nodes);
-  const queryError = useAppStore((state) => state.network.queryError);
-  const queryStatus = useAppStore((state) => state.network.queryStatus);
-  const selectedApiNodeId = useAppStore((state) => state.network.selectedApiNodeId);
-  const initializeApiNodes = useAppStore((state) => state.initializeApiNodes);
-  const refreshApiNodes = useAppStore((state) => state.refreshApiNodes);
+  const apiNodesQuery = useApiNodesQuery();
+  const selectedApiNodeId = useAppStore((state) => state.selectedApiNodeId);
   const selectApiNode = useAppStore((state) => state.selectApiNode);
 
-  useEffect(() => {
-    initializeApiNodes().catch((error: unknown) => {
-      console.error('Unable to load API Nodes.', error);
-    });
-  }, [initializeApiNodes]);
+  const queryStatus: OperationStatus = apiNodesQuery.isPending
+    ? 'pending'
+    : apiNodesQuery.isError
+      ? 'failed'
+      : apiNodesQuery.data
+        ? 'succeeded'
+        : 'idle';
 
   return (
     <NetworkSettingsScreen
-      nodes={nodes}
-      onRefresh={refreshApiNodes}
+      nodes={apiNodesQuery.data ?? []}
+      onRefresh={() => apiNodesQuery.refetch().then(() => undefined)}
       onSelectApiNode={selectApiNode}
-      queryError={queryError}
+      queryError={apiNodesQuery.error ?? null}
       queryStatus={queryStatus}
       selectedApiNodeId={selectedApiNodeId}
     />

@@ -8,7 +8,6 @@ const mockDashboardTabsScreen = jest.fn(() => null);
 const mockDashboardSmallScreenTabBar = jest.fn(() => null);
 const mockDashboardShell = jest.fn(({ children }: PropsWithChildren) => children);
 const mockSelectGameAccount = jest.fn();
-const mockInitializeGames = jest.fn(async () => undefined);
 const mockGetTabScreenOptions = jest.fn((reducedMotion: boolean) => ({
   animation: reducedMotion ? 'none' : 'fade',
 }));
@@ -57,16 +56,17 @@ jest.mock('@/components', () => ({}));
 jest.mock('@/features/dashboard', () => ({
   DashboardShell: mockDashboardShell,
   selectBackdropTint: () => '#00ff00',
+  useActiveGameAccount: () => ({ account: 'account-1', color: 'primary' }),
+  useArkHostStream: () => undefined,
+  useGamesQuery: () => ({
+    data: { gameAccounts: [{ account: 'account-1' }, { account: 'account-2' }] },
+    isError: false,
+    isPending: false,
+  }),
 }));
 
 jest.mock('@/store', () => ({
-  selectActiveGameAccount: () => ({ account: 'account-1', color: 'primary' }),
   useAppStore: (selector: (state: object) => unknown) => selector({
-    games: {
-      data: { gameAccounts: [{ account: 'account-1' }, { account: 'account-2' }] },
-      loadStatus: 'succeeded',
-    },
-    initializeGames: mockInitializeGames,
     selectGameAccount: mockSelectGameAccount,
   }),
 }));
@@ -94,7 +94,6 @@ describe('DashboardLayout route transitions', () => {
   beforeEach(() => {
     mockDashboardTabs.mockClear();
     mockDashboardShell.mockClear();
-    mockInitializeGames.mockClear();
     mockSelectGameAccount.mockClear();
     mockGetTabScreenOptions.mockClear();
     mockUseReducedMotion.mockReset();

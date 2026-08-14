@@ -2,7 +2,7 @@ import * as v from 'valibot';
 
 import { adminUserSchema, userSessionSchema } from '@/schemas/auth';
 import { MOCK_AUTH_VALUES, mockActiveSession, mockAdminSession } from '@/mocks/auth';
-import { MockAuthAdapter } from './mock-auth-adapter';
+import { MockAuthAdapter } from './auth-adapter.mock';
 
 const adapter = new MockAuthAdapter(0);
 

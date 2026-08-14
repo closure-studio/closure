@@ -9,7 +9,6 @@ export type LoginCredentials = v.InferOutput<typeof loginCredentialsSchema>;
 
 export const loginSubmissionSchema = v.object({
   credentials: loginCredentialsSchema,
-  rememberSession: v.boolean(),
 });
 
 export type LoginSubmission = v.InferOutput<typeof loginSubmissionSchema>;

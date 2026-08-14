@@ -1,18 +1,26 @@
+import { useUpdatePassword } from '@/features/auth';
 import { AccountSettingsScreen } from '@/features/settings';
 import { useAppStore } from '@/store';
 
+type OperationStatus = 'failed' | 'idle' | 'pending' | 'succeeded';
+
 export default function SettingsAccountRoute() {
   const principal = useAppStore((state) => state.auth.session?.principal ?? null);
-  const onUpdatePassword = useAppStore((state) => state.updatePassword);
-  const passwordUpdateError = useAppStore((state) => state.auth.passwordUpdateError);
-  const passwordUpdateStatus = useAppStore((state) => state.auth.passwordUpdateStatus);
+  const updatePassword = useUpdatePassword();
+  const passwordUpdateStatus: OperationStatus = updatePassword.isPending
+    ? 'pending'
+    : updatePassword.isError
+      ? 'failed'
+      : updatePassword.isSuccess
+        ? 'succeeded'
+        : 'idle';
 
   if (!principal) return null;
 
   return (
     <AccountSettingsScreen
-      onUpdatePassword={onUpdatePassword}
-      passwordUpdateError={passwordUpdateError}
+      onUpdatePassword={updatePassword.mutateAsync}
+      passwordUpdateError={updatePassword.error ?? null}
       passwordUpdateStatus={passwordUpdateStatus}
       principal={principal}
     />

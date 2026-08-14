@@ -1,31 +1,41 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 
-import { AuthScreen } from '@/features/auth';
+import { AuthScreen, useLogin, usePasswordRecovery } from '@/features/auth';
 import { resolvePostLoginDestination } from '@/features/session';
+import type { LoginSubmission } from '@/schemas/auth';
 import { useAppStore } from '@/store';
+
+type OperationStatus = 'failed' | 'idle' | 'pending' | 'succeeded';
 
 export default function LoginRoute() {
   const { returnTo } = useLocalSearchParams<{ returnTo?: string | string[] }>();
-  const login = useAppStore((state) => state.login);
-  const loginError = useAppStore((state) => state.auth.loginError);
-  const loginStatus = useAppStore((state) => state.auth.loginStatus);
-  const onPasswordRecovery = useAppStore((state) => state.requestPasswordRecovery);
-  const onResetPasswordRecovery = useAppStore((state) => state.resetPasswordRecovery);
-  const passwordRecoveryError = useAppStore((state) => state.auth.passwordRecoveryError);
-  const passwordRecoveryStatus = useAppStore((state) => state.auth.passwordRecoveryStatus);
+  const login = useLogin();
+  const passwordRecovery = usePasswordRecovery();
   const session = useAppStore((state) => state.auth.session);
   const destination = resolvePostLoginDestination(returnTo);
 
+  const passwordRecoveryStatus: OperationStatus = passwordRecovery.isPending
+    ? 'pending'
+    : passwordRecovery.isError
+      ? 'failed'
+      : passwordRecovery.isSuccess
+        ? 'succeeded'
+        : 'idle';
+
   if (session) return <Redirect href={destination} />;
+
+  const handleLogin = (submission: LoginSubmission) => {
+    return login.mutateAsync(submission).then(() => undefined);
+  };
 
   return (
     <AuthScreen
-      isSubmitting={loginStatus === 'pending'}
-      loginError={loginError}
-      onLogin={login}
-      onPasswordRecovery={onPasswordRecovery}
-      onResetPasswordRecovery={onResetPasswordRecovery}
-      passwordRecoveryError={passwordRecoveryError}
+      isSubmitting={login.isPending}
+      loginError={login.error ?? null}
+      onLogin={handleLogin}
+      onPasswordRecovery={passwordRecovery.mutateAsync}
+      onResetPasswordRecovery={passwordRecovery.reset}
+      passwordRecoveryError={passwordRecovery.error ?? null}
       passwordRecoveryStatus={passwordRecoveryStatus}
     />
   );

@@ -4,4 +4,4 @@ export type {
   AuthFailure,
   AuthResult,
 } from './auth-adapter';
-export { MockAuthAdapter } from './mock-auth-adapter';
+export { MockAuthAdapter } from './auth-adapter.mock';

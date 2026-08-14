@@ -2,9 +2,9 @@ import { ArrowLeft, ArrowRight, Check, LockKeyhole, Mail } from 'lucide-react-na
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useReducedMotion } from 'react-native-reanimated';
-import { AnimatePresence, Button, Form, Spinner, XStack, YStack, getTokens, styled, useMedia } from 'tamagui';
+import { AnimatePresence, Button, Form, Spinner, YStack, getTokens, styled, useMedia } from 'tamagui';
 
-import { MonoText, TerminalCheckbox, TerminalPanel, TerminalPasswordVisibilityButton, TerminalSectionHeading, TerminalText, TerminalTextField } from '@/components';
+import { MonoText, TerminalPanel, TerminalPasswordVisibilityButton, TerminalSectionHeading, TerminalText, TerminalTextField } from '@/components';
 import type { TerminalTextFieldHandle } from '@/components';
 import type { LoginSubmission, PasswordRecoveryRequestInput } from '@/schemas/auth';
 
@@ -62,7 +62,6 @@ export function LoginForm({
   const [mode, setMode] = useState<AuthFormMode>('login');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberSession, setRememberSession] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [invalidLoginField, setInvalidLoginField] = useState<InvalidLoginField>(null);
   const [unexpectedSubmissionError, setUnexpectedSubmissionError] = useState<string | null>(null);
@@ -88,7 +87,6 @@ export function LoginForm({
     try {
       await onSubmit({
         credentials: { identifier: identifier.trim(), password },
-        rememberSession,
       });
     } finally {
       submittingRef.current = false;
@@ -169,22 +167,9 @@ export function LoginForm({
                   />
                 )}
               />
-              <XStack
-                flexDirection="column"
-                items="flex-start"
-                gap="$1"
-                $xs={{ flexDirection: 'row', items: 'center', justify: 'space-between', gap: '$0' }}
-              >
-                <TerminalCheckbox
-                  id="remember-session"
-                  label={t('login.keepConnected')}
-                  checked={rememberSession}
-                  onCheckedChange={setRememberSession}
-                />
-                <TerminalActionButton onPress={() => { onResetPasswordRecovery(); setMode('forgot'); setIsRecoveryIdentifierMissing(false); }}>
-                  <MonoText size="$3" color="$appAccent">{t('login.forgotAccessKey')}</MonoText>
-                </TerminalActionButton>
-              </XStack>
+              <TerminalActionButton self="flex-start" onPress={() => { onResetPasswordRecovery(); setMode('forgot'); setIsRecoveryIdentifierMissing(false); }}>
+                <MonoText size="$3" color="$appAccent">{t('login.forgotAccessKey')}</MonoText>
+              </TerminalActionButton>
               <Form.Trigger asChild>
                 <Button height="$4.5" borderWidth={1} borderColor="$appAccent" rounded="$0" bg="$appAccentSoft" hoverStyle={{ bg: '$appAccentSoft', borderColor: '$appAccent' }} pressStyle={{ bg: '$appSurfaceRaised' }} focusVisibleStyle={{ borderColor: '$appText' }} disabledStyle={{ opacity: 0.55 }} disabled={isSubmitting} aria-busy={isSubmitting} {...(isSubmitting ? { icon: <Spinner size="small" color="$appAccent" /> } : {})} $platform-web={{ clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))' }}>
                   <TerminalText size="$3" color="$appAccent" fontWeight="700">{isSubmitting ? t('login.connecting') : t('login.submit')}</TerminalText>

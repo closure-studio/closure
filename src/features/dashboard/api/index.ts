@@ -6,7 +6,7 @@ export type {
   ArkHostSseListener,
   ArkHostSseSubscription,
 } from './arkhost-api';
-export { MockArkHostApi } from './mock-arkhost-api';
+export { MockArkHostApi } from './arkhost-api.mock';
 export { RemoteGameResourcesApi } from './game-resources-api';
 export type {
   GameResourceFetch,

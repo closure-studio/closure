@@ -3,4 +3,4 @@ export type {
   ApiNodeFailure,
   ApiNodeResult,
 } from './api-node-adapter';
-export { MockApiNodeAdapter } from './mock-api-node-adapter';
+export { MockApiNodeAdapter } from './api-node-adapter.mock';

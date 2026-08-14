@@ -27,13 +27,13 @@ describe('loginCredentialsSchema', () => {
     expect(v.safeParse(loginCredentialsSchema, credentials).success).toBe(false);
   });
 
-  it('keeps the persistence preference outside credentials', () => {
+  it('accepts a login submission with credentials only', () => {
     const result = v.parse(loginSubmissionSchema, {
       credentials: { identifier: 'doctor', password: 'access-key' },
-      rememberSession: false,
     });
 
-    expect(result.rememberSession).toBe(false);
-    expect(result.credentials).not.toHaveProperty('rememberSession');
+    expect(result).toEqual({
+      credentials: { identifier: 'doctor', password: 'access-key' },
+    });
   });
 });

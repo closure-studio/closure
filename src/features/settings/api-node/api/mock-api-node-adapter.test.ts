@@ -1,4 +1,4 @@
-import { MockApiNodeAdapter } from './mock-api-node-adapter';
+import { MockApiNodeAdapter } from './api-node-adapter.mock';
 
 describe('MockApiNodeAdapter', () => {
   it('returns schema-validated nodes as independent data', async () => {
