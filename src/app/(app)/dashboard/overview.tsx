@@ -2,22 +2,22 @@ import {
   DashboardPageScroll,
   GameAccountOverviewView,
   getStageDisplayLabel,
-  useActiveGameAccount,
-  useActiveGameDetail,
+  useSelectedGameAccount,
+  useSelectedGameDetail,
   useStageTable,
 } from '@/features/dashboard';
 
 export default function DashboardOverviewRoute() {
-  const activeGameAccount = useActiveGameAccount();
-  const detail = useActiveGameDetail();
+  const selectedGameAccount = useSelectedGameAccount();
+  const detail = useSelectedGameDetail();
   const stageTable = useStageTable();
 
-  if (!activeGameAccount) return null;
-  const stageLabel = getStageDisplayLabel(stageTable, activeGameAccount.config.map_id, '—');
+  if (!selectedGameAccount) return null;
+  const stageLabel = getStageDisplayLabel(stageTable, selectedGameAccount.config.map_id, '—');
 
   return (
     <DashboardPageScroll>
-      <GameAccountOverviewView detail={detail} gameAccount={activeGameAccount} stageLabel={stageLabel} />
+      <GameAccountOverviewView detail={detail} gameAccount={selectedGameAccount} stageLabel={stageLabel} />
     </DashboardPageScroll>
   );
 }

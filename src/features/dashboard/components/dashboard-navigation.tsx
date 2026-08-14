@@ -41,7 +41,7 @@ export function resolveScrollOffsetToRevealItem({
   return itemEnd > viewportEnd ? Math.max(0, itemEnd - viewportWidth) : null;
 }
 
-function GameAccountButton({ gameAccount, isActive, onPress }: { gameAccount: GameAccount; isActive: boolean; onPress: () => void }) {
+function GameAccountButton({ gameAccount, isSelected, onPress }: { gameAccount: GameAccount; isSelected: boolean; onPress: () => void }) {
   const { t } = useTranslation('dashboard');
   const avatarTone = gameAccount.color === 'warning'
     ? '$appWarningRing'
@@ -56,7 +56,7 @@ function GameAccountButton({ gameAccount, isActive, onPress }: { gameAccount: Ga
 
   return (
     <NotchedButton
-      isSelected={isActive}
+      isSelected={isSelected}
       testID={`game-account-option-${gameAccount.account}`}
       height={50}
       px={12}
@@ -65,14 +65,14 @@ function GameAccountButton({ gameAccount, isActive, onPress }: { gameAccount: Ga
       items="center"
       justify="flex-start"
       onPress={onPress}
-      aria-pressed={isActive}
+      aria-pressed={isSelected}
     >
       <XStack position="relative" z="$1" items="center" gap={10}>
         <YStack width={32} height={32} shrink={0} items="center" justify="center" bg="$appSurfaceStrong" borderWidth={1} borderColor={avatarTone}>
           <TerminalText size="$3" fontWeight="700" color={avatarColor}>{gameAccount.nickname.slice(0, 1).toUpperCase() || '?'}</TerminalText>
         </YStack>
         <YStack shrink={0}>
-          <MonoText size="$2" lineHeight="$1" letterSpacing={0} color={isActive ? '$appText' : '$appMuted'} fontWeight="600" numberOfLines={1}>{gameAccount.nickname || gameAccount.account}</MonoText>
+          <MonoText size="$2" lineHeight="$1" letterSpacing={0} color={isSelected ? '$appText' : '$appMuted'} fontWeight="600" numberOfLines={1}>{gameAccount.nickname || gameAccount.account}</MonoText>
           <MonoText size="$1" letterSpacing={0} textTransform="uppercase" numberOfLines={1}>{t('operators.accountLevel', { level: gameAccount.level })} · {gameAccount.statusText}</MonoText>
         </YStack>
         <YStack width={6} height={6} shrink={0} rounded="$10" bg={gameAccount.statusCode === ARK_HOST_GAME_STATUS_CODE.running ? '$appSuccess' : '$appMuted'} opacity={gameAccount.statusCode === ARK_HOST_GAME_STATUS_CODE.running ? 1 : 0.5} />
@@ -81,15 +81,15 @@ function GameAccountButton({ gameAccount, isActive, onPress }: { gameAccount: Ga
   );
 }
 
-export function GameAccountSwitcher({ gameAccounts, activeGameAccountId, onSelectGameAccount }: { gameAccounts: readonly GameAccount[]; activeGameAccountId: string; onSelectGameAccount: (gameAccountId: string) => void }) {
+export function GameAccountSwitcher({ gameAccounts, selectedGameAccountId, onSelectGameAccount }: { gameAccounts: readonly GameAccount[]; selectedGameAccountId: string; onSelectGameAccount: (gameAccountId: string) => void }) {
   const reducedMotion = useReducedMotion();
   const scrollViewRef = useRef<ReactNativeScrollView>(null);
   const accountLayouts = useRef(new Map<string, HorizontalItemLayout>());
   const scrollOffset = useRef(0);
   const viewportWidth = useRef(0);
 
-  const revealActiveGameAccount = useCallback(() => {
-    const itemLayout = accountLayouts.current.get(activeGameAccountId);
+  const revealSelectedGameAccount = useCallback(() => {
+    const itemLayout = accountLayouts.current.get(selectedGameAccountId);
     if (!itemLayout) return;
 
     const nextScrollOffset = resolveScrollOffsetToRevealItem({
@@ -105,15 +105,15 @@ export function GameAccountSwitcher({ gameAccounts, activeGameAccountId, onSelec
       x: nextScrollOffset,
       y: 0,
     });
-  }, [activeGameAccountId, reducedMotion]);
+  }, [selectedGameAccountId, reducedMotion]);
 
   useEffect(() => {
-    revealActiveGameAccount();
-  }, [revealActiveGameAccount]);
+    revealSelectedGameAccount();
+  }, [revealSelectedGameAccount]);
 
   const handleViewportLayout = (event: LayoutChangeEvent) => {
     viewportWidth.current = event.nativeEvent.layout.width;
-    revealActiveGameAccount();
+    revealSelectedGameAccount();
   };
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -123,7 +123,7 @@ export function GameAccountSwitcher({ gameAccounts, activeGameAccountId, onSelec
   const handleAccountLayout = (gameAccountId: string, event: LayoutChangeEvent) => {
     const { width, x } = event.nativeEvent.layout;
     accountLayouts.current.set(gameAccountId, { width, x });
-    if (gameAccountId === activeGameAccountId) revealActiveGameAccount();
+    if (gameAccountId === selectedGameAccountId) revealSelectedGameAccount();
   };
 
   return (
@@ -139,7 +139,7 @@ export function GameAccountSwitcher({ gameAccounts, activeGameAccountId, onSelec
       $md={{ mx: '$-5' }}
     >
       <SlidingSelection
-        value={activeGameAccountId}
+        value={selectedGameAccountId}
         indicator={<NotchedSelectionIndicator />}
         px="$3.5"
         $md={{ px: '$5' }}
@@ -150,7 +150,7 @@ export function GameAccountSwitcher({ gameAccounts, activeGameAccountId, onSelec
             value={gameAccount.account}
             onLayout={(event) => handleAccountLayout(gameAccount.account, event)}
           >
-            <GameAccountButton gameAccount={gameAccount} isActive={gameAccount.account === activeGameAccountId} onPress={() => onSelectGameAccount(gameAccount.account)} />
+            <GameAccountButton gameAccount={gameAccount} isSelected={gameAccount.account === selectedGameAccountId} onPress={() => onSelectGameAccount(gameAccount.account)} />
           </SlidingSelection.Item>
         ))}
       </SlidingSelection>

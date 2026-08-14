@@ -13,13 +13,13 @@ const dashboardMarqueeMessages = [
 ] as const;
 
 export type DashboardSecondaryHeaderProps = {
-  activeGameAccountId: string;
+  selectedGameAccountId: string;
   gameAccounts: readonly GameAccount[];
   onSelectGameAccount: (gameAccountId: string) => void;
 };
 
 export function DashboardSecondaryHeader({
-  activeGameAccountId,
+  selectedGameAccountId,
   gameAccounts,
   onSelectGameAccount,
 }: DashboardSecondaryHeaderProps) {
@@ -35,7 +35,7 @@ export function DashboardSecondaryHeader({
         <YStack px="$3.5" py="$3" $md={{ px: '$5' }}>
           <GameAccountSwitcher
             gameAccounts={gameAccounts}
-            activeGameAccountId={activeGameAccountId}
+            selectedGameAccountId={selectedGameAccountId}
             onSelectGameAccount={onSelectGameAccount}
           />
         </YStack>

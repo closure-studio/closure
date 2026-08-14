@@ -8,9 +8,8 @@ import { MonoText } from '@/components';
 import {
   DashboardShell,
   selectBackdropTint,
-  useActiveGameAccount,
-  useArkHostStream,
-  useGamesQuery,
+  useGameAccountsQuery,
+  useSelectedGameAccount,
 } from '@/features/dashboard';
 import { DashboardSmallScreenTabBar } from '@/features/navigation';
 import { getTabScreenOptions, useSessionBackdrop } from '@/features/session';
@@ -28,31 +27,39 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
   const layoutSize = useLayoutSize();
   const isFocused = useIsFocused();
   const { setBackdropTint } = useSessionBackdrop();
-  const activeGameAccount = useActiveGameAccount();
-  const gamesQuery = useGamesQuery();
+  const gameAccountsQuery = useGameAccountsQuery();
+  const selectedGameAccount = useSelectedGameAccount();
+  const selectedGameAccountId = useAppStore((state) => state.selectedGameAccountId);
   const selectGameAccount = useAppStore((state) => state.selectGameAccount);
-  const backdropTint = selectBackdropTint(activeGameAccount, { primary: colors.appAccent.val, warning: colors.appWarning.val, muted: colors.appMuted.val });
+  const gameAccounts = useMemo(
+    () => gameAccountsQuery.data ?? [],
+    [gameAccountsQuery.data],
+  );
+  const backdropTint = selectBackdropTint(selectedGameAccount, { primary: colors.appAccent.val, warning: colors.appWarning.val, muted: colors.appMuted.val });
 
-  useArkHostStream();
+  useEffect(() => {
+    if (!gameAccountsQuery.isSuccess) return;
+    if (selectedGameAccountId !== null
+      && gameAccounts.some((account) => account.account === selectedGameAccountId)
+    ) return;
+    selectGameAccount(gameAccounts[0]?.account ?? null);
+  }, [gameAccounts, gameAccountsQuery.isSuccess, selectedGameAccountId, selectGameAccount]);
+
   useEffect(() => { setBackdropTint(backdropTint); }, [backdropTint, setBackdropTint]);
 
-  const gameAccounts = useMemo(
-    () => gamesQuery.data?.gameAccounts ?? [],
-    [gamesQuery.data],
-  );
-  const activeGameAccountId = activeGameAccount?.account ?? '';
   const handleGameAccountSwipe = useCallback((direction: HorizontalSwipeDirection) => {
-    const adjacentGameAccount = resolveAdjacentHorizontalSwipeItem({ activeId: activeGameAccountId, direction, items: gameAccounts.map((account) => ({ id: account.account })) });
+    const adjacentGameAccount = resolveAdjacentHorizontalSwipeItem({ activeId: selectedGameAccountId ?? '', direction, items: gameAccounts.map((account) => ({ id: account.account })) });
     if (adjacentGameAccount) selectGameAccount(adjacentGameAccount.id);
-  }, [activeGameAccountId, gameAccounts, selectGameAccount]);
+  }, [gameAccounts, selectGameAccount, selectedGameAccountId]);
 
-  if (gamesQuery.isPending) return <DashboardState label="LOADING ARKHOST DATA" />;
-  if (gamesQuery.isError) return <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
-  if (!activeGameAccount) return <DashboardState label="NO GAME ACCOUNTS" />;
+  if (gameAccountsQuery.isPending) return <DashboardState label="LOADING ARKHOST DATA" />;
+  if (gameAccountsQuery.isError) return <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
+  if (gameAccounts.length === 0) return <DashboardState label="NO GAME ACCOUNTS" />;
+  if (!selectedGameAccount) return <DashboardState label="LOADING ARKHOST DATA" />;
 
   return (
     <DashboardShell
-      activeGameAccountId={activeGameAccountId}
+      selectedGameAccountId={selectedGameAccountId ?? ''}
       gameAccounts={gameAccounts}
       isContentSwipeEnabled={isFocused && layoutSize === 'small' && gameAccounts.length > 1}
       onContentSwipe={handleGameAccountSwipe}

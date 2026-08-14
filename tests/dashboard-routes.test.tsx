@@ -6,7 +6,7 @@ import DashboardInventoryRoute from '../src/app/(app)/dashboard/inventory';
 import DashboardOperatorsRoute from '../src/app/(app)/dashboard/operators';
 import DashboardOverviewRoute from '../src/app/(app)/dashboard/overview';
 
-const mockActiveGameAccount = {
+const mockSelectedGameAccount = {
   account: 'G1',
   config: { map_id: 'main_01-07' },
 };
@@ -23,10 +23,10 @@ jest.mock('@/features/dashboard', () => {
     getStageDisplayLabel: (_table: object, stageId: string) => stageId,
     InventoryView: () => <Text testID="inventory-screen" />,
     OperatorRosterView: () => <Text testID="operators-screen" />,
-    useActiveCharacters: () => ({ chars: [], total: 0 }),
-    useActiveGameAccount: () => mockActiveGameAccount,
-    useActiveGameDetail: () => ({ inventory: {} }),
-    useActiveLogs: () => ({ hasMore: false, logs: [] }),
+    useSelectedCharacters: () => ({ chars: [], total: 0 }),
+    useSelectedGameAccount: () => mockSelectedGameAccount,
+    useSelectedGameDetail: () => ({ inventory: {} }),
+    useSelectedLogs: () => ({ hasMore: false, logs: [] }),
     useCharacterTable: () => ({}),
     useItemTable: () => ({}),
     useStageTable: () => ({}),

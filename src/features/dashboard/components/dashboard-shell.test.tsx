@@ -27,7 +27,7 @@ function DashboardShellTestTree({ pageId }: { pageId: string }) {
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <I18nextProvider i18n={i18n}>
         <DashboardShell
-          activeGameAccountId="G18928069156"
+          selectedGameAccountId="G18928069156"
           gameAccounts={initialGameAccounts}
           isContentSwipeEnabled
           onContentSwipe={jest.fn()}

@@ -29,12 +29,49 @@ import {
 } from "@/mocks/arkhost";
 
 const MOCK_ARKHOST_DELAY_MS = 250;
+export const MOCK_ARKHOST_SSE_RECONNECT_DELAY_MS = 5000;
 
 const success = <T>(data: T): ArkHostResult<T> => ({ data, ok: true });
 const failure = <T>(): ArkHostResult<T> => ({
   error: { code: "operation-rejected", kind: "business" },
   ok: false,
 });
+
+class MockSseSubscription {
+  readonly #listener: ArkHostSseListener;
+  #connected = true;
+  #reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  #unsubscribed = false;
+
+  constructor(listener: ArkHostSseListener) {
+    this.#listener = listener;
+  }
+
+  dispatch(event: ArkHostSseEvent) {
+    if (!this.#connected || this.#unsubscribed) return;
+    this.#listener(event);
+  }
+
+  scheduleReconnect() {
+    if (this.#unsubscribed || this.#reconnectTimer !== null) return;
+    this.#connected = false;
+    this.#reconnectTimer = setTimeout(() => {
+      this.#reconnectTimer = null;
+      if (this.#unsubscribed) return;
+      this.#connected = true;
+    }, MOCK_ARKHOST_SSE_RECONNECT_DELAY_MS);
+  }
+
+  unsubscribe() {
+    if (this.#unsubscribed) return;
+    this.#unsubscribed = true;
+    this.#connected = false;
+    if (this.#reconnectTimer !== null) {
+      clearTimeout(this.#reconnectTimer);
+      this.#reconnectTimer = null;
+    }
+  }
+}
 
 const mockCharactersByAccount = new Map([
   ["G18928069156", mockArkHostCharactersResponse],
@@ -44,7 +81,7 @@ const mockCharactersByAccount = new Map([
 
 export class MockArkHostApi implements ArkHostApi {
   readonly #delayMs: number;
-  readonly #listeners = new Set<ArkHostSseListener>();
+  readonly #subscriptions = new Set<MockSseSubscription>();
   #gameList: ArkHostGameListEntry[];
   #systemConfig: ArkHostSystemConfig;
   #detail: ArkHostGameDetail | null;
@@ -67,13 +104,32 @@ export class MockArkHostApi implements ArkHostApi {
         : null;
   }
 
+  get activeSubscriptionCount(): number {
+    return this.#subscriptions.size;
+  }
+
   async #wait() {
     if (this.#delayMs === 0) return;
     await new Promise<void>((resolve) => setTimeout(resolve, this.#delayMs));
   }
 
   emit(event: ArkHostSseEvent) {
-    for (const listener of this.#listeners) listener(event);
+    for (const subscription of this.#subscriptions) subscription.dispatch(event);
+  }
+
+  simulateTransportClose() {
+    for (const subscription of this.#subscriptions) subscription.scheduleReconnect();
+  }
+
+  async deleteGame(account: string) {
+    await this.#wait();
+    const index = this.#gameList.findIndex(
+      (entry) => entry.status.account === account,
+    );
+    if (index === -1) return failure<boolean>();
+    this.#gameList.splice(index, 1);
+    if (this.#detail?.config.account === account) this.#detail = null;
+    return success(true);
   }
 
   async fetchApCostRanking() {
@@ -148,10 +204,12 @@ export class MockArkHostApi implements ArkHostApi {
     _accessToken: string,
     listener: ArkHostSseListener,
   ): ArkHostSseSubscription {
-    this.#listeners.add(listener);
+    const subscription = new MockSseSubscription(listener);
+    this.#subscriptions.add(subscription);
     return {
       unsubscribe: () => {
-        this.#listeners.delete(listener);
+        this.#subscriptions.delete(subscription);
+        subscription.unsubscribe();
       },
     };
   }

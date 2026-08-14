@@ -21,7 +21,18 @@ function createMemoryStorage(
 }
 
 describe('App Store client state', () => {
-  it('persists the session and game account across rehydration', async () => {
+  it('selects and clears the game account in runtime state only', () => {
+    const { storage } = createMemoryStorage();
+    const store = createAppStore({ storage });
+
+    expect(store.getState().selectedGameAccountId).toBeNull();
+    store.getState().selectGameAccount('G16601716973');
+    expect(store.getState().selectedGameAccountId).toBe('G16601716973');
+    store.getState().selectGameAccount(null);
+    expect(store.getState().selectedGameAccountId).toBeNull();
+  });
+
+  it('restores the session and node selection but not the game account selection', async () => {
     const { storage } = createMemoryStorage();
     const store = createAppStore({ storage });
 
@@ -30,7 +41,8 @@ describe('App Store client state', () => {
     const rememberedStore = createAppStore({ storage });
     await rememberedStore.persist.rehydrate();
     expect(rememberedStore.getState().auth.session).toEqual(mockActiveSession);
-    expect(rememberedStore.getState().activeGameAccountId).toBe('G16601716973');
+    expect(rememberedStore.getState().selectedApiNodeId).toBe('domestic');
+    expect(rememberedStore.getState().selectedGameAccountId).toBeNull();
   });
 
   it('clears the session and game account on logout while keeping the node selection', async () => {
@@ -43,7 +55,7 @@ describe('App Store client state', () => {
     store.getState().logout();
 
     expect(store.getState().auth.session).toBeNull();
-    expect(store.getState().activeGameAccountId).toBeNull();
+    expect(store.getState().selectedGameAccountId).toBeNull();
     expect(store.getState().selectedApiNodeId).toBe('overseas');
 
     const rehydratedStore = createAppStore({ storage });
@@ -64,7 +76,7 @@ describe('App Store client state', () => {
     expect(store.getState().selectedApiNodeId).toBe('overseas');
   });
 
-  it('resets the game account only when the session owner changes', () => {
+  it('resets the game account selection only when the session owner changes', () => {
     const { storage } = createMemoryStorage();
     const store = createAppStore({ storage });
 
@@ -72,17 +84,16 @@ describe('App Store client state', () => {
     store.getState().selectGameAccount('G18928069156');
 
     store.getState().setSession(mockActiveSession);
-    expect(store.getState().activeGameAccountId).toBe('G18928069156');
+    expect(store.getState().selectedGameAccountId).toBe('G18928069156');
 
     store.getState().setSession(mockAdminSession);
-    expect(store.getState().activeGameAccountId).toBeNull();
+    expect(store.getState().selectedGameAccountId).toBeNull();
     expect(store.getState().auth.session).toEqual(mockAdminSession);
   });
 });
 
 describe('Persisted store format', () => {
   const emptyState = {
-    activeGameAccountId: null,
     auth: { session: null },
     selectedApiNodeId: 'domestic' as const,
   };
@@ -96,10 +107,26 @@ describe('Persisted store format', () => {
     expect([...values.keys()]).toEqual([APP_STORE_STORAGE_KEY]);
   });
 
+  it('never serializes the game account selection', () => {
+    const { storage, values } = createMemoryStorage();
+    const store = createAppStore({ storage });
+
+    store.getState().setSession(mockActiveSession);
+    store.getState().selectGameAccount('G18928069156');
+
+    const raw = values.get(APP_STORE_STORAGE_KEY);
+    expect(raw).toBeDefined();
+    const persisted: unknown = JSON.parse(raw ?? '{}');
+    const persistedState = typeof persisted === 'object' && persisted !== null && 'state' in persisted
+      ? persisted.state
+      : {};
+    expect(persistedState).not.toHaveProperty('selectedGameAccountId');
+    expect(persistedState).not.toHaveProperty('activeGameAccountId');
+  });
+
   it('restores valid bare state by wrapping it in the current envelope', async () => {
     const { storage } = createMemoryStorage({
       [APP_STORE_STORAGE_KEY]: JSON.stringify({
-        activeGameAccountId: 'G16601716973',
         auth: { session: mockActiveSession },
         selectedApiNodeId: 'overseas',
       }),
@@ -108,8 +135,8 @@ describe('Persisted store format', () => {
     const store = createAppStore({ storage });
     await store.persist.rehydrate();
     expect(store.getState().auth.session).toEqual(mockActiveSession);
-    expect(store.getState().activeGameAccountId).toBe('G16601716973');
     expect(store.getState().selectedApiNodeId).toBe('overseas');
+    expect(store.getState().selectedGameAccountId).toBeNull();
   });
 
   it('drops stored data that does not match the current shape', async () => {

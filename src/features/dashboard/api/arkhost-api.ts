@@ -24,13 +24,13 @@ export type ArkHostResult<T> =
 export type ArkHostSseEvent =
   | { data: ArkHostGameListEntry[]; type: 'game' }
   | { data: ArkHostGameLogEntry; type: 'log' }
-  | { data: ArkHostGachaEvent[]; type: 'ssr' }
-  | { type: 'close' };
+  | { data: ArkHostGachaEvent[]; type: 'ssr' };
 
 export type ArkHostSseListener = (event: ArkHostSseEvent) => void;
 export type ArkHostSseSubscription = { unsubscribe: () => void };
 
 export interface ArkHostApi {
+  deleteGame(account: string): Promise<ArkHostResult<boolean>>;
   fetchApCostRanking(): Promise<ArkHostResult<ArkHostApCostEntry[]>>;
   fetchCharacters(account: string): Promise<ArkHostResult<ArkHostCharacters>>;
   fetchGameDetail(account: string): Promise<ArkHostResult<ArkHostGameDetail | null>>;

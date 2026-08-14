@@ -50,14 +50,50 @@ describe("MockArkHostApi", () => {
     expect(config.ok && config.data.announcement).toBe("updated");
   });
 
-  it("provides a controllable SSE subscription", () => {
+  it("deletes a game account and keeps server reads consistent", async () => {
+    const api = new MockArkHostApi(0);
+    expect(await api.deleteGame("G18928069156")).toEqual({
+      data: true,
+      ok: true,
+    });
+    const games = await api.fetchGameList();
+    expect(games.ok && games.data).toHaveLength(2);
+    expect(
+      games.ok && games.data.some((entry) => entry.status.account === "G18928069156"),
+    ).toBe(false);
+    const detail = await api.fetchGameDetail("G18928069156");
+    expect(detail.ok && detail.data).toBeNull();
+  });
+
+  it("rejects deleting an unknown game account", async () => {
+    const api = new MockArkHostApi(0);
+    expect(await api.deleteGame("G00000000000")).toEqual({
+      error: { code: "operation-rejected", kind: "business" },
+      ok: false,
+    });
+  });
+
+  it("provides a controllable SSE subscription that stops after unsubscribe", () => {
     const api = new MockArkHostApi(0);
     const listener = jest.fn();
     const subscription = api.subscribe("mock-token", listener);
+    expect(api.activeSubscriptionCount).toBe(1);
     api.emit({ data: mockArkHostGachaEvents, type: "ssr" });
     expect(listener).toHaveBeenCalledTimes(1);
     subscription.unsubscribe();
-    api.emit({ type: "close" });
+    expect(api.activeSubscriptionCount).toBe(0);
+    api.emit({ data: mockArkHostGachaEvents, type: "ssr" });
     expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  it("unsubscribe cancels a pending reconnect", () => {
+    jest.useFakeTimers();
+    const api = new MockArkHostApi(0);
+    const subscription = api.subscribe("mock-token", jest.fn());
+    api.simulateTransportClose();
+    expect(jest.getTimerCount()).toBe(1);
+    subscription.unsubscribe();
+    expect(jest.getTimerCount()).toBe(0);
+    jest.useRealTimers();
   });
 });

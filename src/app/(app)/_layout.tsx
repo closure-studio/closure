@@ -1,6 +1,7 @@
 import { Redirect, usePathname, useRouter } from 'expo-router';
 import { Stack as AppStack } from 'expo-router/js-stack';
 import { useReducedMotion } from 'react-native-reanimated';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { ROUTES } from '@/constants/routes';
 import {
@@ -11,6 +12,7 @@ import {
 import {
   NavigationLayout,
 } from '@/features/navigation';
+import { useArkHostSync } from '@/features/dashboard';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import { useAppStore } from '@/store';
 
@@ -19,9 +21,11 @@ export default function AppLayout() {
   const pathname = usePathname();
   const router = useRouter();
   const reducedMotion = useReducedMotion();
+  const queryClient = useQueryClient();
   const logout = useAppStore((state) => state.logout);
   const session = useAppStore((state) => state.auth.session);
   const { resetBackdropTint } = useSessionBackdrop();
+  useArkHostSync();
   const screenOptions = layoutSize === 'small'
     ? getScopeTransitionScreenOptions(reducedMotion)
     : getRouteScreenOptions(reducedMotion);
@@ -32,8 +36,9 @@ export default function AppLayout() {
 
   const handleLogout = () => {
     resetBackdropTint();
-    router.replace(ROUTES.login);
     logout();
+    queryClient.clear();
+    router.replace(ROUTES.login);
   };
 
   return (

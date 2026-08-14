@@ -11,6 +11,7 @@ import { persistedStoreStateSchema } from "@/schemas/local-state";
 import type { PersistedStoreState } from "@/schemas/local-state";
 
 export type AppStore = PersistedStoreState & {
+  selectedGameAccountId: string | null;
   // auth
   setSession: (session: UserSession) => void;
   logout: () => void;
@@ -24,17 +25,16 @@ export const APP_STORE_STORAGE_KEY = "closure.app-store";
 
 const APP_STORE_VERSION = 1;
 
-function initialState(): PersistedStoreState {
+function initialState(): PersistedStoreState & { selectedGameAccountId: string | null } {
   return {
-    activeGameAccountId: null,
     auth: { session: null },
     selectedApiNodeId: "domestic",
+    selectedGameAccountId: null,
   };
 }
 
 function persistedStateFromStore(state: AppStore): PersistedStoreState {
   return {
-    activeGameAccountId: state.auth.session ? state.activeGameAccountId : null,
     auth: { session: state.auth.session },
     selectedApiNodeId: state.selectedApiNodeId,
   };
@@ -84,7 +84,7 @@ export function createAppStore(options: AppStoreOptions = {}) {
       (set) => ({
         ...initialState(),
         logout: () => {
-          set({ activeGameAccountId: null, auth: { session: null } });
+          set({ auth: { session: null }, selectedGameAccountId: null });
         },
         selectApiNode: (apiNodeId) => {
           const parsedApiNodeId = v.safeParse(apiNodeIdSchema, apiNodeId);
@@ -92,7 +92,7 @@ export function createAppStore(options: AppStoreOptions = {}) {
           set({ selectedApiNodeId: parsedApiNodeId.output });
         },
         selectGameAccount: (gameAccountId) => {
-          set({ activeGameAccountId: gameAccountId });
+          set({ selectedGameAccountId: gameAccountId });
         },
         setSession: (session) => {
           set((state) => {
@@ -101,9 +101,9 @@ export function createAppStore(options: AppStoreOptions = {}) {
               state.auth.session.principal.id !== session.principal.id;
             return {
               auth: { session },
-              activeGameAccountId: ownerChanged
+              selectedGameAccountId: ownerChanged
                 ? null
-                : state.activeGameAccountId,
+                : state.selectedGameAccountId,
             };
           });
         },

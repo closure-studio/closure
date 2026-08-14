@@ -47,7 +47,7 @@ async function renderGameAccountSwitcher() {
       <I18nextProvider i18n={i18n}>
         <GameAccountSwitcher
           gameAccounts={initialGameAccounts.slice(0, 2)}
-          activeGameAccountId="G18928069156"
+          selectedGameAccountId="G18928069156"
           onSelectGameAccount={onSelectGameAccount}
         />
       </I18nextProvider>

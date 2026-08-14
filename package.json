@@ -60,7 +60,7 @@
     "typescript-eslint": "^8.65.0"
   },
   "scripts": {
-    "start": "expo start --dev-client",
+    "start": "expo start --dev-client -c",
     "reset-project": "node ./scripts/reset-project.js",
     "resources:sync": "node --experimental-strip-types ./scripts/sync-game-resources.mjs",
     "android": "expo run:android",

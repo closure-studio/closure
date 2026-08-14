@@ -2,12 +2,12 @@ import {
   DashboardPageScroll,
   getCharacterDisplayName,
   OperatorRosterView,
-  useActiveCharacters,
+  useSelectedCharacters,
   useCharacterTable,
 } from '@/features/dashboard';
 
 export default function DashboardOperatorsRoute() {
-  const characters = useActiveCharacters();
+  const characters = useSelectedCharacters();
   const characterTable = useCharacterTable();
 
   return (

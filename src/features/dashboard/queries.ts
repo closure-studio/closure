@@ -1,18 +1,16 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
 import { ARK_HOST_GAME_STATUS_CODE } from '@/schemas/arkhost';
 import type {
-  ArkHostApCostEntry,
   ArkHostCharacters,
   ArkHostGameDetail,
   ArkHostGameListEntry,
   ArkHostGameLogs,
   ArkHostGachaEvent,
-  ArkHostSystemConfig,
 } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
-import { appStore, useAppStore } from '@/store';
+import { useAppStore } from '@/store';
 import { FailureError } from '@/utils/failure-error';
 import { getQueryDependencies } from '@/services/query-dependencies';
 import type { ArkHostResult, ArkHostSseSubscription } from './api';
@@ -20,17 +18,11 @@ import type { ArkHostResult, ArkHostSseSubscription } from './api';
 const EMPTY_CHARACTERS: ArkHostCharacters = { chars: [], total: 0 };
 const EMPTY_GAME_LOGS: ArkHostGameLogs = { hasMore: false, logs: [] };
 
-export type GamesSnapshot = {
-  apCostRanking: ArkHostApCostEntry[];
-  gameAccounts: GameAccount[];
-  systemConfig: ArkHostSystemConfig;
-};
-
 export const arkHostQueryKeys = {
   characters: (account: string) => ['arkhost', 'characters', account] as const,
   detail: (account: string) => ['arkhost', 'detail', account] as const,
+  gameAccounts: (userId: string) => ['arkhost', 'game-accounts', userId] as const,
   gacha: ['arkhost', 'gacha'] as const,
-  games: (userId: string) => ['arkhost', 'games', userId] as const,
   logs: (account: string) => ['arkhost', 'logs', account] as const,
 };
 
@@ -64,18 +56,15 @@ function mapGameAccount(entry: ArkHostGameListEntry): GameAccount {
   };
 }
 
-export function useGamesQuery() {
+export function useGameAccountsQuery() {
   const session = useAppStore((state) => state.auth.session);
   const userId = session?.principal.id ?? '';
-  return useQuery<GamesSnapshot>({
-    queryKey: arkHostQueryKeys.games(userId),
+  return useQuery<GameAccount[]>({
+    queryKey: arkHostQueryKeys.gameAccounts(userId),
     enabled: session !== null,
     queryFn: async () => {
       const { arkHostApi } = getQueryDependencies();
-      const systemConfig = unwrap(await arkHostApi.fetchSystemConfig());
-      const gameAccounts = unwrap(await arkHostApi.fetchGameList()).map(mapGameAccount);
-      const apCostRanking = unwrap(await arkHostApi.fetchApCostRanking());
-      return { apCostRanking, gameAccounts, systemConfig };
+      return unwrap(await arkHostApi.fetchGameList()).map(mapGameAccount);
     },
   });
 }
@@ -116,81 +105,92 @@ export function useGameLogsQuery(account: string | null) {
   });
 }
 
-export function useActiveGameAccount(): GameAccount | null {
-  const activeGameAccountId = useAppStore((state) => state.activeGameAccountId);
-  const gamesQuery = useGamesQuery();
-  const gameAccounts = gamesQuery.data?.gameAccounts ?? [];
-  return gameAccounts.find((account) => account.account === activeGameAccountId)
-    ?? gameAccounts[0]
+export function useSelectedGameAccount(): GameAccount | null {
+  const selectedGameAccountId = useAppStore((state) => state.selectedGameAccountId);
+  const gameAccountsQuery = useGameAccountsQuery();
+  if (selectedGameAccountId === null) return null;
+  const gameAccounts = gameAccountsQuery.data ?? [];
+  return gameAccounts.find((account) => account.account === selectedGameAccountId)
     ?? null;
 }
 
-export function useActiveGameDetail(): ArkHostGameDetail | null {
-  const account = useActiveGameAccount();
+export function useSelectedGameDetail(): ArkHostGameDetail | null {
+  const account = useSelectedGameAccount();
   const detailQuery = useGameDetailQuery(account?.account ?? null);
   return detailQuery.data ?? null;
 }
 
-export function useActiveCharacters(): ArkHostCharacters {
-  const account = useActiveGameAccount();
+export function useSelectedCharacters(): ArkHostCharacters {
+  const account = useSelectedGameAccount();
   const charactersQuery = useCharactersQuery(account?.account ?? null);
   return charactersQuery.data ?? EMPTY_CHARACTERS;
 }
 
-export function useActiveLogs(): ArkHostGameLogs {
-  const account = useActiveGameAccount();
+export function useSelectedLogs(): ArkHostGameLogs {
+  const account = useSelectedGameAccount();
   const logsQuery = useGameLogsQuery(account?.account ?? null);
   return logsQuery.data ?? EMPTY_GAME_LOGS;
 }
 
-export function useArkHostStream() {
+export function useDeleteGameAccount() {
   const session = useAppStore((state) => state.auth.session);
   const queryClient = useQueryClient();
+  const userId = session?.principal.id ?? '';
+  return useMutation({
+    mutationFn: async (accountId: string) => {
+      const { arkHostApi } = getQueryDependencies();
+      const result = await arkHostApi.deleteGame(accountId);
+      if (!result.ok || result.data !== true) {
+        throw new FailureError({ code: 'operation-rejected', kind: 'business' });
+      }
+      return true;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: arkHostQueryKeys.gameAccounts(userId),
+        exact: true,
+      });
+    },
+  });
+}
+
+export function useArkHostSync() {
+  const session = useAppStore((state) => state.auth.session);
+  const queryClient = useQueryClient();
+  useGameAccountsQuery();
   useEffect(() => {
     if (!session) return;
-    let subscription: ArkHostSseSubscription | null = null;
+    const userId = session.principal.id;
     const { arkHostApi } = getQueryDependencies();
-    subscription = arkHostApi.subscribe(session.accessToken, (event) => {
-      if (event.type === 'close') {
-        subscription?.unsubscribe();
-        return;
-      }
-      const userId = session.principal.id;
-      if (event.type === 'game') {
-        queryClient.setQueryData<GamesSnapshot>(
-          arkHostQueryKeys.games(userId),
-          (previous) => {
-            if (!previous) return previous;
-            const gameAccounts = event.data.map(mapGameAccount);
-            const activeGameAccountId = appStore.getState().activeGameAccountId;
-            if (activeGameAccountId
-              && !gameAccounts.some((account) => account.account === activeGameAccountId)
-            ) {
-              appStore.getState().selectGameAccount(gameAccounts[0]?.account ?? null);
-            }
-            return { ...previous, gameAccounts };
-          },
-        );
-      } else if (event.type === 'log') {
-        queryClient.setQueryData<ArkHostGameLogs>(
-          arkHostQueryKeys.logs(event.data.name),
-          (previous) => {
-            const page = previous ?? { hasMore: true, logs: [] };
-            const exists = page.logs.some((log) => log.id === event.data.id);
-            return exists
-              ? page
-              : { ...page, logs: [event.data, ...page.logs] };
-          },
-        );
-      } else {
-        queryClient.setQueryData<ArkHostGachaEvent[]>(
-          arkHostQueryKeys.gacha,
-          event.data,
-        );
-      }
-    });
+    const subscription: ArkHostSseSubscription = arkHostApi.subscribe(
+      session.accessToken,
+      (event) => {
+        if (event.type === 'game') {
+          queryClient.setQueryData<GameAccount[]>(
+            arkHostQueryKeys.gameAccounts(userId),
+            event.data.map(mapGameAccount),
+          );
+        } else if (event.type === 'log') {
+          queryClient.setQueryData<ArkHostGameLogs>(
+            arkHostQueryKeys.logs(event.data.name),
+            (previous) => {
+              const page = previous ?? { hasMore: true, logs: [] };
+              const exists = page.logs.some((log) => log.id === event.data.id);
+              return exists
+                ? page
+                : { ...page, logs: [event.data, ...page.logs] };
+            },
+          );
+        } else {
+          queryClient.setQueryData<ArkHostGachaEvent[]>(
+            arkHostQueryKeys.gacha,
+            event.data,
+          );
+        }
+      },
+    );
     return () => {
-      subscription?.unsubscribe();
+      subscription.unsubscribe();
     };
   }, [queryClient, session]);
 }
