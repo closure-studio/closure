@@ -55,7 +55,9 @@ yarn-error.*
 *.tsbuildinfo
 
 # editor / agent tooling scratch (shared configs above stay tracked)
-.vscode/.react/
+/.agents/
+.vscode/
+skills-lock.json
 .claude/settings.local.json
 /.codex/
 .eas/
