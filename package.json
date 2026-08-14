@@ -6,6 +6,7 @@
     "@expo-google-fonts/geist-mono": "^0.4.3",
     "@expo-google-fonts/oxanium": "^0.4.2",
     "@expo/ui": "~57.0.10",
+    "@shopify/flash-list": "2.0.2",
     "@shopify/react-native-skia": "2.6.2",
     "@tamagui/config": "^2.5.1",
     "@tamagui/portal": "^2.5.1",
@@ -82,6 +83,9 @@
     "typecheck": "tsc --noEmit"
   },
   "jest": {
+    "setupFiles": [
+      "<rootDir>/tests/mocks/flash-list.tsx"
+    ],
     "moduleNameMapper": {
       "^@/assets/(.*)$": "<rootDir>/assets/$1",
       "^lucide-react-native$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js",
