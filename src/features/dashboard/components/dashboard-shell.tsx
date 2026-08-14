@@ -33,6 +33,27 @@ export function DashboardShell({
   );
 }
 
+export function DashboardPageFrame({ children }: PropsWithChildren) {
+  return (
+    <YStack
+      testID="dashboard-page-frame"
+      width="100%"
+      maxW={DASHBOARD_CONTENT_MAX_WIDTH}
+      self="center"
+      grow={1}
+      shrink={1}
+      minW={0}
+      minH={0}
+      p="$3.5"
+      pt="$3"
+      pb="$4"
+      $md={{ px: '$5', pt: '$4', pb: '$5' }}
+    >
+      {children}
+    </YStack>
+  );
+}
+
 export function DashboardPageScroll({ children }: PropsWithChildren) {
   return (
     <YStack grow={1} shrink={1} minW={0} minH={0} height="100%" maxH="100%" overflow="hidden">

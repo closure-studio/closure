@@ -4,11 +4,12 @@ import { TamaguiProvider } from 'tamagui';
 import * as v from 'valibot';
 
 import { tamaguiConfig } from '../../../../../tamagui.config';
+import { getResponsiveGridLayout } from '@/hooks/use-responsive-grid-rows';
 import { itemTableSchema } from '@/schemas/game-data';
 import { inventorySchema } from '@/schemas/game-account';
 import type { LayoutSize } from '@/schemas/layout-size';
 import { getItemImageUrl } from '../item-image';
-import { InventoryView, getInventoryGridLayout } from './inventory-view';
+import { InventoryView } from './inventory-view';
 
 let mockLayoutSize: LayoutSize = 'small';
 
@@ -70,7 +71,7 @@ function gridLayoutEvent(width: number) {
   };
 }
 
-describe('getInventoryGridLayout', () => {
+describe('getResponsiveGridLayout', () => {
   it.each([
     { containerWidth: 0, columnCount: 1, itemWidth: undefined },
     { containerWidth: -16, columnCount: 1, itemWidth: undefined },
@@ -89,7 +90,7 @@ describe('getInventoryGridLayout', () => {
   ])(
     'computes $columnCount columns and their width for a $containerWidth container',
     ({ containerWidth, columnCount, itemWidth }) => {
-      const layout = getInventoryGridLayout(containerWidth, 7, 124);
+      const layout = getResponsiveGridLayout(containerWidth, 7, 124);
 
       expect(layout.columnCount).toBe(columnCount);
       if (itemWidth === undefined) {
@@ -120,7 +121,12 @@ describe('InventoryView', () => {
       </TamaguiProvider>,
     );
 
-    expect(screen.getByTestId('inventory-grid-columns-1')).toBeTruthy();
+    // No placeholder single-column grid content renders before the container is measured.
+    expect(screen.queryByTestId('inventory-item-31034')).toBeNull();
+    expect(screen.queryByTestId('inventory-item-EPGS_COIN')).toBeNull();
+
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(320));
+    expect(screen.getByTestId('inventory-grid-columns-2')).toBeTruthy();
     expect(screen.getByTestId('inventory-item-31034')).toBeTruthy();
     expect(screen.getByTestId('inventory-item-EPGS_COIN')).toBeTruthy();
     expect(screen.getByTestId('inventory-preview-details')).toBeTruthy();
@@ -211,16 +217,16 @@ describe('InventoryView', () => {
       </TamaguiProvider>,
     );
 
-    await fireEvent(screen.getByTestId('inventory-grid-columns-1'), 'layout', gridLayoutEvent(320));
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(320));
     expect(screen.getByTestId('inventory-grid-columns-2')).toBeTruthy();
 
-    await fireEvent(screen.getByTestId('inventory-grid-columns-2'), 'layout', gridLayoutEvent(400));
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(400));
     expect(screen.getByTestId('inventory-grid-columns-3')).toBeTruthy();
 
-    await fireEvent(screen.getByTestId('inventory-grid-columns-3'), 'layout', gridLayoutEvent(720));
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(720));
     expect(screen.getByTestId('inventory-grid-columns-5')).toBeTruthy();
 
-    await fireEvent(screen.getByTestId('inventory-grid-columns-5'), 'layout', gridLayoutEvent(1104));
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(1104));
     expect(screen.getByTestId('inventory-grid-columns-8')).toBeTruthy();
   });
 
@@ -232,7 +238,7 @@ describe('InventoryView', () => {
       </TamaguiProvider>,
     );
 
-    await fireEvent(screen.getByTestId('inventory-grid-columns-1'), 'layout', gridLayoutEvent(500));
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(500));
 
     expect(screen.getByTestId('inventory-grid-columns-2')).toBeTruthy();
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-31034').props.style)).toEqual(
@@ -276,7 +282,7 @@ describe('InventoryView', () => {
       </TamaguiProvider>,
     );
 
-    await fireEvent(screen.getByTestId('inventory-grid-columns-1'), 'layout', gridLayoutEvent(100));
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(100));
     expect(screen.queryByTestId('inventory-item-info-31034')).toBeNull();
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-31034').props.style)).toEqual(
       expect.objectContaining({ justifyContent: 'center', width: 100 }),
@@ -285,7 +291,7 @@ describe('InventoryView', () => {
     await fireEvent.press(screen.getByTestId('inventory-item-EPGS_COIN'));
     expect(screen.getByTestId('inventory-item-EPGS_COIN').props['aria-selected']).toBe(true);
 
-    await fireEvent(screen.getByTestId('inventory-grid-columns-1'), 'layout', gridLayoutEvent(39));
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(39));
     expect(screen.queryByTestId('inventory-item-31034')).toBeNull();
     expect(screen.getByTestId('inventory-preview-details')).toBeTruthy();
     expect(readSvgText(screen.getByTestId('inventory-preview-name'))).toBe('寻访参数模型');
@@ -298,7 +304,7 @@ describe('InventoryView', () => {
       </TamaguiProvider>,
     );
 
-    await fireEvent(screen.getByTestId('inventory-grid-columns-1'), 'layout', gridLayoutEvent(320));
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(320));
     const firstImage = screen.getByTestId('inventory-item-image-svg-image-31034', {
       includeHiddenElements: true,
     });
@@ -313,7 +319,7 @@ describe('InventoryView', () => {
       expect.objectContaining({ width: 156.5 }),
     );
 
-    await fireEvent(screen.getByTestId('inventory-grid-columns-2'), 'layout', gridLayoutEvent(1104));
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(1104));
     expect(screen.getByTestId('inventory-grid-columns-8')).toBeTruthy();
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-31034').props.style)).toEqual(
       expect.objectContaining({ width: 1055 / 8 }),
@@ -328,7 +334,7 @@ describe('InventoryView', () => {
     expect(loadedImage.props.opacity).toBeUndefined();
     expect(screen.queryByTestId('inventory-item-image-fallback-character-31034')).toBeNull();
 
-    await fireEvent(screen.getByTestId('inventory-grid-columns-8'), 'layout', gridLayoutEvent(320));
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(320));
     expect(screen.getByTestId('inventory-grid-columns-2')).toBeTruthy();
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-31034').props.style)).toEqual(
       expect.objectContaining({ width: 156.5 }),

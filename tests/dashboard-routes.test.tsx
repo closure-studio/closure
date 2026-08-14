@@ -15,6 +15,9 @@ jest.mock('@/features/dashboard', () => {
   const { Text, View } = jest.requireActual<typeof import('react-native')>('react-native');
   return {
     ActivityTimelineView: () => <Text testID="activity-screen" />,
+    DashboardPageFrame: ({ children }: PropsWithChildren) => (
+      <View testID="dashboard-page-frame">{children}</View>
+    ),
     DashboardPageScroll: ({ children }: PropsWithChildren) => (
       <View testID="dashboard-page-scroll">{children}</View>
     ),
@@ -35,14 +38,14 @@ jest.mock('@/features/dashboard', () => {
 
 describe('dashboard routes', () => {
   it.each([
-    ['activity', DashboardActivityRoute],
-    ['inventory', DashboardInventoryRoute],
-    ['operators', DashboardOperatorsRoute],
-    ['overview', DashboardOverviewRoute],
-  ] as const)('renders the dedicated %s screen', async (screenId, Route) => {
+    ['activity', DashboardActivityRoute, 'dashboard-page-scroll'],
+    ['inventory', DashboardInventoryRoute, 'dashboard-page-frame'],
+    ['operators', DashboardOperatorsRoute, 'dashboard-page-frame'],
+    ['overview', DashboardOverviewRoute, 'dashboard-page-scroll'],
+  ] as const)('renders the dedicated %s screen', async (screenId, Route, wrapperTestId) => {
     const screen = await render(<Route />);
 
-    expect(screen.getByTestId('dashboard-page-scroll')).toBeTruthy();
+    expect(screen.getByTestId(wrapperTestId)).toBeTruthy();
     expect(screen.getByTestId(`${screenId}-screen`)).toBeTruthy();
   });
 });

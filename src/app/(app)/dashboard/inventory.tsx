@@ -1,5 +1,5 @@
 import {
-  DashboardPageScroll,
+  DashboardPageFrame,
   InventoryView,
   useSelectedGameDetail,
   useItemTable,
@@ -10,8 +10,8 @@ export default function DashboardInventoryRoute() {
   const itemTable = useItemTable();
 
   return (
-    <DashboardPageScroll>
+    <DashboardPageFrame>
       <InventoryView inventory={detail?.inventory ?? {}} itemTable={itemTable} />
-    </DashboardPageScroll>
+    </DashboardPageFrame>
   );
 }

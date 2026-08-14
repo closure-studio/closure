@@ -1,0 +1,52 @@
+import { useCallback, useMemo, useState } from 'react';
+import type { LayoutChangeEvent } from 'react-native';
+
+export function useResponsiveGridRows<T, TLayout extends { columnCount: number }>(
+  items: readonly T[],
+  getLayout: (listWidth: number) => TLayout,
+  getItemKey: (item: T) => string,
+) {
+  const [listWidth, setListWidth] = useState(0);
+
+  const layout = getLayout(listWidth);
+
+  const rows = useMemo(() => {
+    if (listWidth <= 0) return [];
+    const chunks: T[][] = [];
+    for (let index = 0; index < items.length; index += layout.columnCount) {
+      chunks.push(items.slice(index, index + layout.columnCount));
+    }
+    return chunks;
+  }, [items, layout.columnCount, listWidth]);
+
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+    const width = event.nativeEvent.layout.width;
+    setListWidth((currentWidth) => (currentWidth === width ? currentWidth : width));
+  }, []);
+
+  const keyExtractor = useCallback(
+    (row: readonly T[], index: number) => {
+      const first = row[0];
+      return first ? getItemKey(first) : `grid-row-${index}`;
+    },
+    [getItemKey],
+  );
+
+  return { rows, listWidth, layout, handleLayout, keyExtractor };
+}
+
+export function getResponsiveGridLayout(containerWidth: number, gap: number, minimumItemWidth: number) {
+  if (containerWidth <= 0) {
+    return { columnCount: 1, itemWidth: undefined };
+  }
+
+  const columnCount = Math.max(
+    1,
+    Math.floor((containerWidth + gap) / (minimumItemWidth + gap)),
+  );
+
+  return {
+    columnCount,
+    itemWidth: (containerWidth - gap * (columnCount - 1)) / columnCount,
+  };
+}

@@ -1,25 +1,22 @@
+import { FlashList } from '@shopify/flash-list';
 import { PackageOpen } from 'lucide-react-native';
-import { memo, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { XStack, YStack, getTokens } from 'tamagui';
 
-import { MonoText, TerminalPanel, TerminalText } from '@/components';
-import type { ItemTable, ItemTableItem } from '@/schemas/game-data';
+import { MonoText, ResponsiveGridRow, TerminalText } from '@/components';
+import { getResponsiveGridLayout, useResponsiveGridRows } from '@/hooks/use-responsive-grid-rows';
+import type { ItemTable } from '@/schemas/game-data';
 import type { Inventory } from '@/schemas/game-account';
 import type { LayoutSize } from '@/schemas/layout-size';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import {
   formatInventoryQuantity,
   InventoryCell,
+  type InventoryEntry,
   INVENTORY_CELL_ARTWORK_SIZE_TOKEN,
   INVENTORY_CELL_MIN_WIDTH_TOKEN,
 } from './inventory-cell';
 import { InventoryArtwork } from './inventory-artwork';
-
-type InventoryEntry = {
-  item: ItemTableItem;
-  itemId: string;
-  quantity: number;
-};
 
 const INVENTORY_GRID_GAP_TOKEN = '$2';
 const PREVIEW_ARTWORK_SIZE = {
@@ -31,24 +28,12 @@ const PREVIEW_FALLBACK_ICON_SIZE = {
   large: 34,
 } as const;
 
-function getItemDescription(value: string | null | undefined): string | undefined {
-  return value ? value.split('\\n').join('\n') : undefined;
+function getEntryItemKey(entry: InventoryEntry): string {
+  return entry.itemId;
 }
 
-export function getInventoryGridLayout(containerWidth: number, gap: number, minimumItemWidth: number) {
-  if (containerWidth <= 0) {
-    return { columnCount: 1, itemWidth: undefined };
-  }
-
-  const columnCount = Math.max(
-    1,
-    Math.floor((containerWidth + gap) / (minimumItemWidth + gap)),
-  );
-
-  return {
-    columnCount,
-    itemWidth: (containerWidth - gap * (columnCount - 1)) / columnCount,
-  };
+function getItemDescription(value: string | null | undefined): string | undefined {
+  return value ? value.split('\\n').join('\n') : undefined;
 }
 
 const InventoryPreview = memo(function InventoryPreview({
@@ -146,59 +131,61 @@ export function InventoryView({
     ? requestedItemId
     : entries[0]?.itemId;
   const selectedEntry = entries.find((entry) => entry.itemId === selectedItemId);
-  const [listWidth, setListWidth] = useState(0);
   const tokens = getTokens();
   const gridGap = tokens.space[INVENTORY_GRID_GAP_TOKEN].val;
   const minimumItemWidth = tokens.size[INVENTORY_CELL_MIN_WIDTH_TOKEN[layoutSize]].val;
   const artworkWidth = tokens.size[INVENTORY_CELL_ARTWORK_SIZE_TOKEN[layoutSize]].val;
-  const { columnCount, itemWidth } = getInventoryGridLayout(
-    listWidth,
-    gridGap,
-    minimumItemWidth,
+  const { rows, listWidth, layout, handleLayout, keyExtractor } = useResponsiveGridRows(
+    entries,
+    (width) => getResponsiveGridLayout(width, gridGap, minimumItemWidth),
+    getEntryItemKey,
   );
+  const { columnCount, itemWidth } = layout;
   const imageOnly = listWidth > 0 && listWidth < minimumItemWidth;
   const showCells = listWidth === 0 || listWidth >= artworkWidth;
 
+  const renderItem = useCallback(
+    ({ item: row, extraData }: { item: InventoryEntry[]; extraData?: string | null }) => (
+      <ResponsiveGridRow
+        row={row}
+        gap={gridGap}
+        getItemKey={getEntryItemKey}
+        renderCell={(entry) => (
+          <InventoryCell
+            entry={entry}
+            imageOnly={imageOnly}
+            itemWidth={itemWidth}
+            onSelect={setRequestedItemId}
+            selected={entry.itemId === (extraData ?? null)}
+            size={layoutSize}
+          />
+        )}
+      />
+    ),
+    [gridGap, imageOnly, itemWidth, layoutSize],
+  );
+
   if (!selectedEntry) {
     return (
-      <YStack testID="inventory-empty" minH={360} items="center" justify="center" gap="$3">
+      <YStack testID="inventory-empty" grow={1} items="center" justify="center" gap="$3">
         <PackageOpen color={getTokens().color.appMuted.val} size={44} strokeWidth={1.25} />
       </YStack>
     );
   }
 
   return (
-    <YStack width="100%">
-      <TerminalPanel
-        testID="inventory-panel"
-        cornerBrackets
-        width="100%"
-        p={0}
-      >
-        <InventoryPreview entry={selectedEntry} size={layoutSize} />
-        <XStack
+    <YStack testID="inventory-grid-container" width="100%" grow={1} minH={0} onLayout={handleLayout}>
+      <InventoryPreview entry={selectedEntry} size={layoutSize} />
+      {showCells ? (
+        <FlashList
           testID={`inventory-grid-columns-${columnCount}`}
-          width="100%"
-          flexWrap="wrap"
-          gap={gridGap}
-          onLayout={(event) => {
-            const width = event.nativeEvent.layout.width;
-            setListWidth((currentWidth) => (currentWidth === width ? currentWidth : width));
-          }}
-        >
-          {showCells ? entries.map((entry) => (
-            <InventoryCell
-              key={entry.itemId}
-              entry={entry}
-              imageOnly={imageOnly}
-              itemWidth={itemWidth}
-              onSelect={setRequestedItemId}
-              selected={entry.itemId === selectedItemId}
-              size={layoutSize}
-            />
-          )) : null}
-        </XStack>
-      </TerminalPanel>
+          data={rows}
+          extraData={selectedItemId}
+          keyExtractor={keyExtractor}
+          style={{ flex: 1 }}
+          renderItem={renderItem}
+        />
+      ) : null}
     </YStack>
   );
 }
