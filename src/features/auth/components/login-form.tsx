@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight, Check, LockKeyhole, Mail } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { type MutationStatus } from '@tanstack/react-query';
 import { useReducedMotion } from 'react-native-reanimated';
 import { AnimatePresence, Button, Form, Spinner, YStack, getTokens, styled, useMedia } from 'tamagui';
 
@@ -34,7 +35,7 @@ type LoginFormProps = {
   onSubmit: (submission: LoginSubmission) => Promise<void>;
   onRecoveryRequest: (input: PasswordRecoveryRequestInput) => Promise<void>;
   onResetPasswordRecovery: () => void;
-  recoveryStatus: 'failed' | 'idle' | 'pending' | 'succeeded';
+  recoveryStatus: MutationStatus;
   recoverySubmissionError: string | null;
   submissionError: string | null;
 };
@@ -191,7 +192,7 @@ export function LoginForm({
             <TerminalPanel cornerBrackets p="$4.5" gap="$4">
               <TerminalSectionHeading code="SOS" title={t('recovery.title')} {...(media.xxs ? { subtitle: 'RECOVERY' } : {})} />
               <AnimatePresence mode="wait">
-                {recoveryStatus === 'succeeded' ? (
+                {recoveryStatus === 'success' ? (
                   <YStack key="reset-sent" transition={reducedMotion ? '0ms' : '300ms'} enterStyle={reducedMotion ? null : { opacity: 0, scale: 0.96 }} exitStyle={reducedMotion ? null : { opacity: 0 }} opacity={1} scale={1} items="center" gap="$2" py="$3">
                     <Check size={36} color={colors.appSuccess.val} />
                     <TerminalText size="$4" fontWeight="700">{t('recovery.sentTitle')}</TerminalText>

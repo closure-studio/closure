@@ -1,3 +1,4 @@
+import { type MutationStatus } from '@tanstack/react-query';
 import {
   CalendarClock,
   KeyRound,
@@ -40,12 +41,11 @@ import { SettingsPage } from '../../components/settings-page';
 type PasswordField = 'currentPassword' | 'newPassword' | 'repeatNewPassword';
 type PasswordIssue = (typeof passwordChangeIssue)[keyof typeof passwordChangeIssue];
 type PasswordErrors = Partial<Record<PasswordField, PasswordIssue>>;
-type PasswordUpdateStatus = 'failed' | 'idle' | 'pending' | 'succeeded';
 
 export type AccountSettingsScreenProps = {
   onUpdatePassword: (input: PasswordChangeInput) => Promise<boolean>;
   passwordUpdateError: AuthFailure | null;
-  passwordUpdateStatus: PasswordUpdateStatus;
+  passwordUpdateStatus: MutationStatus;
   principal: SessionPrincipal;
 };
 
@@ -256,7 +256,7 @@ export function AccountSettingsScreen({
     timeStyle: 'short',
   }).format(new Date(principal.registeredAt));
   const translatedPasswordUpdateError = passwordUpdateErrorMessage(passwordUpdateError, t);
-  const showPasswordUpdateSuccess = passwordUpdateStatus === 'succeeded' && passwordWasUpdated;
+  const showPasswordUpdateSuccess = passwordUpdateStatus === 'success' && passwordWasUpdated;
 
   const translatePasswordError = (errorCode: PasswordIssue) => {
     switch (errorCode) {

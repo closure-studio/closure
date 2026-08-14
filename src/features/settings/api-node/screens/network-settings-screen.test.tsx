@@ -34,7 +34,7 @@ async function renderNetworkSettings() {
         onRefresh={onRefresh}
         onSelectApiNode={setSelectedApiNodeId}
         queryError={null}
-        queryStatus="succeeded"
+        queryStatus="success"
         selectedApiNodeId={selectedApiNodeId}
       />
     );

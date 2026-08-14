@@ -1,3 +1,4 @@
+import { type MutationStatus } from '@tanstack/react-query';
 import { useReducedMotion } from 'react-native-reanimated';
 import { KeyboardAvoidingView } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +20,7 @@ type AuthScreenProps = {
   onPasswordRecovery: (input: PasswordRecoveryRequestInput) => Promise<void>;
   onResetPasswordRecovery: () => void;
   passwordRecoveryError: AuthFailure | null;
-  passwordRecoveryStatus: 'failed' | 'idle' | 'pending' | 'succeeded';
+  passwordRecoveryStatus: MutationStatus;
 };
 
 function loginFailureMessage(error: AuthFailure | null, translate: (key: string) => string): string | null {

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
+import { type QueryStatus } from '@tanstack/react-query';
 import {
   AnimatePresence,
   Button,
@@ -42,14 +43,13 @@ const ELEVATED_LATENCY_MAX_MS = 150;
 
 type LatencyTone = '$appSuccess' | '$appWarning' | '$appDanger';
 type DetectionStatus = 'checking' | 'reachable' | 'unreachable';
-type OperationStatus = 'failed' | 'idle' | 'pending' | 'succeeded';
 
 export type NetworkSettingsScreenProps = {
   nodes: readonly ApiNode[];
   onRefresh: () => Promise<void>;
   onSelectApiNode: (apiNodeId: ApiNodeId) => void;
   queryError: ApiNodeFailure | null;
-  queryStatus: OperationStatus;
+  queryStatus: QueryStatus;
   selectedApiNodeId: ApiNodeId;
 };
 
