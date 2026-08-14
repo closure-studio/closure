@@ -9,7 +9,6 @@ import {
 } from './game-resource-cache';
 import {
   bundledCharacterTable,
-  bundledGameResources,
   bundledItemTable,
   bundledStageTable,
 } from './game-data';
@@ -37,7 +36,7 @@ export const GAME_RESOURCES_STALE_TIME_MS = HOURS_PER_DAY
 
 type GameResourceData<T> = {
   table: T;
-  updatedAt: string;
+  updatedAt: string | null;
 };
 
 const GAME_RESOURCE_QUERY_KEY = 'game-resources';
@@ -50,15 +49,15 @@ const gameResourceQueryKeys = {
 
 const characterBundled: GameResourceData<CharacterTable> = {
   table: bundledCharacterTable,
-  updatedAt: bundledGameResources.character.updatedAt,
+  updatedAt: null,
 };
 const itemBundled: GameResourceData<ItemTable> = {
   table: bundledItemTable,
-  updatedAt: bundledGameResources.item.updatedAt,
+  updatedAt: null,
 };
 const stageBundled: GameResourceData<StageTable> = {
   table: bundledStageTable,
-  updatedAt: bundledGameResources.stage.updatedAt,
+  updatedAt: null,
 };
 
 function useGameResourceQuery<T>(
@@ -66,7 +65,7 @@ function useGameResourceQuery<T>(
   cacheKey: string,
   schema: v.GenericSchema<unknown, T>,
   bundled: GameResourceData<T>,
-  fetchResource: (updatedAt: string) => Promise<GameResourceResult<T>>,
+  fetchResource: (updatedAt: string | null) => Promise<GameResourceResult<T>>,
 ) {
   const queryClient = useQueryClient();
   const initial = useMemo(
@@ -76,7 +75,9 @@ function useGameResourceQuery<T>(
   return useQuery({
     queryKey,
     initialData: initial,
-    initialDataUpdatedAt: Date.parse(initial.updatedAt),
+    initialDataUpdatedAt: initial.updatedAt === null
+      ? 0
+      : Date.parse(initial.updatedAt),
     staleTime: GAME_RESOURCES_STALE_TIME_MS,
     queryFn: async () => {
       const current = queryClient.getQueryData<GameResourceData<T>>(queryKey)

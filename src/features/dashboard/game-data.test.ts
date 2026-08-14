@@ -1,6 +1,5 @@
 import {
   bundledCharacterTable,
-  bundledGameResources,
   bundledItemTable,
   bundledStageTable,
   getCharacterDisplayName,
@@ -43,11 +42,5 @@ describe('bundled game resource catalog', () => {
     expect(getCharacterDisplayName(bundledCharacterTable, missingCharacterId)).toBe(missingCharacterId);
     expect(getStageDisplayLabel(bundledStageTable, missingStageId, '—')).toBe(missingStageId);
     expect(getStageDisplayLabel(bundledStageTable, '', '—')).toBe('—');
-  });
-
-  it('loads an update timestamp for each bundled table', () => {
-    expect(Object.values(bundledGameResources).every(({ updatedAt }) => (
-      Number.isFinite(Date.parse(updatedAt))
-    ))).toBe(true);
   });
 });

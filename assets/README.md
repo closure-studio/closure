@@ -14,7 +14,7 @@ The bundled game data tables are sourced from:
 - <https://ark-resource.arknights.app/data/stage_table.json>
 - <https://ark-resource.arknights.app/data/character_table.json>
 
-Run `npm run resources:sync` to validate and update the three bundled tables and
-their matching `Last-Modified` timestamps. Each table is updated independently.
+Run `npm run resources:sync` to validate and update the three bundled tables.
+Each table is updated independently.
 
 Keep generated platform resources in their platform-specific subdirectory and update `app.json` whenever an application icon or splash path moves.

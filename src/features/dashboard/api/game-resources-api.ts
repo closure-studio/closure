@@ -20,9 +20,9 @@ export type GameResourceResult<T> =
   | { kind: 'unavailable' };
 
 export interface GameResourcesApi {
-  fetchCharacter(updatedAt: string): Promise<GameResourceResult<CharacterTable>>;
-  fetchItem(updatedAt: string): Promise<GameResourceResult<ItemTable>>;
-  fetchStage(updatedAt: string): Promise<GameResourceResult<StageTable>>;
+  fetchCharacter(updatedAt: string | null): Promise<GameResourceResult<CharacterTable>>;
+  fetchItem(updatedAt: string | null): Promise<GameResourceResult<ItemTable>>;
+  fetchStage(updatedAt: string | null): Promise<GameResourceResult<StageTable>>;
 }
 
 export type GameResourceResponse = {
@@ -42,14 +42,16 @@ const NOT_MODIFIED_STATUS = 304;
 
 async function fetchTable<T>(
   fileName: string,
-  updatedAt: string,
+  updatedAt: string | null,
   schema: v.GenericSchema<unknown, T>,
   request: GameResourceFetch,
 ): Promise<GameResourceResult<T>> {
   try {
-    const response = await request(`${GAME_RESOURCE_BASE_URL}/${fileName}`, {
-      headers: { 'If-Modified-Since': new Date(updatedAt).toUTCString() },
-    });
+    const headers: Record<string, string> = {};
+    if (updatedAt !== null) {
+      headers['If-Modified-Since'] = new Date(updatedAt).toUTCString();
+    }
+    const response = await request(`${GAME_RESOURCE_BASE_URL}/${fileName}`, { headers });
     if (response.status === NOT_MODIFIED_STATUS) return { kind: 'not-modified' };
     if (!response.ok) return { kind: 'unavailable' };
 
@@ -76,15 +78,15 @@ async function fetchTable<T>(
 export class RemoteGameResourcesApi implements GameResourcesApi {
   constructor(private readonly request: GameResourceFetch = fetch) {}
 
-  fetchCharacter(updatedAt: string) {
+  fetchCharacter(updatedAt: string | null) {
     return fetchTable('character_table.json', updatedAt, characterTableSchema, this.request);
   }
 
-  fetchItem(updatedAt: string) {
+  fetchItem(updatedAt: string | null) {
     return fetchTable('item_table.json', updatedAt, itemTableSchema, this.request);
   }
 
-  fetchStage(updatedAt: string) {
+  fetchStage(updatedAt: string | null) {
     return fetchTable('stage_table.json', updatedAt, stageTableSchema, this.request);
   }
 }

@@ -29,9 +29,5 @@ export type {
   StageTableEntry,
 } from './stage-table.schema';
 export {
-  bundledGameResourcesSchema,
   gameResourceUpdatedAtSchema,
-} from './game-resources.schema';
-export type {
-  BundledGameResources,
 } from './game-resources.schema';

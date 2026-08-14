@@ -43,6 +43,25 @@ describe('Remote Game Resources API', () => {
     );
   });
 
+  it('fetches unconditionally when no freshness timestamp is known', async () => {
+    const request = jest.fn<ReturnType<GameResourceFetch>, Parameters<GameResourceFetch>>().mockResolvedValue(createResponse({
+      body: {
+        item_alpha: { icon: 'ITEM_ALPHA', name: '测试物品甲' },
+      },
+    }));
+    const api = new RemoteGameResourcesApi(request);
+
+    await expect(api.fetchItem(null)).resolves.toEqual({
+      kind: 'updated',
+      table: { item_alpha: { icon: 'ITEM_ALPHA', name: '测试物品甲' } },
+      updatedAt: '2026-08-11T10:20:41.000Z',
+    });
+    expect(request).toHaveBeenCalledWith(
+      'https://ark-resource.arknights.app/data/item_table.json',
+      { headers: {} },
+    );
+  });
+
   it('accepts a 304 without reading a body', async () => {
     const response = createResponse({ ok: false, status: 304 });
     const api = new RemoteGameResourcesApi(() => Promise.resolve(response));
