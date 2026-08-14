@@ -6,8 +6,6 @@ import {
   RefreshCw,
   Route,
   Server,
-  Signal,
-  SignalZero,
 } from 'lucide-react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +31,8 @@ import {
   TerminalPanel,
   TerminalText,
 } from '@/components';
+import { API_NODE_HOSTS } from '@/constants/api';
+import type { ApiNodeHost } from '@/constants/api';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import { apiNodeIdSchema } from '@/schemas/api-node';
 import type { ApiNode, ApiNodeId } from '@/schemas/api-node';
@@ -71,9 +71,20 @@ export function NetworkSettingsScreen({
   const colors = getTokens().color;
   const layoutSize = useLayoutSize();
   const reducedMotion = useReducedMotion();
-  const selectedApiNode: ApiNode | undefined = nodes.find(
+  const nodesById = new Map(nodes.map((node) => [node.id, node]));
+  const buildNode = (host: ApiNodeHost): ApiNode => {
+    const probed = nodesById.get(host.id);
+    return {
+      id: host.id,
+      description: host.description,
+      latencyMs: probed?.latencyMs ?? 0,
+      outcome: probed?.outcome ?? 'unreachable',
+    };
+  };
+  const displayNodes: readonly ApiNode[] = API_NODE_HOSTS.map(buildNode);
+  const selectedApiNode: ApiNode = displayNodes.find(
     (apiNode) => apiNode.id === selectedApiNodeId,
-  ) ?? nodes[0];
+  ) ?? buildNode(API_NODE_HOSTS[0]);
 
   const handleNodeChange = (candidateNodeId: string) => {
     const result = v.safeParse(apiNodeIdSchema, candidateNodeId);
@@ -89,7 +100,7 @@ export function NetworkSettingsScreen({
   const isChecking = queryStatus === 'pending';
   const detectionStatus: DetectionStatus = isChecking
     ? 'checking'
-    : selectedApiNode?.outcome ?? 'unreachable';
+    : selectedApiNode.outcome;
   const detectionComplete = detectionStatus !== 'checking';
   const detectionPresentation = {
     buttonBackground: detectionComplete ? '$appAccentSoft' : '$appWarningSoft',
@@ -101,7 +112,7 @@ export function NetworkSettingsScreen({
     buttonLabel: t(detectionComplete ? 'network.retest' : 'network.checking'),
     buttonTone: detectionComplete ? '$appAccent' : '$appWarning',
     latencyAnimationKey: detectionComplete
-      ? `latency-${selectedApiNode?.id ?? 'none'}`
+      ? `latency-${selectedApiNode.id}`
       : 'checking',
     panelIndicatorOpacity: detectionComplete ? 0.55 : 1,
     panelIndicatorTone: detectionComplete ? '$appAccent' : '$appWarning',
@@ -112,57 +123,23 @@ export function NetworkSettingsScreen({
       checking: {
         latencyTone: '$appMuted',
         latencyValue: '--',
-        statusIcon: <Spinner size="small" color="$appWarning" />,
-        statusLabel: t('network.checking'),
-        statusTone: '$appWarning',
       },
       reachable: {
-        latencyTone: resolveLatencyTone(selectedApiNode?.latencyMs ?? 0),
-        latencyValue: selectedApiNode?.latencyMs ?? '--',
-        statusIcon: <Signal size={15} color={colors.appSuccess.val} strokeWidth={1.8} />,
-        statusLabel: t('network.connected'),
-        statusTone: '$appSuccess',
+        latencyTone: resolveLatencyTone(selectedApiNode.latencyMs),
+        latencyValue: selectedApiNode.latencyMs,
       },
       unreachable: {
         latencyTone: '$appDanger',
         latencyValue: '--',
-        statusIcon: <SignalZero size={15} color={colors.appDanger.val} strokeWidth={1.8} />,
-        statusLabel: t('network.unreachable'),
-        statusTone: '$appDanger',
       },
     } as const)[detectionStatus],
   } as const;
-
-  if (!selectedApiNode) {
-    return (
-      <SettingsPage>
-        <YStack gap="$3" $md={{ gap: '$5' }}>
-          <TerminalNotice tone="danger">
-            {queryError ? t('network.queryError') : t('network.checking')}
-          </TerminalNotice>
-          <Button
-            borderWidth={1}
-            borderColor="$appAccentBorder"
-            bg="$appAccentSoft"
-            disabled={isChecking}
-            onPress={handleRetest}
-          >
-            {isChecking ? <Spinner size="small" color="$appWarning" /> : null}
-            <MonoText size="$2.5" color="$appAccent">
-              {t(isChecking ? 'network.checking' : 'network.retest')}
-            </MonoText>
-          </Button>
-        </YStack>
-      </SettingsPage>
-    );
-  }
 
   return (
     <SettingsPage>
       {layoutSize === 'large' ? (
         <SectionPageHeader
           code={t('network.code')}
-          description={t('network.description')}
           eyebrow={t('network.eyebrow')}
           status={t('network.status')}
           title={t('network.title')}
@@ -259,12 +236,6 @@ export function NetworkSettingsScreen({
                   </TerminalText>
                 </YStack>
               </AnimatePresence>
-              <XStack items="center" gap="$2" pt="$2">
-                {detectionPresentation.statusIcon}
-                <MonoText size="$2" color={detectionPresentation.statusTone}>
-                  {detectionPresentation.statusLabel}
-                </MonoText>
-              </XStack>
             </YStack>
 
             <YStack minW={180} items="flex-start" gap="$1" $md={{ items: 'flex-end' }}>
@@ -359,17 +330,6 @@ export function NetworkSettingsScreen({
             </XStack>
           ) : null}
 
-          {layoutSize === 'small' ? (
-            <MonoText
-              size="$2"
-              lineHeight="$3"
-              color="$appText"
-              selectable
-            >
-              {t('network.description')}
-            </MonoText>
-          ) : null}
-
           <RadioGroup
             value={selectedApiNodeId}
             onValueChange={handleNodeChange}
@@ -384,7 +344,7 @@ export function NetworkSettingsScreen({
               gap="$3"
               $lg={{ flexDirection: 'row' }}
             >
-              {nodes.map((apiNode, index) => {
+              {displayNodes.map((apiNode, index) => {
                 const isSelected = apiNode.id === selectedApiNodeId;
                 const isReachable = apiNode.outcome === 'reachable';
                 const latencyTone = isReachable
@@ -494,8 +454,6 @@ export function NetworkSettingsScreen({
             </TerminalNotice>
           ) : null}
         </YStack>
-
-        <TerminalNotice>{t('network.mockNotice')}</TerminalNotice>
       </YStack>
     </SettingsPage>
   );

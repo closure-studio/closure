@@ -6,7 +6,7 @@ import {
   RemoteGameResourcesApi,
 } from '@/features/dashboard/api';
 import type { ApiNodeAdapter } from '@/features/settings/api-node/api';
-import { MockApiNodeAdapter } from '@/features/settings/api-node/api';
+import { RemoteApiNodeAdapter } from '@/features/settings/api-node/api';
 
 export type QueryDependencies = {
   apiNodeAdapter: ApiNodeAdapter;
@@ -16,7 +16,7 @@ export type QueryDependencies = {
 };
 
 const defaultDependencies: QueryDependencies = {
-  apiNodeAdapter: new MockApiNodeAdapter(),
+  apiNodeAdapter: new RemoteApiNodeAdapter(),
   arkHostApi: new MockArkHostApi(),
   authAdapter: new MockAuthAdapter(),
   gameResourcesApi: new RemoteGameResourcesApi(),

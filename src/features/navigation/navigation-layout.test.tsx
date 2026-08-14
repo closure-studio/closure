@@ -12,6 +12,8 @@ import {
 const mockUsePathname = jest.fn(() => '/dashboard/overview');
 const mockRouterReplace = jest.fn();
 const mockReturnToDashboard = jest.fn();
+const mockUseSelectedGameAccount = jest.fn<{ nickname: string; avatar: { id: string; type: string } } | null, []>();
+const mockGetGameAvatarImageUrl = jest.fn<string | null, [unknown]>();
 let mockLayoutSize: 'small' | 'large' = 'small';
 const mockSurfaceRecords: {
   enabled: boolean;
@@ -46,6 +48,11 @@ jest.mock('react-native-reanimated', () => {
 
 jest.mock('@/providers/layout-size-provider', () => ({
   useLayoutSize: () => mockLayoutSize,
+}));
+
+jest.mock('@/features/dashboard', () => ({
+  useSelectedGameAccount: () => mockUseSelectedGameAccount(),
+  getGameAvatarImageUrl: (avatar: unknown) => mockGetGameAvatarImageUrl(avatar),
 }));
 
 jest.mock('./back-navigation', () => ({
@@ -93,6 +100,8 @@ describe('Small Screen NavigationLayout header', () => {
     mockUsePathname.mockReturnValue('/dashboard/overview');
     mockRouterReplace.mockClear();
     mockReturnToDashboard.mockClear();
+    mockUseSelectedGameAccount.mockReturnValue(null);
+    mockGetGameAvatarImageUrl.mockReturnValue(null);
     mockLayoutSize = 'small';
     mockSurfaceRecords.length = 0;
   });
@@ -115,6 +124,28 @@ describe('Small Screen NavigationLayout header', () => {
     expect(screen.getByTestId('settings-route-content')).toBeTruthy();
     expect(screen.queryByTestId('settings-scope-backdrop')).toBeNull();
   });
+
+  it('shows the selected Game Account nickname as the dashboard header title', async () => {
+    mockUseSelectedGameAccount.mockReturnValue({
+      nickname: '欧皇大佬',
+      avatar: { id: 'avatar_def_10', type: 'DEFAULT' },
+    });
+    mockGetGameAvatarImageUrl.mockReturnValue('https://example.test/avatar.webp');
+
+    const screen = await render(<NavigationTestTree scope="dashboard" />);
+
+    expect(screen.getByText('欧皇大佬')).toBeTruthy();
+    expect(mockGetGameAvatarImageUrl).toHaveBeenCalledWith({ id: 'avatar_def_10', type: 'DEFAULT' });
+  });
+
+  it('keeps the settings page label as the header title on Large Screen Settings', async () => {
+    mockLayoutSize = 'large';
+    mockUsePathname.mockReturnValue('/settings/network');
+
+    const screen = await render(<NavigationTestTree scope="settings" />);
+
+    expect(screen.getByText('navigation:pages.network.label')).toBeTruthy();
+  });
 });
 
 describe('NavigationLayout settings swipe surface', () => {
@@ -122,6 +153,8 @@ describe('NavigationLayout settings swipe surface', () => {
     mockUsePathname.mockReturnValue('/settings/network');
     mockRouterReplace.mockClear();
     mockReturnToDashboard.mockClear();
+    mockUseSelectedGameAccount.mockReturnValue(null);
+    mockGetGameAvatarImageUrl.mockReturnValue(null);
     mockLayoutSize = 'small';
     mockSurfaceRecords.length = 0;
   });

@@ -1,3 +1,4 @@
+export { getGameAvatarImageUrl } from './avatar-image';
 export { ActivityTimelineView } from './components/activity-timeline-view';
 export { DashboardPageScroll, DashboardShell } from './components/dashboard-shell';
 export { GameAccountOverviewView } from './components/game-account-overview-view';

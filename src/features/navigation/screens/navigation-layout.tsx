@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { XStack, YStack } from 'tamagui';
 
 import { HorizontalSwipeSurface } from '@/components';
-import { ARK_RESOURCES_ORIGIN } from '@/config/ark-resources';
+import { getGameAvatarImageUrl, useSelectedGameAccount } from '@/features/dashboard';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import type { HorizontalSwipeDirection } from '@/utils/horizontal-swipe';
 import { LargeScreenNavigationSidebar } from '../components/large-screen-navigation-sidebar';
@@ -27,7 +27,6 @@ import {
 
 const dashboardPages = Object.values(dashboardNavigation.pages).sort((left, right) => left.sort - right.sort);
 const settingsPages = Object.values(settingsNavigation.pages).sort((left, right) => left.sort - right.sort);
-const MOCK_PROFILE_AVATAR_URL = `${ARK_RESOURCES_ORIGIN}/assets/avatar/ASSISTANT/char_003_kalts_sale_14.webp`;
 
 type NavigationLayoutProps = PropsWithChildren<{
   onLogout: () => void;
@@ -44,8 +43,9 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
   const matchedSettingsPage = settingsPages.find((page) => page.route === pathname);
   const activeDashboardPage = matchedDashboardPage ?? dashboardNavigation.defaultPage;
   const activeSettingsPage = matchedSettingsPage ?? settingsNavigation.defaultPage;
+  const selectedGameAccount = useSelectedGameAccount();
   const headerTitle = scope === 'dashboard'
-    ? tDashboard(`navigation.sections.${activeDashboardPage.id}.label`)
+    ? (selectedGameAccount?.nickname ?? '')
     : t(`pages.${activeSettingsPage.id}.label`);
   const isSettingsSwipeEnabled = scope === 'settings' && layoutSize === 'small';
   const { enterSettings, returnToDashboard } = useSettingsBackNavigation({
@@ -151,7 +151,9 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
                   >
                     <NavigationHeader
                       avatarLabel={t('smallScreen.avatarLabel')}
-                      avatarUrl={MOCK_PROFILE_AVATAR_URL}
+                      avatarUrl={scope === 'dashboard'
+                        ? getGameAvatarImageUrl(selectedGameAccount?.avatar)
+                        : null}
                       isSettingsActive={scope === 'settings'}
                       onSettingsPress={handleScopePress}
                       settingsLabel={t(scope === 'dashboard' ? 'scopeSwitcher.openSettings' : 'scopeSwitcher.returnToDashboard')}

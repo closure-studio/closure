@@ -1,9 +1,8 @@
 {
   "network": {
     "code": "SET-NET / 01",
-    "description": "Measure and select the API Node used by this session. Results are deterministic mocks and no network request is sent.",
     "eyebrow": "Connection routing",
-    "status": "Mock link online",
+    "status": "Routing link online",
     "title": "Network Settings",
     "nodesCode": "NODE",
     "nodesTitle": "API Nodes",
@@ -19,14 +18,11 @@
     },
     "checking": "Checking",
     "queryError": "Unable to query API Nodes. Retry the probe.",
-    "connected": "Reachable",
-    "unreachable": "Connection failed",
     "active": "Active",
     "switch": "Switch",
-    "latency": "Mock latency",
+    "latency": "Latency",
     "retest": "Retest nodes",
-    "retestLabel": "Retest every API Node",
-    "mockNotice": "MOCK MODE // The selected API Node is saved for this device"
+    "retestLabel": "Retest every API Node"
   },
   "account": {
     "code": "SET-AUTH / 02",

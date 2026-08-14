@@ -7,7 +7,7 @@ import { i18n } from '@/i18n';
 import { tamaguiConfig } from '../../../../../tamagui.config';
 import { mockApiNodes } from '@/mocks/api-node';
 import { NetworkSettingsScreen } from './network-settings-screen';
-import type { ApiNodeId } from '@/schemas/api-node';
+import type { ApiNode, ApiNodeId } from '@/schemas/api-node';
 
 jest.mock('@/providers/layout-size-provider', () => ({
   useLayoutSize: () => 'small',
@@ -24,17 +24,20 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-async function renderNetworkSettings() {
+async function renderNetworkSettings(overrides?: {
+  nodes?: readonly ApiNode[];
+  queryStatus?: 'pending' | 'success';
+}) {
   const onRefresh = jest.fn<Promise<void>, []>().mockResolvedValue(undefined);
   function NetworkTestHarness() {
     const [selectedApiNodeId, setSelectedApiNodeId] = useState<ApiNodeId>('domestic');
     return (
       <NetworkSettingsScreen
-        nodes={mockApiNodes}
+        nodes={overrides?.nodes ?? mockApiNodes}
         onRefresh={onRefresh}
         onSelectApiNode={setSelectedApiNodeId}
         queryError={null}
-        queryStatus="success"
+        queryStatus={overrides?.queryStatus ?? 'success'}
         selectedApiNodeId={selectedApiNodeId}
       />
     );
@@ -69,5 +72,13 @@ describe('NetworkSettingsScreen API Node selection', () => {
     expect(screen.getByRole('radio', {
       name: i18n.t('settings:network.nodes.overseas'),
     })).toBeTruthy();
+  });
+
+  it('renders both API Node cards while detection is pending', async () => {
+    const screen = await renderNetworkSettings({ nodes: [], queryStatus: 'pending' });
+
+    expect(screen.getByTestId('api-node-option-domestic')).toBeTruthy();
+    expect(screen.getByTestId('api-node-option-overseas')).toBeTruthy();
+    expect(screen.getAllByText('--')).toHaveLength(2);
   });
 });

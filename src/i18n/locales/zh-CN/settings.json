@@ -1,9 +1,8 @@
 {
   "network": {
     "code": "SET-NET / 01",
-    "description": "检测并选择本次会话使用的 API 节点。当前数据为确定性模拟结果，不会发起真实网络请求。",
     "eyebrow": "连接路由",
-    "status": "模拟链路在线",
+    "status": "链路路由在线",
     "title": "网络设置",
     "nodesCode": "NODE",
     "nodesTitle": "API 节点",
@@ -19,14 +18,11 @@
     },
     "checking": "检测中",
     "queryError": "无法查询 API 节点，请重试。",
-    "connected": "可连接",
-    "unreachable": "连接失败",
     "active": "使用中",
     "switch": "切换",
-    "latency": "模拟延迟",
+    "latency": "延迟",
     "retest": "重新检测",
-    "retestLabel": "重新检测所有 API 节点",
-    "mockNotice": "MOCK MODE // 所选 API 节点将保存在此设备上"
+    "retestLabel": "重新检测所有 API 节点"
   },
   "account": {
     "code": "SET-AUTH / 02",
