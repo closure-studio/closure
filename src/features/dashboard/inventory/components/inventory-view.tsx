@@ -1,10 +1,10 @@
-import { FlashList, useMappingHelper } from '@shopify/flash-list';
+import { FlashList } from '@shopify/flash-list';
 import { PackageOpen } from 'lucide-react-native';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { XStack, YStack, getTokens } from 'tamagui';
 
-import { MonoText, TerminalText } from '@/components';
-import { useResponsiveGridRows } from '@/hooks/use-responsive-grid-rows';
+import { MonoText, ResponsiveGridRow, TerminalText } from '@/components';
+import { getResponsiveGridLayout, useResponsiveGridRows } from '@/hooks/use-responsive-grid-rows';
 import type { ItemTable } from '@/schemas/game-data';
 import type { Inventory } from '@/schemas/game-account';
 import type { LayoutSize } from '@/schemas/layout-size';
@@ -35,57 +35,6 @@ function getEntryItemKey(entry: InventoryEntry): string {
 function getItemDescription(value: string | null | undefined): string | undefined {
   return value ? value.split('\\n').join('\n') : undefined;
 }
-
-export function getInventoryGridLayout(containerWidth: number, gap: number, minimumItemWidth: number) {
-  if (containerWidth <= 0) {
-    return { columnCount: 1, itemWidth: undefined };
-  }
-
-  const columnCount = Math.max(
-    1,
-    Math.floor((containerWidth + gap) / (minimumItemWidth + gap)),
-  );
-
-  return {
-    columnCount,
-    itemWidth: (containerWidth - gap * (columnCount - 1)) / columnCount,
-  };
-}
-
-const InventoryRow = memo(function InventoryRow({
-  row,
-  selectedItemId,
-  imageOnly,
-  itemWidth,
-  onSelect,
-  size,
-  gap,
-}: {
-  row: InventoryEntry[];
-  selectedItemId: string | null;
-  imageOnly: boolean;
-  itemWidth: number | undefined;
-  onSelect: (itemId: string) => void;
-  size: LayoutSize;
-  gap: number;
-}) {
-  const { getMappingKey } = useMappingHelper();
-  return (
-    <XStack gap={gap} pb={gap} width="100%">
-      {row.map((entry, index) => (
-        <InventoryCell
-          key={getMappingKey(entry.itemId, index)}
-          entry={entry}
-          imageOnly={imageOnly}
-          itemWidth={itemWidth}
-          onSelect={onSelect}
-          selected={entry.itemId === selectedItemId}
-          size={size}
-        />
-      ))}
-    </XStack>
-  );
-});
 
 const InventoryPreview = memo(function InventoryPreview({
   entry,
@@ -188,7 +137,7 @@ export function InventoryView({
   const artworkWidth = tokens.size[INVENTORY_CELL_ARTWORK_SIZE_TOKEN[layoutSize]].val;
   const { rows, listWidth, layout, handleLayout, keyExtractor } = useResponsiveGridRows(
     entries,
-    (width) => getInventoryGridLayout(width, gridGap, minimumItemWidth),
+    (width) => getResponsiveGridLayout(width, gridGap, minimumItemWidth),
     getEntryItemKey,
   );
   const { columnCount, itemWidth } = layout;
@@ -197,14 +146,20 @@ export function InventoryView({
 
   const renderItem = useCallback(
     ({ item: row, extraData }: { item: InventoryEntry[]; extraData?: string | null }) => (
-      <InventoryRow
+      <ResponsiveGridRow
         row={row}
-        selectedItemId={extraData ?? null}
-        imageOnly={imageOnly}
-        itemWidth={itemWidth}
-        onSelect={setRequestedItemId}
-        size={layoutSize}
         gap={gridGap}
+        getItemKey={getEntryItemKey}
+        renderCell={(entry) => (
+          <InventoryCell
+            entry={entry}
+            imageOnly={imageOnly}
+            itemWidth={itemWidth}
+            onSelect={setRequestedItemId}
+            selected={entry.itemId === (extraData ?? null)}
+            size={layoutSize}
+          />
+        )}
       />
     ),
     [gridGap, imageOnly, itemWidth, layoutSize],

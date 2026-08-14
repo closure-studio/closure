@@ -3,6 +3,7 @@ export { SectionPageHeader } from './layout/section-page-header';
 export { Avatar, type AvatarProps } from './ui/avatar';
 export { AvatarFilter, type AvatarFilterProps } from './ui/avatar-filter';
 export { HorizontalSwipeSurface } from './layout/horizontal-swipe-surface';
+export { ResponsiveGridRow, type ResponsiveGridRowProps } from './layout/responsive-grid-row';
 export { FlickeringStatusIndicator } from './ui/motion/flickering-status-indicator';
 export {
   NotchedButton,

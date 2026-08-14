@@ -4,11 +4,12 @@ import { TamaguiProvider } from 'tamagui';
 import * as v from 'valibot';
 
 import { tamaguiConfig } from '../../../../../tamagui.config';
+import { getResponsiveGridLayout } from '@/hooks/use-responsive-grid-rows';
 import { itemTableSchema } from '@/schemas/game-data';
 import { inventorySchema } from '@/schemas/game-account';
 import type { LayoutSize } from '@/schemas/layout-size';
 import { getItemImageUrl } from '../item-image';
-import { InventoryView, getInventoryGridLayout } from './inventory-view';
+import { InventoryView } from './inventory-view';
 
 let mockLayoutSize: LayoutSize = 'small';
 
@@ -70,7 +71,7 @@ function gridLayoutEvent(width: number) {
   };
 }
 
-describe('getInventoryGridLayout', () => {
+describe('getResponsiveGridLayout', () => {
   it.each([
     { containerWidth: 0, columnCount: 1, itemWidth: undefined },
     { containerWidth: -16, columnCount: 1, itemWidth: undefined },
@@ -89,7 +90,7 @@ describe('getInventoryGridLayout', () => {
   ])(
     'computes $columnCount columns and their width for a $containerWidth container',
     ({ containerWidth, columnCount, itemWidth }) => {
-      const layout = getInventoryGridLayout(containerWidth, 7, 124);
+      const layout = getResponsiveGridLayout(containerWidth, 7, 124);
 
       expect(layout.columnCount).toBe(columnCount);
       if (itemWidth === undefined) {

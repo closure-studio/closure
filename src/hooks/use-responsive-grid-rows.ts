@@ -34,3 +34,19 @@ export function useResponsiveGridRows<T, TLayout extends { columnCount: number }
 
   return { rows, listWidth, layout, handleLayout, keyExtractor };
 }
+
+export function getResponsiveGridLayout(containerWidth: number, gap: number, minimumItemWidth: number) {
+  if (containerWidth <= 0) {
+    return { columnCount: 1, itemWidth: undefined };
+  }
+
+  const columnCount = Math.max(
+    1,
+    Math.floor((containerWidth + gap) / (minimumItemWidth + gap)),
+  );
+
+  return {
+    columnCount,
+    itemWidth: (containerWidth - gap * (columnCount - 1)) / columnCount,
+  };
+}

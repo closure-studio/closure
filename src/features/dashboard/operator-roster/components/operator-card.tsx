@@ -19,7 +19,7 @@ export const OperatorCard = memo(function OperatorCard({
   const { t } = useTranslation('dashboard');
   const level = operator.level;
   return (
-    <TerminalPanel minW={OPERATOR_CARD_MIN_WIDTH} grow={1} shrink={1} p="$3">
+    <TerminalPanel testID={`operator-card-${operator.charId}`} minW={OPERATOR_CARD_MIN_WIDTH} grow={1} shrink={1} p="$3">
       <XStack justify="space-between"><MonoText size="$1" color="$appAccent">{operator.charId}</MonoText><MonoText size="$1">{t('operators.eliteLevel', { level: operator.evolvePhase ?? unavailable })}</MonoText></XStack>
       <TerminalText mt="$2" size="$4" fontWeight="800" numberOfLines={1}>{name}</TerminalText>
       <XStack mt="$2" justify="space-between"><MonoText size="$1">{t('operators.detail.level')}</MonoText><MonoText size="$1" color="$appAccent">{level ?? unavailable}</MonoText></XStack>
