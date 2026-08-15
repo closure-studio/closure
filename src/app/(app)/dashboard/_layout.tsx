@@ -59,11 +59,8 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
 
   return (
     <DashboardShell
-      selectedGameAccountId={selectedGameAccountId ?? ''}
-      gameAccounts={gameAccounts}
       isContentSwipeEnabled={isFocused && layoutSize === 'small' && gameAccounts.length > 1}
       onContentSwipe={handleGameAccountSwipe}
-      onSelectGameAccount={selectGameAccount}
     >
       <DashboardTabs
         detachInactiveScreens={process.env.EXPO_OS !== 'ios'}

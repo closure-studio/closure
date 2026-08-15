@@ -3,11 +3,11 @@ import { ScrollView, YStack } from 'tamagui';
 
 import { HorizontalSwipeSurface } from '@/components';
 import type { HorizontalSwipeDirection } from '@/utils/horizontal-swipe';
-import { DashboardSecondaryHeader, type DashboardSecondaryHeaderProps } from './dashboard-secondary-header';
+import { DashboardSecondaryHeader } from './dashboard-secondary-header';
 
 const DASHBOARD_CONTENT_MAX_WIDTH = 1152;
 
-type DashboardShellProps = DashboardSecondaryHeaderProps & {
+type DashboardShellProps = {
   isContentSwipeEnabled: boolean;
   onContentSwipe: (direction: HorizontalSwipeDirection) => void;
 };
@@ -16,11 +16,10 @@ export function DashboardShell({
   children,
   isContentSwipeEnabled,
   onContentSwipe,
-  ...headerProps
 }: PropsWithChildren<DashboardShellProps>) {
   return (
     <YStack grow={1} shrink={1} minH={0} overflow="hidden">
-      <DashboardSecondaryHeader {...headerProps} />
+      <DashboardSecondaryHeader />
       <HorizontalSwipeSurface
         enabled={isContentSwipeEnabled}
         onSwipe={onContentSwipe}
