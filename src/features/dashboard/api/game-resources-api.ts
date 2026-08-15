@@ -1,7 +1,7 @@
 import { fetch } from 'expo/fetch';
 import * as v from 'valibot';
 
-import { ARK_RESOURCES_ORIGIN } from '@/config/ark-resources';
+import { ARK_RESOURCES_ORIGIN } from '@/constants/api';
 import {
   characterTableSchema,
   gameResourceUpdatedAtSchema,

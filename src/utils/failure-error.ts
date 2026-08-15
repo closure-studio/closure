@@ -14,3 +14,10 @@ export class FailureError<T extends TypedFailure> extends Error {
     return this.failure.code;
   }
 }
+
+export function unwrapResult<T, E extends TypedFailure>(
+  result: { ok: true; data: T } | { ok: false; error: E },
+): T {
+  if (!result.ok) throw new FailureError(result.error);
+  return result.data;
+}

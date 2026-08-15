@@ -18,9 +18,6 @@ jest.mock('@/features/dashboard', () => {
     DashboardPageFrame: ({ children }: PropsWithChildren) => (
       <View testID="dashboard-page-frame">{children}</View>
     ),
-    DashboardPageScroll: ({ children }: PropsWithChildren) => (
-      <View testID="dashboard-page-scroll">{children}</View>
-    ),
     GameAccountOverviewView: () => <Text testID="overview-screen" />,
     getCharacterDisplayName: (_table: object, characterId: string) => characterId,
     getStageDisplayLabel: (_table: object, stageId: string) => stageId,
@@ -38,10 +35,10 @@ jest.mock('@/features/dashboard', () => {
 
 describe('dashboard routes', () => {
   it.each([
-    ['activity', DashboardActivityRoute, 'dashboard-page-scroll'],
+    ['activity', DashboardActivityRoute, 'dashboard-page-frame'],
     ['inventory', DashboardInventoryRoute, 'dashboard-page-frame'],
     ['operators', DashboardOperatorsRoute, 'dashboard-page-frame'],
-    ['overview', DashboardOverviewRoute, 'dashboard-page-scroll'],
+    ['overview', DashboardOverviewRoute, 'dashboard-page-frame'],
   ] as const)('renders the dedicated %s screen', async (screenId, Route, wrapperTestId) => {
     const screen = await render(<Route />);
 

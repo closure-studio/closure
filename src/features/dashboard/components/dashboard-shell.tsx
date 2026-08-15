@@ -33,8 +33,8 @@ export function DashboardShell({
   );
 }
 
-export function DashboardPageFrame({ children }: PropsWithChildren) {
-  return (
+export function DashboardPageFrame({ children, scroll = false }: PropsWithChildren<{ scroll?: boolean }>) {
+  const frame = (
     <YStack
       testID="dashboard-page-frame"
       width="100%"
@@ -46,15 +46,14 @@ export function DashboardPageFrame({ children }: PropsWithChildren) {
       minH={0}
       p="$3.5"
       pt="$3"
-      pb="$4"
-      $md={{ px: '$5', pt: '$4', pb: '$5' }}
+      $md={{ px: '$5', pt: '$4' }}
     >
       {children}
     </YStack>
   );
-}
 
-export function DashboardPageScroll({ children }: PropsWithChildren) {
+  if (!scroll) return frame;
+
   return (
     <YStack grow={1} shrink={1} minW={0} minH={0} height="100%" maxH="100%" overflow="hidden">
       <ScrollView
@@ -65,17 +64,12 @@ export function DashboardPageScroll({ children }: PropsWithChildren) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ grow: 1 }}
       >
-        <YStack
-          width="100%"
-          maxW={DASHBOARD_CONTENT_MAX_WIDTH}
-          self="center"
-          p="$3.5"
-          pt="$3"
-          $md={{ p: '$5', pt: '$4' }}
-        >
-          {children}
-        </YStack>
+        {frame}
       </ScrollView>
     </YStack>
   );
+}
+
+export function DashboardPageScroll({ children }: PropsWithChildren) {
+  return <DashboardPageFrame scroll>{children}</DashboardPageFrame>;
 }

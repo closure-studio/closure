@@ -25,14 +25,7 @@ import type {
 } from '@/schemas/game-data';
 import * as v from 'valibot';
 
-const HOURS_PER_DAY = 24;
-const MINUTES_PER_HOUR = 60;
-const SECONDS_PER_MINUTE = 60;
-const MILLISECONDS_PER_SECOND = 1000;
-export const GAME_RESOURCES_STALE_TIME_MS = HOURS_PER_DAY
-  * MINUTES_PER_HOUR
-  * SECONDS_PER_MINUTE
-  * MILLISECONDS_PER_SECOND;
+const GAME_RESOURCES_STALE_TIME_MS = 86_400_000; // 24h
 
 type GameResourceData<T> = {
   table: T;

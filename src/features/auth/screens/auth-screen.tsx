@@ -6,6 +6,7 @@ import { ScrollView, XStack, YStack, getTokens } from 'tamagui';
 
 import { DecorativeBarcode, FlickeringStatusIndicator, MonoText } from '@/components';
 import type { AuthFailure } from '../api';
+import { authFailureMessage } from '../failure-messages';
 import type { LoginSubmission, PasswordRecoveryRequestInput } from '@/schemas/auth';
 import { AccessOrbit } from '../components/access-orbit';
 import { LoginForm } from '../components/login-form';
@@ -23,66 +24,6 @@ type AuthScreenProps = {
   passwordRecoveryStatus: MutationStatus;
 };
 
-function loginFailureMessage(error: AuthFailure | null, translate: (key: string) => string): string | null {
-  if (!error) return null;
-  switch (error.code) {
-    case 'invalid-credentials':
-      return translate('login.errors.invalidCredentials');
-    case 'account-banned':
-      return translate('login.errors.accountBanned');
-    case 'rate-limited':
-      return translate('login.errors.rateLimited');
-    case 'network-unavailable':
-    case 'timeout':
-      return translate('login.errors.networkUnavailable');
-    case 'server-error':
-      return translate('login.errors.serverError');
-    case 'invalid-response':
-      return translate('login.errors.invalidResponse');
-    case 'already-bound':
-    case 'email-already-registered':
-    case 'invalid-input':
-    case 'invalid-oauth-code':
-    case 'invalid-verification-code':
-    case 'permission-denied':
-    case 'session-expired':
-    case 'unknown-business-error':
-    case 'user-not-found':
-    case 'verification-code-expired':
-      return translate('login.errors.fallback');
-  }
-  return translate('login.errors.fallback');
-}
-
-function recoveryFailureMessage(error: AuthFailure | null, translate: (key: string) => string): string | null {
-  if (!error) return null;
-  switch (error.code) {
-    case 'user-not-found':
-      return translate('recovery.errors.userNotFound');
-    case 'network-unavailable':
-    case 'timeout':
-      return translate('recovery.errors.networkUnavailable');
-    case 'server-error':
-      return translate('recovery.errors.serverError');
-    case 'invalid-response':
-      return translate('recovery.errors.invalidResponse');
-    case 'account-banned':
-    case 'already-bound':
-    case 'email-already-registered':
-    case 'invalid-credentials':
-    case 'invalid-input':
-    case 'invalid-oauth-code':
-    case 'invalid-verification-code':
-    case 'permission-denied':
-    case 'rate-limited':
-    case 'session-expired':
-    case 'unknown-business-error':
-    case 'verification-code-expired':
-      return translate('recovery.errors.fallback');
-  }
-  return translate('recovery.errors.fallback');
-}
-
 export function AuthScreen({
   isSubmitting,
   loginError,
@@ -95,8 +36,8 @@ export function AuthScreen({
   const { t } = useTranslation('auth');
   const colors = getTokens().color;
   const reducedMotion = useReducedMotion();
-  const loginErrorMessage = loginFailureMessage(loginError, t);
-  const recoveryErrorMessage = recoveryFailureMessage(passwordRecoveryError, t);
+  const loginErrorMessage = authFailureMessage(loginError, t, 'login');
+  const recoveryErrorMessage = authFailureMessage(passwordRecoveryError, t, 'recovery');
 
   return (
     <KeyboardAvoidingView behavior={process.env.EXPO_OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>

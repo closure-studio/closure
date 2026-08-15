@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react-native';
 import { Text } from 'react-native';
 
-import { LayoutSizeProvider, useLayoutSize } from './layout-size-provider';
+import { useLayoutSize } from './layout-size-provider';
 
 let mockMediaMd = false;
 
@@ -14,18 +14,14 @@ function LayoutSizeProbe() {
   return <Text>{layoutSize}</Text>;
 }
 
-describe('LayoutSizeProvider', () => {
+describe('useLayoutSize', () => {
   it.each([
     { mediaMd: false, layoutSize: 'small' },
     { mediaMd: true, layoutSize: 'large' },
-  ] as const)('derives $layoutSize from Tamagui md=$mediaMd', async ({ layoutSize, mediaMd }) => {
+  ] as const)('projects Tamagui md=$mediaMd to $layoutSize', async ({ layoutSize, mediaMd }) => {
     mockMediaMd = mediaMd;
 
-    await render(
-      <LayoutSizeProvider>
-        <LayoutSizeProbe />
-      </LayoutSizeProvider>,
-    );
+    await render(<LayoutSizeProbe />);
 
     expect(screen.getByText(layoutSize)).toBeTruthy();
   });

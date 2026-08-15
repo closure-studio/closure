@@ -55,18 +55,6 @@ export function resolveSettingsSwipeAction({
   return nextPage ? { pageId: nextPage.id, type: 'select-page' } : null;
 }
 
-export function hasAdjacentSettingsPage({
-  activeId,
-  direction,
-  items,
-}: {
-  activeId: SettingsPageId;
-  direction: HorizontalSwipeDirection;
-  items: readonly { id: SettingsPageId }[];
-}) {
-  return resolveSettingsSwipeAction({ activeId, direction, items })?.type === 'select-page';
-}
-
 function SettingsPagerTick() {
   return (
     <YStack width="100%" height="100%">
@@ -144,8 +132,8 @@ export function SettingsPagerTabs({
   tabListLabel: string;
 }) {
   const colors = getTokens().color;
-  const hasPreviousStep = hasAdjacentSettingsPage({ activeId, direction: 'right', items });
-  const hasNextStep = hasAdjacentSettingsPage({ activeId, direction: 'left', items });
+  const hasPreviousStep = resolveSettingsSwipeAction({ activeId, direction: 'right', items })?.type === 'select-page';
+  const hasNextStep = resolveSettingsSwipeAction({ activeId, direction: 'left', items })?.type === 'select-page';
 
   return (
     <YStack
@@ -170,16 +158,22 @@ export function SettingsPagerTabs({
           justify="center"
           gap="$3"
         >
-          <YStack
-            testID="settings-previous-icon"
-            height={PAGER_ITEM_HEIGHT}
-            items="center"
-            justify="center"
-            opacity={hasPreviousStep ? 0.55 : 0.15}
-            style={{ pointerEvents: 'none' }}
-          >
-            <ChevronLeft size={14} color={colors.appMuted.val} strokeWidth={1.5} />
-          </YStack>
+          {([
+            { testID: 'settings-previous-icon', icon: ChevronLeft, visible: hasPreviousStep },
+            { testID: 'settings-next-icon', icon: ChevronRight, visible: hasNextStep },
+          ] as const).map(({ testID, icon: Icon, visible }) => (
+            <YStack
+              key={testID}
+              testID={testID}
+              height={PAGER_ITEM_HEIGHT}
+              items="center"
+              justify="center"
+              opacity={visible ? 0.55 : 0.15}
+              style={{ pointerEvents: 'none' }}
+            >
+              <Icon size={14} color={colors.appMuted.val} strokeWidth={1.5} />
+            </YStack>
+          ))}
 
           <YStack gap="$1.5">
             <XStack items="center" justify="center" role="tablist" aria-label={tabListLabel}>
@@ -235,17 +229,6 @@ export function SettingsPagerTabs({
             </XStack>
 
             <AnimatedSwipeHint>{swipeHint}</AnimatedSwipeHint>
-          </YStack>
-
-          <YStack
-            testID="settings-next-icon"
-            height={PAGER_ITEM_HEIGHT}
-            items="center"
-            justify="center"
-            opacity={hasNextStep ? 0.55 : 0.15}
-            style={{ pointerEvents: 'none' }}
-          >
-            <ChevronRight size={14} color={colors.appMuted.val} strokeWidth={1.5} />
           </YStack>
         </XStack>
       </YStack>

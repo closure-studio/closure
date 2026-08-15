@@ -7,13 +7,12 @@ import type {
   ArkHostGameDetail,
   ArkHostGameListEntry,
   ArkHostGameLogs,
-  ArkHostGachaEvent,
 } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
 import { useAppStore } from '@/store';
-import { FailureError } from '@/utils/failure-error';
+import { unwrapResult } from '@/utils/failure-error';
 import { getQueryDependencies } from '@/services/query-dependencies';
-import type { ArkHostResult, ArkHostSseSubscription } from './api';
+import type { ArkHostSseSubscription } from './api';
 
 const EMPTY_CHARACTERS: ArkHostCharacters = { chars: [], total: 0 };
 const EMPTY_GAME_LOGS: ArkHostGameLogs = { hasMore: false, logs: [] };
@@ -22,14 +21,8 @@ export const arkHostQueryKeys = {
   characters: (account: string) => ['arkhost', 'characters', account] as const,
   detail: (account: string) => ['arkhost', 'detail', account] as const,
   gameAccounts: (userId: string) => ['arkhost', 'game-accounts', userId] as const,
-  gacha: ['arkhost', 'gacha'] as const,
   logs: (account: string) => ['arkhost', 'logs', account] as const,
 };
-
-function unwrap<T>(result: ArkHostResult<T>): T {
-  if (!result.ok) throw new FailureError(result.error);
-  return result.data;
-}
 
 function mapGameAccount(entry: ArkHostGameListEntry): GameAccount {
   const color = entry.status.code === ARK_HOST_GAME_STATUS_CODE.gameError
@@ -64,7 +57,7 @@ export function useGameAccountsQuery() {
     enabled: session !== null,
     queryFn: async () => {
       const { arkHostApi } = getQueryDependencies();
-      return unwrap(await arkHostApi.fetchGameList()).map(mapGameAccount);
+      return unwrapResult(await arkHostApi.fetchGameList()).map(mapGameAccount);
     },
   });
 }
@@ -76,7 +69,7 @@ export function useGameDetailQuery(account: string | null) {
     enabled: account !== null,
     queryFn: async () => {
       if (!account) return null;
-      return unwrap(await arkHostApi.fetchGameDetail(account));
+      return unwrapResult(await arkHostApi.fetchGameDetail(account));
     },
   });
 }
@@ -88,7 +81,7 @@ export function useCharactersQuery(account: string | null) {
     enabled: account !== null,
     queryFn: async () => {
       if (!account) return EMPTY_CHARACTERS;
-      return unwrap(await arkHostApi.fetchCharacters(account));
+      return unwrapResult(await arkHostApi.fetchCharacters(account));
     },
   });
 }
@@ -100,7 +93,7 @@ export function useGameLogsQuery(account: string | null) {
     enabled: account !== null,
     queryFn: async () => {
       if (!account) return EMPTY_GAME_LOGS;
-      return unwrap(await arkHostApi.fetchGameLogs(account, 0));
+      return unwrapResult(await arkHostApi.fetchGameLogs(account, 0));
     },
   });
 }
@@ -158,11 +151,6 @@ export function useArkHostSync() {
                 ? page
                 : { ...page, logs: [event.data, ...page.logs] };
             },
-          );
-        } else {
-          queryClient.setQueryData<ArkHostGachaEvent[]>(
-            arkHostQueryKeys.gacha,
-            event.data,
           );
         }
       },

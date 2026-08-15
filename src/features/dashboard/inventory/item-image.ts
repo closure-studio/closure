@@ -1,4 +1,4 @@
-import { ARK_RESOURCES_ORIGIN } from '@/config/ark-resources';
+import { ARK_RESOURCES_ORIGIN } from '@/constants/api';
 
 const ITEM_IMAGE_BASE_URL = `${ARK_RESOURCES_ORIGIN}/assets/items`;
 

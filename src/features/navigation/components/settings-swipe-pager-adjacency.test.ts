@@ -1,29 +1,29 @@
 import { settingsNavigation } from '../navigation-config';
-import { hasAdjacentSettingsPage } from './settings-swipe-pager';
+import { resolveSettingsSwipeAction } from './settings-swipe-pager';
 
 const settingsItems = Object.values(settingsNavigation.pages)
   .sort((left, right) => left.sort - right.sort)
   .map(({ id }) => ({ id }));
 
-describe('hasAdjacentSettingsPage', () => {
+describe('settings swipe page adjacency', () => {
   it('does not treat exiting from the first page as a previous page', () => {
-    expect(hasAdjacentSettingsPage({
+    expect(resolveSettingsSwipeAction({
       activeId: 'network',
       direction: 'right',
       items: settingsItems,
-    })).toBe(false);
+    })?.type === 'select-page').toBe(false);
   });
 
   it('reports adjacent pages in either direction', () => {
-    expect(hasAdjacentSettingsPage({
+    expect(resolveSettingsSwipeAction({
       activeId: 'account',
       direction: 'right',
       items: settingsItems,
-    })).toBe(true);
-    expect(hasAdjacentSettingsPage({
+    })?.type === 'select-page').toBe(true);
+    expect(resolveSettingsSwipeAction({
       activeId: 'account',
       direction: 'left',
       items: settingsItems,
-    })).toBe(true);
+    })?.type === 'select-page').toBe(true);
   });
 });

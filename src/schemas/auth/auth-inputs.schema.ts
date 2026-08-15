@@ -1,9 +1,7 @@
 import * as v from 'valibot';
 
-const nonBlankStringSchema = v.pipe(
-  v.string(),
-  v.check((value) => value.trim().length > 0),
-);
+import { nonBlankStringSchema } from '@/schemas/primitives';
+
 const emailSchema = v.pipe(v.string(), v.trim(), v.email());
 const accessTokenSchema = v.pipe(v.string(), v.minLength(1));
 

@@ -27,6 +27,7 @@ import {
   TerminalText,
   TerminalTextField,
 } from '@/components';
+import { authFailureMessage } from '@/features/auth';
 import type { AuthFailure } from '@/features/auth';
 import { USER_PERMISSION } from '@/schemas/auth';
 import type { SessionPrincipal } from '@/schemas/auth';
@@ -51,39 +52,6 @@ export type AccountSettingsScreenProps = {
 
 function hasSuperAdminPermission(permission: number): boolean {
   return (permission & USER_PERMISSION.superAdmin) === USER_PERMISSION.superAdmin;
-}
-
-function passwordUpdateErrorMessage(
-  error: AuthFailure | null,
-  translate: (key: string) => string,
-): string | null {
-  if (!error) return null;
-  switch (error.code) {
-    case 'invalid-credentials':
-      return translate('account.errors.invalidCredentials');
-    case 'account-banned':
-      return translate('account.errors.accountBanned');
-    case 'session-expired':
-      return translate('account.errors.sessionExpired');
-    case 'network-unavailable':
-    case 'rate-limited':
-    case 'timeout':
-    case 'server-error':
-      return translate('account.errors.serverError');
-    case 'invalid-response':
-      return translate('account.errors.invalidResponse');
-    case 'already-bound':
-    case 'email-already-registered':
-    case 'invalid-input':
-    case 'invalid-oauth-code':
-    case 'invalid-verification-code':
-    case 'permission-denied':
-    case 'unknown-business-error':
-    case 'user-not-found':
-    case 'verification-code-expired':
-      return translate('account.errors.fallback');
-  }
-  return translate('account.errors.fallback');
 }
 
 function passwordErrorsFromIssues(issues: readonly { message: string }[]): PasswordErrors {
@@ -255,7 +223,7 @@ export function AccountSettingsScreen({
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(principal.registeredAt));
-  const translatedPasswordUpdateError = passwordUpdateErrorMessage(passwordUpdateError, t);
+  const translatedPasswordUpdateError = authFailureMessage(passwordUpdateError, t, 'account');
   const showPasswordUpdateSuccess = passwordUpdateStatus === 'success' && passwordWasUpdated;
 
   const translatePasswordError = (errorCode: PasswordIssue) => {
@@ -340,8 +308,8 @@ export function AccountSettingsScreen({
   );
 
   return (
-    <SettingsPage>
-      {layoutSize === 'large' ? (
+    <SettingsPage
+      header={(
         <SectionPageHeader
           code={t('account.code')}
           description={t('account.description')}
@@ -349,8 +317,8 @@ export function AccountSettingsScreen({
           status={t('account.status')}
           title={t('account.title')}
         />
-      ) : null}
-
+      )}
+    >
       <YStack gap="$3" $md={{ gap: '$5' }}>
         {layoutSize === 'small' ? (
           <MonoText size="$2" lineHeight="$3" color="$appText" select="text">

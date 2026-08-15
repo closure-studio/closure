@@ -9,15 +9,10 @@ import type { ApiNodeHost } from '@/constants/api';
 import type { ApiNode } from '@/schemas/api-node';
 import type { ApiNodeAdapter, ApiNodeResult } from './api-node-adapter';
 
-export type ApiNodeProbeResponse = {
-  ok: boolean;
-  status: number;
-};
-
 export type ApiNodeProbeFetch = (
   input: string,
   init: { signal: AbortSignal },
-) => Promise<ApiNodeProbeResponse>;
+) => Promise<{ ok: boolean; status: number }>;
 
 async function probeApiNode(
   host: ApiNodeHost,

@@ -1,11 +1,11 @@
 import * as v from 'valibot';
 
-const nonBlankStringSchema = v.pipe(v.string(), v.minLength(1));
+import { nonEmptyStringSchema } from '@/schemas/primitives';
 
-export const characterIdSchema = nonBlankStringSchema;
+export const characterIdSchema = nonEmptyStringSchema;
 
 export const characterTableEntrySchema = v.object({
-  name: nonBlankStringSchema,
+  name: nonEmptyStringSchema,
   rarity: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(5)),
 });
 

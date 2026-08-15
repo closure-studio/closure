@@ -27,7 +27,6 @@ import { TamaguiProvider } from 'tamagui';
 
 import { tamaguiConfig } from '../../tamagui.config';
 import { LocalizationProvider } from './localization-provider';
-import { LayoutSizeProvider } from './layout-size-provider';
 
 SplashScreen.preventAutoHideAsync().catch((splashError: unknown) => {
   console.warn('Unable to keep the splash screen visible.', splashError);
@@ -67,16 +66,14 @@ export function AppProvider({ children }: PropsWithChildren) {
   return (
     <LocalizationProvider>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-        <LayoutSizeProvider>
-          <QueryClientProvider client={queryClient}>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <ThemeProvider value={DarkTheme}>
-                <StatusBar style="light" />
-                {children}
-              </ThemeProvider>
-            </GestureHandlerRootView>
-          </QueryClientProvider>
-        </LayoutSizeProvider>
+        <QueryClientProvider client={queryClient}>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <ThemeProvider value={DarkTheme}>
+              <StatusBar style="light" />
+              {children}
+            </ThemeProvider>
+          </GestureHandlerRootView>
+        </QueryClientProvider>
       </TamaguiProvider>
     </LocalizationProvider>
   );

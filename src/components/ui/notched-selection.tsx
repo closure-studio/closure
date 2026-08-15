@@ -97,13 +97,11 @@ export function NotchedSurface({
 }
 
 type NotchedButtonProps = PropsWithChildren<{
-  dashed?: boolean;
   isSelected?: boolean;
 } & Omit<ComponentProps<typeof Button>, 'children'>>;
 
 export function NotchedButton({
   children,
-  dashed = false,
   isSelected,
   ...props
 }: NotchedButtonProps) {
@@ -127,7 +125,6 @@ export function NotchedButton({
       <NotchedSurface
         fill={colors.appSurfaceRaised.val}
         stroke={isSelected ? colors.appAccentBorder.val : colors.appBorder.val}
-        {...(dashed ? { strokeDasharray: '4 3' } : {})}
       />
       {children}
     </Button>
