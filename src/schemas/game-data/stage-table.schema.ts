@@ -1,15 +1,14 @@
 import * as v from 'valibot';
 
-const nonBlankStringSchema = v.pipe(v.string(), v.minLength(1));
-const nonNegativeIntegerSchema = v.pipe(v.number(), v.integer(), v.minValue(0));
+import { nonEmptyStringSchema, nonNegativeIntegerSchema } from '@/schemas/primitives';
 
-export const stageIdSchema = nonBlankStringSchema;
+export const stageIdSchema = nonEmptyStringSchema;
 
 export const stageTableEntrySchema = v.object({
-  name: nonBlankStringSchema,
-  code: nonBlankStringSchema,
+  name: nonEmptyStringSchema,
+  code: nonEmptyStringSchema,
   ap: nonNegativeIntegerSchema,
-  items: v.array(nonBlankStringSchema),
+  items: v.array(nonEmptyStringSchema),
 });
 
 export const stageTableSchema = v.pipe(

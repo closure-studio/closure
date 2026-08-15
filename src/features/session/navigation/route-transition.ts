@@ -3,7 +3,7 @@ import { Stack as JsStack } from 'expo-router/js-stack';
 import type { BottomTabNavigationOptions } from 'expo-router/tabs';
 import { Animated, Easing } from 'react-native';
 
-import { PAGE_TRANSITION_DURATION_MS } from '@/constants/page-transition';
+import { PAGE_TRANSITION_DURATION_MS } from '@/constants/routes';
 
 type ExcludeFunction<T> = T extends (...args: never[]) => unknown ? never : T;
 type JsStackScreenOptions = ExcludeFunction<NonNullable<ComponentProps<typeof JsStack>['screenOptions']>>;
@@ -88,26 +88,46 @@ const scopeCardStyleInterpolator: CardStyleInterpolator = ({ current, inverted, 
   };
 };
 
-export function getRouteScreenOptions(
+const sharedStackOptions = {
+  cardOverlayEnabled: false,
+  cardStyle: { backgroundColor: 'transparent' },
+  gestureEnabled: false,
+  headerShown: false,
+} as const;
+
+type StackOptionsExtras = {
+  cardShadowEnabled?: boolean;
+  detachPreviousScreen?: boolean;
+};
+
+function buildStackOptions(
   reducedMotion: boolean,
+  interpolator: CardStyleInterpolator,
+  extras: StackOptionsExtras = {},
 ): JsStackScreenOptions {
-  const sharedOptions: JsStackScreenOptions = {
-    cardOverlayEnabled: false,
-    cardStyle: { backgroundColor: 'transparent' },
-    detachPreviousScreen: false,
-    gestureEnabled: false,
-    headerShown: false,
+  const base = {
+    ...sharedStackOptions,
+    detachPreviousScreen: extras.detachPreviousScreen ?? false,
+    ...(extras.cardShadowEnabled === undefined ? {} : { cardShadowEnabled: extras.cardShadowEnabled }),
   };
 
   return reducedMotion
-    ? { ...sharedOptions, animation: 'none' }
+    ? { ...base, animation: 'none' }
     : {
-      ...sharedOptions,
+      ...base,
       animation: 'default',
       animationTypeForReplace: 'push',
-      cardStyleInterpolator: routeCardStyleInterpolator,
+      cardStyleInterpolator: interpolator,
       transitionSpec,
     };
+}
+
+export function getRouteScreenOptions(
+  reducedMotion: boolean,
+): JsStackScreenOptions {
+  return buildStackOptions(reducedMotion, routeCardStyleInterpolator, {
+    detachPreviousScreen: false,
+  });
 }
 
 export function getTabScreenOptions(reducedMotion: boolean): BottomTabNavigationOptions {
@@ -130,28 +150,8 @@ export function getTabScreenOptions(reducedMotion: boolean): BottomTabNavigation
 export function getScopeTransitionScreenOptions(
   reducedMotion: boolean,
 ): JsStackScreenOptions {
-  const sharedOptions: JsStackScreenOptions = {
-    cardOverlayEnabled: false,
+  return buildStackOptions(reducedMotion, scopeCardStyleInterpolator, {
     cardShadowEnabled: false,
-    cardStyle: { backgroundColor: 'transparent' },
-    detachPreviousScreen: false,
-    gestureEnabled: false,
-    headerShown: false,
-  };
-
-  if (reducedMotion) {
-    return {
-      ...sharedOptions,
-      animation: 'none',
-      detachPreviousScreen: true,
-    };
-  }
-
-  return {
-    ...sharedOptions,
-    animation: 'default',
-    animationTypeForReplace: 'push',
-    cardStyleInterpolator: scopeCardStyleInterpolator,
-    transitionSpec,
-  };
+    detachPreviousScreen: reducedMotion,
+  });
 }

@@ -1,6 +1,6 @@
-import { ActivityTimelineView, DashboardPageScroll, useSelectedLogs } from '@/features/dashboard';
+import { ActivityTimelineView, DashboardPageFrame, useSelectedLogs } from '@/features/dashboard';
 
 export default function DashboardActivityRoute() {
   const logs = useSelectedLogs();
-  return <DashboardPageScroll><ActivityTimelineView entries={logs.logs} /></DashboardPageScroll>;
+  return <DashboardPageFrame scroll><ActivityTimelineView entries={logs.logs} /></DashboardPageFrame>;
 }

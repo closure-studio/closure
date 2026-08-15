@@ -1,4 +1,4 @@
-import { PAGE_TRANSITION_DURATION_MS } from '@/constants/page-transition';
+import { PAGE_TRANSITION_DURATION_MS } from '@/constants/routes';
 import { Animated } from 'react-native';
 import {
   getRouteScreenOptions,

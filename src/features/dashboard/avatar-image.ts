@@ -1,4 +1,4 @@
-import { ARK_RESOURCES_ORIGIN } from '@/config/ark-resources';
+import { ARK_RESOURCES_ORIGIN } from '@/constants/api';
 import type { ArkHostAvatar } from '@/schemas/arkhost';
 
 const GAME_AVATAR_IMAGE_BASE_URL = `${ARK_RESOURCES_ORIGIN}/assets/avatar`;

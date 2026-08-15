@@ -1,4 +1,4 @@
-import { ARK_RESOURCES_ORIGIN } from '@/config/ark-resources';
+import { ARK_RESOURCES_ORIGIN } from '@/constants/api';
 import { getGameAvatarImageUrl } from './avatar-image';
 
 describe('getGameAvatarImageUrl', () => {

@@ -1,6 +1,5 @@
 export {
   itemIdSchema,
-  itemTableItemSchema,
   itemTableSchema,
 } from './item-table.schema';
 export type {
@@ -9,8 +8,6 @@ export type {
   ItemTableItem,
 } from './item-table.schema';
 export {
-  characterIdSchema,
-  characterTableEntrySchema,
   characterTableSchema,
 } from './character-table.schema';
 export type {
@@ -19,8 +16,6 @@ export type {
   CharacterTableEntry,
 } from './character-table.schema';
 export {
-  stageIdSchema,
-  stageTableEntrySchema,
   stageTableSchema,
 } from './stage-table.schema';
 export type {

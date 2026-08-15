@@ -4,7 +4,6 @@ import {
   Info,
   TriangleAlert,
 } from 'lucide-react-native';
-import type { LucideIcon } from 'lucide-react-native';
 import { XStack, getTokens, styled } from 'tamagui';
 
 import { MonoText } from './typography';
@@ -13,7 +12,6 @@ export type TerminalNoticeTone = 'danger' | 'info' | 'success' | 'warning';
 
 export type TerminalNoticeProps = {
   children: string;
-  icon?: LucideIcon;
   tone?: TerminalNoticeTone;
 };
 
@@ -53,7 +51,6 @@ const TerminalNoticeFrame = styled(XStack, {
 
 export function TerminalNotice({
   children,
-  icon,
   tone = 'warning',
 }: TerminalNoticeProps) {
   const colors = getTokens().color;
@@ -79,7 +76,7 @@ export function TerminalNotice({
       iconColor: colors.appWarning.val,
     },
   }[tone];
-  const NoticeIcon = icon ?? tonePresentation.icon;
+  const NoticeIcon = tonePresentation.icon;
 
   return (
     <TerminalNoticeFrame tone={tone}>

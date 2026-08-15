@@ -1,5 +1,4 @@
 export { DecorativeBarcode } from './decorative-barcode';
-export { TerminalFilterButton } from './terminal-filter-button';
 export { TerminalMarquee, type TerminalMarqueeItem, type TerminalMarqueeProps, type TerminalMarqueeTone } from './terminal-marquee';
 export { TerminalMeterBar } from './terminal-meter-bar';
 export {

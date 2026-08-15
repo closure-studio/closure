@@ -22,6 +22,8 @@ export const dashboardNavigation = {
   pages: dashboardPages,
 } as const;
 
+export const sortedDashboardPages = Object.values(dashboardPages).sort((left, right) => left.sort - right.sort);
+
 const settingsPages = {
   network: { id: 'network', route: ROUTES.settingsNetwork, icon: Wifi, sort: 10 },
   account: { id: 'account', route: ROUTES.settingsAccount, icon: ShieldCheck, sort: 20 },
@@ -32,6 +34,8 @@ export const settingsNavigation = {
   defaultPage: settingsPages.network,
   pages: settingsPages,
 } as const;
+
+export const sortedSettingsPages = Object.values(settingsPages).sort((left, right) => left.sort - right.sort);
 
 export type DashboardPageId = keyof typeof dashboardNavigation.pages;
 export type SettingsPageId = keyof typeof settingsNavigation.pages;

@@ -1,8 +1,8 @@
 import * as v from "valibot";
 
-const nonNegativeIntegerSchema = v.pipe(v.number(), v.integer(), v.minValue(0));
+import { nonEmptyStringSchema, nonNegativeIntegerSchema } from "@/schemas/primitives";
+
 const integerSchema = v.pipe(v.number(), v.integer());
-const nonBlankStringSchema = v.pipe(v.string(), v.minLength(1));
 
 export const ARK_HOST_GAME_STATUS_CODE = {
   loginFailed: -1,
@@ -19,14 +19,14 @@ export const arkHostAvatarSchema = v.object({
 
 export const arkHostBattleReplayActionSchema = v.object({
   action_type: v.picklist(["SHARE", "AUTO_BATTLE"]),
-  stage_id: nonBlankStringSchema,
-  uuid: nonBlankStringSchema,
+  stage_id: nonEmptyStringSchema,
+  uuid: nonEmptyStringSchema,
 });
 
 export const arkHostGameConfigSchema = v.object({
   accelerate_slot: v.string(),
   accelerate_slot_cn: v.string(),
-  account: nonBlankStringSchema,
+  account: nonEmptyStringSchema,
   allow_login_assist: v.boolean(),
   battle_maps: v.array(v.string()),
   battle_replay_actions: v.nullable(v.array(arkHostBattleReplayActionSchema)),
@@ -53,7 +53,7 @@ export const arkHostGameListEntrySchema = v.object({
   captcha_info: arkHostCaptchaInfoSchema,
   game_config: arkHostGameConfigSchema,
   status: v.object({
-    account: nonBlankStringSchema,
+    account: nonEmptyStringSchema,
     ap: nonNegativeIntegerSchema,
     avatar: arkHostAvatarSchema,
     code: integerSchema,
@@ -64,7 +64,7 @@ export const arkHostGameListEntrySchema = v.object({
     password: v.nullable(v.string()),
     platform: integerSchema,
     text: v.string(),
-    uuid: nonBlankStringSchema,
+    uuid: nonEmptyStringSchema,
   }),
 });
 
@@ -126,7 +126,7 @@ export const arkHostGameLogsSchema = v.object({
 });
 
 export const arkHostCharacterSchema = v.object({
-  charId: nonBlankStringSchema,
+  charId: nonEmptyStringSchema,
   evolvePhase: nonNegativeIntegerSchema,
   level: nonNegativeIntegerSchema,
   potentialRank: nonNegativeIntegerSchema,
@@ -140,7 +140,7 @@ export const arkHostCharactersSchema = v.object({
 export const arkHostGachaEventSchema = v.object({
   account: v.string(),
   avatar: arkHostAvatarSchema,
-  charId: nonBlankStringSchema,
+  charId: nonEmptyStringSchema,
   createdAt: nonNegativeIntegerSchema,
   gachaInfo: v.string(),
   nickName: v.string(),

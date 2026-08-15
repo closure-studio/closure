@@ -17,3 +17,4 @@ export const API_NODE_HOSTS: readonly [ApiNodeHost, ...ApiNodeHost[]] = [
 
 export const API_NODE_PROBE_PATH = '/system/config';
 export const API_NODE_PROBE_TIMEOUT_MS = 5000;
+export const ARK_RESOURCES_ORIGIN = 'https://ark-resource.arknights.app';

@@ -1,5 +1,5 @@
 import {
-  DashboardPageScroll,
+  DashboardPageFrame,
   GameAccountOverviewView,
   getStageDisplayLabel,
   useSelectedGameAccount,
@@ -16,8 +16,8 @@ export default function DashboardOverviewRoute() {
   const stageLabel = getStageDisplayLabel(stageTable, selectedGameAccount.config.map_id, '—');
 
   return (
-    <DashboardPageScroll>
+    <DashboardPageFrame scroll>
       <GameAccountOverviewView detail={detail} gameAccount={selectedGameAccount} stageLabel={stageLabel} />
-    </DashboardPageScroll>
+    </DashboardPageFrame>
   );
 }

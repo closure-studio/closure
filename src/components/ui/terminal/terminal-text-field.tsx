@@ -30,18 +30,10 @@ const TerminalTextFieldFrame = styled(XStack, {
   gap: '$2',
   borderWidth: 1,
   borderColor: '$appBorder',
+  bg: '$appSurfaceRaised',
+  focusWithinStyle: { borderColor: '$appAccent' },
 
   variants: {
-    surface: {
-      solid: {
-        bg: '$appSurfaceRaised',
-        focusWithinStyle: { borderColor: '$appAccent' },
-      },
-      translucent: {
-        bg: '$appSurfaceRaisedTranslucent',
-        focusWithinStyle: { borderColor: '$appAccentBorder' },
-      },
-    },
     invalid: {
       true: {
         bg: '$appWarningSoft',
@@ -69,7 +61,6 @@ type TerminalTextFieldProps = {
   returnKeyType?: TerminalInputProps['returnKeyType'];
   secureTextEntry?: boolean;
   submitBehavior?: TerminalInputProps['submitBehavior'];
-  surface?: 'solid' | 'translucent';
   trailing?: ReactNode;
   value: string;
 };
@@ -91,7 +82,6 @@ export const TerminalTextField = forwardRef<TerminalTextFieldHandle, TerminalTex
   returnKeyType,
   secureTextEntry,
   submitBehavior,
-  surface = 'solid',
   trailing,
   value,
 }, ref) {
@@ -118,7 +108,7 @@ export const TerminalTextField = forwardRef<TerminalTextFieldHandle, TerminalTex
       <Label htmlFor={id}>
         <MonoText size="$2.5" textTransform="uppercase">{label}</MonoText>
       </Label>
-      <TerminalTextFieldFrame surface={surface} invalid={Boolean(error)}>
+      <TerminalTextFieldFrame invalid={Boolean(error)}>
         <Icon size={16} color={colors.appMuted.val} strokeWidth={1.7} />
         <TerminalTextInput
           ref={ref}
@@ -132,7 +122,7 @@ export const TerminalTextField = forwardRef<TerminalTextFieldHandle, TerminalTex
           {...optionalInputProps}
           {...(error ? { 'aria-describedby': errorId } : {})}
           aria-invalid={Boolean(error)}
-          fontFamily={surface === 'translucent' ? '$mono' : '$body'}
+          fontFamily="$body"
         />
         {trailing}
       </TerminalTextFieldFrame>

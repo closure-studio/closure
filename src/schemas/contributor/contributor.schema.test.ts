@@ -4,7 +4,6 @@ import { contributorsSchema } from './contributor.schema';
 
 const validContributors = {
   recipient: {
-    gameAccountId: 'acc-01',
     callsign: 'AMIYA-MAIN',
   },
   operationsTeam: [

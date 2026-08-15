@@ -6,10 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import { MonoText } from '@/components';
-import { dashboardNavigation } from './navigation-config';
-
-const dashboardPages = Object.values(dashboardNavigation.pages)
-  .sort((left, right) => left.sort - right.sort);
+import { sortedDashboardPages as dashboardPages } from './navigation-config';
 
 type DashboardSmallScreenTabBarProps = {
   navigation: {

@@ -19,14 +19,13 @@ import {
   dashboardNavigation,
   getNavigationScope,
   settingsNavigation,
+  sortedDashboardPages as dashboardPages,
+  sortedSettingsPages as settingsPages,
 } from '../navigation-config';
 import {
   useNavigationBackHandler,
   useSettingsBackNavigation,
 } from '../back-navigation';
-
-const dashboardPages = Object.values(dashboardNavigation.pages).sort((left, right) => left.sort - right.sort);
-const settingsPages = Object.values(settingsNavigation.pages).sort((left, right) => left.sort - right.sort);
 
 type NavigationLayoutProps = PropsWithChildren<{
   onLogout: () => void;
@@ -43,6 +42,8 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
   const matchedSettingsPage = settingsPages.find((page) => page.route === pathname);
   const activeDashboardPage = matchedDashboardPage ?? dashboardNavigation.defaultPage;
   const activeSettingsPage = matchedSettingsPage ?? settingsNavigation.defaultPage;
+  const scopePages = scope === 'dashboard' ? dashboardPages : settingsPages;
+  const activePage = scope === 'dashboard' ? activeDashboardPage : activeSettingsPage;
   const selectedGameAccount = useSelectedGameAccount();
   const headerTitle = scope === 'dashboard'
     ? (selectedGameAccount?.nickname ?? '')
@@ -69,17 +70,10 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
 
   useNavigationBackHandler(pathname, handleExitSettings);
 
-  const handleSelectDashboardPage = (pageId: string) => {
-    const page = dashboardPages.find((candidate) => candidate.id === pageId);
+  const handleSelectSidebarPage = useCallback((pageId: string) => {
+    const page = scopePages.find((candidate) => candidate.id === pageId);
     if (page && page.route !== pathname) router.replace(page.route);
-  };
-
-  const handleSelectSettingsPage = useCallback((pageId: string) => {
-    const page = settingsPages.find((candidate) => candidate.id === pageId);
-    if (!page || page.route === pathname) return;
-
-    router.replace(page.route);
-  }, [pathname, router]);
+  }, [pathname, router, scopePages]);
 
   const handleSettingsSwipe = useCallback((direction: HorizontalSwipeDirection) => {
     const action = resolveSettingsSwipeAction({
@@ -94,8 +88,8 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
       return;
     }
 
-    handleSelectSettingsPage(action.pageId);
-  }, [activeSettingsPage.id, handleExitSettings, handleSelectSettingsPage]);
+    handleSelectSidebarPage(action.pageId);
+  }, [activeSettingsPage.id, handleExitSettings, handleSelectSidebarPage]);
 
   const dashboardItems = dashboardPages.map((page) => ({
     icon: page.icon,
@@ -107,11 +101,8 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
     id: page.id,
     label: t(`pages.${page.id}.label`),
   }));
-  const sidebarItems = scope === 'dashboard' ? dashboardItems : settingsItems;
-  const activeSidebarId = scope === 'dashboard' ? activeDashboardPage.id : activeSettingsPage.id;
-  const handleSelectSidebarPage = scope === 'dashboard'
-    ? handleSelectDashboardPage
-    : handleSelectSettingsPage;
+  const pageItems = scope === 'dashboard' ? dashboardItems : settingsItems;
+  const activeSidebarId = activePage.id;
 
   return (
     <SafeAreaView
@@ -122,7 +113,7 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
         <XStack grow={1} shrink={1} minH={0}>
           <LargeScreenNavigationSidebar
             activeId={activeSidebarId}
-            items={sidebarItems}
+            items={pageItems}
             onLogout={onLogout}
             onSelect={handleSelectSidebarPage}
             onToggleScope={handleScopePress}
@@ -139,7 +130,7 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
                   <SettingsPagerTabs
                     activeId={activeSettingsPage.id}
                     items={settingsItems}
-                    onSelect={handleSelectSettingsPage}
+                    onSelect={handleSelectSidebarPage}
                     swipeHint={t('smallScreen.swipeHint')}
                     tabListLabel={t('smallScreen.settingsTabsLabel')}
                   />
