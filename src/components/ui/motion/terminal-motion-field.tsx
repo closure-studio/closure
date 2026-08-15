@@ -30,7 +30,7 @@ export function TerminalMotionField({
     <Suspense fallback={null}>
       <SkiaWebLoader />
       <LazyFlowParticleField
-        key={`${width}:${height}:${tint}:${secondaryTint}`}
+        key={`${width}:${height}`}
         width={width}
         height={height}
         tint={tint}
