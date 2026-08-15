@@ -38,6 +38,7 @@
       "trust": "Trust"
     },
     "eliteLevel": "E{{level}}",
+    "accountLevel": "LV.{{level}}",
     "level": "LV {{level}}/{{maxLevel}}",
     "skillLevel": "SKILL L{{level}}",
     "upgradeProgress": "UPGRADE PROGRESS"

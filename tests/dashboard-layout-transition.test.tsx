@@ -142,6 +142,7 @@ describe('DashboardLayout route transitions', () => {
     expect(mockGetTabScreenOptions).toHaveBeenCalledWith(false);
     expect(mockDashboardShell).toHaveBeenCalledWith(
       expect.objectContaining({
+        selectedGameAccountId: 'account-1',
         isContentSwipeEnabled: true,
         onContentSwipe: expect.any(Function),
       }),
@@ -255,6 +256,10 @@ describe('Dashboard selection reconciliation', () => {
     await render(<DashboardLayout />);
 
     expect(mockSelectGameAccount).not.toHaveBeenCalled();
+    expect(mockDashboardShell).toHaveBeenCalledWith(
+      expect.objectContaining({ selectedGameAccountId: 'account-1' }),
+      undefined,
+    );
   });
 
   it('reconciles an invalid selection to the first returned account', async () => {
