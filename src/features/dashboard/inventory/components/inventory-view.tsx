@@ -9,6 +9,7 @@ import type { ItemTable } from '@/schemas/game-data';
 import type { Inventory } from '@/schemas/game-account';
 import type { LayoutSize } from '@/schemas/layout-size';
 import { useLayoutSize } from '@/providers/layout-size-provider';
+import { InventoryPreviewArtwork } from './inventory-artwork';
 import {
   formatInventoryQuantity,
   InventoryCell,
@@ -16,7 +17,6 @@ import {
   INVENTORY_CELL_ARTWORK_SIZE_TOKEN,
   INVENTORY_CELL_MIN_WIDTH_TOKEN,
 } from './inventory-cell';
-import { InventoryArtwork } from './inventory-artwork';
 
 const INVENTORY_GRID_GAP_TOKEN = '$2';
 const PREVIEW_ARTWORK_SIZE = {
@@ -27,6 +27,8 @@ const PREVIEW_FALLBACK_ICON_SIZE = {
   small: 28,
   large: 34,
 } as const;
+
+export const EMPTY_INVENTORY: Inventory = {};
 
 function getEntryItemKey(entry: InventoryEntry): string {
   return entry.itemId;
@@ -66,7 +68,7 @@ const InventoryPreview = memo(function InventoryPreview({
         justify="center"
         overflow="hidden"
       >
-        <InventoryArtwork
+        <InventoryPreviewArtwork
           key={entry.itemId}
           fallbackSize={PREVIEW_FALLBACK_ICON_SIZE[size]}
           height={artworkSize}
@@ -111,26 +113,83 @@ const InventoryPreview = memo(function InventoryPreview({
   );
 });
 
+const InventoryRow = memo(function InventoryRow({
+  row,
+  gap,
+  imageOnly,
+  itemWidth,
+  layoutSize,
+  selectedItemId,
+  onSelect,
+}: {
+  row: InventoryEntry[];
+  gap: number;
+  imageOnly: boolean;
+  itemWidth: number | undefined;
+  layoutSize: LayoutSize;
+  selectedItemId: string | null;
+  onSelect: (itemId: string) => void;
+}) {
+  return (
+    <ResponsiveGridRow
+      row={row}
+      gap={gap}
+      getItemKey={getEntryItemKey}
+      renderCell={(entry) => (
+        <InventoryCell
+          entry={entry}
+          imageOnly={imageOnly}
+          itemWidth={itemWidth}
+          onSelect={onSelect}
+          selected={entry.itemId === selectedItemId}
+          size={layoutSize}
+        />
+      )}
+    />
+  );
+});
+
 export function InventoryView({
+  accountId,
   inventory,
   itemTable,
 }: {
+  accountId: string | null;
   inventory: Inventory;
   itemTable: ItemTable;
 }) {
   const layoutSize = useLayoutSize();
-  const entries = useMemo(
-    () => Object.entries(inventory).flatMap(([itemId, quantity]) => {
+  const { entries, byId } = useMemo(() => {
+    const builtEntries: InventoryEntry[] = [];
+    const builtById = new Map<string, InventoryEntry>();
+
+    for (const [itemId, quantity] of Object.entries(inventory)) {
       const item = itemTable[itemId];
-      return item ? [{ item, itemId, quantity }] : [];
-    }),
-    [inventory, itemTable],
-  );
-  const [requestedItemId, setRequestedItemId] = useState<string | null>(null);
-  const selectedItemId = entries.some((entry) => entry.itemId === requestedItemId)
-    ? requestedItemId
-    : entries[0]?.itemId;
-  const selectedEntry = entries.find((entry) => entry.itemId === selectedItemId);
+      if (!item) continue;
+      const entry = { item, itemId, quantity };
+      builtEntries.push(entry);
+      builtById.set(itemId, entry);
+    }
+
+    return { entries: builtEntries, byId: builtById };
+  }, [inventory, itemTable]);
+  const [selection, setSelection] = useState<{
+    accountId: string | null;
+    itemId: string | null;
+  }>({ accountId, itemId: null });
+
+  // Selection is stored together with the account it was made on, so an
+  // account boundary instantly invalidates it without a state effect or a
+  // list remount; the fallback below selects the new account's first entry.
+  const selectedEntry = (
+    selection.accountId === accountId && selection.itemId !== null
+      ? byId.get(selection.itemId)
+      : undefined
+  ) ?? entries[0];
+  const selectedItemId = selectedEntry?.itemId ?? null;
+  const handleSelectItem = useCallback((itemId: string) => {
+    setSelection({ accountId, itemId });
+  }, [accountId]);
   const tokens = getTokens();
   const gridGap = tokens.space[INVENTORY_GRID_GAP_TOKEN].val;
   const minimumItemWidth = tokens.size[INVENTORY_CELL_MIN_WIDTH_TOKEN[layoutSize]].val;
@@ -146,23 +205,17 @@ export function InventoryView({
 
   const renderItem = useCallback(
     ({ item: row, extraData }: { item: InventoryEntry[]; extraData?: string | null }) => (
-      <ResponsiveGridRow
+      <InventoryRow
         row={row}
         gap={gridGap}
-        getItemKey={getEntryItemKey}
-        renderCell={(entry) => (
-          <InventoryCell
-            entry={entry}
-            imageOnly={imageOnly}
-            itemWidth={itemWidth}
-            onSelect={setRequestedItemId}
-            selected={entry.itemId === (extraData ?? null)}
-            size={layoutSize}
-          />
-        )}
+        imageOnly={imageOnly}
+        itemWidth={itemWidth}
+        layoutSize={layoutSize}
+        selectedItemId={extraData ?? null}
+        onSelect={handleSelectItem}
       />
     ),
-    [gridGap, imageOnly, itemWidth, layoutSize],
+    [gridGap, handleSelectItem, imageOnly, itemWidth, layoutSize],
   );
 
   if (!selectedEntry) {

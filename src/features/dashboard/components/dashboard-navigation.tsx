@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   LayoutChangeEvent,
@@ -41,7 +41,15 @@ export function resolveScrollOffsetToRevealItem({
   return itemEnd > viewportEnd ? Math.max(0, itemEnd - viewportWidth) : null;
 }
 
-function GameAccountButton({ gameAccount, isSelected, onPress }: { gameAccount: GameAccount; isSelected: boolean; onPress: () => void }) {
+const GameAccountButton = memo(function GameAccountButton({
+  gameAccount,
+  isSelected,
+  onSelectGameAccount,
+}: {
+  gameAccount: GameAccount;
+  isSelected: boolean;
+  onSelectGameAccount: (gameAccountId: string) => void;
+}) {
   const { t } = useTranslation('dashboard');
   const avatarTone = gameAccount.color === 'warning'
     ? '$appWarningRing'
@@ -64,7 +72,7 @@ function GameAccountButton({ gameAccount, isSelected, onPress }: { gameAccount: 
       flexDirection="row"
       items="center"
       justify="flex-start"
-      onPress={onPress}
+      onPress={() => onSelectGameAccount(gameAccount.account)}
       aria-pressed={isSelected}
     >
       <XStack position="relative" z="$1" items="center" gap={10}>
@@ -79,7 +87,7 @@ function GameAccountButton({ gameAccount, isSelected, onPress }: { gameAccount: 
       </XStack>
     </NotchedButton>
   );
-}
+});
 
 export function GameAccountSwitcher({ gameAccounts, selectedGameAccountId, onSelectGameAccount }: { gameAccounts: readonly GameAccount[]; selectedGameAccountId: string; onSelectGameAccount: (gameAccountId: string) => void }) {
   const reducedMotion = useReducedMotion();
@@ -150,7 +158,11 @@ export function GameAccountSwitcher({ gameAccounts, selectedGameAccountId, onSel
             value={gameAccount.account}
             onLayout={(event) => handleAccountLayout(gameAccount.account, event)}
           >
-            <GameAccountButton gameAccount={gameAccount} isSelected={gameAccount.account === selectedGameAccountId} onPress={() => onSelectGameAccount(gameAccount.account)} />
+            <GameAccountButton
+              gameAccount={gameAccount}
+              isSelected={gameAccount.account === selectedGameAccountId}
+              onSelectGameAccount={onSelectGameAccount}
+            />
           </SlidingSelection.Item>
         ))}
       </SlidingSelection>

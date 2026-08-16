@@ -16,10 +16,6 @@ const mockUseIsFocused = jest.fn(() => true);
 const mockUseLayoutSize = jest.fn((): LayoutSize => 'small');
 
 let mockSelectedGameAccountId: string | null = 'account-1';
-let mockSelectedGameAccount: { account: string; color: string } | null = {
-  account: 'account-1',
-  color: 'primary',
-};
 let mockGameAccountsQuery: {
   data: { account: string }[] | undefined;
   isError: boolean;
@@ -83,7 +79,9 @@ jest.mock('@/components', () => {
 jest.mock('@/features/dashboard', () => ({
   DashboardShell: mockDashboardShell,
   selectBackdropTint: () => '#00ff00',
-  useSelectedGameAccount: () => mockSelectedGameAccount,
+  selectGameAccountById: (accounts: { account: string }[] | undefined, accountId: string | null) =>
+    accounts?.find((account) => account.account === accountId) ?? null,
+  useAdjacentGameAccountPrefetch: () => undefined,
   useArkHostSync: () => undefined,
   useGameAccountsQuery: () => mockGameAccountsQuery,
 }));
@@ -127,7 +125,6 @@ describe('DashboardLayout route transitions', () => {
     mockUseLayoutSize.mockReset();
     mockUseLayoutSize.mockReturnValue('small');
     mockSelectedGameAccountId = 'account-1';
-    mockSelectedGameAccount = { account: 'account-1', color: 'primary' };
     mockGameAccountsQuery = {
       data: [{ account: 'account-1' }, { account: 'account-2' }],
       isError: false,
@@ -150,7 +147,6 @@ describe('DashboardLayout route transitions', () => {
     );
     expect(mockDashboardTabs).toHaveBeenCalledWith(
       expect.objectContaining({
-        detachInactiveScreens: false,
         screenOptions: { animation: 'fade' },
         tabBar: expect.any(Function),
       }),
@@ -160,6 +156,9 @@ describe('DashboardLayout route transitions', () => {
     if (typeof receivedProps !== 'object' || receivedProps === null) {
       throw new Error('Expected Dashboard Tabs props.');
     }
+    // iOS must not opt out of native screen detachment: the default (true)
+    // keeps inactive tab native views out of the hierarchy.
+    expect(Reflect.get(receivedProps, 'detachInactiveScreens')).toBeUndefined();
     const tabBar = Reflect.get(receivedProps, 'tabBar');
     if (typeof tabBar !== 'function') throw new Error('Expected a Dashboard tab bar renderer.');
     expect(Reflect.apply(tabBar, null, [{}])).toEqual(expect.objectContaining({
@@ -233,7 +232,6 @@ describe('Dashboard selection reconciliation', () => {
     mockUseLayoutSize.mockReset();
     mockUseLayoutSize.mockReturnValue('small');
     mockSelectedGameAccountId = 'account-1';
-    mockSelectedGameAccount = { account: 'account-1', color: 'primary' };
     mockGameAccountsQuery = {
       data: [{ account: 'account-1' }, { account: 'account-2' }],
       isError: false,
@@ -244,7 +242,6 @@ describe('Dashboard selection reconciliation', () => {
 
   it('selects the first account when the list first loads without a selection', async () => {
     mockSelectedGameAccountId = null;
-    mockSelectedGameAccount = null;
     const screen = await render(<DashboardLayout />);
 
     expect(mockSelectGameAccount).toHaveBeenCalledWith('account-1');
@@ -264,7 +261,6 @@ describe('Dashboard selection reconciliation', () => {
 
   it('reconciles an invalid selection to the first returned account', async () => {
     mockSelectedGameAccountId = 'account-9';
-    mockSelectedGameAccount = null;
     await render(<DashboardLayout />);
 
     expect(mockSelectGameAccount).toHaveBeenCalledWith('account-1');
@@ -272,7 +268,6 @@ describe('Dashboard selection reconciliation', () => {
 
   it('clears the selection and shows the no-accounts state for an empty list', async () => {
     mockSelectedGameAccountId = 'account-1';
-    mockSelectedGameAccount = null;
     mockGameAccountsQuery = {
       data: [],
       isError: false,

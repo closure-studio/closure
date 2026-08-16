@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import type { LayoutChangeEvent } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -48,7 +48,7 @@ const TerminalMarqueeMessage = styled(MonoText, {
   },
 });
 
-export function TerminalMarquee({ items }: TerminalMarqueeProps) {
+export const TerminalMarquee = memo(function TerminalMarquee({ items }: TerminalMarqueeProps) {
   const reducedMotion = useReducedMotion();
   const [contentWidth, setContentWidth] = useState(0);
   const horizontalOffset = useSharedValue(0);
@@ -129,4 +129,4 @@ export function TerminalMarquee({ items }: TerminalMarqueeProps) {
       </Animated.View>
     </YStack>
   );
-}
+});

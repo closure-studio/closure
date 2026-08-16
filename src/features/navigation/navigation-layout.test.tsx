@@ -12,7 +12,7 @@ import {
 const mockUsePathname = jest.fn(() => '/dashboard/overview');
 const mockRouterReplace = jest.fn();
 const mockReturnToDashboard = jest.fn();
-const mockUseSelectedGameAccount = jest.fn<{ nickname: string; avatar: { id: string; type: string } } | null, []>();
+let mockSelectedGameAccount: { account: string; nickname: string; avatar: { id: string; type: string } } | null = null;
 const mockGetGameAvatarImageUrl = jest.fn<string | null, [unknown]>();
 let mockLayoutSize: 'small' | 'large' = 'small';
 const mockSurfaceRecords: {
@@ -51,7 +51,7 @@ jest.mock('@/providers/layout-size-provider', () => ({
 }));
 
 jest.mock('@/features/dashboard', () => ({
-  useSelectedGameAccount: () => mockUseSelectedGameAccount(),
+  useSelectedGameAccount: () => mockSelectedGameAccount,
   getGameAvatarImageUrl: (avatar: unknown) => mockGetGameAvatarImageUrl(avatar),
 }));
 
@@ -100,7 +100,7 @@ describe('Small Screen NavigationLayout header', () => {
     mockUsePathname.mockReturnValue('/dashboard/overview');
     mockRouterReplace.mockClear();
     mockReturnToDashboard.mockClear();
-    mockUseSelectedGameAccount.mockReturnValue(null);
+    mockSelectedGameAccount = null;
     mockGetGameAvatarImageUrl.mockReturnValue(null);
     mockLayoutSize = 'small';
     mockSurfaceRecords.length = 0;
@@ -126,10 +126,11 @@ describe('Small Screen NavigationLayout header', () => {
   });
 
   it('shows the selected Game Account nickname as the dashboard header title', async () => {
-    mockUseSelectedGameAccount.mockReturnValue({
+    mockSelectedGameAccount = {
+      account: 'G1',
       nickname: '欧皇大佬',
       avatar: { id: 'avatar_def_10', type: 'DEFAULT' },
-    });
+    };
     mockGetGameAvatarImageUrl.mockReturnValue('https://example.test/avatar.webp');
 
     const screen = await render(<NavigationTestTree scope="dashboard" />);
@@ -153,7 +154,7 @@ describe('NavigationLayout settings swipe surface', () => {
     mockUsePathname.mockReturnValue('/settings/network');
     mockRouterReplace.mockClear();
     mockReturnToDashboard.mockClear();
-    mockUseSelectedGameAccount.mockReturnValue(null);
+    mockSelectedGameAccount = null;
     mockGetGameAvatarImageUrl.mockReturnValue(null);
     mockLayoutSize = 'small';
     mockSurfaceRecords.length = 0;

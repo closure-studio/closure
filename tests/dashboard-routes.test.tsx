@@ -11,6 +11,11 @@ const mockSelectedGameAccount = {
   config: { map_id: 'main_01-07' },
 };
 
+jest.mock('@/store', () => ({
+  useAppStore: (selector: (state: { selectedGameAccountId: string | null }) => unknown) =>
+    selector({ selectedGameAccountId: 'G1' }),
+}));
+
 jest.mock('@/features/dashboard', () => {
   const { Text, View } = jest.requireActual<typeof import('react-native')>('react-native');
   return {
@@ -18,15 +23,16 @@ jest.mock('@/features/dashboard', () => {
     DashboardPageFrame: ({ children }: PropsWithChildren) => (
       <View testID="dashboard-page-frame">{children}</View>
     ),
+    EMPTY_INVENTORY: {},
     GameAccountOverviewView: () => <Text testID="overview-screen" />,
     getCharacterDisplayName: (_table: object, characterId: string) => characterId,
     getStageDisplayLabel: (_table: object, stageId: string) => stageId,
     InventoryView: () => <Text testID="inventory-screen" />,
     OperatorRosterView: () => <Text testID="operators-screen" />,
-    useSelectedCharacters: () => ({ chars: [], total: 0 }),
     useSelectedGameAccount: () => mockSelectedGameAccount,
-    useSelectedGameDetail: () => ({ inventory: {} }),
-    useSelectedLogs: () => ({ hasMore: false, logs: [] }),
+    useSelectedGameDetailQuery: () => ({ data: { inventory: {} } }),
+    useSelectedCharactersQuery: () => ({ data: { chars: [], total: 0 } }),
+    useSelectedGameLogsQuery: () => ({ data: { hasMore: false, logs: [] } }),
     useCharacterTable: () => ({}),
     useItemTable: () => ({}),
     useStageTable: () => ({}),

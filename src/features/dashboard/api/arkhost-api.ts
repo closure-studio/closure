@@ -1,11 +1,12 @@
 import type {
   ArkHostCharacters,
-  ArkHostGachaEvent,
   ArkHostGameDetail,
   ArkHostGameListEntry,
-  ArkHostGameLogEntry,
   ArkHostGameLogs,
+  ArkHostSseEvent,
 } from '@/schemas/arkhost';
+
+export type { ArkHostSseEvent } from '@/schemas/arkhost';
 
 export type ArkHostFailure =
   | { code: 'operation-rejected'; diagnosticMessage?: string; kind: 'business' }
@@ -15,11 +16,6 @@ export type ArkHostFailure =
 export type ArkHostResult<T> =
   | { data: T; ok: true }
   | { error: ArkHostFailure; ok: false };
-
-export type ArkHostSseEvent =
-  | { data: ArkHostGameListEntry[]; type: 'game' }
-  | { data: ArkHostGameLogEntry; type: 'log' }
-  | { data: ArkHostGachaEvent[]; type: 'ssr' };
 
 export type ArkHostSseListener = (event: ArkHostSseEvent) => void;
 export type ArkHostSseSubscription = { unsubscribe: () => void };

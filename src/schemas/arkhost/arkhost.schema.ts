@@ -146,6 +146,21 @@ export const arkHostGachaEventSchema = v.object({
   nickName: v.string(),
 });
 
+export const arkHostSseEventSchema = v.union([
+  v.object({
+    data: v.array(arkHostGameListEntrySchema),
+    type: v.literal('game'),
+  }),
+  v.object({
+    data: arkHostGameLogEntrySchema,
+    type: v.literal('log'),
+  }),
+  v.object({
+    data: v.array(arkHostGachaEventSchema),
+    type: v.literal('ssr'),
+  }),
+]);
+
 const responseMessageSchema = v.string();
 function responseSchema<
   TSchema extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
@@ -189,3 +204,4 @@ export type ArkHostGameLogEntry = v.InferOutput<
 export type ArkHostCharacter = v.InferOutput<typeof arkHostCharacterSchema>;
 export type ArkHostCharacters = v.InferOutput<typeof arkHostCharactersSchema>;
 export type ArkHostGachaEvent = v.InferOutput<typeof arkHostGachaEventSchema>;
+export type ArkHostSseEvent = v.InferOutput<typeof arkHostSseEventSchema>;

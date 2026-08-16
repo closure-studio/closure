@@ -134,6 +134,7 @@ export function getTabScreenOptions(reducedMotion: boolean): BottomTabNavigation
   const sharedOptions: BottomTabNavigationOptions = {
     headerShown: false,
     lazy: true,
+    freezeOnBlur: true,
     sceneStyle: { backgroundColor: 'transparent' },
   };
 

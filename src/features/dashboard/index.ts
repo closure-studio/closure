@@ -6,15 +6,21 @@ export {
   getCharacterDisplayName,
   getStageDisplayLabel,
 } from './game-data';
-export { InventoryView } from './inventory/components/inventory-view';
+export {
+  EMPTY_INVENTORY,
+  InventoryView,
+} from './inventory/components/inventory-view';
 export { OperatorRosterView } from './operator-roster/components/operator-roster-view';
 export {
+  selectGameAccountById,
+  useAdjacentGameAccountPrefetch,
   useArkHostSync,
   useGameAccountsQuery,
-  useSelectedCharacters,
+  useSelectedCharactersQuery,
   useSelectedGameAccount,
-  useSelectedGameDetail,
-  useSelectedLogs,
+  useSelectedGameDetailQuery,
+  useSelectedGameLogsQuery,
+  useSessionQueryCacheReset,
 } from './queries';
 export {
   useCharacterTable,

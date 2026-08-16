@@ -1,27 +1,29 @@
-import { useCallback } from 'react';
+import { useMemo } from 'react';
 
 import {
   DashboardPageFrame,
   getCharacterDisplayName,
   OperatorRosterView,
-  useSelectedCharacters,
   useCharacterTable,
+  useSelectedCharactersQuery,
 } from '@/features/dashboard';
 
 export default function DashboardOperatorsRoute() {
-  const characters = useSelectedCharacters();
+  const characters = useSelectedCharactersQuery().data;
   const characterTable = useCharacterTable();
-  const getCharacterName = useCallback(
-    (characterId: string) => getCharacterDisplayName(characterTable, characterId),
-    [characterTable],
+
+  const operators = useMemo(
+    () => (characters?.chars ?? []).map((operator) => ({
+      charId: operator.charId,
+      name: getCharacterDisplayName(characterTable, operator.charId),
+      operator,
+    })),
+    [characterTable, characters?.chars],
   );
 
   return (
     <DashboardPageFrame>
-      <OperatorRosterView
-        getCharacterName={getCharacterName}
-        operators={characters.chars}
-      />
+      <OperatorRosterView operators={operators} />
     </DashboardPageFrame>
   );
 }

@@ -1,7 +1,6 @@
 import { Redirect, usePathname, useRouter } from 'expo-router';
 import { Stack as AppStack } from 'expo-router/js-stack';
 import { useReducedMotion } from 'react-native-reanimated';
-import { useQueryClient } from '@tanstack/react-query';
 
 import { ROUTES } from '@/constants/routes';
 import {
@@ -21,7 +20,6 @@ export default function AppLayout() {
   const pathname = usePathname();
   const router = useRouter();
   const reducedMotion = useReducedMotion();
-  const queryClient = useQueryClient();
   const logout = useAppStore((state) => state.logout);
   const session = useAppStore((state) => state.auth.session);
   const { resetBackdropTint } = useSessionBackdrop();
@@ -37,7 +35,6 @@ export default function AppLayout() {
   const handleLogout = () => {
     resetBackdropTint();
     logout();
-    queryClient.clear();
     router.replace(ROUTES.login);
   };
 
