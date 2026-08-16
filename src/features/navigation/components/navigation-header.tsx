@@ -59,7 +59,7 @@ export function NavigationHeader({
           $md={{ display: 'none' }}
         >
           <Settings
-            size={20}
+            size={24}
             color={isSettingsActive ? colors.appAccent.val : colors.appText.val}
             strokeWidth={1.8}
           />
