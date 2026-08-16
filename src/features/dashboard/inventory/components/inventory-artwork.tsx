@@ -27,7 +27,12 @@ function getFirstCharacter(value: string): string {
   return Array.from(value)[0] ?? '';
 }
 
-export function InventoryArtwork({
+/**
+ * Full-detail SVG artwork (radial feather, mask, scanline filter) for the
+ * single selected-item preview. Grid cells must use the lightweight
+ * {@link InventoryGridThumbnail} instead — never render this per cell.
+ */
+export function InventoryPreviewArtwork({
   fallbackSize,
   height,
   icon,

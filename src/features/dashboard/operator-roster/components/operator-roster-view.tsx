@@ -1,5 +1,5 @@
 import { FlashList } from '@shopify/flash-list';
-import { useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { getTokens } from 'tamagui';
 
 import { ResponsiveGridRow } from '@/components';
@@ -9,16 +9,39 @@ import { OperatorCard, OPERATOR_CARD_MIN_WIDTH } from './operator-card';
 
 const OPERATOR_ROW_GAP_TOKEN = '$2';
 
-function getOperatorKey(operator: Operator): string {
-  return operator.charId;
+export type OperatorViewModel = {
+  charId: string;
+  name: string;
+  operator: Operator;
+};
+
+function getOperatorKey(viewModel: OperatorViewModel): string {
+  return viewModel.charId;
 }
 
+const OperatorRow = memo(function OperatorRow({
+  row,
+  gap,
+}: {
+  row: OperatorViewModel[];
+  gap: number;
+}) {
+  return (
+    <ResponsiveGridRow
+      row={row}
+      gap={gap}
+      getItemKey={getOperatorKey}
+      renderCell={(viewModel) => (
+        <OperatorCard name={viewModel.name} operator={viewModel.operator} />
+      )}
+    />
+  );
+});
+
 export function OperatorRosterView({
-  getCharacterName,
   operators,
 }: {
-  getCharacterName: (characterId: string) => string;
-  operators: readonly Operator[];
+  operators: readonly OperatorViewModel[];
 }) {
   const gridGap = getTokens().space[OPERATOR_ROW_GAP_TOKEN].val;
   const { rows, handleLayout, keyExtractor } = useResponsiveGridRows(
@@ -28,17 +51,10 @@ export function OperatorRosterView({
   );
 
   const renderItem = useCallback(
-    ({ item: row }: { item: Operator[] }) => (
-      <ResponsiveGridRow
-        row={row}
-        gap={gridGap}
-        getItemKey={getOperatorKey}
-        renderCell={(operator) => (
-          <OperatorCard name={getCharacterName(operator.charId)} operator={operator} />
-        )}
-      />
+    ({ item: row }: { item: OperatorViewModel[] }) => (
+      <OperatorRow row={row} gap={gridGap} />
     ),
-    [getCharacterName, gridGap],
+    [gridGap],
   );
 
   return (

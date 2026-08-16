@@ -8,8 +8,9 @@ import { MonoText } from '@/components';
 import {
   DashboardShell,
   selectBackdropTint,
+  selectGameAccountById,
+  useAdjacentGameAccountPrefetch,
   useGameAccountsQuery,
-  useSelectedGameAccount,
 } from '@/features/dashboard';
 import { DashboardSmallScreenTabBar } from '@/features/navigation';
 import { getTabScreenOptions, useSessionBackdrop } from '@/features/session';
@@ -28,14 +29,19 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
   const isFocused = useIsFocused();
   const { setBackdropTint } = useSessionBackdrop();
   const gameAccountsQuery = useGameAccountsQuery();
-  const selectedGameAccount = useSelectedGameAccount();
   const selectedGameAccountId = useAppStore((state) => state.selectedGameAccountId);
   const selectGameAccount = useAppStore((state) => state.selectGameAccount);
   const gameAccounts = useMemo(
     () => gameAccountsQuery.data ?? [],
     [gameAccountsQuery.data],
   );
+  const selectedGameAccount = useMemo(
+    () => selectGameAccountById(gameAccounts, selectedGameAccountId),
+    [gameAccounts, selectedGameAccountId],
+  );
   const backdropTint = selectBackdropTint(selectedGameAccount, { primary: colors.appAccent.val, warning: colors.appWarning.val, muted: colors.appMuted.val });
+
+  useAdjacentGameAccountPrefetch(gameAccounts, selectedGameAccountId);
 
   useEffect(() => {
     if (!gameAccountsQuery.isSuccess) return;
@@ -66,7 +72,6 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
       onSelectGameAccount={selectGameAccount}
     >
       <DashboardTabs
-        detachInactiveScreens={process.env.EXPO_OS !== 'ios'}
         screenOptions={getTabScreenOptions(reducedMotion)}
         tabBar={layoutSize === 'small' ? (props) => <DashboardSmallScreenTabBar {...props} reducedMotion={reducedMotion} /> : () => null}
       >

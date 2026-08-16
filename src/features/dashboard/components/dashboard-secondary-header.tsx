@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { YStack } from 'tamagui';
 
@@ -24,13 +25,17 @@ export function DashboardSecondaryHeader({
   onSelectGameAccount,
 }: DashboardSecondaryHeaderProps) {
   const { t } = useTranslation('navigation');
+  const marqueeItems = useMemo(
+    () => dashboardMarqueeMessages.map((message) => ({
+      id: message.id,
+      label: t(message.translationKey),
+      tone: message.tone,
+    })),
+    [t],
+  );
   return (
     <YStack testID="dashboard-secondary-header" shrink={0}>
-      <TerminalMarquee items={dashboardMarqueeMessages.map((message) => ({
-        id: message.id,
-        label: t(message.translationKey),
-        tone: message.tone,
-      }))} />
+      <TerminalMarquee items={marqueeItems} />
       <YStack bg="$appSurface">
         <YStack px="$3.5" py="$3" $md={{ px: '$5' }}>
           <GameAccountSwitcher

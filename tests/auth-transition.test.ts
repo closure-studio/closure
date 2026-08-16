@@ -105,6 +105,7 @@ describe('route transition', () => {
       animation: 'fade',
       headerShown: false,
       lazy: true,
+      freezeOnBlur: true,
       transitionSpec: {
         config: { duration: PAGE_TRANSITION_DURATION_MS },
       },
@@ -141,6 +142,7 @@ describe('route transition', () => {
       animation: 'none',
       headerShown: false,
       lazy: true,
+      freezeOnBlur: true,
     });
   });
 

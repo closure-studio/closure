@@ -4,7 +4,8 @@ import { XStack, YStack, styled } from 'tamagui';
 import { MonoText, TerminalText } from '@/components';
 import type { ItemTableItem } from '@/schemas/game-data';
 import type { LayoutSize } from '@/schemas/layout-size';
-import { InventoryArtwork } from './inventory-artwork';
+import { getItemImageUrl } from '../item-image';
+import { InventoryGridThumbnail } from './inventory-grid-thumbnail';
 
 export const INVENTORY_CELL_MIN_WIDTH_TOKEN = {
   small: '$11',
@@ -115,14 +116,12 @@ export const InventoryCell = memo(function InventoryCell({
         justify="center"
         overflow="hidden"
       >
-        <InventoryArtwork
-          fallbackSize={size === 'small' ? 26 : 34}
-          height={artworkSize}
-          icon={entry.item.icon}
+        <InventoryGridThumbnail
           itemId={entry.itemId}
           label={entry.item.name}
+          size={artworkSize}
           testIdPrefix="inventory-item-image"
-          width={artworkSize}
+          uri={getItemImageUrl(entry.item.icon)}
         />
       </XStack>
       {imageOnly ? null : (

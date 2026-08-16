@@ -7,7 +7,7 @@ import { i18n } from '@/i18n';
 import { operatorSchema } from '@/schemas/game-account';
 import type { Operator } from '@/schemas/game-account';
 import { tamaguiConfig } from '../../../../../tamagui.config';
-import { OperatorRosterView } from './operator-roster-view';
+import { OperatorRosterView, type OperatorViewModel } from './operator-roster-view';
 
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
@@ -31,6 +31,12 @@ const namesByCharId: Record<string, string> = {
   char_003: '能天使',
 };
 
+const operatorViewModels: OperatorViewModel[] = operators.map((operator) => ({
+  charId: operator.charId,
+  name: namesByCharId[operator.charId] ?? operator.charId,
+  operator,
+}));
+
 function gridLayoutEvent(width: number) {
   return {
     nativeEvent: { layout: { width, height: 0, x: 0, y: 0 } },
@@ -42,10 +48,7 @@ describe('OperatorRosterView', () => {
     const screen = await render(
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <I18nextProvider i18n={i18n}>
-          <OperatorRosterView
-            operators={operators}
-            getCharacterName={(charId) => namesByCharId[charId] ?? charId}
-          />
+          <OperatorRosterView operators={operatorViewModels} />
         </I18nextProvider>
       </TamaguiProvider>,
     );

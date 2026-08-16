@@ -3,13 +3,13 @@ import {
   GameAccountOverviewView,
   getStageDisplayLabel,
   useSelectedGameAccount,
-  useSelectedGameDetail,
+  useSelectedGameDetailQuery,
   useStageTable,
 } from '@/features/dashboard';
 
 export default function DashboardOverviewRoute() {
   const selectedGameAccount = useSelectedGameAccount();
-  const detail = useSelectedGameDetail();
+  const detailQuery = useSelectedGameDetailQuery();
   const stageTable = useStageTable();
 
   if (!selectedGameAccount) return null;
@@ -17,7 +17,7 @@ export default function DashboardOverviewRoute() {
 
   return (
     <DashboardPageFrame scroll>
-      <GameAccountOverviewView detail={detail} gameAccount={selectedGameAccount} stageLabel={stageLabel} />
+      <GameAccountOverviewView detail={detailQuery.data ?? null} gameAccount={selectedGameAccount} stageLabel={stageLabel} />
     </DashboardPageFrame>
   );
 }

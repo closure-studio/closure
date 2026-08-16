@@ -6,7 +6,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { XStack, YStack } from 'tamagui';
 
 import { HorizontalSwipeSurface } from '@/components';
-import { getGameAvatarImageUrl, useSelectedGameAccount } from '@/features/dashboard';
+import {
+  getGameAvatarImageUrl,
+  useSelectedGameAccount,
+} from '@/features/dashboard';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import type { HorizontalSwipeDirection } from '@/utils/horizontal-swipe';
 import { LargeScreenNavigationSidebar } from '../components/large-screen-navigation-sidebar';

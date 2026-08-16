@@ -12,16 +12,22 @@ Optimize for the smallest necessary system, not the fewest lines. Before a fix o
 ```text
 Presentational UI <- props
         ^
-Screen / Route <-> App Store <-> Server
-                  ^
-                  |
-           Zustand Persist <-> MMKV
+Screen / Route
+   ├── App Store <-> Zustand Persist <-> MMKV
+   │     client state and client workflows
+   │
+   └── Feature Query Layer <-> Server
+         server state, cache, mutations and SSE
 ```
 
-- Keep one global App Store, organized by business domain. Screens and routes read it through selectors and call its actions; presentational UI receives values and callbacks through props and never imports the Store, services, or MMKV.
-- Store actions own orchestration: set operation-specific state, perform the operation, update authoritative state atomically, and let persistence observe the result.
-- Access MMKV only through the Zustand persist adapter. Persist only stable state; exclude actions, loading/error state, Promises, and cancellation handles.
-- Treat server responses and rehydrated MMKV values as untrusted: validate them with the owning Valibot schema before they enter Store state. Never keep synchronized copies of the same data in UI, networking, and persistence.
+- The App Store is the single owner of client state and client workflows; screens and routes read it through selectors and call its actions.
+- The Feature Query Layer (TanStack Query) is the single owner of server state: cache, mutations, and SSE updates.
+- Store actions own client workflows; query hooks, options, and mutations own server operations.
+- Screens never call the API service or MMKV directly; presentational UI receives values and callbacks through props and never imports the Store, query dependencies, services, or MMKV.
+- Combine Store and Query state in the owning feature hook, not in every Route.
+- Never mirror state across the boundary: no Query -> Store and no Store -> Query copies.
+- Validate server responses, SSE payloads, and persisted storage once at their ingress boundary with the owning Valibot schema. Never keep synchronized copies of the same data in UI, networking, and persistence.
+- Access MMKV only through the Zustand persist adapter. Persist only stable client state; exclude actions, loading/error state, Promises, and cancellation handles.
 
 # Tamagui-First UI
 

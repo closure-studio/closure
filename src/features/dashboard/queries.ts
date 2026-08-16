@@ -1,21 +1,21 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { queryOptions, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
+import * as v from 'valibot';
 
-import { ARK_HOST_GAME_STATUS_CODE } from '@/schemas/arkhost';
-import type {
-  ArkHostCharacters,
-  ArkHostGameDetail,
-  ArkHostGameListEntry,
-  ArkHostGameLogs,
+import {
+  ARK_HOST_GAME_STATUS_CODE,
+  arkHostCharactersSchema,
+  arkHostGameDetailSchema,
+  arkHostGameListEntrySchema,
+  arkHostGameLogsSchema,
+  arkHostSseEventSchema,
 } from '@/schemas/arkhost';
+import type { ArkHostGameListEntry, ArkHostGameLogs } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
 import { useAppStore } from '@/store';
-import { unwrapResult } from '@/utils/failure-error';
+import { FailureError, unwrapResult } from '@/utils/failure-error';
 import { getQueryDependencies } from '@/services/query-dependencies';
 import type { ArkHostSseSubscription } from './api';
-
-const EMPTY_CHARACTERS: ArkHostCharacters = { chars: [], total: 0 };
-const EMPTY_GAME_LOGS: ArkHostGameLogs = { hasMore: false, logs: [] };
 
 export const arkHostQueryKeys = {
   characters: (account: string) => ['arkhost', 'characters', account] as const,
@@ -23,6 +23,19 @@ export const arkHostQueryKeys = {
   gameAccounts: (userId: string) => ['arkhost', 'game-accounts', userId] as const,
   logs: (account: string) => ['arkhost', 'logs', account] as const,
 };
+
+/**
+ * Validates ArkHost server payloads once at the Query cache ingress. A
+ * malformed payload surfaces as an invalid-response query error instead of
+ * poisoning the cache.
+ */
+function parseArkHostPayload<T>(schema: v.GenericSchema<unknown, T>, payload: unknown): T {
+  const parsed = v.safeParse(schema, payload);
+  if (!parsed.success) {
+    throw new FailureError({ code: 'invalid-response', kind: 'invalid-response' });
+  }
+  return parsed.output;
+}
 
 function mapGameAccount(entry: ArkHostGameListEntry): GameAccount {
   const color = entry.status.code === ARK_HOST_GAME_STATUS_CODE.gameError
@@ -57,72 +70,136 @@ export function useGameAccountsQuery() {
     enabled: session !== null,
     queryFn: async () => {
       const { arkHostApi } = getQueryDependencies();
-      return unwrapResult(await arkHostApi.fetchGameList()).map(mapGameAccount);
+      const result = await arkHostApi.fetchGameList();
+      const entries = parseArkHostPayload(
+        v.array(arkHostGameListEntrySchema),
+        unwrapResult(result),
+      );
+      return entries.map(mapGameAccount);
     },
   });
 }
+
+export const gameDetailQueryOptions = (account: string) =>
+  queryOptions({
+    queryKey: arkHostQueryKeys.detail(account),
+    queryFn: async () => {
+      const { arkHostApi } = getQueryDependencies();
+      const result = await arkHostApi.fetchGameDetail(account);
+      return parseArkHostPayload(
+        v.nullable(arkHostGameDetailSchema),
+        unwrapResult(result),
+      );
+    },
+  });
 
 export function useGameDetailQuery(account: string | null) {
-  const { arkHostApi } = getQueryDependencies();
-  return useQuery<ArkHostGameDetail | null>({
-    queryKey: arkHostQueryKeys.detail(account ?? ''),
+  return useQuery({
+    ...gameDetailQueryOptions(account ?? ''),
     enabled: account !== null,
-    queryFn: async () => {
-      if (!account) return null;
-      return unwrapResult(await arkHostApi.fetchGameDetail(account));
-    },
   });
 }
+
+export const charactersQueryOptions = (account: string) =>
+  queryOptions({
+    queryKey: arkHostQueryKeys.characters(account),
+    queryFn: async () => {
+      const { arkHostApi } = getQueryDependencies();
+      const result = await arkHostApi.fetchCharacters(account);
+      return parseArkHostPayload(arkHostCharactersSchema, unwrapResult(result));
+    },
+  });
 
 export function useCharactersQuery(account: string | null) {
-  const { arkHostApi } = getQueryDependencies();
-  return useQuery<ArkHostCharacters>({
-    queryKey: arkHostQueryKeys.characters(account ?? ''),
+  return useQuery({
+    ...charactersQueryOptions(account ?? ''),
     enabled: account !== null,
-    queryFn: async () => {
-      if (!account) return EMPTY_CHARACTERS;
-      return unwrapResult(await arkHostApi.fetchCharacters(account));
-    },
   });
 }
+
+export const logsQueryOptions = (account: string) =>
+  queryOptions({
+    queryKey: arkHostQueryKeys.logs(account),
+    queryFn: async () => {
+      const { arkHostApi } = getQueryDependencies();
+      const result = await arkHostApi.fetchGameLogs(account, 0);
+      return parseArkHostPayload(arkHostGameLogsSchema, unwrapResult(result));
+    },
+  });
 
 export function useGameLogsQuery(account: string | null) {
-  const { arkHostApi } = getQueryDependencies();
-  return useQuery<ArkHostGameLogs>({
-    queryKey: arkHostQueryKeys.logs(account ?? ''),
+  return useQuery({
+    ...logsQueryOptions(account ?? ''),
     enabled: account !== null,
-    queryFn: async () => {
-      if (!account) return EMPTY_GAME_LOGS;
-      return unwrapResult(await arkHostApi.fetchGameLogs(account, 0));
-    },
   });
 }
 
+export function selectGameAccountById(
+  accounts: readonly GameAccount[] | undefined,
+  accountId: string | null,
+): GameAccount | null {
+  if (accountId === null) return null;
+  return accounts?.find((account) => account.account === accountId) ?? null;
+}
+
+/**
+ * Single React composition entry for the selected Game Account object.
+ * Derives the object from the Query list and the Store selection; never
+ * stores a second copy of server data.
+ */
 export function useSelectedGameAccount(): GameAccount | null {
   const selectedGameAccountId = useAppStore((state) => state.selectedGameAccountId);
-  const gameAccountsQuery = useGameAccountsQuery();
-  if (selectedGameAccountId === null) return null;
-  const gameAccounts = gameAccountsQuery.data ?? [];
-  return gameAccounts.find((account) => account.account === selectedGameAccountId)
-    ?? null;
+  const gameAccounts = useGameAccountsQuery().data;
+  return selectGameAccountById(gameAccounts, selectedGameAccountId);
 }
 
-export function useSelectedGameDetail(): ArkHostGameDetail | null {
-  const account = useSelectedGameAccount();
-  const detailQuery = useGameDetailQuery(account?.account ?? null);
-  return detailQuery.data ?? null;
+/**
+ * Selected server resource hooks read the current account ID directly from
+ * the Store and return the full Query result. They intentionally do not go
+ * through `useSelectedGameAccount`, so querying detail/characters/logs does
+ * not subscribe to the Game Account list.
+ */
+export function useSelectedGameDetailQuery() {
+  const accountId = useAppStore((state) => state.selectedGameAccountId);
+  return useGameDetailQuery(accountId);
 }
 
-export function useSelectedCharacters(): ArkHostCharacters {
-  const account = useSelectedGameAccount();
-  const charactersQuery = useCharactersQuery(account?.account ?? null);
-  return charactersQuery.data ?? EMPTY_CHARACTERS;
+export function useSelectedCharactersQuery() {
+  const accountId = useAppStore((state) => state.selectedGameAccountId);
+  return useCharactersQuery(accountId);
 }
 
-export function useSelectedLogs(): ArkHostGameLogs {
-  const account = useSelectedGameAccount();
-  const logsQuery = useGameLogsQuery(account?.account ?? null);
-  return logsQuery.data ?? EMPTY_GAME_LOGS;
+export function useSelectedGameLogsQuery() {
+  const accountId = useAppStore((state) => state.selectedGameAccountId);
+  return useGameLogsQuery(accountId);
+}
+
+/**
+ * Prefetches detail/characters/logs for the accounts adjacent to the active
+ * selection so a swipe or tap to a neighbor renders from cache. Intentionally
+ * limited to the previous and next account only.
+ */
+export function useAdjacentGameAccountPrefetch(
+  gameAccounts: readonly GameAccount[] | undefined,
+  selectedGameAccountId: string | null,
+) {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (!gameAccounts || gameAccounts.length < 2 || selectedGameAccountId === null) return;
+    const activeIndex = gameAccounts.findIndex(
+      (account) => account.account === selectedGameAccountId,
+    );
+    if (activeIndex < 0) return;
+    const adjacentAccounts = [
+      gameAccounts[activeIndex - 1],
+      gameAccounts[activeIndex + 1],
+    ].filter((account): account is GameAccount => account !== undefined);
+    for (const account of adjacentAccounts) {
+      void queryClient.prefetchQuery(gameDetailQueryOptions(account.account));
+      void queryClient.prefetchQuery(charactersQueryOptions(account.account));
+      void queryClient.prefetchQuery(logsQueryOptions(account.account));
+    }
+  }, [gameAccounts, queryClient, selectedGameAccountId]);
 }
 
 export function useArkHostSync() {
@@ -136,20 +213,23 @@ export function useArkHostSync() {
     const subscription: ArkHostSseSubscription = arkHostApi.subscribe(
       session.accessToken,
       (event) => {
-        if (event.type === 'game') {
+        const parsedEvent = v.safeParse(arkHostSseEventSchema, event);
+        if (!parsedEvent.success) return;
+        const validated = parsedEvent.output;
+        if (validated.type === 'game') {
           queryClient.setQueryData<GameAccount[]>(
             arkHostQueryKeys.gameAccounts(userId),
-            event.data.map(mapGameAccount),
+            validated.data.map(mapGameAccount),
           );
-        } else if (event.type === 'log') {
+        } else if (validated.type === 'log') {
           queryClient.setQueryData<ArkHostGameLogs>(
-            arkHostQueryKeys.logs(event.data.name),
+            arkHostQueryKeys.logs(validated.data.name),
             (previous) => {
               const page = previous ?? { hasMore: true, logs: [] };
-              const exists = page.logs.some((log) => log.id === event.data.id);
+              const exists = page.logs.some((log) => log.id === validated.data.id);
               return exists
                 ? page
-                : { ...page, logs: [event.data, ...page.logs] };
+                : { ...page, logs: [validated.data, ...page.logs] };
             },
           );
         }
@@ -158,5 +238,24 @@ export function useArkHostSync() {
     return () => {
       subscription.unsubscribe();
     };
+  }, [queryClient, session]);
+}
+
+/**
+ * Clears the Query cache whenever the session principal identity changes or
+ * the session ends, so no server data survives across users. This is bound to
+ * the session transition itself (including direct `logout()` and `setSession`
+ * with a different principal), not to any UI handler.
+ */
+export function useSessionQueryCacheReset() {
+  const session = useAppStore((state) => state.auth.session);
+  const queryClient = useQueryClient();
+  const previousPrincipalId = useRef<string | null>(null);
+
+  useEffect(() => {
+    const principalId = session?.principal.id ?? null;
+    if (previousPrincipalId.current === principalId) return;
+    previousPrincipalId.current = principalId;
+    queryClient.clear();
   }, [queryClient, session]);
 }
