@@ -60,4 +60,17 @@ describe('NavigationHeader profile avatar', () => {
 
     expect(onSettingsPress).toHaveBeenCalledTimes(1);
   });
+
+  it('renders the settings icon at the enlarged header size', async () => {
+    const { screen } = await renderHeader();
+    const settingsButton = screen.getByLabelText('Open settings');
+    const settingsIcons = settingsButton.queryAll((instance) => (
+      instance.type === 'RNSVGSvgView'
+      && instance.props.width === 24
+      && instance.props.height === 24
+    ));
+
+    expect(settingsIcons).toHaveLength(1);
+    expect(settingsIcons[0]?.props).toEqual(expect.objectContaining({ width: 24, height: 24 }));
+  });
 });
