@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { YStack } from 'tamagui';
 
 import { TerminalMarquee } from '@/components';
+import { useLayoutSize } from '@/providers/layout-size-provider';
 import type { GameAccount } from '@/schemas/game-account';
 import { GameAccountSwitcher } from './dashboard-navigation';
 
@@ -25,6 +26,7 @@ export function DashboardSecondaryHeader({
   onSelectGameAccount,
 }: DashboardSecondaryHeaderProps) {
   const { t } = useTranslation('navigation');
+  const layoutSize = useLayoutSize();
   const marqueeItems = useMemo(
     () => dashboardMarqueeMessages.map((message) => ({
       id: message.id,
@@ -36,15 +38,17 @@ export function DashboardSecondaryHeader({
   return (
     <YStack testID="dashboard-secondary-header" shrink={0}>
       <TerminalMarquee items={marqueeItems} />
-      <YStack bg="$appSurface">
-        <YStack px="$3.5" py="$3" $md={{ px: '$5' }}>
-          <GameAccountSwitcher
-            gameAccounts={gameAccounts}
-            selectedGameAccountId={selectedGameAccountId}
-            onSelectGameAccount={onSelectGameAccount}
-          />
+      {layoutSize === 'large' && (
+        <YStack bg="$appSurface">
+          <YStack px="$5" py="$3">
+            <GameAccountSwitcher
+              gameAccounts={gameAccounts}
+              selectedGameAccountId={selectedGameAccountId}
+              onSelectGameAccount={onSelectGameAccount}
+            />
+          </YStack>
         </YStack>
-      </YStack>
+      )}
     </YStack>
   );
 }

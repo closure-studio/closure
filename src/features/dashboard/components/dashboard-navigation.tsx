@@ -137,20 +137,18 @@ export function GameAccountSwitcher({ gameAccounts, selectedGameAccountId, onSel
   return (
     <ScrollView
       ref={scrollViewRef}
-      mx="$-3.5"
+      mx="$-5"
       horizontal
       showsHorizontalScrollIndicator={false}
       scrollEventThrottle={SCROLL_EVENT_THROTTLE_MS}
       contentContainerStyle={{ pb: 1 }}
       onLayout={handleViewportLayout}
       onScroll={handleScroll}
-      $md={{ mx: '$-5' }}
     >
       <SlidingSelection
         value={selectedGameAccountId}
         indicator={<NotchedSelectionIndicator />}
-        px="$3.5"
-        $md={{ px: '$5' }}
+        px="$5"
       >
         {gameAccounts.map((gameAccount) => (
           <SlidingSelection.Item
