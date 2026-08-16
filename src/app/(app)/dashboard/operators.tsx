@@ -22,7 +22,7 @@ export default function DashboardOperatorsRoute() {
   );
 
   return (
-    <DashboardPageFrame>
+    <DashboardPageFrame flushBottom>
       <OperatorRosterView operators={operators} />
     </DashboardPageFrame>
   );

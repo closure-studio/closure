@@ -27,6 +27,11 @@
     }
   },
   "operators": {
+    "cell": {
+      "eliteLabel": "精英 {{rank}}",
+      "levelLabel": "LV",
+      "potentialLabel": "潜能 {{rank}}"
+    },
     "close": "[关闭]",
     "closeDetails": "关闭干员详情",
     "detail": {
@@ -37,7 +42,6 @@
       "skill": "技能",
       "trust": "信赖"
     },
-    "eliteLevel": "E{{level}}",
     "accountLevel": "LV.{{level}}",
     "level": "LV {{level}}/{{maxLevel}}",
     "skillLevel": "技能 L{{level}}",

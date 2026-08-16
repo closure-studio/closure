@@ -33,7 +33,11 @@ export function DashboardShell({
   );
 }
 
-export function DashboardPageFrame({ children, scroll = false }: PropsWithChildren<{ scroll?: boolean }>) {
+export function DashboardPageFrame({
+  children,
+  flushBottom = false,
+  scroll = false,
+}: PropsWithChildren<{ flushBottom?: boolean; scroll?: boolean }>) {
   const frame = (
     <YStack
       testID="dashboard-page-frame"
@@ -46,7 +50,8 @@ export function DashboardPageFrame({ children, scroll = false }: PropsWithChildr
       minH={0}
       p="$3.5"
       pt="$3"
-      $md={{ px: '$5', pt: '$4' }}
+      pb={flushBottom ? '$0' : '$3.5'}
+      $md={{ px: '$5', pt: '$4', pb: '$3.5' }}
     >
       {children}
     </YStack>
