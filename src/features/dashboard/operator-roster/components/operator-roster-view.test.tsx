@@ -31,6 +31,14 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
+jest.mock('expo-image', () => {
+  const { View } = jest.requireActual<typeof import('react-native')>('react-native');
+
+  return {
+    Image: (props: { [key: string]: unknown }) => <View {...props} />,
+  };
+});
+
 const operators: Operator[] = v.parse(v.array(operatorSchema), [
   { charId: 'char_001', evolvePhase: 2, level: 60, potentialRank: 5 },
   { charId: 'char_002', evolvePhase: 0, level: 1, potentialRank: 0 },
@@ -81,7 +89,65 @@ describe('OperatorRosterView', () => {
     expect(screen.getByText('德克萨斯')).toBeTruthy();
     expect(screen.getByText('能天使')).toBeTruthy();
     expect(screen.queryByText('OP//01')).toBeNull();
-    expect(screen.queryByTestId('operator-card-potential-char_001')).toBeNull();
+
+    const eliteFrame = screen.getByTestId('operator-card-elite-frame-char_001');
+    expect(StyleSheet.flatten(eliteFrame.props.style)).toEqual(
+      expect.objectContaining({
+        bottom: 44,
+        height: 30,
+        left: 10,
+        width: 30,
+        zIndex: 2,
+      }),
+    );
+    const eliteIcon = screen.getByTestId('operator-card-elite-char_001');
+    expect(eliteIcon.props.source).toBeDefined();
+    expect(eliteIcon.props.recyclingKey).toBe('char_001-elite-2');
+    expect(eliteIcon.props.accessibilityLabel).toContain('2');
+    expect(
+      screen.getByTestId('operator-card-elite-filter-mask-char_001', {
+        includeHiddenElements: true,
+      }).props.maskType,
+    ).toBe(1);
+    expect(
+      screen.getByTestId('operator-card-elite-filter-svg-char_001', {
+        includeHiddenElements: true,
+      }),
+    ).toBeTruthy();
+
+    const levelBlock = screen.getByTestId('operator-card-level-block-char_001');
+    expect(StyleSheet.flatten(levelBlock.props.style)).toEqual(
+      expect.objectContaining({ bottom: 10, left: 10, zIndex: 2 }),
+    );
+
+    const potentialFrame = screen.getByTestId('operator-card-potential-frame-char_001');
+    expect(StyleSheet.flatten(potentialFrame.props.style)).toEqual(
+      expect.objectContaining({
+        bottom: 10,
+        height: 30,
+        right: 10,
+        width: 30,
+        zIndex: 2,
+      }),
+    );
+
+    const potentialIcon = screen.getByTestId('operator-card-potential-char_001');
+    expect(potentialIcon.props.contentFit).toBe('contain');
+    expect(potentialIcon.props.source).toBeDefined();
+    expect(potentialIcon.props.recyclingKey).toBe('char_001-potential-5');
+    expect(potentialIcon.props.accessibilityLabel).toContain('6');
+    expect(
+      screen.getByTestId('operator-card-potential-filter-mask-char_001', {
+        includeHiddenElements: true,
+      }).props.maskType,
+    ).toBe(1);
+    expect(
+      screen.getByTestId('operator-card-potential-filter-svg-char_001', {
+        includeHiddenElements: true,
+      }),
+    ).toBeTruthy();
+    expect(screen.getByTestId('operator-card-potential-char_002').props.source).toBeDefined();
+    expect(screen.getByTestId('operator-card-potential-char_003').props.source).toBeDefined();
 
     const portraitLayer = screen.getByTestId('operator-card-portrait-layer-char_001', {
       includeHiddenElements: true,
@@ -154,6 +220,8 @@ describe('OperatorRosterView', () => {
     expect(screen.queryByTestId('operator-card-portrait-char_001')).toBeNull();
     expect(screen.queryByTestId('operator-card-filter-svg-char_001')).toBeNull();
     expect(screen.queryByTestId('operator-card-bottom-transition-char_001')).toBeNull();
+    expect(screen.queryByTestId('operator-card-elite-char_001')).toBeNull();
     expect(screen.queryByTestId('operator-card-right-transition-char_001')).toBeNull();
+    expect(screen.queryByTestId('operator-card-potential-char_001')).toBeNull();
   });
 });

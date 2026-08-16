@@ -114,6 +114,7 @@ const InventoryPreview = memo(function InventoryPreview({
 });
 
 const InventoryRow = memo(function InventoryRow({
+  isLast,
   row,
   gap,
   imageOnly,
@@ -122,6 +123,7 @@ const InventoryRow = memo(function InventoryRow({
   selectedItemId,
   onSelect,
 }: {
+  isLast: boolean;
   row: InventoryEntry[];
   gap: number;
   imageOnly: boolean;
@@ -132,6 +134,7 @@ const InventoryRow = memo(function InventoryRow({
 }) {
   return (
     <ResponsiveGridRow
+      isLast={isLast}
       row={row}
       gap={gap}
       getItemKey={getEntryItemKey}
@@ -204,8 +207,9 @@ export function InventoryView({
   const showCells = listWidth === 0 || listWidth >= artworkWidth;
 
   const renderItem = useCallback(
-    ({ item: row, extraData }: { item: InventoryEntry[]; extraData?: string | null }) => (
+    ({ item: row, index: rowIndex, extraData }: { item: InventoryEntry[]; index: number; extraData?: string | null }) => (
       <InventoryRow
+        isLast={rowIndex === rows.length - 1}
         row={row}
         gap={gridGap}
         imageOnly={imageOnly}
@@ -215,7 +219,7 @@ export function InventoryView({
         onSelect={handleSelectItem}
       />
     ),
-    [gridGap, handleSelectItem, imageOnly, itemWidth, layoutSize],
+    [gridGap, handleSelectItem, imageOnly, itemWidth, layoutSize, rows.length],
   );
 
   if (!selectedEntry) {

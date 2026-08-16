@@ -28,7 +28,9 @@
   },
   "operators": {
     "cell": {
-      "levelLabel": "LV"
+      "eliteLabel": "Elite {{rank}}",
+      "levelLabel": "LV",
+      "potentialLabel": "Potential {{rank}}"
     },
     "close": "[CLOSE]",
     "closeDetails": "Close operator details",

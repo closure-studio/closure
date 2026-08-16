@@ -23,12 +23,14 @@ function getOperatorKey(viewModel: OperatorViewModel): string {
 
 const OperatorRow = memo(function OperatorRow({
   columnCount,
+  isLast,
   row,
   gap,
   rowIndex,
   size,
 }: {
   columnCount: number;
+  isLast: boolean;
   row: OperatorViewModel[];
   gap: number;
   rowIndex: number;
@@ -36,6 +38,7 @@ const OperatorRow = memo(function OperatorRow({
 }) {
   return (
     <ResponsiveGridRow
+      isLast={isLast}
       row={row}
       gap={gap}
       getItemKey={getOperatorKey}
@@ -68,13 +71,14 @@ export function OperatorRosterView({
     ({ item: row, index: rowIndex }: { item: OperatorViewModel[]; index: number }) => (
       <OperatorRow
         columnCount={layout.columnCount}
+        isLast={rowIndex === rows.length - 1}
         row={row}
         gap={gridGap}
         rowIndex={rowIndex}
         size={layoutSize}
       />
     ),
-    [gridGap, layout.columnCount, layoutSize],
+    [gridGap, layout.columnCount, layoutSize, rows.length],
   );
 
   return (

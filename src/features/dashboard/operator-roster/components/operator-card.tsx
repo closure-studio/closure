@@ -1,5 +1,6 @@
+import { Image } from 'expo-image';
 import { memo, useId } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { FadeInRight, useReducedMotion } from 'react-native-reanimated';
 import Svg, {
   Defs,
@@ -14,6 +15,15 @@ import { getTokens, XStack, YStack, styled } from 'tamagui';
 import { useTranslation } from 'react-i18next';
 
 import { AvatarFilter, MonoText, TerminalMeterBar, TerminalPanel, TerminalText } from '@/components';
+import elite0 from '@/assets/images/operators/elite/elite_0.webp';
+import elite1 from '@/assets/images/operators/elite/elite_1.webp';
+import elite2 from '@/assets/images/operators/elite/elite_2.webp';
+import potential0 from '@/assets/images/operators/potential/potential_0.webp';
+import potential1 from '@/assets/images/operators/potential/potential_1.webp';
+import potential2 from '@/assets/images/operators/potential/potential_2.webp';
+import potential3 from '@/assets/images/operators/potential/potential_3.webp';
+import potential4 from '@/assets/images/operators/potential/potential_4.webp';
+import potential5 from '@/assets/images/operators/potential/potential_5.webp';
 import type { LayoutSize } from '@/schemas/layout-size';
 import type { Operator } from '@/schemas/game-account';
 import { getOperatorPortraitUrl } from '../portrait-image';
@@ -27,6 +37,14 @@ const OPERATOR_PORTRAIT_SOURCE_HEIGHT = 360;
 const OPERATOR_PORTRAIT_ZOOM = 1.2;
 const OPERATOR_PORTRAIT_VERTICAL_SHIFT_PX = 10;
 const OPERATOR_CELL_BOTTOM_TRANSITION_HEIGHT = 18;
+const OPERATOR_ELITE_ICON_WIDTH = 30;
+const OPERATOR_ELITE_ICON_HEIGHT = 30;
+const OPERATOR_ELITE_ICON_OFFSET = 10;
+const OPERATOR_ELITE_ICON_BOTTOM = 44;
+const OPERATOR_LEVEL_BOTTOM = 10;
+const OPERATOR_LEVEL_LEFT = 10;
+const OPERATOR_POTENTIAL_ICON_SIZE = 30;
+const OPERATOR_POTENTIAL_ICON_OFFSET = 10;
 const PORTRAIT_FADE_COLOR = '#ffffff';
 const OPERATOR_PORTRAIT_EDGE_FADE_STOPS = [
   { offset: '0%', opacity: 1 },
@@ -42,6 +60,19 @@ const OPERATOR_CELL_BOTTOM_TRANSITION_STOPS = [
   { offset: '100%', opacity: 0.62 },
 ] as const;
 const unavailable = '—';
+const OPERATOR_ELITE_IMAGES = {
+  0: elite0,
+  1: elite1,
+  2: elite2,
+} satisfies Record<Operator['evolvePhase'], number>;
+const OPERATOR_POTENTIAL_IMAGES = {
+  0: potential0,
+  1: potential1,
+  2: potential2,
+  3: potential3,
+  4: potential4,
+  5: potential5,
+} satisfies Record<Operator['potentialRank'], number>;
 
 const SmallOperatorCardFrame = styled(YStack, {
   name: 'SmallOperatorCard',
@@ -78,10 +109,112 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
   },
+  eliteIcon: {
+    position: 'absolute',
+    left: OPERATOR_ELITE_ICON_OFFSET,
+    bottom: OPERATOR_ELITE_ICON_BOTTOM,
+    width: OPERATOR_ELITE_ICON_WIDTH,
+    height: OPERATOR_ELITE_ICON_HEIGHT,
+    zIndex: 2,
+    pointerEvents: 'none',
+  },
+  levelBlock: {
+    position: 'absolute',
+    left: OPERATOR_LEVEL_LEFT,
+    bottom: OPERATOR_LEVEL_BOTTOM,
+    zIndex: 2,
+  },
+  potentialIcon: {
+    position: 'absolute',
+    right: OPERATOR_POTENTIAL_ICON_OFFSET,
+    bottom: OPERATOR_POTENTIAL_ICON_OFFSET,
+    width: OPERATOR_POTENTIAL_ICON_SIZE,
+    height: OPERATOR_POTENTIAL_ICON_SIZE,
+    zIndex: 2,
+    pointerEvents: 'none',
+  },
+  potentialFilter: {
+    pointerEvents: 'none',
+  },
 });
 
 function formatLevel(level: number | undefined): string {
   return level === undefined ? unavailable : String(level).padStart(2, '0');
+}
+
+type OperatorMaskedIconProps = {
+  accessibilityLabel: string;
+  charId: string;
+  frameStyle: StyleProp<ViewStyle>;
+  recyclingKey: string;
+  size: { height: number; width: number };
+  source: number;
+  testIdPrefix: string;
+};
+
+function OperatorMaskedIcon({
+  accessibilityLabel,
+  charId,
+  frameStyle,
+  recyclingKey,
+  size,
+  source,
+  testIdPrefix,
+}: OperatorMaskedIconProps) {
+  const filterId = useId().replace(/[^a-zA-Z0-9_-]/g, '');
+  const maskId = `${testIdPrefix}-alpha-mask-${filterId}`;
+
+  return (
+    <YStack
+      testID={`${testIdPrefix}-frame-${charId}`}
+      style={frameStyle}
+    >
+      <Image
+        testID={`${testIdPrefix}-${charId}`}
+        source={source}
+        cachePolicy="memory-disk"
+        contentFit="contain"
+        recyclingKey={recyclingKey}
+        accessibilityLabel={accessibilityLabel}
+        style={StyleSheet.absoluteFill}
+      />
+      <Svg
+        testID={`${testIdPrefix}-filter-${charId}`}
+        width={size.width}
+        height={size.height}
+        viewBox={`0 0 ${size.width} ${size.height}`}
+        style={[StyleSheet.absoluteFill, styles.potentialFilter]}
+        aria-hidden
+      >
+        <Defs>
+          <Mask
+            testID={`${testIdPrefix}-filter-mask-${charId}`}
+            id={maskId}
+            width={size.width}
+            height={size.height}
+            maskUnits="userSpaceOnUse"
+            maskContentUnits="userSpaceOnUse"
+            maskType="alpha"
+          >
+            <SvgImage
+              testID={`${testIdPrefix}-filter-mask-image-${charId}`}
+              href={source}
+              width={size.width}
+              height={size.height}
+              preserveAspectRatio="xMidYMid meet"
+            />
+          </Mask>
+        </Defs>
+        <G
+          testID={`${testIdPrefix}-filter-layer-${charId}`}
+          mask={`url(#${maskId})`}
+          aria-hidden
+        >
+          <AvatarFilter testID={`${testIdPrefix}-filter-svg-${charId}`} />
+        </G>
+      </Svg>
+    </YStack>
+  );
 }
 
 function OperatorCardTicks({ charId }: { charId: string }) {
@@ -361,7 +494,6 @@ function SmallOperatorCard({
           minW={0}
           minH={OPERATOR_CARD_MIN_HEIGHT}
           p="$2.5"
-          justify="flex-end"
         >
           <YStack position="absolute" t="40%" l="$2.5" z={1} minW={0} maxW="94%" shrink={1}>
             <TerminalText
@@ -376,7 +508,13 @@ function SmallOperatorCard({
               {name}
             </TerminalText>
           </YStack>
-          <YStack shrink={0}>
+          <XStack
+            testID={`operator-card-level-block-${operator.charId}`}
+            shrink={0}
+            items="baseline"
+            gap="$1"
+            style={styles.levelBlock}
+          >
             <MonoText testID={`operator-card-level-label-${operator.charId}`} size="$1" color="$appMuted">
               {t('operators.cell.levelLabel')}
             </MonoText>
@@ -388,8 +526,30 @@ function SmallOperatorCard({
             >
               {level}
             </MonoText>
-          </YStack>
+          </XStack>
         </YStack>
+        <OperatorMaskedIcon
+          accessibilityLabel={t('operators.cell.eliteLabel', {
+            rank: operator.evolvePhase,
+          })}
+          charId={operator.charId}
+          frameStyle={styles.eliteIcon}
+          recyclingKey={`${operator.charId}-elite-${operator.evolvePhase}`}
+          size={{ height: OPERATOR_ELITE_ICON_HEIGHT, width: OPERATOR_ELITE_ICON_WIDTH }}
+          source={OPERATOR_ELITE_IMAGES[operator.evolvePhase]}
+          testIdPrefix="operator-card-elite"
+        />
+        <OperatorMaskedIcon
+          accessibilityLabel={t('operators.cell.potentialLabel', {
+            rank: operator.potentialRank + 1,
+          })}
+          charId={operator.charId}
+          frameStyle={styles.potentialIcon}
+          recyclingKey={`${operator.charId}-potential-${operator.potentialRank}`}
+          size={{ height: OPERATOR_POTENTIAL_ICON_SIZE, width: OPERATOR_POTENTIAL_ICON_SIZE }}
+          source={OPERATOR_POTENTIAL_IMAGES[operator.potentialRank]}
+          testIdPrefix="operator-card-potential"
+        />
       </SmallOperatorCardFrame>
     </Animated.View>
   );
