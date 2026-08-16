@@ -27,6 +27,9 @@
     }
   },
   "operators": {
+    "cell": {
+      "levelLabel": "LV"
+    },
     "close": "[CLOSE]",
     "closeDetails": "Close operator details",
     "detail": {

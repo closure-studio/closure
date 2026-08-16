@@ -27,6 +27,9 @@
     }
   },
   "operators": {
+    "cell": {
+      "levelLabel": "LV"
+    },
     "close": "[关闭]",
     "closeDetails": "关闭干员详情",
     "detail": {

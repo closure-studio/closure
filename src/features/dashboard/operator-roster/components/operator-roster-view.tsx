@@ -4,7 +4,9 @@ import { getTokens } from 'tamagui';
 
 import { ResponsiveGridRow } from '@/components';
 import { getResponsiveGridLayout, useResponsiveGridRows } from '@/hooks/use-responsive-grid-rows';
+import { useLayoutSize } from '@/providers/layout-size-provider';
 import type { Operator } from '@/schemas/game-account';
+import type { LayoutSize } from '@/schemas/layout-size';
 import { OperatorCard, OPERATOR_CARD_MIN_WIDTH } from './operator-card';
 
 const OPERATOR_ROW_GAP_TOKEN = '$2';
@@ -20,19 +22,30 @@ function getOperatorKey(viewModel: OperatorViewModel): string {
 }
 
 const OperatorRow = memo(function OperatorRow({
+  columnCount,
   row,
   gap,
+  rowIndex,
+  size,
 }: {
+  columnCount: number;
   row: OperatorViewModel[];
   gap: number;
+  rowIndex: number;
+  size: LayoutSize;
 }) {
   return (
     <ResponsiveGridRow
       row={row}
       gap={gap}
       getItemKey={getOperatorKey}
-      renderCell={(viewModel) => (
-        <OperatorCard name={viewModel.name} operator={viewModel.operator} />
+      renderCell={(viewModel, index) => (
+        <OperatorCard
+          displayIndex={rowIndex * columnCount + index}
+          name={viewModel.name}
+          operator={viewModel.operator}
+          size={size}
+        />
       )}
     />
   );
@@ -43,18 +56,25 @@ export function OperatorRosterView({
 }: {
   operators: readonly OperatorViewModel[];
 }) {
+  const layoutSize = useLayoutSize();
   const gridGap = getTokens().space[OPERATOR_ROW_GAP_TOKEN].val;
-  const { rows, handleLayout, keyExtractor } = useResponsiveGridRows(
+  const { rows, handleLayout, keyExtractor, layout } = useResponsiveGridRows(
     operators,
     (width) => getResponsiveGridLayout(width, gridGap, OPERATOR_CARD_MIN_WIDTH),
     getOperatorKey,
   );
 
   const renderItem = useCallback(
-    ({ item: row }: { item: OperatorViewModel[] }) => (
-      <OperatorRow row={row} gap={gridGap} />
+    ({ item: row, index: rowIndex }: { item: OperatorViewModel[]; index: number }) => (
+      <OperatorRow
+        columnCount={layout.columnCount}
+        row={row}
+        gap={gridGap}
+        rowIndex={rowIndex}
+        size={layoutSize}
+      />
     ),
-    [gridGap],
+    [gridGap, layout.columnCount, layoutSize],
   );
 
   return (
@@ -62,6 +82,7 @@ export function OperatorRosterView({
       data={rows}
       keyExtractor={keyExtractor}
       onLayout={handleLayout}
+      showsVerticalScrollIndicator={false}
       style={{ flex: 1 }}
       testID="operator-roster-list"
       renderItem={renderItem}
