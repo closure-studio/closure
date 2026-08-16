@@ -37,7 +37,6 @@
       "skill": "技能",
       "trust": "信赖"
     },
-    "eliteLevel": "E{{level}}",
     "accountLevel": "LV.{{level}}",
     "level": "LV {{level}}/{{maxLevel}}",
     "skillLevel": "技能 L{{level}}",
