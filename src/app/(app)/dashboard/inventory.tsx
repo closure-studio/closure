@@ -13,7 +13,7 @@ export default function DashboardInventoryRoute() {
   const itemTable = useItemTable();
 
   return (
-    <DashboardPageFrame>
+    <DashboardPageFrame flushBottom>
       <InventoryView
         accountId={selectedGameAccountId}
         inventory={detail?.inventory ?? EMPTY_INVENTORY}

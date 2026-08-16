@@ -8,6 +8,7 @@ type MockFlashListProps<TItem> = {
   extraData?: unknown;
   testID?: string;
   onLayout?: (event: LayoutChangeEvent) => void;
+  showsVerticalScrollIndicator?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -19,10 +20,19 @@ jest.mock('@shopify/flash-list', () => {
     props: MockFlashListProps<TItem>,
     _ref: Ref<unknown>,
   ) {
-    const { data, extraData, keyExtractor, onLayout, renderItem, style, testID } = props;
+    const {
+      data,
+      extraData,
+      keyExtractor,
+      onLayout,
+      renderItem,
+      showsVerticalScrollIndicator,
+      style,
+      testID,
+    } = props;
     return react.createElement(
-      reactNative.View,
-      { testID, onLayout, style },
+      reactNative.ScrollView,
+      { testID, onLayout, showsVerticalScrollIndicator, style },
       (data ?? []).map((item, index) => react.createElement(
         reactNative.View,
         { key: keyExtractor(item, index) },

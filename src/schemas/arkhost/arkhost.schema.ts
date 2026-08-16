@@ -127,9 +127,9 @@ export const arkHostGameLogsSchema = v.object({
 
 export const arkHostCharacterSchema = v.object({
   charId: nonEmptyStringSchema,
-  evolvePhase: nonNegativeIntegerSchema,
+  evolvePhase: v.picklist([0, 1, 2]),
   level: nonNegativeIntegerSchema,
-  potentialRank: nonNegativeIntegerSchema,
+  potentialRank: v.picklist([0, 1, 2, 3, 4, 5]),
 });
 
 export const arkHostCharactersSchema = v.object({

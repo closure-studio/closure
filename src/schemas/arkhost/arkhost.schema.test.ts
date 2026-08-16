@@ -9,6 +9,7 @@ import {
   mockArkHostTertiaryCharactersResponse,
 } from "@/mocks/arkhost";
 import {
+  arkHostCharacterSchema,
   arkHostCharactersResponseSchema,
   arkHostGameDetailResponseSchema,
   arkHostGameListResponseSchema,
@@ -85,6 +86,22 @@ describe("ArkHost server contracts", () => {
         code: 1,
         data: { hasMore: "yes", logs: [] },
         message: "ok",
+      }).success,
+    ).toBe(false);
+    expect(
+      v.safeParse(arkHostCharacterSchema, {
+        charId: "char_3",
+        evolvePhase: 0,
+        level: 1,
+        potentialRank: 6,
+      }).success,
+    ).toBe(false);
+    expect(
+      v.safeParse(arkHostCharacterSchema, {
+        charId: "char_3",
+        evolvePhase: 3,
+        level: 1,
+        potentialRank: 0,
       }).success,
     ).toBe(false);
   });
