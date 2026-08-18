@@ -1,7 +1,7 @@
 import { MaskedView } from '@expo/ui/community/masked-view';
 import { Image } from 'expo-image';
 import { memo, useMemo } from 'react';
-import { StyleSheet, type ImageStyle, type StyleProp } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { XStack, YStack, styled } from 'tamagui';
 
 import elite0 from '@/assets/images/operators/elite/prerendered/elite_0.webp';
@@ -129,96 +129,16 @@ function formatLevel(level: number): string {
   return String(level).padStart(2, '0');
 }
 
-type OperatorStaticIconProps = {
-  accessibilityLabel: string;
-  charId: string;
-  imageStyle: StyleProp<ImageStyle>;
-  recyclingKey: string;
-  source: number;
-  testIdPrefix: string;
-};
-
-function OperatorStaticIcon({
-  accessibilityLabel,
-  charId,
-  imageStyle,
-  recyclingKey,
-  source,
-  testIdPrefix,
-}: OperatorStaticIconProps) {
-  return (
-    <Image
-      testID={`${testIdPrefix}-${charId}`}
-      source={source}
-      cachePolicy="memory-disk"
-      contentFit="contain"
-      recyclingKey={recyclingKey}
-      accessibilityLabel={accessibilityLabel}
-      style={imageStyle}
-    />
-  );
-}
-
-function OperatorCardTicks({ charId }: { charId: string }) {
-  return (
-    <Image
-      testID={`operator-card-ticks-${charId}`}
-      source={operatorCellTicks}
-      cachePolicy="memory"
-      contentFit="fill"
-      style={styles.ticks}
-      aria-hidden
-    />
-  );
-}
-
-function OperatorCellBottomTransition({ charId }: { charId: string }) {
-  return (
-    <Image
-      testID={`operator-card-bottom-transition-${charId}`}
-      source={operatorCellBottomTransition}
-      cachePolicy="memory"
-      contentFit="fill"
-      style={styles.bottomTransition}
-      aria-hidden
-    />
-  );
-}
-
-type OperatorPortraitImageProps = {
-  charId: string;
-  source: string;
-  testID: string;
-};
-
-function OperatorPortraitImage({
-  charId,
-  source,
-  testID,
-}: OperatorPortraitImageProps) {
-  const imageSource = useMemo(
+function OperatorPortraitBackdrop({ charId }: { charId: string }) {
+  const portraitUrl = getOperatorPortraitUrl(charId);
+  const portraitSource = useMemo(
     () => ({
-      uri: source,
+      uri: portraitUrl,
       width: OPERATOR_PORTRAIT_GEOMETRY.sourceWidth,
       height: OPERATOR_PORTRAIT_GEOMETRY.sourceHeight,
     }),
-    [source],
+    [portraitUrl],
   );
-
-  return (
-    <Image
-      testID={testID}
-      source={imageSource}
-      cachePolicy="memory-disk"
-      contentFit="contain"
-      recyclingKey={charId}
-      style={styles.portraitImage}
-    />
-  );
-}
-
-function OperatorPortraitBackdrop({ charId }: { charId: string }) {
-  const portraitUrl = getOperatorPortraitUrl(charId);
 
   return (
     <MaskedView
@@ -236,19 +156,25 @@ function OperatorPortraitBackdrop({ charId }: { charId: string }) {
         />
       }
     >
-      <OperatorPortraitImage
-        charId={`${charId}-portrait`}
-        source={portraitUrl}
+      <Image
         testID={`operator-card-portrait-${charId}`}
+        source={portraitSource}
+        cachePolicy="memory-disk"
+        contentFit="contain"
+        recyclingKey={`${charId}-portrait`}
+        style={styles.portraitImage}
       />
       <MaskedView
         testID={`operator-card-filter-${charId}`}
         style={StyleSheet.absoluteFill}
         maskElement={
-          <OperatorPortraitImage
-            charId={`${charId}-portrait-mask`}
-            source={portraitUrl}
+          <Image
             testID={`operator-card-filter-mask-image-${charId}`}
+            source={portraitSource}
+            cachePolicy="memory-disk"
+            contentFit="contain"
+            recyclingKey={`${charId}-portrait-mask`}
+            style={styles.portraitImage}
           />
         }
       >
@@ -279,8 +205,22 @@ function SmallOperatorCard({
   return (
     <SmallOperatorCardFrame testID={`operator-card-${operator.charId}`}>
       <OperatorPortraitBackdrop charId={operator.charId} />
-      <OperatorCellBottomTransition charId={operator.charId} />
-      <OperatorCardTicks charId={operator.charId} />
+      <Image
+        testID={`operator-card-bottom-transition-${operator.charId}`}
+        source={operatorCellBottomTransition}
+        cachePolicy="memory"
+        contentFit="fill"
+        style={styles.bottomTransition}
+        aria-hidden
+      />
+      <Image
+        testID={`operator-card-ticks-${operator.charId}`}
+        source={operatorCellTicks}
+        cachePolicy="memory"
+        contentFit="fill"
+        style={styles.ticks}
+        aria-hidden
+      />
       <YStack grow={1} shrink={1} minW={0} minH={OPERATOR_CARD_MIN_HEIGHT} p="$2.5">
         <YStack position="absolute" t="40%" l="$2.5" z={1} minW={0} maxW="94%" shrink={1}>
           <TerminalText
@@ -315,21 +255,23 @@ function SmallOperatorCard({
           </MonoText>
         </XStack>
       </YStack>
-      <OperatorStaticIcon
-        accessibilityLabel={labels.elite[operator.evolvePhase]}
-        charId={operator.charId}
-        imageStyle={styles.eliteIcon}
-        recyclingKey={`${operator.charId}-elite-${operator.evolvePhase}`}
+      <Image
+        testID={`operator-card-elite-${operator.charId}`}
         source={OPERATOR_ELITE_IMAGES[operator.evolvePhase]}
-        testIdPrefix="operator-card-elite"
+        cachePolicy="memory-disk"
+        contentFit="contain"
+        recyclingKey={`${operator.charId}-elite-${operator.evolvePhase}`}
+        accessibilityLabel={labels.elite[operator.evolvePhase]}
+        style={styles.eliteIcon}
       />
-      <OperatorStaticIcon
-        accessibilityLabel={labels.potential[operator.potentialRank]}
-        charId={operator.charId}
-        imageStyle={styles.potentialIcon}
-        recyclingKey={`${operator.charId}-potential-${operator.potentialRank}`}
+      <Image
+        testID={`operator-card-potential-${operator.charId}`}
         source={OPERATOR_POTENTIAL_IMAGES[operator.potentialRank]}
-        testIdPrefix="operator-card-potential"
+        cachePolicy="memory-disk"
+        contentFit="contain"
+        recyclingKey={`${operator.charId}-potential-${operator.potentialRank}`}
+        accessibilityLabel={labels.potential[operator.potentialRank]}
+        style={styles.potentialIcon}
       />
     </SmallOperatorCardFrame>
   );
