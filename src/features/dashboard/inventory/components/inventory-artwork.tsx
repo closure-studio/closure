@@ -1,10 +1,11 @@
+import { MaskedView } from '@expo/ui/community/masked-view';
 import { useId, useState } from 'react';
+import { StyleSheet } from 'react-native';
 import Svg, {
   Circle,
   Defs,
   G,
   Image as SvgImage,
-  Mask,
   RadialGradient as SvgRadialGradient,
   Stop,
   Text as SvgText,
@@ -28,9 +29,9 @@ function getFirstCharacter(value: string): string {
 }
 
 /**
- * Full-detail SVG artwork (radial feather, mask, scanline filter) for the
- * single selected-item preview. Grid cells must use the lightweight
- * {@link InventoryGridThumbnail} instead — never render this per cell.
+ * Full-detail selected-item artwork with a radial feather and terminal filter.
+ * Grid cells must use the lightweight {@link InventoryGridThumbnail} instead;
+ * never render this per cell.
  */
 export function InventoryPreviewArtwork({
   fallbackSize,
@@ -53,7 +54,6 @@ export function InventoryPreviewArtwork({
   const colors = getTokens().color;
   const artworkId = useId().replace(/[^a-zA-Z0-9_-]/g, '');
   const maskGradientId = `inventory-artwork-mask-gradient-${artworkId}`;
-  const maskId = `inventory-artwork-mask-${artworkId}`;
   const centerX = width / 2;
   const centerY = height / 2;
   const radius = Math.min(width, height) / 2;
@@ -63,43 +63,48 @@ export function InventoryPreviewArtwork({
   const showFallback = imageStatus !== 'ready';
 
   return (
-    <Svg
-      testID={`${testIdPrefix}-circle-${itemId}`}
-      width={width}
-      height={height}
-      viewBox={`${-featherInset} ${-featherInset} ${viewBoxWidth} ${viewBoxHeight}`}
-      preserveAspectRatio="none"
-      style={{ borderRadius: CIRCULAR_ARTWORK_RADIUS, overflow: 'hidden' }}
+    <MaskedView
+      testID={`${testIdPrefix}-feather-mask-${itemId}`}
+      style={{ width, height }}
+      maskElement={
+        <Svg
+          testID={`${testIdPrefix}-feather-mask-svg-${itemId}`}
+          width={width}
+          height={height}
+          viewBox={`${-featherInset} ${-featherInset} ${viewBoxWidth} ${viewBoxHeight}`}
+          preserveAspectRatio="none"
+          style={StyleSheet.absoluteFill}
+        >
+          <Defs>
+            <SvgRadialGradient id={maskGradientId} cx="50%" cy="50%" r="50%">
+              {ARTWORK_FEATHER_STOPS.map((stop) => (
+                <Stop
+                  key={stop.offset}
+                  offset={stop.offset}
+                  stopColor={stop.color}
+                  stopOpacity={stop.opacity}
+                />
+              ))}
+            </SvgRadialGradient>
+          </Defs>
+          <Circle
+            cx={centerX}
+            cy={centerY}
+            r={radius}
+            fill={`url(#${maskGradientId})`}
+          />
+        </Svg>
+      }
     >
-      <G testID={`${testIdPrefix}-feather-${itemId}`}>
-        <Defs>
-          <SvgRadialGradient id={maskGradientId} cx="50%" cy="50%" r="50%">
-            {ARTWORK_FEATHER_STOPS.map((stop) => (
-              <Stop
-                key={stop.offset}
-                offset={stop.offset}
-                stopColor={stop.color}
-                stopOpacity={stop.opacity}
-              />
-            ))}
-          </SvgRadialGradient>
-          <Mask
-            testID={`${testIdPrefix}-feather-mask-${itemId}`}
-            id={maskId}
-            width="100%"
-            height="100%"
-            maskUnits="userSpaceOnUse"
-            maskContentUnits="userSpaceOnUse"
-          >
-            <Circle
-              cx={centerX}
-              cy={centerY}
-              r={radius}
-              fill={`url(#${maskGradientId})`}
-            />
-          </Mask>
-        </Defs>
-        <G mask={`url(#${maskId})`}>
+      <Svg
+        testID={`${testIdPrefix}-circle-${itemId}`}
+        width={width}
+        height={height}
+        viewBox={`${-featherInset} ${-featherInset} ${viewBoxWidth} ${viewBoxHeight}`}
+        preserveAspectRatio="none"
+        style={{ borderRadius: CIRCULAR_ARTWORK_RADIUS, overflow: 'hidden' }}
+      >
+        <G testID={`${testIdPrefix}-feather-${itemId}`}>
           {showFallback ? (
             <G testID={`${testIdPrefix}-fallback-${itemId}`} aria-hidden>
               <SvgText
@@ -128,7 +133,7 @@ export function InventoryPreviewArtwork({
             <AvatarFilter testID={`${testIdPrefix}-filter-svg-${itemId}`} />
           </G>
         </G>
-      </G>
-    </Svg>
+      </Svg>
+    </MaskedView>
   );
 }

@@ -1,34 +1,60 @@
 import { Image } from 'expo-image';
 import { memo } from 'react';
-import { StyleSheet, View } from 'react-native';
-import Svg, { G } from 'react-native-svg';
+import { StyleSheet } from 'react-native';
+import { XStack, styled } from 'tamagui';
 
-import { AvatarFilter } from '@/components';
+import inventoryGridFilterLarge from '@/assets/images/inventory/grid-filter-large.webp';
+import inventoryGridFilterSmall from '@/assets/images/inventory/grid-filter-small.webp';
+import type { LayoutSize } from '@/schemas/layout-size';
+import { INVENTORY_GRID_THUMBNAIL_SIZE } from '../inventory-grid-thumbnail-config';
 
-const CIRCULAR_ARTWORK_RADIUS = 999;
+const INVENTORY_GRID_FILTER_IMAGES = {
+  small: inventoryGridFilterSmall,
+  large: inventoryGridFilterLarge,
+} as const satisfies Record<LayoutSize, number>;
 
-// Grid cells keep the static filter overlay (wash + scanlines) but not the
-// feather/mask — the feather stays preview-only to keep cells lightweight.
+const InventoryGridThumbnailFrame = styled(XStack, {
+  name: 'InventoryGridThumbnail',
+  position: 'relative',
+  shrink: 0,
+  items: 'center',
+  justify: 'center',
+  overflow: 'hidden',
+  rounded: 999,
+  variants: {
+    layoutSize: {
+      small: {
+        width: INVENTORY_GRID_THUMBNAIL_SIZE.small,
+        height: INVENTORY_GRID_THUMBNAIL_SIZE.small,
+        ml: '$1.5',
+        my: '$0.5',
+      },
+      large: {
+        width: INVENTORY_GRID_THUMBNAIL_SIZE.large,
+        height: INVENTORY_GRID_THUMBNAIL_SIZE.large,
+      },
+    },
+  } as const,
+});
+
 export const InventoryGridThumbnail = memo(function InventoryGridThumbnail({
   itemId,
   label,
-  size,
-  testIdPrefix,
+  layoutSize,
   uri,
 }: {
   itemId: string;
   label: string;
-  size: number;
-  testIdPrefix: string;
+  layoutSize: LayoutSize;
   uri: string;
 }) {
   return (
-    <View
-      testID={`${testIdPrefix}-circle-${itemId}`}
-      style={[styles.circle, { width: size, height: size }]}
+    <InventoryGridThumbnailFrame
+      testID={`inventory-item-image-circle-${itemId}`}
+      layoutSize={layoutSize}
     >
       <Image
-        testID={`${testIdPrefix}-thumbnail-${itemId}`}
+        testID={`inventory-item-image-thumbnail-${itemId}`}
         source={uri}
         recyclingKey={itemId}
         cachePolicy="memory-disk"
@@ -36,18 +62,14 @@ export const InventoryGridThumbnail = memo(function InventoryGridThumbnail({
         accessibilityLabel={label}
         style={StyleSheet.absoluteFill}
       />
-      <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
-        <G testID={`${testIdPrefix}-filter-${itemId}`} aria-hidden>
-          <AvatarFilter testID={`${testIdPrefix}-filter-svg-${itemId}`} />
-        </G>
-      </Svg>
-    </View>
+      <Image
+        testID={`inventory-item-image-filter-${itemId}`}
+        source={INVENTORY_GRID_FILTER_IMAGES[layoutSize]}
+        cachePolicy="memory"
+        contentFit="fill"
+        style={StyleSheet.absoluteFill}
+        aria-hidden
+      />
+    </InventoryGridThumbnailFrame>
   );
-});
-
-const styles = StyleSheet.create({
-  circle: {
-    borderRadius: CIRCULAR_ARTWORK_RADIUS,
-    overflow: 'hidden',
-  },
 });

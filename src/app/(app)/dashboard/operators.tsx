@@ -14,7 +14,6 @@ export default function DashboardOperatorsRoute() {
 
   const operators = useMemo(
     () => (characters?.chars ?? []).map((operator) => ({
-      charId: operator.charId,
       name: getCharacterDisplayName(characterTable, operator.charId),
       operator,
     })),
