@@ -9,12 +9,12 @@ import type { ItemTable } from '@/schemas/game-data';
 import type { Inventory } from '@/schemas/game-account';
 import type { LayoutSize } from '@/schemas/layout-size';
 import { useLayoutSize } from '@/providers/layout-size-provider';
+import { INVENTORY_GRID_THUMBNAIL_SIZE } from '../inventory-grid-thumbnail-config';
 import { InventoryPreviewArtwork } from './inventory-artwork';
 import {
   formatInventoryQuantity,
   InventoryCell,
   type InventoryEntry,
-  INVENTORY_CELL_ARTWORK_SIZE_TOKEN,
   INVENTORY_CELL_MIN_WIDTH_TOKEN,
 } from './inventory-cell';
 
@@ -196,7 +196,7 @@ export function InventoryView({
   const tokens = getTokens();
   const gridGap = tokens.space[INVENTORY_GRID_GAP_TOKEN].val;
   const minimumItemWidth = tokens.size[INVENTORY_CELL_MIN_WIDTH_TOKEN[layoutSize]].val;
-  const artworkWidth = tokens.size[INVENTORY_CELL_ARTWORK_SIZE_TOKEN[layoutSize]].val;
+  const artworkWidth = INVENTORY_GRID_THUMBNAIL_SIZE[layoutSize];
   const { rows, listWidth, layout, handleLayout, keyExtractor } = useResponsiveGridRows(
     entries,
     (width) => getResponsiveGridLayout(width, gridGap, minimumItemWidth),

@@ -9,6 +9,13 @@ import {
 } from 'react-native-svg';
 import { getTokens } from 'tamagui';
 
+import {
+  AVATAR_FILTER_BASE_LAYERS,
+  AVATAR_FILTER_PATTERN,
+  AVATAR_FILTER_SCANLINE_OPACITY,
+  AVATAR_FILTER_WASH_STOPS,
+} from './avatar-filter-config';
+
 export type AvatarFilterProps = {
   testID: string;
 };
@@ -23,8 +30,17 @@ export function AvatarFilter({ testID }: AvatarFilterProps) {
   return (
     <G testID={testID}>
       <Defs>
-        <Pattern id={scanlinePatternId} width="3" height="3" patternUnits="userSpaceOnUse">
-          <Rect width="3" height="1" fill={colors.appScanline.val} />
+        <Pattern
+          id={scanlinePatternId}
+          width={AVATAR_FILTER_PATTERN.width}
+          height={AVATAR_FILTER_PATTERN.height}
+          patternUnits="userSpaceOnUse"
+        >
+          <Rect
+            width={AVATAR_FILTER_PATTERN.width}
+            height={AVATAR_FILTER_PATTERN.rowHeight}
+            fill={colors.appScanline.val}
+          />
         </Pattern>
         <SvgLinearGradient
           id={`${scanlinePatternId}-wash`}
@@ -33,15 +49,32 @@ export function AvatarFilter({ testID }: AvatarFilterProps) {
           x2="100%"
           y2="0%"
         >
-          <Stop offset="0%" stopColor={colors.appAccent.val} stopOpacity={0.14} />
-          <Stop offset="52%" stopColor={colors.appAccent.val} stopOpacity={0} />
-          <Stop offset="100%" stopColor={colors.appText.val} stopOpacity={0.08} />
+          {AVATAR_FILTER_WASH_STOPS.map((stop) => (
+            <Stop
+              key={`${stop.color}-${stop.offset}`}
+              offset={`${stop.offset * 100}%`}
+              stopColor={colors[stop.color].val}
+              stopOpacity={stop.opacity}
+            />
+          ))}
         </SvgLinearGradient>
       </Defs>
-      <Rect width="100%" height="100%" fill={colors.appBackground.val} opacity={0.18} />
-      <Rect width="100%" height="100%" fill={colors.appAccent.val} opacity={0.08} />
+      {AVATAR_FILTER_BASE_LAYERS.map((layer) => (
+        <Rect
+          key={`${layer.color}-${layer.opacity}`}
+          width="100%"
+          height="100%"
+          fill={colors[layer.color].val}
+          opacity={layer.opacity}
+        />
+      ))}
       <Rect width="100%" height="100%" fill={washFill} />
-      <Rect width="100%" height="100%" fill={scanlineFill} opacity={0.62} />
+      <Rect
+        width="100%"
+        height="100%"
+        fill={scanlineFill}
+        opacity={AVATAR_FILTER_SCANLINE_OPACITY}
+      />
     </G>
   );
 }

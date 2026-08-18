@@ -1,5 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getTokens } from 'tamagui';
 
 import { ResponsiveGridRow } from '@/components';
@@ -7,33 +8,30 @@ import { getResponsiveGridLayout, useResponsiveGridRows } from '@/hooks/use-resp
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import type { Operator } from '@/schemas/game-account';
 import type { LayoutSize } from '@/schemas/layout-size';
-import { OperatorCard, OPERATOR_CARD_MIN_WIDTH } from './operator-card';
+import { OperatorCard, OPERATOR_CARD_MIN_WIDTH, type OperatorCardLabels } from './operator-card';
 
 const OPERATOR_ROW_GAP_TOKEN = '$2';
 
 export type OperatorViewModel = {
-  charId: string;
   name: string;
   operator: Operator;
 };
 
 function getOperatorKey(viewModel: OperatorViewModel): string {
-  return viewModel.charId;
+  return viewModel.operator.charId;
 }
 
 const OperatorRow = memo(function OperatorRow({
-  columnCount,
   isLast,
+  labels,
   row,
   gap,
-  rowIndex,
   size,
 }: {
-  columnCount: number;
   isLast: boolean;
+  labels: OperatorCardLabels;
   row: OperatorViewModel[];
   gap: number;
-  rowIndex: number;
   size: LayoutSize;
 }) {
   return (
@@ -42,9 +40,9 @@ const OperatorRow = memo(function OperatorRow({
       row={row}
       gap={gap}
       getItemKey={getOperatorKey}
-      renderCell={(viewModel, index) => (
+      renderCell={(viewModel) => (
         <OperatorCard
-          displayIndex={rowIndex * columnCount + index}
+          labels={labels}
           name={viewModel.name}
           operator={viewModel.operator}
           size={size}
@@ -59,9 +57,28 @@ export function OperatorRosterView({
 }: {
   operators: readonly OperatorViewModel[];
 }) {
+  const { t } = useTranslation('dashboard');
   const layoutSize = useLayoutSize();
   const gridGap = getTokens().space[OPERATOR_ROW_GAP_TOKEN].val;
-  const { rows, handleLayout, keyExtractor, layout } = useResponsiveGridRows(
+  const labels = useMemo<OperatorCardLabels>(() => ({
+    cellLevel: t('operators.cell.levelLabel'),
+    detailLevel: t('operators.detail.level'),
+    detailPotential: t('operators.detail.potential'),
+    elite: {
+      0: t('operators.cell.eliteLabel', { rank: 0 }),
+      1: t('operators.cell.eliteLabel', { rank: 1 }),
+      2: t('operators.cell.eliteLabel', { rank: 2 }),
+    },
+    potential: {
+      0: t('operators.cell.potentialLabel', { rank: 1 }),
+      1: t('operators.cell.potentialLabel', { rank: 2 }),
+      2: t('operators.cell.potentialLabel', { rank: 3 }),
+      3: t('operators.cell.potentialLabel', { rank: 4 }),
+      4: t('operators.cell.potentialLabel', { rank: 5 }),
+      5: t('operators.cell.potentialLabel', { rank: 6 }),
+    },
+  }), [t]);
+  const { rows, handleLayout, keyExtractor } = useResponsiveGridRows(
     operators,
     (width) => getResponsiveGridLayout(width, gridGap, OPERATOR_CARD_MIN_WIDTH),
     getOperatorKey,
@@ -70,15 +87,14 @@ export function OperatorRosterView({
   const renderItem = useCallback(
     ({ item: row, index: rowIndex }: { item: OperatorViewModel[]; index: number }) => (
       <OperatorRow
-        columnCount={layout.columnCount}
         isLast={rowIndex === rows.length - 1}
+        labels={labels}
         row={row}
         gap={gridGap}
-        rowIndex={rowIndex}
         size={layoutSize}
       />
     ),
-    [gridGap, layout.columnCount, layoutSize, rows.length],
+    [gridGap, labels, layoutSize, rows.length],
   );
 
   return (

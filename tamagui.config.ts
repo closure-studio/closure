@@ -2,6 +2,7 @@ import { defaultConfig } from '@tamagui/config/v5';
 import { createFont, createTamagui } from 'tamagui';
 
 import { animations } from './src/theme/animations';
+import { APP_RASTER_COLORS } from './src/theme/app-colors';
 
 const appFontSizes = {
   1: 12,
@@ -85,7 +86,7 @@ export const tamaguiConfig = createTamagui({
   tokens: {
     ...defaultConfig.tokens,
     color: {
-      appBackground: '#07090a',
+      appBackground: APP_RASTER_COLORS.appBackground,
       appSurface: 'rgba(13, 16, 17, 0.76)',
       appSurfaceStrong: 'rgba(15, 18, 20, 0.95)',
       appSurfaceRaised: '#15191a',
@@ -93,11 +94,11 @@ export const tamaguiConfig = createTamagui({
       appBorder: 'rgba(75, 83, 82, 0.52)',
       appBorderSolid: '#2a2f31',
       appGrid: 'rgba(228, 233, 235, 0.06)',
-      appScanline: 'rgba(228, 233, 235, 0.04)',
-      appText: '#f0f2ee',
+      appScanline: APP_RASTER_COLORS.appScanline,
+      appText: APP_RASTER_COLORS.appText,
       appMuted: '#878e8c',
-      appRule: 'rgba(205, 216, 211, 0.16)',
-      appAccent: '#3dccdf',
+      appRule: APP_RASTER_COLORS.appRule,
+      appAccent: APP_RASTER_COLORS.appAccent,
       appAccentBorder: 'rgba(61, 204, 223, 0.50)',
       appAccentEdge: 'rgba(61, 204, 223, 0.60)',
       appAccentRing: 'rgba(61, 204, 223, 0.70)',

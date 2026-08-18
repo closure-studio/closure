@@ -4,6 +4,8 @@ import { TamaguiProvider } from 'tamagui';
 import * as v from 'valibot';
 
 import { tamaguiConfig } from '../../../../../tamagui.config';
+import inventoryGridFilterLarge from '@/assets/images/inventory/grid-filter-large.webp';
+import inventoryGridFilterSmall from '@/assets/images/inventory/grid-filter-small.webp';
 import { getResponsiveGridLayout } from '@/hooks/use-responsive-grid-rows';
 import { itemTableSchema } from '@/schemas/game-data';
 import { inventorySchema } from '@/schemas/game-account';
@@ -31,7 +33,7 @@ jest.mock('expo-image', () => {
   const { View } = jest.requireActual<typeof import('react-native')>('react-native');
   return {
     Image: (props: {
-      source: string | { uri?: string };
+      source: number | string | { uri?: string };
       testID?: string;
       [key: string]: unknown;
     }) => {
@@ -180,14 +182,14 @@ describe('InventoryView', () => {
     );
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-image-circle-31034').props.style)).toEqual(
       expect.objectContaining({
-        borderRadius: 999,
+        borderBottomLeftRadius: 999,
+        borderBottomRightRadius: 999,
+        borderTopLeftRadius: 999,
+        borderTopRightRadius: 999,
         height: 48,
         overflow: 'hidden',
         width: 48,
       }),
-    );
-    expect(StyleSheet.flatten(screen.getByTestId('inventory-item-artwork-31034').props.style)).toEqual(
-      expect.objectContaining({ height: 48, width: 48 }),
     );
     expect(screen.getByTestId('inventory-selection-top-left-31034')).toBeTruthy();
     expect(screen.getByTestId('inventory-selection-top-right-31034')).toBeTruthy();
@@ -199,9 +201,8 @@ describe('InventoryView', () => {
     expect(inventoryImage.props.src).toEqual({
       uri: 'https://ark-resource.arknights.app/assets/items/MTL_SL_OC4.webp',
     });
-    // Grid cells stay lightweight: no feather/mask tree, no per-cell image
-    // status state, and a recycling key for FlashList reuse. The static
-    // filter overlay is kept.
+    // Grid cells keep only two Expo Image views: the recycled remote artwork
+    // and a shared, pre-rendered local filter overlay.
     expect(inventoryImage.props.recyclingKey).toBe('31034');
     expect(screen.queryByTestId('inventory-item-image-fallback-character-31034', {
       includeHiddenElements: true,
@@ -209,14 +210,20 @@ describe('InventoryView', () => {
     expect(screen.queryByTestId('inventory-item-image-feather-mask-31034', {
       includeHiddenElements: true,
     })).toBeNull();
-    expect(screen.queryByTestId('inventory-item-image-filter-31034', {
+    const inventoryFilter = screen.getByTestId('inventory-item-image-filter-31034', {
       includeHiddenElements: true,
-    })).toBeTruthy();
+    });
+    expect(inventoryFilter.props.src).toBe(inventoryGridFilterSmall);
+    expect(inventoryFilter.props.cachePolicy).toBe('memory');
+    expect(inventoryFilter.props.contentFit).toBe('fill');
     expect(screen.queryByTestId('inventory-item-image-filter-svg-31034', {
       includeHiddenElements: true,
-    })).toBeTruthy();
+    })).toBeNull();
     // The single preview keeps the full SVG artwork.
     expect(screen.getByTestId('inventory-preview-image-feather-mask-31034', {
+      includeHiddenElements: true,
+    })).toBeTruthy();
+    expect(screen.getByTestId('inventory-preview-image-feather-mask-svg-31034', {
       includeHiddenElements: true,
     })).toBeTruthy();
 
@@ -283,8 +290,21 @@ describe('InventoryView', () => {
       expect.objectContaining({ borderRadius: 999, overflow: 'hidden' }),
     );
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-image-circle-31034').props.style)).toEqual(
-      expect.objectContaining({ borderRadius: 999, overflow: 'hidden' }),
+      expect.objectContaining({
+        borderBottomLeftRadius: 999,
+        borderBottomRightRadius: 999,
+        borderTopLeftRadius: 999,
+        borderTopRightRadius: 999,
+        height: 104,
+        overflow: 'hidden',
+        width: 104,
+      }),
     );
+    expect(
+      screen.getByTestId('inventory-item-image-filter-31034', {
+        includeHiddenElements: true,
+      }).props.src,
+    ).toBe(inventoryGridFilterLarge);
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-name-31034').props.style)).toEqual(
       expect.objectContaining({ fontSize: 16, lineHeight: 24 }),
     );

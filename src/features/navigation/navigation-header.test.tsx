@@ -43,6 +43,7 @@ describe('NavigationHeader profile avatar', () => {
     expect(screen.getAllByTestId('avatar')).toHaveLength(1);
     expect(screen.getByTestId('avatar-svg')).toBeTruthy();
     expect(screen.getByTestId('avatar-mask')).toBeTruthy();
+    expect(screen.getByTestId('avatar-mask-svg')).toBeTruthy();
     expect(screen.getByTestId('avatar-fallback-image')).toBeTruthy();
     expect(screen.getByTestId('avatar-source-image').props.src).toEqual({ uri: TEST_AVATAR_URL });
 

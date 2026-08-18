@@ -12,10 +12,6 @@ export const INVENTORY_CELL_MIN_WIDTH_TOKEN = {
   large: '$16',
 } as const;
 
-export const INVENTORY_CELL_ARTWORK_SIZE_TOKEN = {
-  small: '$4.5',
-  large: '$10',
-} as const;
 export type InventoryEntry = {
   item: ItemTableItem;
   itemId: string;
@@ -91,8 +87,6 @@ export const InventoryCell = memo(function InventoryCell({
   selected: boolean;
   size: LayoutSize;
 }) {
-  const artworkSize = size === 'small' ? 48 : 104;
-
   return (
     <InventoryCellFrame
       testID={`inventory-item-${entry.itemId}`}
@@ -105,25 +99,12 @@ export const InventoryCell = memo(function InventoryCell({
       layoutSize={size}
       width={itemWidth ?? '100%'}
     >
-      <XStack
-        testID={`inventory-item-artwork-${entry.itemId}`}
-        width={INVENTORY_CELL_ARTWORK_SIZE_TOKEN[size]}
-        height={INVENTORY_CELL_ARTWORK_SIZE_TOKEN[size]}
-        ml={size === 'small' ? '$1.5' : '$0'}
-        my={size === 'small' ? '$0.5' : '$0'}
-        shrink={0}
-        items="center"
-        justify="center"
-        overflow="hidden"
-      >
-        <InventoryGridThumbnail
-          itemId={entry.itemId}
-          label={entry.item.name}
-          size={artworkSize}
-          testIdPrefix="inventory-item-image"
-          uri={getItemImageUrl(entry.item.icon)}
-        />
-      </XStack>
+      <InventoryGridThumbnail
+        itemId={entry.itemId}
+        label={entry.item.name}
+        layoutSize={size}
+        uri={getItemImageUrl(entry.item.icon)}
+      />
       {imageOnly ? null : (
         <YStack
           testID={`inventory-item-info-${entry.itemId}`}
