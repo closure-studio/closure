@@ -80,12 +80,48 @@
     "sanity": "理智"
   },
   "timeline": {
-    "logLevel": "级别 {{level}}",
     "title": "活动与公告",
+    "entries": {
+      "contingency-contract": {
+        "description": "高难度轮换玩法开启,冲击更高合约等级获取赛季奖励。",
+        "scheduleLabel": "全天",
+        "tag": "CONTINGENCY",
+        "title": "危机合约 · 第 21 期"
+      },
+      "limited-headhunting": {
+        "description": "6★ 限定干员概率 UP,建议保留合成玉与寻访凭证。",
+        "scheduleLabel": "07-22 ~ 08-05",
+        "tag": "BANNER",
+        "title": "限定寻访 · 逐光图纪"
+      },
+      "resource-rotation": {
+        "description": "固定资源关卡轮换已结束,下轮将于下月初刷新。",
+        "scheduleLabel": "07-10 ~ 07-17",
+        "tag": "NOTICE",
+        "title": "每月轮换 · 资源收集"
+      },
+      "side-story-revival": {
+        "description": "限时活动关卡开放,可兑换限定家具与合成玉,注意理智消耗节奏。",
+        "scheduleLabel": "07-18 ~ 08-01",
+        "tag": "SIDE STORY",
+        "title": "生于黑夜 · 复刻"
+      },
+      "version-maintenance": {
+        "description": "服务器停机维护,期间无法登录,补偿理智将于维护后发放。",
+        "scheduleLabel": "04:00 ~ 10:00",
+        "tag": "MAINTENANCE",
+        "title": "版本维护更新"
+      }
+    },
     "status": {
       "active": "进行中",
       "ended": "已结束",
       "upcoming": "即将开始"
     }
+  },
+  "logs": {
+    "logLevel": "级别 {{level}}",
+    "subtitle": "ARKHOST 日志",
+    "title": "游戏日志"
   }
 }

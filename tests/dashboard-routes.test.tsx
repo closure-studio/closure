@@ -5,6 +5,11 @@ import DashboardActivityRoute from '../src/app/(app)/dashboard/activity';
 import DashboardInventoryRoute from '../src/app/(app)/dashboard/inventory';
 import DashboardOperatorsRoute from '../src/app/(app)/dashboard/operators';
 import DashboardOverviewRoute from '../src/app/(app)/dashboard/overview';
+import type { ArkHostGameLogEntry } from '@/schemas/arkhost';
+
+const mockUseSelectedGameLogsQuery = jest.fn((): { data: { hasMore: boolean; logs: ArkHostGameLogEntry[] } } => ({
+  data: { hasMore: false, logs: [] },
+}));
 
 const mockSelectedGameAccount = {
   account: 'G1',
@@ -19,12 +24,13 @@ jest.mock('@/store', () => ({
 jest.mock('@/features/dashboard', () => {
   const { Text, View } = jest.requireActual<typeof import('react-native')>('react-native');
   return {
-    ActivityTimelineView: () => <Text testID="activity-screen" />,
+    ActivityTimelineView: ({ entries }: { entries: readonly unknown[] }) => <Text testID="activity-screen">{entries.length}</Text>,
     DashboardPageFrame: ({ children }: PropsWithChildren) => (
       <View testID="dashboard-page-frame">{children}</View>
     ),
     EMPTY_INVENTORY: {},
     GameAccountOverviewView: () => <Text testID="overview-screen" />,
+    GameLogsView: ({ entries }: { entries: readonly unknown[] }) => <Text testID="game-logs-screen">{entries.length}</Text>,
     getCharacterDisplayName: (_table: object, characterId: string) => characterId,
     getStageDisplayLabel: (_table: object, stageId: string) => stageId,
     InventoryView: () => <Text testID="inventory-screen" />,
@@ -32,11 +38,16 @@ jest.mock('@/features/dashboard', () => {
     useSelectedGameAccount: () => mockSelectedGameAccount,
     useSelectedGameDetailQuery: () => ({ data: { inventory: {} } }),
     useSelectedCharactersQuery: () => ({ data: { chars: [], total: 0 } }),
-    useSelectedGameLogsQuery: () => ({ data: { hasMore: false, logs: [] } }),
+    useSelectedGameLogsQuery: () => mockUseSelectedGameLogsQuery(),
     useCharacterTable: () => ({}),
     useItemTable: () => ({}),
     useStageTable: () => ({}),
   };
+});
+
+beforeEach(() => {
+  mockUseSelectedGameLogsQuery.mockReset();
+  mockUseSelectedGameLogsQuery.mockReturnValue({ data: { hasMore: false, logs: [] } });
 });
 
 describe('dashboard routes', () => {
@@ -50,5 +61,30 @@ describe('dashboard routes', () => {
 
     expect(screen.getByTestId(wrapperTestId)).toBeTruthy();
     expect(screen.getByTestId(`${screenId}-screen`)).toBeTruthy();
+  });
+
+  it('keeps the restored schedule tab independent from game logs', async () => {
+    const screen = await render(<DashboardActivityRoute />);
+
+    expect(screen.getByTestId('activity-screen').props.children).toBe(5);
+    expect(mockUseSelectedGameLogsQuery).not.toHaveBeenCalled();
+  });
+
+  it('renders selected game logs after the summary content', async () => {
+    mockUseSelectedGameLogsQuery.mockReturnValue({
+      data: {
+        hasMore: false,
+        logs: [{ content: 'log entry', id: 1, logLevel: 1, name: 'G1', ts: 1 }],
+      },
+    });
+
+    const screen = await render(<DashboardOverviewRoute />);
+    const summaryNodes = screen.getAllByTestId(/^(overview-screen|game-logs-screen)$/);
+
+    expect(summaryNodes).toEqual([
+      screen.getByTestId('overview-screen'),
+      screen.getByTestId('game-logs-screen'),
+    ]);
+    expect(screen.getByTestId('game-logs-screen').props.children).toBe(1);
   });
 });

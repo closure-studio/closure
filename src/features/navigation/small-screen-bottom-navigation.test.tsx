@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react';
 import { fireEvent, render } from '@testing-library/react-native';
 import { I18nextProvider } from 'react-i18next';
 import { StyleSheet } from 'react-native';
@@ -8,11 +9,34 @@ import { i18n } from '@/i18n';
 import { tamaguiConfig } from '../../../tamagui.config';
 import { DashboardSmallScreenTabBar } from './dashboard-small-screen-tab-bar';
 
+const mockYStack = jest.fn();
 const bottomInset = 34;
 const safeAreaMetrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
   insets: { top: 47, right: 0, bottom: bottomInset, left: 0 },
 };
+
+jest.mock('react-native-reanimated', () => {
+  const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
+
+  return {
+    ...reanimated,
+    useReducedMotion: () => true,
+  };
+});
+
+jest.mock('tamagui', () => {
+  const tamagui = jest.requireActual<typeof import('tamagui')>('tamagui');
+  const ActualYStack = tamagui.YStack;
+
+  return {
+    ...tamagui,
+    YStack: (props: ComponentProps<typeof ActualYStack>) => {
+      mockYStack(props);
+      return <ActualYStack {...props} />;
+    },
+  };
+});
 
 async function renderMobileBottomNavigation(defaultPrevented = false) {
   const emit = jest.fn(() => ({
@@ -28,7 +52,6 @@ async function renderMobileBottomNavigation(defaultPrevented = false) {
         <I18nextProvider i18n={i18n}>
           <DashboardSmallScreenTabBar
             navigation={{ emit, navigate }}
-            reducedMotion
             state={{
               index: 1,
               routes: [
@@ -49,6 +72,16 @@ async function renderMobileBottomNavigation(defaultPrevented = false) {
 }
 
 describe('MobileBottomNavigation', () => {
+  beforeEach(() => {
+    mockYStack.mockClear();
+  });
+
+  it('keeps the active indicator static when reduced motion is enabled', async () => {
+    await renderMobileBottomNavigation();
+
+    expect(mockYStack).toHaveBeenCalledWith(expect.objectContaining({ transition: '0ms' }));
+  });
+
   it('extends its background through the bottom safe area', async () => {
     const { screen } = await renderMobileBottomNavigation();
     const navigation = screen.getByTestId('small-screen-bottom-navigation');

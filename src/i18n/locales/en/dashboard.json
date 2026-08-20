@@ -80,12 +80,48 @@
     "sanity": "Sanity"
   },
   "timeline": {
-    "logLevel": "LV {{level}}",
     "title": "Events and notices",
+    "entries": {
+      "contingency-contract": {
+        "description": "A high-difficulty rotation is open. Push for higher contract levels to earn seasonal rewards.",
+        "scheduleLabel": "ALL DAY",
+        "tag": "CONTINGENCY",
+        "title": "Contingency Contract - Season 21"
+      },
+      "limited-headhunting": {
+        "description": "A limited 6-star operator rate-up is active. Consider saving Orundum and permits.",
+        "scheduleLabel": "JUL 22 - AUG 05",
+        "tag": "BANNER",
+        "title": "Limited Headhunting - Charting the Light"
+      },
+      "resource-rotation": {
+        "description": "The fixed resource stage rotation has ended. The next rotation refreshes at the start of next month.",
+        "scheduleLabel": "JUL 10 - JUL 17",
+        "tag": "NOTICE",
+        "title": "Monthly Rotation - Resource Collection"
+      },
+      "side-story-revival": {
+        "description": "Limited event stages are open with exchangeable furniture and Orundum. Watch your sanity budget.",
+        "scheduleLabel": "JUL 18 - AUG 01",
+        "tag": "SIDE STORY",
+        "title": "Born from the Night - Rerun"
+      },
+      "version-maintenance": {
+        "description": "Servers will be unavailable during maintenance. Sanity compensation will be issued afterward.",
+        "scheduleLabel": "04:00 - 10:00",
+        "tag": "MAINTENANCE",
+        "title": "Version Maintenance"
+      }
+    },
     "status": {
       "active": "Active",
       "ended": "Ended",
       "upcoming": "Upcoming"
     }
+  },
+  "logs": {
+    "logLevel": "LV {{level}}",
+    "subtitle": "ARKHOST LOGS",
+    "title": "Game logs"
   }
 }

@@ -11,5 +11,3 @@ export const ROUTES = {
   settingsContributors: '/settings/contributors',
   settingsNetwork: '/settings/network',
 } as const;
-
-export const PAGE_TRANSITION_DURATION_MS = 400;

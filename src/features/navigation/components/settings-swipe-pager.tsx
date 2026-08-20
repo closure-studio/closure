@@ -25,6 +25,9 @@ import type { SettingsPageId } from '../navigation-config';
 const PAGER_ITEM_HEIGHT = 22;
 const PAGER_TICK_HEIGHT = 2;
 const PAGER_INACTIVE_TICK_WIDTH = 18;
+const PAGER_ARROW_ACTIVE_OPACITY = 0.85;
+const PAGER_ARROW_INACTIVE_OPACITY = 0.35;
+const PAGER_ARROW_STROKE_WIDTH = 1.8;
 const SWIPE_HINT_OFFSET_PX = 10;
 const SWIPE_HINT_HALF_TRAVEL_DURATION_MS = 4_000;
 const SWIPE_HINT_FULL_TRAVEL_DURATION_MS = 8_000;
@@ -158,24 +161,18 @@ export function SettingsPagerTabs({
           justify="center"
           gap="$3"
         >
-          {([
-            { testID: 'settings-previous-icon', icon: ChevronLeft, visible: hasPreviousStep },
-            { testID: 'settings-next-icon', icon: ChevronRight, visible: hasNextStep },
-          ] as const).map(({ testID, icon: Icon, visible }) => (
-            <YStack
-              key={testID}
-              testID={testID}
-              height={PAGER_ITEM_HEIGHT}
-              items="center"
-              justify="center"
-              opacity={visible ? 0.55 : 0.15}
-              style={{ pointerEvents: 'none' }}
-            >
-              <Icon size={14} color={colors.appMuted.val} strokeWidth={1.5} />
-            </YStack>
-          ))}
+          <YStack
+            testID="settings-previous-icon"
+            height={PAGER_ITEM_HEIGHT}
+            items="center"
+            justify="center"
+            opacity={hasPreviousStep ? PAGER_ARROW_ACTIVE_OPACITY : PAGER_ARROW_INACTIVE_OPACITY}
+            style={{ pointerEvents: 'none' }}
+          >
+            <ChevronLeft size={14} color={colors.appAccent.val} strokeWidth={PAGER_ARROW_STROKE_WIDTH} />
+          </YStack>
 
-          <YStack gap="$1.5">
+          <YStack testID="settings-pager-content" gap="$1.5">
             <XStack items="center" justify="center" role="tablist" aria-label={tabListLabel}>
               <SlidingSelection value={activeId} gap={10} indicator={<SettingsPagerTick />}>
                 {items.map((item) => {
@@ -229,6 +226,17 @@ export function SettingsPagerTabs({
             </XStack>
 
             <AnimatedSwipeHint>{swipeHint}</AnimatedSwipeHint>
+          </YStack>
+
+          <YStack
+            testID="settings-next-icon"
+            height={PAGER_ITEM_HEIGHT}
+            items="center"
+            justify="center"
+            opacity={hasNextStep ? PAGER_ARROW_ACTIVE_OPACITY : PAGER_ARROW_INACTIVE_OPACITY}
+            style={{ pointerEvents: 'none' }}
+          >
+            <ChevronRight size={14} color={colors.appAccent.val} strokeWidth={PAGER_ARROW_STROKE_WIDTH} />
           </YStack>
         </XStack>
       </YStack>

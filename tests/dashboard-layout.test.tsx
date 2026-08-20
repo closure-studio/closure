@@ -8,10 +8,6 @@ const mockDashboardTabsScreen = jest.fn(() => null);
 const mockDashboardSmallScreenTabBar = jest.fn(() => null);
 const mockDashboardShell = jest.fn(({ children }: PropsWithChildren) => children);
 const mockSelectGameAccount = jest.fn();
-const mockGetTabScreenOptions = jest.fn((reducedMotion: boolean) => ({
-  animation: reducedMotion ? 'none' : 'fade',
-}));
-const mockUseReducedMotion = jest.fn(() => false);
 const mockUseIsFocused = jest.fn(() => true);
 const mockUseLayoutSize = jest.fn((): LayoutSize => 'small');
 
@@ -38,17 +34,6 @@ jest.mock('expo-router', () => ({
 jest.mock('expo-router/tabs', () => ({
   Tabs: Object.assign(mockDashboardTabs, { Screen: mockDashboardTabsScreen }),
 }));
-
-jest.mock('react-native-reanimated', () => {
-  const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
-  const reanimatedMock = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated/mock');
-
-  return {
-    ...reanimated,
-    ...reanimatedMock,
-    useReducedMotion: mockUseReducedMotion,
-  };
-});
 
 jest.mock('tamagui', () => {
   const { View } = jest.requireActual<typeof import('react-native')>('react-native');
@@ -104,7 +89,6 @@ jest.mock('@/features/navigation', () => ({
 }));
 
 jest.mock('@/features/session', () => ({
-  getTabScreenOptions: mockGetTabScreenOptions,
   useSessionBackdrop: () => ({ setBackdropTint: jest.fn() }),
 }));
 
@@ -112,14 +96,11 @@ const DashboardLayout = jest.requireActual<
   typeof import('../src/app/(app)/dashboard/_layout')
 >('../src/app/(app)/dashboard/_layout').default;
 
-describe('DashboardLayout route transitions', () => {
+describe('DashboardLayout', () => {
   beforeEach(() => {
     mockDashboardTabs.mockClear();
     mockDashboardShell.mockClear();
     mockSelectGameAccount.mockClear();
-    mockGetTabScreenOptions.mockClear();
-    mockUseReducedMotion.mockReset();
-    mockUseReducedMotion.mockReturnValue(false);
     mockUseIsFocused.mockReset();
     mockUseIsFocused.mockReturnValue(true);
     mockUseLayoutSize.mockReset();
@@ -133,10 +114,9 @@ describe('DashboardLayout route transitions', () => {
     };
   });
 
-  it('enables Dashboard route transitions when reduced motion is disabled', async () => {
+  it('configures Dashboard Tabs without route transitions', async () => {
     await render(<DashboardLayout />);
 
-    expect(mockGetTabScreenOptions).toHaveBeenCalledWith(false);
     expect(mockDashboardShell).toHaveBeenCalledWith(
       expect.objectContaining({
         selectedGameAccountId: 'account-1',
@@ -147,7 +127,13 @@ describe('DashboardLayout route transitions', () => {
     );
     expect(mockDashboardTabs).toHaveBeenCalledWith(
       expect.objectContaining({
-        screenOptions: { animation: 'fade' },
+        screenOptions: {
+          animation: 'none',
+          freezeOnBlur: true,
+          headerShown: false,
+          lazy: true,
+          sceneStyle: { backgroundColor: 'transparent' },
+        },
         tabBar: expect.any(Function),
       }),
       undefined,
@@ -162,9 +148,17 @@ describe('DashboardLayout route transitions', () => {
     const tabBar = Reflect.get(receivedProps, 'tabBar');
     if (typeof tabBar !== 'function') throw new Error('Expected a Dashboard tab bar renderer.');
     expect(Reflect.apply(tabBar, null, [{}])).toEqual(expect.objectContaining({
-      props: expect.objectContaining({ reducedMotion: false }),
+      props: expect.not.objectContaining({ reducedMotion: expect.anything() }),
       type: mockDashboardSmallScreenTabBar,
     }));
+    const screenOptions = Reflect.get(receivedProps, 'screenOptions');
+    if (typeof screenOptions !== 'object' || screenOptions === null) {
+      throw new Error('Expected Dashboard screen options.');
+    }
+    const sceneInterpolatorProperty = ['sceneStyle', 'Interpolator'].join('');
+    const tabTransitionProperty = ['transition', 'Spec'].join('');
+    expect(Reflect.get(screenOptions, sceneInterpolatorProperty)).toBeUndefined();
+    expect(Reflect.get(screenOptions, tabTransitionProperty)).toBeUndefined();
     expect(Reflect.get(receivedProps, 'children')).toEqual(expect.objectContaining({
       props: { name: 'index', options: { href: null } },
       type: mockDashboardTabsScreen,
@@ -212,17 +206,6 @@ describe('DashboardLayout route transitions', () => {
     );
   });
 
-  it('disables Dashboard route transitions when reduced motion is enabled', async () => {
-    mockUseReducedMotion.mockReturnValue(true);
-
-    await render(<DashboardLayout />);
-
-    expect(mockGetTabScreenOptions).toHaveBeenCalledWith(true);
-    expect(mockDashboardTabs).toHaveBeenCalledWith(
-      expect.objectContaining({ screenOptions: { animation: 'none' } }),
-      undefined,
-    );
-  });
 });
 
 describe('Dashboard selection reconciliation', () => {
