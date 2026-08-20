@@ -1,6 +1,6 @@
 export { getGameAvatarImageUrl } from './avatar-image';
 export { ActivityTimelineView } from './components/activity-timeline-view';
-export { DashboardPageFrame, DashboardPageScroll, DashboardShell } from './components/dashboard-shell';
+export { DashboardPageFrame, DashboardShell } from './components/dashboard-shell';
 export { GameLogsView } from './components/game-logs-view';
 export { GameAccountOverviewView } from './components/game-account-overview-view';
 export {

@@ -44,25 +44,5 @@ export function authFailureMessage(
   scope: AuthFailureScope,
 ): string | null {
   if (!error) return null;
-  switch (error.code) {
-    case 'invalid-credentials':
-    case 'account-banned':
-    case 'rate-limited':
-    case 'network-unavailable':
-    case 'timeout':
-    case 'server-error':
-    case 'invalid-response':
-    case 'session-expired':
-    case 'user-not-found':
-      return translate(keyByScope[scope][error.code] ?? fallbackKeyByScope[scope]);
-    case 'already-bound':
-    case 'email-already-registered':
-    case 'invalid-input':
-    case 'invalid-oauth-code':
-    case 'invalid-verification-code':
-    case 'permission-denied':
-    case 'unknown-business-error':
-    case 'verification-code-expired':
-      return translate(fallbackKeyByScope[scope]);
-  }
+  return translate(keyByScope[scope][error.code] ?? fallbackKeyByScope[scope]);
 }
