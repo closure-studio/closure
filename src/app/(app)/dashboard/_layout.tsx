@@ -1,7 +1,6 @@
 import { Tabs as DashboardTabs } from 'expo-router/tabs';
 import { useIsFocused } from 'expo-router';
 import { useCallback, useEffect, useMemo } from 'react';
-import { useReducedMotion } from 'react-native-reanimated';
 import { Spinner, YStack, getTokens } from 'tamagui';
 
 import { MonoText } from '@/components';
@@ -13,7 +12,7 @@ import {
   useGameAccountsQuery,
 } from '@/features/dashboard';
 import { DashboardSmallScreenTabBar } from '@/features/navigation';
-import { getTabScreenOptions, useSessionBackdrop } from '@/features/session';
+import { useSessionBackdrop } from '@/features/session';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import { useAppStore } from '@/store';
 import { resolveAdjacentHorizontalSwipeItem } from '@/utils/horizontal-swipe';
@@ -23,7 +22,7 @@ function DashboardState({ label }: { label: string }) {
   return <YStack grow={1} items="center" justify="center" gap="$3"><Spinner color="$appAccent" /><MonoText size="$2">{label}</MonoText></YStack>;
 }
 
-function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
+export default function DashboardLayout() {
   const colors = getTokens().color;
   const layoutSize = useLayoutSize();
   const isFocused = useIsFocused();
@@ -72,15 +71,17 @@ function DashboardLayoutContent({ reducedMotion }: { reducedMotion: boolean }) {
       onSelectGameAccount={selectGameAccount}
     >
       <DashboardTabs
-        screenOptions={getTabScreenOptions(reducedMotion)}
-        tabBar={layoutSize === 'small' ? (props) => <DashboardSmallScreenTabBar {...props} reducedMotion={reducedMotion} /> : () => null}
+        screenOptions={{
+          animation: 'none',
+          freezeOnBlur: true,
+          headerShown: false,
+          lazy: true,
+          sceneStyle: { backgroundColor: 'transparent' },
+        }}
+        tabBar={layoutSize === 'small' ? (props) => <DashboardSmallScreenTabBar {...props} /> : () => null}
       >
         <DashboardTabs.Screen name="index" options={{ href: null }} />
       </DashboardTabs>
     </DashboardShell>
   );
-}
-
-export default function DashboardLayout() {
-  return <DashboardLayoutContent reducedMotion={useReducedMotion()} />;
 }

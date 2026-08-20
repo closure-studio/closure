@@ -1,10 +1,6 @@
-import { Stack as RootStack } from 'expo-router/js-stack';
-import { useReducedMotion } from 'react-native-reanimated';
+import { Slot } from 'expo-router';
 
-import {
-  getRouteScreenOptions,
-  SessionShell,
-} from '@/features/session';
+import { SessionShell } from '@/features/session';
 import { useSessionQueryCacheReset } from '@/features/dashboard';
 import { AppProvider } from '@/providers';
 
@@ -13,7 +9,7 @@ export default function RootLayout() {
     <AppProvider>
       <SessionQueryCacheReset />
       <SessionShell>
-        <RootNavigator />
+        <Slot />
       </SessionShell>
     </AppProvider>
   );
@@ -22,15 +18,4 @@ export default function RootLayout() {
 function SessionQueryCacheReset() {
   useSessionQueryCacheReset();
   return null;
-}
-
-function RootNavigator() {
-  const reducedMotion = useReducedMotion();
-
-  return (
-    <RootStack screenOptions={getRouteScreenOptions(reducedMotion)}>
-      <RootStack.Screen name="(auth)" />
-      <RootStack.Screen name="(app)" />
-    </RootStack>
-  );
 }

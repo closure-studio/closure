@@ -2,6 +2,7 @@ import type { BottomTabBarProps } from 'expo-router/tabs';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LayoutChangeEvent } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
@@ -17,17 +18,16 @@ type DashboardSmallScreenTabBarProps = {
     }) => { defaultPrevented: boolean };
     navigate: (name: string, params: object | undefined) => void;
   };
-  reducedMotion: boolean;
   state: Pick<BottomTabBarProps['state'], 'index' | 'routes'>;
 };
 
 export function DashboardSmallScreenTabBar({
   navigation,
-  reducedMotion,
   state,
 }: DashboardSmallScreenTabBarProps) {
   const { t } = useTranslation('dashboard');
   const colors = getTokens().color;
+  const reducedMotion = useReducedMotion();
   const { bottom: bottomInset } = useSafeAreaInsets();
   const [navigationWidth, setNavigationWidth] = useState(0);
   const activeRoute = state.routes[state.index];
