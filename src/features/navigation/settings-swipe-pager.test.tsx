@@ -66,6 +66,23 @@ describe('SettingsPagerTabs', () => {
     });
   });
 
+  it('keeps the direction icons on opposite sides of the pager content', async () => {
+    const screen = await renderSettingsPagerTabs();
+    const layoutNodes = screen.getAllByTestId(/settings-(previous-icon|pager-content|next-icon)/);
+
+    expect(layoutNodes).toHaveLength(3);
+    expect(layoutNodes.indexOf(screen.getByTestId('settings-previous-icon'))).toBe(0);
+    expect(layoutNodes.indexOf(screen.getByTestId('settings-pager-content'))).toBe(1);
+    expect(layoutNodes.indexOf(screen.getByTestId('settings-next-icon'))).toBe(2);
+  });
+
+  it('keeps both direction icons legible while preserving disabled-state contrast', async () => {
+    const screen = await renderSettingsPagerTabs();
+
+    expect(screen.getByTestId('settings-previous-icon')).toHaveStyle({ opacity: 0.35 });
+    expect(screen.getByTestId('settings-next-icon')).toHaveStyle({ opacity: 0.85 });
+  });
+
   it('keeps the swipe hint centered when reduced motion is enabled', async () => {
     const screen = await renderSettingsPagerTabs();
 

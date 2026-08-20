@@ -1,10 +1,9 @@
 import {
   ActivityTimelineView,
   DashboardPageFrame,
-  useSelectedGameLogsQuery,
 } from '@/features/dashboard';
+import { mockDashboardSchedule } from '@/mocks/dashboard';
 
 export default function DashboardActivityRoute() {
-  const logs = useSelectedGameLogsQuery().data;
-  return <DashboardPageFrame scroll><ActivityTimelineView entries={logs?.logs ?? []} /></DashboardPageFrame>;
+  return <DashboardPageFrame scroll><ActivityTimelineView entries={mockDashboardSchedule} /></DashboardPageFrame>;
 }
