@@ -74,7 +74,3 @@ export function DashboardPageFrame({
     </YStack>
   );
 }
-
-export function DashboardPageScroll({ children }: PropsWithChildren) {
-  return <DashboardPageFrame scroll>{children}</DashboardPageFrame>;
-}

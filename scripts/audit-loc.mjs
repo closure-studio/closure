@@ -13,6 +13,7 @@ async function collectFiles(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const fullPath = path.join(directory, entry.name);
     if (entry.isDirectory()) {
+      if (excludeMockFiles && entry.name === 'mocks') continue;
       files.push(...await collectFiles(fullPath));
     } else if (
       /\.tsx?$/.test(entry.name)
