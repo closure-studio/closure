@@ -11,7 +11,7 @@ import {
   SectionPageHeader,
   SlidingSelection,
   TerminalNotice,
-  TerminalPanel,
+  Frame,
   TerminalText,
 } from '@/components';
 import { API_NODE_HOSTS } from '@/constants/api';
@@ -99,7 +99,7 @@ export function NetworkSettingsScreen({
     )}>
       <YStack gap="$3" $md={{ gap: '$5' }}>
         {layoutSize === 'large' ? (
-          <TerminalPanel cornerBrackets minH={320} overflow="hidden" p="$6" gap="$5">
+          <Frame cornerBrackets minH={320} overflow="hidden" p="$6" gap="$5">
             <YStack
               position="absolute"
               t={0} l={0} r={0} height={2}
@@ -186,7 +186,7 @@ export function NetworkSettingsScreen({
               <Clock3 size={13} color={colors.appMuted.val} strokeWidth={1.5} />
               <MonoText size="$1">{t('network.persistenceLabel')}</MonoText>
             </XStack>
-          </TerminalPanel>
+          </Frame>
         ) : null}
 
         <YStack gap="$3">

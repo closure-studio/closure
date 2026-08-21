@@ -29,10 +29,13 @@ jest.mock('@/features/dashboard', () => {
       <View testID="dashboard-page-frame">{children}</View>
     ),
     EMPTY_INVENTORY: {},
-    GameAccountOverviewView: () => <Text testID="overview-screen" />,
-    GameLogsView: ({ entries }: { entries: readonly unknown[] }) => <Text testID="game-logs-screen">{entries.length}</Text>,
+    GameAccountOverviewView: ({ logs }: { logs: readonly unknown[] }) => (
+      <View testID="overview-screen">
+        <Text testID="game-logs-screen">{logs.length}</Text>
+      </View>
+    ),
     getCharacterDisplayName: (_table: object, characterId: string) => characterId,
-    getStageDisplayLabel: (_table: object, stageId: string) => stageId,
+    getStageDisplayParts: (_table: object, stageId: string) => ({ title: stageId, subtitle: undefined }),
     InventoryView: () => <Text testID="inventory-screen" />,
     OperatorRosterView: () => <Text testID="operators-screen" />,
     useSelectedGameAccount: () => mockSelectedGameAccount,
@@ -70,7 +73,7 @@ describe('dashboard routes', () => {
     expect(mockUseSelectedGameLogsQuery).not.toHaveBeenCalled();
   });
 
-  it('renders selected game logs after the summary content', async () => {
+  it('passes selected game logs into the overview summary grid', async () => {
     mockUseSelectedGameLogsQuery.mockReturnValue({
       data: {
         hasMore: false,
@@ -79,12 +82,8 @@ describe('dashboard routes', () => {
     });
 
     const screen = await render(<DashboardOverviewRoute />);
-    const summaryNodes = screen.getAllByTestId(/^(overview-screen|game-logs-screen)$/);
 
-    expect(summaryNodes).toEqual([
-      screen.getByTestId('overview-screen'),
-      screen.getByTestId('game-logs-screen'),
-    ]);
+    expect(screen.getByTestId('overview-screen')).toBeTruthy();
     expect(screen.getByTestId('game-logs-screen').props.children).toBe(1);
   });
 });

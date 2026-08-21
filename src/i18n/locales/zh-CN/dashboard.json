@@ -55,7 +55,7 @@
       "orundum": "合成玉",
       "recruitTickets": "招募券"
     },
-    "base": "可露希尔基建",
+    "base": "基建",
     "baseMetrics": {
       "factoryLoad": "制造站负载",
       "mood": "干员心情",
@@ -67,7 +67,7 @@
     },
     "experience": "经验",
     "level": "等级",
-    "operationMetrics": "作战概览",
+    "operationMetrics": "作战",
     "metrics": {
       "autoBattle": "自动战斗",
       "baseArrange": "基建排班",
@@ -75,9 +75,10 @@
       "map": "当前关卡"
     },
     "overflow": "已溢出",
-    "profile": "// 博士档案",
+    "profile": "档案",
     "recoversAt": "回满 {{time}}",
-    "sanity": "理智"
+    "sanity": "理智",
+    "sanityCurrent": "当前理智"
   },
   "timeline": {
     "title": "活动与公告",
@@ -122,6 +123,6 @@
   "logs": {
     "logLevel": "级别 {{level}}",
     "subtitle": "ARKHOST 日志",
-    "title": "游戏日志"
+    "title": "日志"
   }
 }

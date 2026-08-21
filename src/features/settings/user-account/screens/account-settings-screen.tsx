@@ -22,7 +22,7 @@ import {
 import {
   MonoText,
   SectionPageHeader,
-  TerminalPanel,
+  Frame,
   TerminalPasswordVisibilityButton,
   TerminalText,
   TerminalTextField,
@@ -145,7 +145,7 @@ function AccountIdentityPanel({
   const colors = getTokens().color;
 
   return (
-    <TerminalPanel
+    <Frame
       testID="account-identity-panel"
       p="$3.5"
       gap="$4"
@@ -198,7 +198,7 @@ function AccountIdentityPanel({
           value={status}
         />
       </XStack>
-    </TerminalPanel>
+    </Frame>
   );
 }
 
@@ -343,7 +343,7 @@ export function AccountSettingsScreen({
 
           <YStack grow={1} shrink={1} minW={0} width="100%" $lg={{ width: 'auto' }}>
             <Form onSubmit={handlePasswordSubmit}>
-              <TerminalPanel
+              <Frame
                 testID="account-password-panel"
                 p="$3.5"
                 gap="$4"
@@ -434,7 +434,7 @@ export function AccountSettingsScreen({
                     {t('account.passwordUpdated')}
                   </MonoText>
                 ) : null}
-              </TerminalPanel>
+              </Frame>
             </Form>
           </YStack>
         </XStack>

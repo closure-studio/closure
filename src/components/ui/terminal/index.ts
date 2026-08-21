@@ -6,7 +6,6 @@ export {
   type TerminalNoticeProps,
   type TerminalNoticeTone,
 } from './terminal-notice';
-export { TerminalCornerBrackets, TerminalPanel } from './terminal-panel';
 export { TerminalSectionHeading } from './terminal-section-heading';
 export { TerminalPasswordVisibilityButton, TerminalTextField } from './terminal-text-field';
 export type { TerminalTextFieldHandle } from './terminal-text-field';

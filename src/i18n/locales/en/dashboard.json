@@ -55,7 +55,7 @@
       "orundum": "Orundum",
       "recruitTickets": "Recruit permits"
     },
-    "base": "Closure base",
+    "base": "Base",
     "baseMetrics": {
       "factoryLoad": "Factory load",
       "mood": "Operator morale",
@@ -67,7 +67,7 @@
     },
     "experience": "EXP",
     "level": "LEVEL",
-    "operationMetrics": "Operation metrics",
+    "operationMetrics": "Combat",
     "metrics": {
       "autoBattle": "Auto battle",
       "baseArrange": "Base schedule",
@@ -75,9 +75,10 @@
       "map": "Current stage"
     },
     "overflow": "OVERFLOW",
-    "profile": "// OPERATOR PROFILE",
+    "profile": "Profile",
     "recoversAt": "FULL AT {{time}}",
-    "sanity": "Sanity"
+    "sanity": "Sanity",
+    "sanityCurrent": "CURRENT SANITY"
   },
   "timeline": {
     "title": "Events and notices",
@@ -122,6 +123,6 @@
   "logs": {
     "logLevel": "LV {{level}}",
     "subtitle": "ARKHOST LOGS",
-    "title": "Game logs"
+    "title": "Logs"
   }
 }

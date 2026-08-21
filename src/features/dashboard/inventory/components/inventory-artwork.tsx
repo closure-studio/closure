@@ -13,7 +13,7 @@ import Svg, {
 import { getTokens } from 'tamagui';
 
 import { AvatarFilter } from '@/components';
-import { getItemImageUrl } from '../item-image';
+import { getItemImageUrl } from '@/utils/item-image';
 
 const CIRCULAR_ARTWORK_RADIUS = 999;
 const ARTWORK_FEATHER_STOPS = [
@@ -30,7 +30,7 @@ function getFirstCharacter(value: string): string {
 
 /**
  * Full-detail selected-item artwork with a radial feather and terminal filter.
- * Grid cells must use the lightweight {@link InventoryGridThumbnail} instead;
+ * Grid cells must use the lightweight {@link ItemArtwork} instead;
  * never render this per cell.
  */
 export function InventoryPreviewArtwork({

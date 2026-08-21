@@ -1,11 +1,10 @@
 import { memo } from 'react';
 import { XStack, YStack, styled } from 'tamagui';
 
-import { MonoText, TerminalText } from '@/components';
+import { ItemArtwork, MonoText, TerminalText } from '@/components';
 import type { ItemTableItem } from '@/schemas/game-data';
 import type { LayoutSize } from '@/schemas/layout-size';
-import { getItemImageUrl } from '../item-image';
-import { InventoryGridThumbnail } from './inventory-grid-thumbnail';
+import { getItemImageUrl } from '@/utils/item-image';
 
 export const INVENTORY_CELL_MIN_WIDTH_TOKEN = {
   small: '$11',
@@ -87,6 +86,16 @@ export const InventoryCell = memo(function InventoryCell({
   selected: boolean;
   size: LayoutSize;
 }) {
+  const artwork = (
+    <ItemArtwork
+      accessibilityLabel={entry.item.name}
+      layoutSize={size}
+      recyclingKey={entry.itemId}
+      source={getItemImageUrl(entry.item.icon)}
+      testID={`inventory-item-image-${entry.itemId}`}
+    />
+  );
+
   return (
     <InventoryCellFrame
       testID={`inventory-item-${entry.itemId}`}
@@ -99,12 +108,11 @@ export const InventoryCell = memo(function InventoryCell({
       layoutSize={size}
       width={itemWidth ?? '100%'}
     >
-      <InventoryGridThumbnail
-        itemId={entry.itemId}
-        label={entry.item.name}
-        layoutSize={size}
-        uri={getItemImageUrl(entry.item.icon)}
-      />
+      {size === 'small' ? (
+        <YStack ml="$1.5" my="$0.5">
+          {artwork}
+        </YStack>
+      ) : artwork}
       {imageOnly ? null : (
         <YStack
           testID={`inventory-item-info-${entry.itemId}`}

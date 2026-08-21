@@ -11,7 +11,7 @@ import {
   AVATAR_FILTER_SCANLINE_OPACITY,
   AVATAR_FILTER_WASH_STOPS,
 } from '../src/components/ui/avatar-filter-config.ts';
-import { INVENTORY_GRID_THUMBNAIL_SIZE } from '../src/features/dashboard/inventory/inventory-grid-thumbnail-config.ts';
+import { ITEM_ARTWORK_SIZE } from '../src/components/ui/item-artwork-config.ts';
 import {
   OPERATOR_PORTRAIT_FILTER,
   OPERATOR_PORTRAIT_GEOMETRY,
@@ -78,7 +78,7 @@ const ICONS = [
   ...Array.from({ length: 6 }, (_, index) => ({ category: 'potential', name: `potential_${index}` })),
 ];
 
-const INVENTORY_FILTERS = Object.entries(INVENTORY_GRID_THUMBNAIL_SIZE).map(
+const INVENTORY_FILTERS = Object.entries(ITEM_ARTWORK_SIZE).map(
   ([layoutSize, size]) => ({ layoutSize, size }),
 );
 

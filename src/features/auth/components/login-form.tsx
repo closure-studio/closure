@@ -5,7 +5,7 @@ import { type MutationStatus } from '@tanstack/react-query';
 import { useReducedMotion } from 'react-native-reanimated';
 import { AnimatePresence, Button, Form, Spinner, YStack, getTokens, styled, useMedia } from 'tamagui';
 
-import { MonoText, TerminalPanel, TerminalPasswordVisibilityButton, TerminalSectionHeading, TerminalText, TerminalTextField } from '@/components';
+import { Frame, MonoText, TerminalPasswordVisibilityButton, TerminalSectionHeading, TerminalText, TerminalTextField } from '@/components';
 import type { TerminalTextFieldHandle } from '@/components';
 import type { LoginSubmission, PasswordRecoveryRequestInput } from '@/schemas/auth';
 
@@ -121,7 +121,7 @@ export function LoginForm({
       {mode === 'login' ? (
         <YStack key="login" transition={reducedMotion ? '0ms' : '400ms'} enterStyle={reducedMotion ? null : { opacity: 0, x: -24 }} exitStyle={reducedMotion ? null : { opacity: 0, x: -24 }} opacity={1} x={0} gap="$3">
           <Form onSubmit={handleLoginSubmit}>
-            <TerminalPanel cornerBrackets p="$4.5" gap="$4">
+            <Frame cornerBrackets p="$4.5" gap="$4">
               <TerminalSectionHeading code="01" title={t('login.title')} {...(media.xxs ? { subtitle: 'AUTH' } : {})} />
               <TerminalTextField
                 ref={identifierRef}
@@ -182,14 +182,14 @@ export function LoginForm({
                   {unexpectedSubmissionError ?? submissionError}
                 </MonoText>
               ) : null}
-            </TerminalPanel>
+            </Frame>
           </Form>
           <MonoText size="$2.5" text="center">{t('login.unregistered')}</MonoText>
         </YStack>
       ) : (
         <YStack key="forgot" transition={reducedMotion ? '0ms' : '400ms'} enterStyle={reducedMotion ? null : { opacity: 0, x: 24 }} exitStyle={reducedMotion ? null : { opacity: 0, x: 24 }} opacity={1} x={0}>
           <Form onSubmit={submitRecoveryRequest}>
-            <TerminalPanel cornerBrackets p="$4.5" gap="$4">
+            <Frame cornerBrackets p="$4.5" gap="$4">
               <TerminalSectionHeading code="SOS" title={t('recovery.title')} {...(media.xxs ? { subtitle: 'RECOVERY' } : {})} />
               <AnimatePresence mode="wait">
                 {recoveryStatus === 'success' ? (
@@ -236,7 +236,7 @@ export function LoginForm({
                 <ArrowLeft size={16} color={colors.appAccent.val} />
                 <MonoText size="$3" color="$appAccent">{t('recovery.backToLogin')}</MonoText>
               </TerminalActionButton>
-            </TerminalPanel>
+            </Frame>
           </Form>
         </YStack>
       )}
