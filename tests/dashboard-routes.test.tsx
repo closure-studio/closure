@@ -5,6 +5,7 @@ import DashboardActivityRoute from '../src/app/(app)/dashboard/activity';
 import DashboardInventoryRoute from '../src/app/(app)/dashboard/inventory';
 import DashboardOperatorsRoute from '../src/app/(app)/dashboard/operators';
 import DashboardOverviewRoute from '../src/app/(app)/dashboard/overview';
+import DashboardSettingsRoute from '../src/app/(app)/dashboard/settings';
 import type { ArkHostGameLogEntry } from '@/schemas/arkhost';
 
 const mockUseSelectedGameLogsQuery = jest.fn((): { data: { hasMore: boolean; logs: ArkHostGameLogEntry[] } } => ({
@@ -64,6 +65,12 @@ describe('dashboard routes', () => {
 
     expect(screen.getByTestId(wrapperTestId)).toBeTruthy();
     expect(screen.getByTestId(`${screenId}-screen`)).toBeTruthy();
+  });
+
+  it('renders the settings page frame without a settings implementation', async () => {
+    const screen = await render(<DashboardSettingsRoute />);
+
+    expect(screen.getByTestId('dashboard-page-frame')).toBeTruthy();
   });
 
   it('keeps the restored schedule tab independent from game logs', async () => {

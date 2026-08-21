@@ -57,6 +57,7 @@ async function renderMobileBottomNavigation(defaultPrevented = false) {
               routes: [
                 { key: 'index-key', name: 'index' },
                 { key: 'overview-key', name: 'overview' },
+                { key: 'settings-key', name: 'settings' },
                 { key: 'operators-key', name: 'operators' },
                 { key: 'inventory-key', name: 'inventory' },
                 { key: 'activity-key', name: 'activity' },
@@ -94,7 +95,7 @@ describe('MobileBottomNavigation', () => {
   it('omits the index redirect route and marks the navigator active tab', async () => {
     const { screen } = await renderMobileBottomNavigation();
 
-    expect(screen.getAllByRole('tab')).toHaveLength(4);
+    expect(screen.getAllByRole('tab')).toHaveLength(5);
     expect(screen.getByRole('tab', { name: i18n.t('dashboard:navigation.sections.overview.label') }).props['aria-selected']).toBe(true);
   });
 

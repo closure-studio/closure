@@ -5,7 +5,7 @@ import {
 } from './navigation-config';
 
 describe('navigation config', () => {
-  it.each(['/', '/dashboard', '/dashboard/overview', '/dashboard/operators'] as const)(
+  it.each(['/', '/dashboard', '/dashboard/overview', '/dashboard/settings', '/dashboard/operators'] as const)(
     'derives dashboard scope for %s',
     (pathname) => {
       expect(getNavigationScope(pathname)).toBe('dashboard');
@@ -38,6 +38,7 @@ describe('navigation config', () => {
 
     expect(dashboardPages.map(({ id, route }) => ({ id, route }))).toEqual([
       { id: 'overview', route: '/dashboard/overview' },
+      { id: 'settings', route: '/dashboard/settings' },
       { id: 'operators', route: '/dashboard/operators' },
       { id: 'inventory', route: '/dashboard/inventory' },
       { id: 'activity', route: '/dashboard/activity' },

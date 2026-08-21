@@ -23,7 +23,8 @@
       "activity": { "label": "Timeline", "subtitle": "TIMELINE" },
       "inventory": { "label": "Inventory" },
       "operators": { "label": "Operators", "subtitle": "OPERATORS" },
-      "overview": { "label": "Overview", "subtitle": "OVERVIEW" }
+      "overview": { "label": "Overview", "subtitle": "OVERVIEW" },
+      "settings": { "label": "Settings", "subtitle": "SETTINGS" }
     }
   },
   "operators": {
