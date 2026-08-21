@@ -22,12 +22,14 @@ export {
   useAdjacentGameAccountPrefetch,
   useArkHostSync,
   useGameAccountsQuery,
+  useUpdateGameConfig,
   useSelectedCharactersQuery,
   useSelectedGameAccount,
   useSelectedGameDetailQuery,
   useSelectedGameLogsQuery,
   useSessionQueryCacheReset,
 } from './queries';
+export type { UpdateGameConfigInput } from './queries';
 export {
   useCharacterTable,
   useItemTable,

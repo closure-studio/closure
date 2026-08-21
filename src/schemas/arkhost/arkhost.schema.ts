@@ -39,6 +39,10 @@ export const arkHostGameConfigSchema = v.object({
   recruit_reserve: nonNegativeIntegerSchema,
 });
 
+export const arkHostGameConfigPatchSchema = v.partial(
+  arkHostGameConfigSchema,
+);
+
 export const arkHostCaptchaInfoSchema = v.object({
   account: v.optional(v.string()),
   captcha_type: v.string(),
@@ -193,10 +197,14 @@ export const arkHostCharactersResponseSchema = responseSchema(
 );
 
 export type ArkHostAvatar = v.InferOutput<typeof arkHostAvatarSchema>;
+export type ArkHostGameConfig = v.InferOutput<typeof arkHostGameConfigSchema>;
 export type ArkHostGameListEntry = v.InferOutput<
   typeof arkHostGameListEntrySchema
 >;
 export type ArkHostGameDetail = v.InferOutput<typeof arkHostGameDetailSchema>;
+export type ArkHostGameConfigPatch = v.InferOutput<
+  typeof arkHostGameConfigPatchSchema
+>;
 export type ArkHostGameLogs = v.InferOutput<typeof arkHostGameLogsSchema>;
 export type ArkHostGameLogEntry = v.InferOutput<
   typeof arkHostGameLogEntrySchema

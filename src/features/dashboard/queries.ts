@@ -1,4 +1,4 @@
-import { queryOptions, useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import * as v from 'valibot';
 
@@ -6,16 +6,23 @@ import {
   ARK_HOST_GAME_STATUS_CODE,
   arkHostCharactersSchema,
   arkHostGameDetailSchema,
+  arkHostGameConfigPatchSchema,
   arkHostGameListEntrySchema,
   arkHostGameLogsSchema,
   arkHostSseEventSchema,
 } from '@/schemas/arkhost';
-import type { ArkHostGameListEntry, ArkHostGameLogs } from '@/schemas/arkhost';
+import type {
+  ArkHostGameConfig,
+  ArkHostGameConfigPatch,
+  ArkHostGameDetail,
+  ArkHostGameListEntry,
+  ArkHostGameLogs,
+} from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
-import { useAppStore } from '@/store';
+import { appStore, useAppStore } from '@/store';
 import { FailureError, unwrapResult } from '@/utils/failure-error';
 import { getQueryDependencies } from '@/services/query-dependencies';
-import type { ArkHostSseSubscription } from './api';
+import type { ArkHostFailure, ArkHostSseSubscription } from './api';
 
 export const arkHostQueryKeys = {
   characters: (account: string) => ['arkhost', 'characters', account] as const,
@@ -131,6 +138,66 @@ export function useGameLogsQuery(account: string | null) {
   return useQuery({
     ...logsQueryOptions(account ?? ''),
     enabled: account !== null,
+  });
+}
+
+export type UpdateGameConfigInput = {
+  account: string;
+  patch: ArkHostGameConfigPatch;
+};
+
+function mergeGameConfig(
+  config: ArkHostGameConfig,
+  patch: ArkHostGameConfigPatch,
+): ArkHostGameConfig {
+  return Object.assign({ ...config }, patch);
+}
+
+function updateGameConfigCache(
+  queryClient: ReturnType<typeof useQueryClient>,
+  { account, patch }: UpdateGameConfigInput,
+) {
+  const userId = appStore.getState().auth.session?.principal.id;
+  if (userId) {
+    queryClient.setQueryData<GameAccount[]>(
+      arkHostQueryKeys.gameAccounts(userId),
+      (previous) => previous?.map((gameAccount) => (
+        gameAccount.account === account
+          ? { ...gameAccount, config: mergeGameConfig(gameAccount.config, patch) }
+          : gameAccount
+      )),
+    );
+  }
+
+  queryClient.setQueryData<ArkHostGameDetail | null>(
+    arkHostQueryKeys.detail(account),
+    (previous) => previous
+      ? { ...previous, config: mergeGameConfig(previous.config, patch) }
+      : previous,
+  );
+}
+
+export function useUpdateGameConfig() {
+  const queryClient = useQueryClient();
+  return useMutation<ArkHostGameConfigPatch, ArkHostFailure, UpdateGameConfigInput>({
+    mutationFn: async ({ account, patch }) => {
+      const parsedPatch = v.safeParse(arkHostGameConfigPatchSchema, patch);
+      if (!parsedPatch.success) {
+        throw new FailureError({
+          code: 'operation-rejected',
+          diagnosticMessage: 'Invalid game config patch.',
+          kind: 'business',
+        });
+      }
+      const { arkHostApi } = getQueryDependencies();
+      unwrapResult(
+        await arkHostApi.updateGameConfig(account, parsedPatch.output),
+      );
+      return parsedPatch.output;
+    },
+    onSuccess: (parsedPatch, { account }) => {
+      updateGameConfigCache(queryClient, { account, patch: parsedPatch });
+    },
   });
 }
 
