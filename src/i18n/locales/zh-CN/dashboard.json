@@ -125,5 +125,94 @@
     "logLevel": "级别 {{level}}",
     "subtitle": "ARKHOST 日志",
     "title": "日志"
+  },
+  "hostingConfig": {
+    "account": "游戏账号",
+    "allowLoginAssist": "协助登录",
+    "autoBattle": "自动作战",
+    "battleQueue": "作战队列",
+    "code": "GAME-CONFIG",
+    "disabled": "不可编辑",
+    "droneAcceleration": "无人机加速",
+    "enableBuildingArrange": "自动基建",
+    "errors": {
+      "invalidResponse": "服务端返回了无效响应，请重试。",
+      "operationRejected": "配置更新被服务端拒绝，请重试。",
+      "unavailable": "配置服务暂时不可用，请稍后重试。"
+    },
+    "keepingAp": "理智保留",
+    "recruitReserve": "招募券保留",
+    "save": "递交",
+    "saved": "配置已更新。",
+    "smartSwitches": "智能开关",
+    "stageMap": "作战地图",
+    "stageQueueDeferred": "作战队列功能暂未启用",
+    "stageSearchPlaceholder": "请输入代号或名称",
+    "submitValidation": "理智保留和招募券保留必须是非负整数。",
+    "title": "托管配置",
+    "warning": "请在普瑞赛斯指导下使用",
+    "accelerateSlots": {
+      "bottomCenter": "底层中",
+      "bottomLeft": "底层左",
+      "bottomRight": "底层右",
+      "middleCenter": "中层中",
+      "middleLeft": "中层左",
+      "middleRight": "中层右",
+      "topCenter": "顶层中",
+      "topLeft": "顶层左",
+      "topRight": "顶层右"
+    },
+    "ignoreRobot": "忽略小车",
+    "codes": {
+      "sanity": "CONFIG · SANITY",
+      "permits": "CONFIG · PERMITS",
+      "switches": "CONFIG · SMART SWITCH",
+      "drone": "CONFIG · DRONE ACCELERATION",
+      "combat": "CONFIG · BATTLE QUEUE"
+    },
+    "sections": {
+      "reserves": "资源保留",
+      "switches": "自动化开关",
+      "drone": "基建加速",
+      "combat": "作战配置"
+    },
+    "units": {
+      "ap": "点",
+      "permits": "张",
+      "stages": "关"
+    },
+    "status": {
+      "enabled": "已开启",
+      "disabled": "已关闭",
+      "notSet": "未配置",
+      "maintenance": "维护中"
+    },
+    "descriptions": {
+      "keepingAp": "保留指定数量理智，云端托管不会消耗该阈值以下的理智储备。",
+      "recruitReserve": "保留指定数量公开招募券，避免自动寻访耗尽库存凭证。",
+      "enableBuildingArrange": "由云端算法自动进行宿舍心情恢复与制造/贸易站排班轮换。",
+      "isAutoBattle": "按设定的作战地图队列自动消耗理智刷取材料。",
+      "recruitIgnoreRobot": "公开招募时忽略 1★ 小车词条，优先保证高星干员产出。",
+      "allowLoginAssist": "协助登录功能目前处于维护中，暂不可配置。",
+      "droneAcceleration": "选择需要无人机全力加速的基建设施房间 (3x3 布局)。",
+      "battleMaps": "配置作战地图执行队列，可随时搜索添加或移除关卡。"
+    },
+    "dialog": {
+      "edit": "修改",
+      "save": "保存并应用",
+      "cancel": "取消",
+      "close": "关闭",
+      "currentValue": "当前配置",
+      "targetRoom": "目标加速房间",
+      "queueEmpty": "当前队列为空，请在下方搜索并添加关卡",
+      "searchStages": "搜索关卡代号 (如 1-7, CE-6) 或名称...",
+      "searchResults": "搜索结果",
+      "currentQueue": "当前作战队列 (按执行顺序)",
+      "addStage": "加入队列",
+      "removeStage": "移除",
+      "stageCost": "{{cost}} 理智",
+      "noSearchResults": "未找到匹配的作战关卡",
+      "searchPrompt": "输入代号或关卡名称以搜索添加"
+    }
   }
 }

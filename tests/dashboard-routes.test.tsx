@@ -35,6 +35,7 @@ jest.mock('@/features/dashboard', () => {
         <Text testID="game-logs-screen">{logs.length}</Text>
       </View>
     ),
+    GameHostingConfigScreen: () => <View testID="hosting-config-screen" />,
     getCharacterDisplayName: (_table: object, characterId: string) => characterId,
     getStageDisplayParts: (_table: object, stageId: string) => ({ title: stageId, subtitle: undefined }),
     InventoryView: () => <Text testID="inventory-screen" />,
@@ -67,10 +68,10 @@ describe('dashboard routes', () => {
     expect(screen.getByTestId(`${screenId}-screen`)).toBeTruthy();
   });
 
-  it('renders the settings page frame without a settings implementation', async () => {
+  it('renders the hosting configuration screen', async () => {
     const screen = await render(<DashboardSettingsRoute />);
 
-    expect(screen.getByTestId('dashboard-page-frame')).toBeTruthy();
+    expect(screen.getByTestId('hosting-config-screen')).toBeTruthy();
   });
 
   it('keeps the restored schedule tab independent from game logs', async () => {

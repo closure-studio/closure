@@ -1,5 +1,5 @@
-import { DashboardPageFrame } from '@/features/dashboard';
+import { GameHostingConfigScreen } from '@/features/dashboard';
 
 export default function DashboardSettingsRoute() {
-  return <DashboardPageFrame />;
+  return <GameHostingConfigScreen />;
 }
