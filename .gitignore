@@ -78,3 +78,5 @@ skills-lock.json
 /ios
 /android
 opencode.jsonc
+.trellis
+.gitattributes
