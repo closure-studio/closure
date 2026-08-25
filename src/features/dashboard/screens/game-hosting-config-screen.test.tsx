@@ -77,7 +77,7 @@ jest.mock('../queries', () => ({
 function renderScreen() {
   const queryClient = new QueryClient({
     defaultOptions: {
-      queries: { retry: false },
+      queries: { gcTime: 0, retry: false },
     },
   });
   return render(
@@ -119,7 +119,7 @@ describe('GameHostingConfigScreen', () => {
     mockSelectedGameAccount = secondGameAccount;
     const queryClient = new QueryClient({
       defaultOptions: {
-        queries: { retry: false },
+        queries: { gcTime: 0, retry: false },
       },
     });
     await screen.rerender(

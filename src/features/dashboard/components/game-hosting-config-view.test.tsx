@@ -27,7 +27,7 @@ async function renderConfigView(overrides?: {
 }) {
   const queryClient = new QueryClient({
     defaultOptions: {
-      queries: { retry: false },
+      queries: { gcTime: 0, retry: false },
     },
   });
   const onSubmit = overrides?.onSubmit ?? jest.fn<Promise<void>, [SubmitPatch]>().mockResolvedValue(undefined);
