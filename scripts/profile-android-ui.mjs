@@ -254,7 +254,7 @@ data_sources { config { name: "android.packages_list" } }
 
 async function launchOperatorsRoute(serial, identity, forceStop) {
   if (forceStop) await adbText(serial, ['shell', 'am', 'force-stop', identity.packageName]);
-  const routeUrl = `${identity.scheme}:///dashboard/operators`;
+  const routeUrl = `${identity.scheme}:///dashboard/G16601716973/operators`;
   await adbText(serial, [
     'shell',
     'am',
