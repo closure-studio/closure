@@ -1,4 +1,5 @@
 import type {
+  ArkHostGameConfigPatch,
   ArkHostGameDetail,
   ArkHostGameListEntry,
 } from "@/schemas/arkhost";
@@ -152,6 +153,19 @@ export class MockArkHostApi implements ArkHostApi {
         mockArkHostGameLogsResponse.data.hasMore,
       logs: structuredClone(logs),
     });
+  }
+  async updateGameConfig(account: string, patch: ArkHostGameConfigPatch) {
+    await this.#wait();
+    const entry = this.#gameList.find(
+      (game) => game.status.account === account,
+    );
+    if (!entry) return failure<void>();
+
+    Object.assign(entry.game_config, structuredClone(patch));
+    if (this.#detail?.config.account === account) {
+      Object.assign(this.#detail.config, structuredClone(patch));
+    }
+    return success(undefined);
   }
   subscribe(
     _accessToken: string,

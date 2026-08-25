@@ -35,7 +35,9 @@ describe('Dashboard timeline views', () => {
     const firstEntry = entries[0];
     if (!firstEntry) throw new Error('Expected a game log fixture.');
 
-    const screen = await renderDashboardView(<GameLogsView entries={entries} />);
+    const screen = await renderDashboardView(
+      <GameLogsView activeSection="logs" entries={entries} onActivate={() => undefined} />,
+    );
 
     expect(screen.getByTestId('game-logs-view')).toBeTruthy();
     expect(screen.getByText(firstEntry.content)).toBeTruthy();

@@ -1,0 +1,69 @@
+import { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { DashboardPageFrame } from '../components/dashboard-shell';
+import { GameHostingConfigView } from '../components/game-hosting-config-view';
+import type { ArkHostFailure } from '../api';
+import type { ArkHostGameConfigPatch } from '@/schemas/arkhost';
+import { useSelectedGameAccount, useUpdateGameConfig } from '../queries';
+
+type ConfigErrorKey =
+  | 'hostingConfig.errors.invalidResponse'
+  | 'hostingConfig.errors.operationRejected'
+  | 'hostingConfig.errors.unavailable';
+
+function getConfigErrorKey(error: ArkHostFailure | null): ConfigErrorKey | null {
+  if (!error) return null;
+
+  switch (error.code) {
+    case 'operation-rejected':
+      return 'hostingConfig.errors.operationRejected';
+    case 'network-unavailable':
+    case 'server-error':
+    case 'timeout':
+      return 'hostingConfig.errors.unavailable';
+    case 'invalid-response':
+      return 'hostingConfig.errors.invalidResponse';
+  }
+
+  return null;
+}
+
+export function GameHostingConfigScreen() {
+  const { t } = useTranslation('dashboard');
+  const selectedGameAccount = useSelectedGameAccount();
+  const {
+    error,
+    mutateAsync,
+    reset,
+    status,
+  } = useUpdateGameConfig();
+  const account = selectedGameAccount?.account ?? null;
+
+  useEffect(() => {
+    reset();
+  }, [account, reset]);
+
+  const handleSubmit = useCallback((patch: ArkHostGameConfigPatch) => {
+    if (!account) return Promise.resolve();
+    return mutateAsync({ account, patch }).then(() => undefined);
+  }, [account, mutateAsync]);
+
+  if (!selectedGameAccount) return null;
+
+  const errorKey = getConfigErrorKey(error ?? null);
+
+  return (
+    <DashboardPageFrame scroll>
+      <GameHostingConfigView
+        key={selectedGameAccount.account}
+        account={selectedGameAccount.account}
+        config={selectedGameAccount.config}
+        isSubmitting={status === 'pending'}
+        onSubmit={handleSubmit}
+        showSuccess={status === 'success'}
+        submitError={errorKey ? t(errorKey) : null}
+      />
+    </DashboardPageFrame>
+  );
+}

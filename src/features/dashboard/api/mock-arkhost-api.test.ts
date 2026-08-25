@@ -53,6 +53,41 @@ describe("MockArkHostApi", () => {
     });
   });
 
+  it("updates game settings and keeps list and detail reads consistent", async () => {
+    const api = new MockArkHostApi(0);
+    expect(
+      await api.updateGameConfig("G18928069156", {
+        is_stopped: true,
+        keeping_ap: 12,
+      }),
+    ).toEqual({ data: undefined, ok: true });
+
+    const [games, detail] = await Promise.all([
+      api.fetchGameList(),
+      api.fetchGameDetail("G18928069156"),
+    ]);
+    expect(
+      games.ok
+        && games.data.find((entry) => entry.status.account === "G18928069156")
+          ?.game_config,
+    ).toMatchObject({ is_stopped: true, keeping_ap: 12 });
+    expect(detail.ok && detail.data?.config).toMatchObject({
+      is_stopped: true,
+      keeping_ap: 12,
+    });
+    expect(detail.ok && detail.data?.config.is_auto_battle).toBe(true);
+  });
+
+  it("rejects updating an unknown game account", async () => {
+    const api = new MockArkHostApi(0);
+    expect(
+      await api.updateGameConfig("G00000000000", { is_stopped: true }),
+    ).toEqual({
+      error: { code: "operation-rejected", kind: "business" },
+      ok: false,
+    });
+  });
+
   it("provides a controllable SSE subscription that stops after unsubscribe", () => {
     const api = new MockArkHostApi(0);
     const listener = jest.fn();

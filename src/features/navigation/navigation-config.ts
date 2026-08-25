@@ -4,6 +4,7 @@ import {
   Grid2X2,
   HeartHandshake,
   ShieldCheck,
+  Settings2,
   UsersRound,
   Wifi,
 } from 'lucide-react-native';
@@ -12,9 +13,10 @@ import { ROUTES } from '@/constants/routes';
 
 const dashboardPages = {
   overview: { id: 'overview', route: ROUTES.dashboardOverview, icon: Grid2X2, sort: 10 },
-  operators: { id: 'operators', route: ROUTES.dashboardOperators, icon: UsersRound, sort: 20 },
-  inventory: { id: 'inventory', route: ROUTES.dashboardInventory, icon: Boxes, sort: 30 },
-  activity: { id: 'activity', route: ROUTES.dashboardActivity, icon: CalendarClock, sort: 40 },
+  settings: { id: 'settings', route: ROUTES.dashboardSettings, icon: Settings2, sort: 20 },
+  operators: { id: 'operators', route: ROUTES.dashboardOperators, icon: UsersRound, sort: 30 },
+  inventory: { id: 'inventory', route: ROUTES.dashboardInventory, icon: Boxes, sort: 40 },
+  activity: { id: 'activity', route: ROUTES.dashboardActivity, icon: CalendarClock, sort: 50 },
 } as const;
 
 export const dashboardNavigation = {

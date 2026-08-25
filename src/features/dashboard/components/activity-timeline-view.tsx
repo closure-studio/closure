@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { XStack, YStack } from 'tamagui';
 
-import { MonoText, TerminalCornerBrackets, TerminalPanel, TerminalSectionHeading, TerminalText } from '@/components';
+import { CornerBrackets, Frame, MonoText, TerminalSectionHeading, TerminalText } from '@/components';
 import type { DashboardScheduleEntry } from '@/schemas/dashboard';
 
 const toneByCategory: Record<DashboardScheduleEntry['category'], 'cyan' | 'warning' | 'danger' | 'default'> = {
@@ -30,8 +30,8 @@ export function ActivityTimelineView({ entries }: { entries: readonly DashboardS
             <YStack position="absolute" l={3} t={16} width={12} height={12} rotate="45deg" borderWidth={1} borderColor="$appAccent" bg="$appBackground" items="center" justify="center">
               <YStack width={4} height={4} bg="$appAccent" />
             </YStack>
-            <TerminalPanel testID={`dashboard-schedule-entry-${entry.id}`} width="100%" p="$3" tone={toneByCategory[entry.category]}>
-              <TerminalCornerBrackets />
+            <Frame testID={`dashboard-schedule-entry-${entry.id}`} width="100%" p="$3" tone={toneByCategory[entry.category]}>
+              <CornerBrackets />
               <XStack items="center" justify="space-between" gap="$2">
                 <MonoText size="$1" color={colorByCategory[entry.category]}>{t(`timeline.entries.${entry.id}.tag`)}</MonoText>
                 <YStack px="$2" py="$0.5" bg={entry.status === 'active' ? '$appSuccessSoft' : entry.status === 'upcoming' ? '$appWarningSoft' : '$appSurfaceRaised'}>
@@ -41,7 +41,7 @@ export function ActivityTimelineView({ entries }: { entries: readonly DashboardS
               <TerminalText mt="$1" size="$4" fontWeight="800">{t(`timeline.entries.${entry.id}.title`)}</TerminalText>
               <MonoText mt="$2" size="$1">{t(`timeline.entries.${entry.id}.scheduleLabel`)}</MonoText>
               <TerminalText mt="$2" size="$3" lineHeight="$4" color="$appMuted">{t(`timeline.entries.${entry.id}.description`)}</TerminalText>
-            </TerminalPanel>
+            </Frame>
           </XStack>
         ))}
       </YStack>

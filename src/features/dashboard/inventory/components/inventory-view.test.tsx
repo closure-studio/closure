@@ -10,7 +10,7 @@ import { getResponsiveGridLayout } from '@/hooks/use-responsive-grid-rows';
 import { itemTableSchema } from '@/schemas/game-data';
 import { inventorySchema } from '@/schemas/game-account';
 import type { LayoutSize } from '@/schemas/layout-size';
-import { getItemImageUrl } from '../item-image';
+import { getItemImageUrl } from '@/utils/item-image';
 import { EMPTY_INVENTORY, InventoryView } from './inventory-view';
 
 let mockLayoutSize: LayoutSize = 'small';
@@ -180,7 +180,7 @@ describe('InventoryView', () => {
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-quantity-31034').props.style)).toEqual(
       expect.objectContaining({ textAlign: 'right' }),
     );
-    expect(StyleSheet.flatten(screen.getByTestId('inventory-item-image-circle-31034').props.style)).toEqual(
+    expect(StyleSheet.flatten(screen.getByTestId('inventory-item-image-31034').props.style)).toEqual(
       expect.objectContaining({
         borderBottomLeftRadius: 999,
         borderBottomRightRadius: 999,
@@ -195,7 +195,7 @@ describe('InventoryView', () => {
     expect(screen.getByTestId('inventory-selection-top-right-31034')).toBeTruthy();
     expect(screen.getByTestId('inventory-selection-bottom-left-31034')).toBeTruthy();
     expect(screen.getByTestId('inventory-selection-bottom-right-31034')).toBeTruthy();
-    const inventoryImage = screen.getByTestId('inventory-item-image-thumbnail-31034', {
+    const inventoryImage = screen.getByTestId('inventory-item-image-31034-image', {
       includeHiddenElements: true,
     });
     expect(inventoryImage.props.src).toEqual({
@@ -210,7 +210,7 @@ describe('InventoryView', () => {
     expect(screen.queryByTestId('inventory-item-image-feather-mask-31034', {
       includeHiddenElements: true,
     })).toBeNull();
-    const inventoryFilter = screen.getByTestId('inventory-item-image-filter-31034', {
+    const inventoryFilter = screen.getByTestId('inventory-item-image-31034-filter', {
       includeHiddenElements: true,
     });
     expect(inventoryFilter.props.src).toBe(inventoryGridFilterSmall);
@@ -289,7 +289,7 @@ describe('InventoryView', () => {
     expect(StyleSheet.flatten(screen.getByTestId('inventory-preview-image-circle-31034').props.style)).toEqual(
       expect.objectContaining({ borderRadius: 999, overflow: 'hidden' }),
     );
-    expect(StyleSheet.flatten(screen.getByTestId('inventory-item-image-circle-31034').props.style)).toEqual(
+    expect(StyleSheet.flatten(screen.getByTestId('inventory-item-image-31034').props.style)).toEqual(
       expect.objectContaining({
         borderBottomLeftRadius: 999,
         borderBottomRightRadius: 999,
@@ -301,7 +301,7 @@ describe('InventoryView', () => {
       }),
     );
     expect(
-      screen.getByTestId('inventory-item-image-filter-31034', {
+      screen.getByTestId('inventory-item-image-31034-filter', {
         includeHiddenElements: true,
       }).props.src,
     ).toBe(inventoryGridFilterLarge);
@@ -343,7 +343,7 @@ describe('InventoryView', () => {
     );
 
     await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(320));
-    const firstImage = screen.getByTestId('inventory-item-image-thumbnail-31034', {
+    const firstImage = screen.getByTestId('inventory-item-image-31034-image', {
       includeHiddenElements: true,
     });
     expect(firstImage.props.src).toEqual({
@@ -367,7 +367,7 @@ describe('InventoryView', () => {
       expect.objectContaining({ width: 1055 / 8 }),
     );
     expect(screen.getByTestId('inventory-item-EPGS_COIN').props['aria-selected']).toBe(true);
-    const loadedImage = screen.getByTestId('inventory-item-image-thumbnail-31034', {
+    const loadedImage = screen.getByTestId('inventory-item-image-31034-image', {
       includeHiddenElements: true,
     });
     expect(loadedImage.props.src).toEqual({
@@ -383,7 +383,7 @@ describe('InventoryView', () => {
       expect.objectContaining({ width: 156.5 }),
     );
     expect(screen.getByTestId('inventory-item-EPGS_COIN').props['aria-selected']).toBe(true);
-    expect(screen.getByTestId('inventory-item-image-thumbnail-31034', {
+    expect(screen.getByTestId('inventory-item-image-31034-image', {
       includeHiddenElements: true,
     }).props.src).toEqual({
       uri: 'https://ark-resource.arknights.app/assets/items/MTL_SL_OC4.webp',

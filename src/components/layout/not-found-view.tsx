@@ -3,7 +3,8 @@ import { Link } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Button, YStack, getTokens } from 'tamagui';
 
-import { MonoText, TerminalPanel, TerminalText } from '../ui/terminal';
+import { MonoText, TerminalText } from '../ui/terminal';
+import { Frame } from '../ui/frame';
 
 export function NotFoundView() {
   const { t } = useTranslation('common');
@@ -11,7 +12,7 @@ export function NotFoundView() {
 
   return (
     <YStack grow={1} items="center" justify="center" bg="$appBackground" p="$4">
-      <TerminalPanel cornerBrackets width="100%" maxW={520} p="$5" gap="$4">
+      <Frame cornerBrackets width="100%" maxW={520} p="$5" gap="$4">
         <MonoText size="$1" color="$appWarning">{t('notFound.eyebrow')}</MonoText>
         <YStack gap="$1">
           <TerminalText size="$10" fontWeight="900" color="$appAccent">404</TerminalText>
@@ -30,7 +31,7 @@ export function NotFoundView() {
             <MonoText size="$2" color="$appAccent">{t('notFound.returnHome')}</MonoText>
           </Button>
         </Link>
-      </TerminalPanel>
+      </Frame>
     </YStack>
   );
 }

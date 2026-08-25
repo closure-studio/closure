@@ -3,13 +3,13 @@ import { PackageOpen } from 'lucide-react-native';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { XStack, YStack, getTokens } from 'tamagui';
 
+import { ITEM_ARTWORK_SIZE } from '@/components/ui/item-artwork-config';
 import { MonoText, ResponsiveGridRow, TerminalText } from '@/components';
 import { getResponsiveGridLayout, useResponsiveGridRows } from '@/hooks/use-responsive-grid-rows';
 import type { ItemTable } from '@/schemas/game-data';
 import type { Inventory } from '@/schemas/game-account';
 import type { LayoutSize } from '@/schemas/layout-size';
 import { useLayoutSize } from '@/providers/layout-size-provider';
-import { INVENTORY_GRID_THUMBNAIL_SIZE } from '../inventory-grid-thumbnail-config';
 import { InventoryPreviewArtwork } from './inventory-artwork';
 import {
   formatInventoryQuantity,
@@ -196,7 +196,7 @@ export function InventoryView({
   const tokens = getTokens();
   const gridGap = tokens.space[INVENTORY_GRID_GAP_TOKEN].val;
   const minimumItemWidth = tokens.size[INVENTORY_CELL_MIN_WIDTH_TOKEN[layoutSize]].val;
-  const artworkWidth = INVENTORY_GRID_THUMBNAIL_SIZE[layoutSize];
+  const artworkWidth = ITEM_ARTWORK_SIZE[layoutSize];
   const { rows, listWidth, layout, handleLayout, keyExtractor } = useResponsiveGridRows(
     entries,
     (width) => getResponsiveGridLayout(width, gridGap, minimumItemWidth),

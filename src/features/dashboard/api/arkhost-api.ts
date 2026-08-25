@@ -1,5 +1,6 @@
 import type {
   ArkHostCharacters,
+  ArkHostGameConfigPatch,
   ArkHostGameDetail,
   ArkHostGameListEntry,
   ArkHostGameLogs,
@@ -27,4 +28,8 @@ export interface ArkHostApi {
   fetchGameList(): Promise<ArkHostResult<ArkHostGameListEntry[]>>;
   fetchGameLogs(account: string, afterId: number): Promise<ArkHostResult<ArkHostGameLogs>>;
   subscribe(accessToken: string, listener: ArkHostSseListener): ArkHostSseSubscription;
+  updateGameConfig(
+    account: string,
+    patch: ArkHostGameConfigPatch,
+  ): Promise<ArkHostResult<void>>;
 }

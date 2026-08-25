@@ -3,7 +3,10 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import type { PropsWithChildren } from 'react';
 
 import { mockActiveSession } from '@/mocks/auth';
-import { mockArkHostGameListResponse } from '@/mocks/arkhost';
+import {
+  mockArkHostGameDetailResponse,
+  mockArkHostGameListResponse,
+} from '@/mocks/arkhost';
 import {
   configureQueryDependencies,
   resetQueryDependencies,
@@ -15,11 +18,13 @@ import {
   useSelectedGameAccount,
   useSelectedGameDetailQuery,
   useSelectedGameLogsQuery,
+  useUpdateGameConfig,
 } from './queries';
 
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
+      mutations: { gcTime: 0 },
       queries: { gcTime: 0, retry: false },
     },
   });
@@ -44,6 +49,7 @@ function createArkHostApi(overrides: Partial<ArkHostApi> = {}): ArkHostApi {
     fetchGameList: () => Promise.resolve(success(mockArkHostGameListResponse.data ?? [])),
     fetchGameLogs: () => Promise.resolve(success({ hasMore: false, logs: [] })),
     subscribe: () => ({ unsubscribe: () => {} }),
+    updateGameConfig: () => Promise.resolve(success(undefined)),
     ...overrides,
   };
 }
@@ -221,5 +227,103 @@ describe('selected server resource hooks', () => {
       expect(result.current.isError).toBe(true);
     });
     expect(result.current.error?.message).toBe('Request failed (network-unavailable)');
+  });
+
+  it('updates list and detail caches after the server accepts game settings', async () => {
+    const updateGameConfig = jest.fn(() => Promise.resolve(success(undefined)));
+    const fetchGameDetail = jest.fn((_account: string) => Promise.resolve(
+      success(mockArkHostGameDetailResponse.data ?? null),
+    ));
+    configureQueryDependencies({
+      arkHostApi: createArkHostApi({ fetchGameDetail, updateGameConfig }),
+    });
+    const { wrapper } = createWrapper();
+    await act(() => {
+      appStore.getState().setSession(mockActiveSession);
+      appStore.getState().selectGameAccount('G18928069156');
+    });
+    const { result } = await renderHook(
+      () => ({
+        account: useSelectedGameAccount(),
+        detail: useSelectedGameDetailQuery(),
+        mutation: useUpdateGameConfig(),
+      }),
+      { wrapper },
+    );
+
+    await waitFor(() => {
+      expect(result.current.account?.account).toBe('G18928069156');
+      expect(result.current.detail.isSuccess).toBe(true);
+    });
+
+    await act(async () => {
+      const parsedPatch = await result.current.mutation.mutateAsync({
+        account: 'G18928069156',
+        patch: { enable_building_arrange: true, keeping_ap: 12 },
+      });
+      expect(parsedPatch).toEqual({ enable_building_arrange: true, keeping_ap: 12 });
+    });
+    await waitFor(() => {
+      expect(result.current.account?.config.keeping_ap).toBe(12);
+      expect(result.current.detail.data?.config.keeping_ap).toBe(12);
+    });
+
+    expect(updateGameConfig).toHaveBeenCalledWith('G18928069156', {
+      enable_building_arrange: true,
+      keeping_ap: 12,
+    });
+    expect(result.current.account?.config).toMatchObject({
+      enable_building_arrange: true,
+      keeping_ap: 12,
+    });
+    expect(result.current.account?.config.is_auto_battle).toBe(true);
+    expect(result.current.detail.data?.config).toMatchObject({
+      enable_building_arrange: true,
+      keeping_ap: 12,
+    });
+    expect(result.current.detail.data?.config.is_auto_battle).toBe(true);
+  });
+
+  it('does not change caches when game settings are rejected', async () => {
+    const updateGameConfig = jest.fn(() => Promise.resolve(failure({
+      code: 'operation-rejected',
+      kind: 'business',
+    })));
+    const fetchGameDetail = jest.fn((_account: string) => Promise.resolve(
+      success(mockArkHostGameDetailResponse.data ?? null),
+    ));
+    configureQueryDependencies({
+      arkHostApi: createArkHostApi({ fetchGameDetail, updateGameConfig }),
+    });
+    const { wrapper } = createWrapper();
+    await act(() => {
+      appStore.getState().setSession(mockActiveSession);
+      appStore.getState().selectGameAccount('G18928069156');
+    });
+    const { result } = await renderHook(
+      () => ({
+        account: useSelectedGameAccount(),
+        detail: useSelectedGameDetailQuery(),
+        mutation: useUpdateGameConfig(),
+      }),
+      { wrapper },
+    );
+
+    await waitFor(() => {
+      expect(result.current.account?.account).toBe('G18928069156');
+      expect(result.current.detail.isSuccess).toBe(true);
+    });
+    const listConfigBefore = result.current.account?.config;
+    const detailConfigBefore = result.current.detail.data?.config;
+
+    await act(async () => {
+      await expect(result.current.mutation.mutateAsync({
+        account: 'G18928069156',
+        patch: { keeping_ap: 12 },
+      })).rejects.toThrow('Request failed (operation-rejected)');
+    });
+
+    expect(result.current.account?.config).toEqual(listConfigBefore);
+    expect(result.current.detail.data?.config).toEqual(detailConfigBefore);
   });
 });

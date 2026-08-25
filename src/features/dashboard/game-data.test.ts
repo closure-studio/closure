@@ -4,6 +4,7 @@ import {
   bundledStageTable,
   getCharacterDisplayName,
   getStageDisplayLabel,
+  getStageDisplayParts,
 } from './game-data';
 
 function requireFirstEntry<T>(table: Readonly<Record<string, T>>, tableName: string) {
@@ -32,6 +33,7 @@ describe('bundled game resource catalog', () => {
     const [stageId, stage] = requireFirstEntry(bundledStageTable, 'Stage Table');
 
     expect(getCharacterDisplayName(bundledCharacterTable, characterId)).toBe(character.name);
+    expect(getStageDisplayParts(bundledStageTable, stageId, '—')).toEqual({ title: stage.code, subtitle: stage.name });
     expect(getStageDisplayLabel(bundledStageTable, stageId, '—')).toBe(`${stage.code} · ${stage.name}`);
   });
 
@@ -40,6 +42,8 @@ describe('bundled game resource catalog', () => {
     const missingStageId = createMissingId(bundledStageTable, 'test_missing_stage');
 
     expect(getCharacterDisplayName(bundledCharacterTable, missingCharacterId)).toBe(missingCharacterId);
+    expect(getStageDisplayParts(bundledStageTable, missingStageId, '—')).toEqual({ title: missingStageId, subtitle: undefined });
+    expect(getStageDisplayParts(bundledStageTable, '', '—')).toEqual({ title: '—', subtitle: undefined });
     expect(getStageDisplayLabel(bundledStageTable, missingStageId, '—')).toBe(missingStageId);
     expect(getStageDisplayLabel(bundledStageTable, '', '—')).toBe('—');
   });

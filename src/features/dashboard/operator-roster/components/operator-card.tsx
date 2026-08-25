@@ -17,7 +17,7 @@ import potential2 from '@/assets/images/operators/potential/prerendered/potentia
 import potential3 from '@/assets/images/operators/potential/prerendered/potential_3.webp';
 import potential4 from '@/assets/images/operators/potential/prerendered/potential_4.webp';
 import potential5 from '@/assets/images/operators/potential/prerendered/potential_5.webp';
-import { MonoText, TerminalMeterBar, TerminalPanel, TerminalText } from '@/components';
+import { Frame, MonoText, TerminalMeterBar, TerminalText } from '@/components';
 import type { Operator } from '@/schemas/game-account';
 import type { LayoutSize } from '@/schemas/layout-size';
 import { OPERATOR_PORTRAIT_GEOMETRY } from '../operator-portrait-config';
@@ -295,11 +295,11 @@ export const OperatorCard = memo(function OperatorCard({
   }
 
   return (
-    <TerminalPanel testID={`operator-card-${operator.charId}`} minW={OPERATOR_CARD_MIN_WIDTH} grow={1} shrink={1} p="$3">
+    <Frame testID={`operator-card-${operator.charId}`} minW={OPERATOR_CARD_MIN_WIDTH} grow={1} shrink={1} p="$3">
       <TerminalText size="$4" fontWeight="800" numberOfLines={1}>{name}</TerminalText>
       <XStack mt="$2" justify="space-between"><MonoText size="$1">{labels.detailLevel}</MonoText><MonoText size="$1" color="$appAccent">{level}</MonoText></XStack>
       <YStack mt="$1.5"><TerminalMeterBar value={level} max={90} /></YStack>
       <XStack mt="$2" justify="space-between"><MonoText size="$1">{labels.detailPotential}</MonoText><TerminalText size="$2">{operator.potentialRank}</TerminalText></XStack>
-    </TerminalPanel>
+    </Frame>
   );
 });
