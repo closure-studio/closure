@@ -3,8 +3,13 @@ import { Tabs as DashboardTabs } from 'expo-router/tabs';
 import { useEffect, useMemo } from 'react';
 import { getTokens } from 'tamagui';
 
-import { selectBackdropTint, useDashboardRoute } from '@/features/dashboard';
 import {
+  DashboardRouteProvider,
+  selectBackdropTint,
+  useDashboardRoute,
+} from '@/features/dashboard';
+import {
+  DashboardFrame,
   DashboardSmallScreenTabBar,
   dashboardNavigation,
 } from '@/features/navigation';
@@ -12,7 +17,7 @@ import { useSessionBackdrop } from '@/features/session';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import { ROUTES } from '@/constants/routes';
 
-export default function DashboardAccountLayout() {
+function DashboardAccountContent() {
   const colors = getTokens().color;
   const layoutSize = useLayoutSize();
   const { setBackdropTint } = useSessionBackdrop();
@@ -35,19 +40,29 @@ export default function DashboardAccountLayout() {
   if (!gameAccountId || !gameAccount) return <Redirect href={ROUTES.dashboard} />;
 
   return (
-    <DashboardTabs
-      screenOptions={{
-        animation: 'shift',
-        freezeOnBlur: true,
-        headerShown: false,
-        lazy: true,
-        sceneStyle: { backgroundColor: 'transparent' },
-      }}
-      tabBar={layoutSize === 'small' ? (props) => <DashboardSmallScreenTabBar {...props} /> : () => null}
-    >
-      {screens.map((screen) => (
-        <DashboardTabs.Screen key={screen} name={screen} />
-      ))}
-    </DashboardTabs>
+    <DashboardFrame>
+      <DashboardTabs
+        screenOptions={{
+          animation: 'shift',
+          freezeOnBlur: true,
+          headerShown: false,
+          lazy: true,
+          sceneStyle: { backgroundColor: 'transparent' },
+        }}
+        tabBar={layoutSize === 'small' ? (props) => <DashboardSmallScreenTabBar {...props} /> : () => null}
+      >
+        {screens.map((screen) => (
+          <DashboardTabs.Screen key={screen} name={screen} />
+        ))}
+      </DashboardTabs>
+    </DashboardFrame>
+  );
+}
+
+export default function DashboardAccountLayout() {
+  return (
+    <DashboardRouteProvider>
+      <DashboardAccountContent />
+    </DashboardRouteProvider>
   );
 }

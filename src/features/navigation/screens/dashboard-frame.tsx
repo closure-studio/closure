@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
 import { YStack } from 'tamagui';
@@ -27,7 +27,14 @@ export function DashboardFrame({ children }: PropsWithChildren) {
   const router = useRouter();
   const onLogout = useAppLogout();
   const { gameAccount, gameAccountId, gameAccounts } = useDashboardRoute();
-  const activePageId = getDashboardPageId(pathname) ?? dashboardNavigation.defaultPage.id;
+  const routePageId = getDashboardPageId(pathname);
+  const [lastActivePageId, setLastActivePageId] = useState(
+    routePageId ?? dashboardNavigation.defaultPage.id,
+  );
+  if (routePageId && routePageId !== lastActivePageId) {
+    setLastActivePageId(routePageId);
+  }
+  const activePageId = routePageId ?? lastActivePageId;
   const items = sortedDashboardPages.map((page) => ({
     icon: page.icon,
     id: page.id,

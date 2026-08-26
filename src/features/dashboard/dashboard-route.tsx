@@ -1,4 +1,4 @@
-import { useGlobalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { createContext, type PropsWithChildren, useContext } from 'react';
 import * as v from 'valibot';
 
@@ -25,7 +25,7 @@ type DashboardRouteContextValue = {
 const DashboardRouteContext = createContext<DashboardRouteContextValue | null>(null);
 
 export function DashboardRouteProvider({ children }: PropsWithChildren) {
-  const params = useGlobalSearchParams<DashboardRouteParams>();
+  const params = useLocalSearchParams<DashboardRouteParams>();
   const parsedParams = v.safeParse(gameAccountRouteParamsSchema, params);
   const gameAccountId = parsedParams.success ? parsedParams.output.gameAccountId : null;
   const gameAccountsQuery = useGameAccountsQuery();

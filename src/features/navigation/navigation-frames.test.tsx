@@ -117,6 +117,25 @@ describe('navigation scope frames', () => {
     expect(mockDashboardShell).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps the last Dashboard page identity while Settings owns the global URL', async () => {
+    mockPathname = '/dashboard/G1/operators';
+    const screen = await render(<DashboardFrame />);
+
+    expect(readLastFrameProps().activeId).toBe('operators');
+
+    mockPathname = '/settings/account';
+    await screen.rerender(<DashboardFrame />);
+    const backgroundFrame = readLastFrameProps();
+
+    expect(backgroundFrame.activeId).toBe('operators');
+
+    backgroundFrame.onSelect('overview');
+    expect(mockRouterReplace).toHaveBeenCalledWith({
+      pathname: '/dashboard/[gameAccountId]/overview',
+      params: { gameAccountId: 'G1' },
+    });
+  });
+
   it('dismisses Settings to the preserved Dashboard stack screen', async () => {
     mockPathname = '/settings/account';
     await render(<SettingsFrame />);

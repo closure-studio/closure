@@ -6,6 +6,7 @@ const mockRedirect = jest.fn(() => null);
 const mockDashboardTabs = jest.fn(({ children }: PropsWithChildren) => children);
 const mockDashboardTabsScreen = jest.fn(() => null);
 const mockDashboardFrame = jest.fn(({ children }: PropsWithChildren) => children);
+const mockDashboardRouteProvider = jest.fn(({ children }: PropsWithChildren) => children);
 const mockDashboardSmallScreenTabBar = jest.fn(() => null);
 const mockUseLayoutSize = jest.fn(() => 'small' as const);
 const mockSetBackdropTint = jest.fn();
@@ -65,7 +66,9 @@ jest.mock('@/providers/layout-size-provider', () => ({
 }));
 
 jest.mock('@/features/dashboard', () => ({
+  DashboardRouteProvider: mockDashboardRouteProvider,
   selectBackdropTint: () => '#00ff00',
+  useGameAccountsQuery: () => mockRoute.gameAccountsQuery,
   useDashboardRoute: () => mockRoute,
 }));
 
@@ -119,6 +122,7 @@ beforeEach(() => {
   mockDashboardTabs.mockClear();
   mockDashboardTabsScreen.mockClear();
   mockDashboardFrame.mockClear();
+  mockDashboardRouteProvider.mockClear();
   mockSetBackdropTint.mockClear();
   mockUseLayoutSize.mockReset();
   mockUseLayoutSize.mockReturnValue('small');
@@ -146,16 +150,19 @@ describe('Dashboard route layouts', () => {
     }, undefined);
   });
 
-  it('keeps the parent dashboard route as the account-list gate', async () => {
+  it('keeps the parent dashboard route as the Query-owned account-list gate', async () => {
     await render(<DashboardLayout />);
 
+    expect(mockDashboardRouteProvider).not.toHaveBeenCalled();
     expect(mockSlot).toHaveBeenCalledTimes(1);
-    expect(mockDashboardFrame).toHaveBeenCalledTimes(1);
+    expect(mockDashboardFrame).not.toHaveBeenCalled();
   });
 
-  it('renders all account-scoped pages in the dynamic tabs layout', async () => {
+  it('owns local route state and the frame in the dynamic account layout', async () => {
     await render(<DashboardAccountLayout />);
 
+    expect(mockDashboardRouteProvider).toHaveBeenCalledTimes(1);
+    expect(mockDashboardFrame).toHaveBeenCalledTimes(1);
     expect(mockDashboardTabs).toHaveBeenCalledWith(expect.objectContaining({
       screenOptions: expect.objectContaining({ animation: 'shift', headerShown: false }),
       tabBar: expect.any(Function),

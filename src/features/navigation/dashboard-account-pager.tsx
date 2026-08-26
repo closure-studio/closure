@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
 import { TabView } from 'react-native-tab-view';
@@ -16,6 +16,12 @@ import type { DashboardPageId } from './navigation-config';
 type DashboardAccountPagerRoute = {
   gameAccount: GameAccount;
   key: string;
+};
+
+type DashboardAccountPagerState = {
+  index: number;
+  routeAccountId: string | null;
+  routeIndex: number;
 };
 
 type DashboardAccountPagerProps = {
@@ -37,16 +43,38 @@ export function DashboardAccountPager({
     })),
     [gameAccounts],
   );
-  const activeIndex = Math.max(
+  const routeIndex = Math.max(
     0,
     routes.findIndex((route) => route.key === gameAccountId),
   );
+  const [pagerState, setPagerState] = useState<DashboardAccountPagerState>({
+    index: routeIndex,
+    routeAccountId: gameAccountId,
+    routeIndex,
+  });
+
+  if (
+    pagerState.routeAccountId !== gameAccountId
+    || pagerState.routeIndex !== routeIndex
+  ) {
+    setPagerState({
+      index: routeIndex,
+      routeAccountId: gameAccountId,
+      routeIndex,
+    });
+  }
 
   useAdjacentGameAccountPrefetch(gameAccounts, gameAccountId);
 
-  const handleIndexChange = useCallback((index: number) => {
-    const nextRoute = routes[index];
-    if (!nextRoute || nextRoute.key === gameAccountId) return;
+  const handleIndexChange = useCallback((nextIndex: number) => {
+    const nextRoute = routes[nextIndex];
+    if (!nextRoute) return;
+
+    setPagerState((currentState) => ({
+      ...currentState,
+      index: nextIndex,
+    }));
+    if (nextRoute.key === gameAccountId) return;
     router.replace(dashboardPageHref(pageId, nextRoute.key));
   }, [gameAccountId, pageId, router, routes]);
 
@@ -67,7 +95,7 @@ export function DashboardAccountPager({
       initialLayout={{ width }}
       lazy
       lazyPreloadDistance={1}
-      navigationState={{ index: activeIndex, routes }}
+      navigationState={{ index: pagerState.index, routes }}
       onIndexChange={handleIndexChange}
       renderScene={renderScene}
       renderTabBar={() => null}

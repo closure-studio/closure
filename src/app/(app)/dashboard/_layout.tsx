@@ -2,8 +2,7 @@ import { Slot } from 'expo-router';
 import { Spinner, YStack } from 'tamagui';
 
 import { MonoText } from '@/components';
-import { useDashboardRoute } from '@/features/dashboard';
-import { DashboardFrame } from '@/features/navigation';
+import { useGameAccountsQuery } from '@/features/dashboard';
 
 function DashboardState({ label }: { label: string }) {
   return (
@@ -15,12 +14,13 @@ function DashboardState({ label }: { label: string }) {
 }
 
 export default function DashboardLayout() {
-  const { gameAccounts, gameAccountsQuery } = useDashboardRoute();
+  const gameAccountsQuery = useGameAccountsQuery();
+  const gameAccounts = gameAccountsQuery.data ?? [];
 
   let content = <Slot />;
   if (gameAccountsQuery.isPending) content = <DashboardState label="LOADING ARKHOST DATA" />;
   else if (gameAccountsQuery.isError) content = <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
   else if (gameAccounts.length === 0) content = <DashboardState label="NO GAME ACCOUNTS" />;
 
-  return <DashboardFrame>{content}</DashboardFrame>;
+  return content;
 }

@@ -6,6 +6,7 @@ import { ROUTES } from '@/constants/routes';
 const mockSlot = jest.fn(() => null);
 const mockRedirect = jest.fn(() => null);
 const mockAppProvider = jest.fn(({ children }: PropsWithChildren) => children);
+const mockDashboardRouteProvider = jest.fn(({ children }: PropsWithChildren) => children);
 const mockSessionShell = jest.fn(({ children }: PropsWithChildren) => children);
 const mockAppScopeNavigator = jest.fn(() => null);
 const mockUseSessionQueryCacheReset = jest.fn();
@@ -21,7 +22,7 @@ jest.mock('expo-router', () => ({
 }));
 
 jest.mock('@/features/dashboard', () => ({
-  DashboardRouteProvider: mockAppProvider,
+  DashboardRouteProvider: mockDashboardRouteProvider,
   useArkHostSync: mockUseArkHostSync,
   useSessionQueryCacheReset: mockUseSessionQueryCacheReset,
 }));
@@ -69,7 +70,7 @@ describe('route layouts', () => {
     await render(<AppLayout />);
 
     expect(mockAppScopeNavigator).toHaveBeenCalledTimes(1);
-    expect(mockAppProvider).toHaveBeenCalled();
+    expect(mockDashboardRouteProvider).not.toHaveBeenCalled();
   });
 
   it('redirects unauthenticated App routes to Login with the current route', async () => {

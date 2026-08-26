@@ -1,7 +1,7 @@
 import { Redirect, usePathname } from 'expo-router';
 
 import { ROUTES } from '@/constants/routes';
-import { DashboardRouteProvider, useArkHostSync } from '@/features/dashboard';
+import { useArkHostSync } from '@/features/dashboard';
 import { AppScopeNavigator } from '@/features/navigation';
 import { useAppStore } from '@/store';
 
@@ -14,9 +14,5 @@ export default function AppLayout() {
     return <Redirect href={{ pathname: ROUTES.login, params: { returnTo: pathname } }} />;
   }
 
-  return (
-    <DashboardRouteProvider>
-      <AppScopeNavigator />
-    </DashboardRouteProvider>
-  );
+  return <AppScopeNavigator />;
 }

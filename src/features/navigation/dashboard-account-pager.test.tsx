@@ -1,5 +1,5 @@
 import { Fragment, type ReactNode } from 'react';
-import { render } from '@testing-library/react-native';
+import { act, render } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import * as v from 'valibot';
 import { TamaguiProvider } from 'tamagui';
@@ -97,17 +97,24 @@ function readPagerProps(): MockTabViewProps {
   return call[0];
 }
 
-function renderPager() {
-  const renderAccount = (gameAccount: GameAccount) => (
-    <Text testID={`dashboard-account-scene-${gameAccount.account}`}>
-      {gameAccount.account}
-    </Text>
-  );
-
-  return render(
+function DashboardAccountPagerTestTree() {
+  return (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-      <DashboardAccountPager pageId="overview" renderAccount={renderAccount} />
-    </TamaguiProvider>,
+      <DashboardAccountPager
+        pageId="overview"
+        renderAccount={(gameAccount) => (
+          <Text testID={`dashboard-account-scene-${gameAccount.account}`}>
+            {gameAccount.account}
+          </Text>
+        )}
+      />
+    </TamaguiProvider>
+  );
+}
+
+function renderPager() {
+  return render(
+    <DashboardAccountPagerTestTree />,
   );
 }
 
@@ -139,20 +146,39 @@ describe('DashboardAccountPager', () => {
     );
   });
 
-  it('updates the canonical URL only after the pager settles on another account', async () => {
+  it('commits the controlled index before syncing the canonical URL', async () => {
     await renderPager();
     const pager = readPagerProps();
 
-    pager.onIndexChange(2);
+    await act(() => {
+      pager.onIndexChange(2);
+    });
 
+    expect(readPagerProps().navigationState.index).toBe(2);
     expect(mockRouterReplace).toHaveBeenCalledWith(
       dashboardPageHref('overview', thirdGameAccount.account),
     );
     expect(pager.renderTabBar()).toBeNull();
 
     mockRouterReplace.mockClear();
-    pager.onIndexChange(1);
+    await act(() => {
+      readPagerProps().onIndexChange(1);
+    });
 
+    expect(readPagerProps().navigationState.index).toBe(1);
+    expect(mockRouterReplace).not.toHaveBeenCalled();
+  });
+
+  it('synchronizes the controlled index when the route account changes externally', async () => {
+    const screen = await renderPager();
+
+    mockDashboardRoute = {
+      gameAccountId: firstGameAccount.account,
+      gameAccounts,
+    };
+    await screen.rerender(<DashboardAccountPagerTestTree />);
+
+    expect(readPagerProps().navigationState.index).toBe(0);
     expect(mockRouterReplace).not.toHaveBeenCalled();
   });
 });
