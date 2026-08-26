@@ -10,6 +10,7 @@ import { MonoText } from '@/components';
 import { sortedDashboardPages as dashboardPages } from './navigation-config';
 
 type DashboardSmallScreenTabBarProps = {
+  gameAccountId: string;
   navigation: {
     emit: (event: {
       canPreventDefault: true;
@@ -22,6 +23,7 @@ type DashboardSmallScreenTabBarProps = {
 };
 
 export function DashboardSmallScreenTabBar({
+  gameAccountId,
   navigation,
   state,
 }: DashboardSmallScreenTabBarProps) {
@@ -51,7 +53,10 @@ export function DashboardSmallScreenTabBar({
     });
 
     if (route.key !== activeRoute?.key && !event.defaultPrevented) {
-      navigation.navigate(route.name, route.params);
+      navigation.navigate(route.name, {
+        ...route.params,
+        gameAccountId,
+      });
     }
   };
 

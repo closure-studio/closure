@@ -51,6 +51,7 @@ async function renderMobileBottomNavigation(defaultPrevented = false) {
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <I18nextProvider i18n={i18n}>
           <DashboardSmallScreenTabBar
+            gameAccountId="G1"
             navigation={{ emit, navigate }}
             state={{
               index: 1,
@@ -109,7 +110,7 @@ describe('MobileBottomNavigation', () => {
       target: 'operators-key',
       canPreventDefault: true,
     });
-    expect(navigate).toHaveBeenCalledWith('operators', undefined);
+    expect(navigate).toHaveBeenCalledWith('operators', { gameAccountId: 'G1' });
   });
 
   it('honors a prevented tabPress event', async () => {

@@ -11,7 +11,7 @@ const mockSessionShell = jest.fn(({ children }: PropsWithChildren) => children);
 const mockAppScopeNavigator = jest.fn(() => null);
 const mockUseSessionQueryCacheReset = jest.fn();
 const mockUseArkHostSync = jest.fn();
-const mockUsePathname = jest.fn(() => '/dashboard/G1/overview');
+const mockUsePathname = jest.fn(() => '/dashboard/overview');
 
 let mockSession: object | null = { principal: 'doctor' };
 
@@ -56,7 +56,7 @@ const SettingsLayout = jest.requireActual<typeof import('../src/app/(app)/settin
 describe('route layouts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUsePathname.mockReturnValue('/dashboard/G1/overview');
+    mockUsePathname.mockReturnValue('/dashboard/overview');
     mockSession = { principal: 'doctor' };
   });
 

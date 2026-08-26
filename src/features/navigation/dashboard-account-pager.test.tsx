@@ -8,7 +8,6 @@ import { mockArkHostGameListResponse } from '@/mocks/arkhost';
 import { gameAccountSchema, type GameAccount } from '@/schemas/game-account';
 import { tamaguiConfig } from '../../../tamagui.config';
 import { DashboardAccountPager } from './dashboard-account-pager';
-import { dashboardPageHref } from './navigation-config';
 
 type PagerRoute = {
   gameAccount: GameAccount;
@@ -38,11 +37,11 @@ const mockTabView = jest.fn<ReactNode, [MockTabViewProps]>(({
     ))}
   </>
 ));
-const mockRouterReplace = jest.fn();
+const mockRouterSetParams = jest.fn();
 const mockUseAdjacentGameAccountPrefetch = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ replace: mockRouterReplace }),
+  useRouter: () => ({ setParams: mockRouterSetParams }),
 }));
 
 jest.mock('react-native-tab-view', () => ({
@@ -101,7 +100,6 @@ function DashboardAccountPagerTestTree() {
   return (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <DashboardAccountPager
-        pageId="overview"
         renderAccount={(gameAccount) => (
           <Text testID={`dashboard-account-scene-${gameAccount.account}`}>
             {gameAccount.account}
@@ -155,18 +153,18 @@ describe('DashboardAccountPager', () => {
     });
 
     expect(readPagerProps().navigationState.index).toBe(2);
-    expect(mockRouterReplace).toHaveBeenCalledWith(
-      dashboardPageHref('overview', thirdGameAccount.account),
-    );
+    expect(mockRouterSetParams).toHaveBeenCalledWith({
+      gameAccountId: thirdGameAccount.account,
+    });
     expect(pager.renderTabBar()).toBeNull();
 
-    mockRouterReplace.mockClear();
+    mockRouterSetParams.mockClear();
     await act(() => {
       readPagerProps().onIndexChange(1);
     });
 
     expect(readPagerProps().navigationState.index).toBe(1);
-    expect(mockRouterReplace).not.toHaveBeenCalled();
+    expect(mockRouterSetParams).not.toHaveBeenCalled();
   });
 
   it('synchronizes the controlled index when the route account changes externally', async () => {
@@ -179,6 +177,6 @@ describe('DashboardAccountPager', () => {
     await screen.rerender(<DashboardAccountPagerTestTree />);
 
     expect(readPagerProps().navigationState.index).toBe(0);
-    expect(mockRouterReplace).not.toHaveBeenCalled();
+    expect(mockRouterSetParams).not.toHaveBeenCalled();
   });
 });

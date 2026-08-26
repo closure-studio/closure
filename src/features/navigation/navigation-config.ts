@@ -52,15 +52,15 @@ export function dashboardPageHref(
 ): Href {
   switch (pageId) {
     case 'overview':
-      return { pathname: '/dashboard/[gameAccountId]/overview', params: { gameAccountId } };
+      return { pathname: '/dashboard/overview', params: { gameAccountId } };
     case 'settings':
-      return { pathname: '/dashboard/[gameAccountId]/settings', params: { gameAccountId } };
+      return { pathname: '/dashboard/settings', params: { gameAccountId } };
     case 'operators':
-      return { pathname: '/dashboard/[gameAccountId]/operators', params: { gameAccountId } };
+      return { pathname: '/dashboard/operators', params: { gameAccountId } };
     case 'inventory':
-      return { pathname: '/dashboard/[gameAccountId]/inventory', params: { gameAccountId } };
+      return { pathname: '/dashboard/inventory', params: { gameAccountId } };
     case 'activity':
-      return { pathname: '/dashboard/[gameAccountId]/activity', params: { gameAccountId } };
+      return { pathname: '/dashboard/activity', params: { gameAccountId } };
   }
 }
 

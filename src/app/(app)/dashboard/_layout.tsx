@@ -1,8 +1,22 @@
-import { Slot } from 'expo-router';
-import { Spinner, YStack } from 'tamagui';
+import { Redirect } from 'expo-router';
+import { Tabs as DashboardTabs } from 'expo-router/tabs';
+import { useEffect, useMemo } from 'react';
+import { getTokens, Spinner, YStack } from 'tamagui';
 
 import { MonoText } from '@/components';
-import { useGameAccountsQuery } from '@/features/dashboard';
+import {
+  DashboardRouteProvider,
+  selectBackdropTint,
+  useDashboardRoute,
+} from '@/features/dashboard';
+import {
+  DashboardFrame,
+  DashboardSmallScreenTabBar,
+  dashboardNavigation,
+  dashboardPageHref,
+} from '@/features/navigation';
+import { useSessionBackdrop } from '@/features/session';
+import { useLayoutSize } from '@/providers/layout-size-provider';
 
 function DashboardState({ label }: { label: string }) {
   return (
@@ -13,14 +27,79 @@ function DashboardState({ label }: { label: string }) {
   );
 }
 
+function DashboardContent() {
+  const colors = getTokens().color;
+  const layoutSize = useLayoutSize();
+  const { setBackdropTint } = useSessionBackdrop();
+  const {
+    gameAccount,
+    gameAccountId,
+    gameAccounts,
+    gameAccountsQuery,
+  } = useDashboardRoute();
+  const backdropTint = selectBackdropTint(gameAccount, {
+    primary: colors.appAccent.val,
+    warning: colors.appWarning.val,
+    muted: colors.appMuted.val,
+  });
+
+  useEffect(() => {
+    setBackdropTint(backdropTint);
+  }, [backdropTint, setBackdropTint]);
+
+  const screens = useMemo(
+    () => Object.values(dashboardNavigation.pages).map((page) => page.id),
+    [],
+  );
+
+  if (gameAccountsQuery.isPending) return <DashboardState label="LOADING ARKHOST DATA" />;
+  if (gameAccountsQuery.isError) return <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
+  if (gameAccounts.length === 0) return <DashboardState label="NO GAME ACCOUNTS" />;
+
+  if (!gameAccountId || !gameAccount) {
+    const firstGameAccount = gameAccounts[0];
+    if (!firstGameAccount) return null;
+    return (
+      <Redirect
+        href={dashboardPageHref(
+          dashboardNavigation.defaultPage.id,
+          firstGameAccount.account,
+        )}
+      />
+    );
+  }
+
+  return (
+    <DashboardFrame>
+      <DashboardTabs
+        screenOptions={{
+          animation: 'shift',
+          freezeOnBlur: true,
+          headerShown: false,
+          lazy: true,
+          sceneStyle: { backgroundColor: 'transparent' },
+        }}
+        tabBar={layoutSize === 'small'
+          ? (props) => (
+            <DashboardSmallScreenTabBar
+              {...props}
+              gameAccountId={gameAccountId}
+            />
+          )
+          : () => null}
+      >
+        {screens.map((screen) => (
+          <DashboardTabs.Screen key={screen} name={screen} />
+        ))}
+      </DashboardTabs>
+    </DashboardFrame>
+  );
+}
+
 export default function DashboardLayout() {
-  const gameAccountsQuery = useGameAccountsQuery();
-  const gameAccounts = gameAccountsQuery.data ?? [];
-
-  let content = <Slot />;
-  if (gameAccountsQuery.isPending) content = <DashboardState label="LOADING ARKHOST DATA" />;
-  else if (gameAccountsQuery.isError) content = <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
-  else if (gameAccounts.length === 0) content = <DashboardState label="NO GAME ACCOUNTS" />;
-
-  return content;
+  return (
+    <DashboardRouteProvider>
+      <DashboardContent />
+    </DashboardRouteProvider>
+  );
 }

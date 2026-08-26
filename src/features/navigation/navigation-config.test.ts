@@ -38,13 +38,13 @@ describe('navigation config', () => {
     ]);
   });
 
-  it('creates account-scoped hrefs and derives the active page from the URL', () => {
+  it('creates page hrefs with account search params and derives the active page', () => {
     expect(dashboardPageHref('overview', 'G1')).toEqual({
-      pathname: '/dashboard/[gameAccountId]/overview',
+      pathname: '/dashboard/overview',
       params: { gameAccountId: 'G1' },
     });
-    expect(getDashboardPageId('/dashboard/G1/inventory')).toBe('inventory');
-    expect(getDashboardPageId('/dashboard/G1/unknown')).toBeNull();
+    expect(getDashboardPageId('/dashboard/inventory')).toBe('inventory');
+    expect(getDashboardPageId('/dashboard/unknown')).toBeNull();
     expect(getSettingsPageId('/settings/account')).toBe('account');
     expect(getSettingsPageId('/settings/unknown')).toBeNull();
   });

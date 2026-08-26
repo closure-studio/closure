@@ -1,32 +1,47 @@
 import { render } from '@testing-library/react-native';
 import type { PropsWithChildren } from 'react';
 
-const mockSlot = jest.fn(() => null);
 const mockRedirect = jest.fn(() => null);
 const mockDashboardTabs = jest.fn(({ children }: PropsWithChildren) => children);
 const mockDashboardTabsScreen = jest.fn(() => null);
-const mockDashboardFrame = jest.fn(({ children }: PropsWithChildren) => children);
+const mockDashboardFrameRender = jest.fn();
+const mockDashboardFrameMount = jest.fn();
+const mockTerminalMarqueeMount = jest.fn();
 const mockDashboardRouteProvider = jest.fn(({ children }: PropsWithChildren) => children);
 const mockDashboardSmallScreenTabBar = jest.fn(() => null);
 const mockUseLayoutSize = jest.fn(() => 'small' as const);
 const mockSetBackdropTint = jest.fn();
 
 const mockNavigateToAccount = (pageId: string, account: string) => ({
-  pathname: `/dashboard/[gameAccountId]/${pageId}`,
+  pathname: `/dashboard/${pageId}`,
   params: { gameAccountId: account },
 });
 
+type MockGameAccount = { account: string };
+
 let mockRoute: {
   gameAccountId: string | null;
-  gameAccount: { account: string } | null;
-  gameAccounts: { account: string }[];
-  gameAccountsQuery: { data?: { account: string }[]; isError: boolean; isPending: boolean };
+  gameAccount: MockGameAccount | null;
+  gameAccounts: MockGameAccount[];
+  gameAccountsQuery: {
+    data?: MockGameAccount[];
+    isError: boolean;
+    isPending: boolean;
+  };
 } = {
   gameAccountId: 'account-1',
   gameAccount: { account: 'account-1' },
-  gameAccounts: [{ account: 'account-1' }, { account: 'account-2' }],
+  gameAccounts: [
+    { account: 'account-1' },
+    { account: 'account-2' },
+    { account: 'account-3' },
+  ],
   gameAccountsQuery: {
-    data: [{ account: 'account-1' }, { account: 'account-2' }],
+    data: [
+      { account: 'account-1' },
+      { account: 'account-2' },
+      { account: 'account-3' },
+    ],
     isError: false,
     isPending: false,
   },
@@ -34,7 +49,6 @@ let mockRoute: {
 
 jest.mock('expo-router', () => ({
   Redirect: mockRedirect,
-  Slot: mockSlot,
 }));
 
 jest.mock('expo-router/tabs', () => ({
@@ -68,39 +82,34 @@ jest.mock('@/providers/layout-size-provider', () => ({
 jest.mock('@/features/dashboard', () => ({
   DashboardRouteProvider: mockDashboardRouteProvider,
   selectBackdropTint: () => '#00ff00',
-  useGameAccountsQuery: () => mockRoute.gameAccountsQuery,
   useDashboardRoute: () => mockRoute,
 }));
 
-jest.mock('@/features/navigation', () => ({
-  DashboardFrame: mockDashboardFrame,
-  DashboardSmallScreenTabBar: mockDashboardSmallScreenTabBar,
-  dashboardNavigation: {
-    defaultPage: { id: 'overview', segment: 'overview' },
-    pages: {
-      overview: { id: 'overview', segment: 'overview' },
-      settings: { id: 'settings', segment: 'settings' },
-      operators: { id: 'operators', segment: 'operators' },
-      inventory: { id: 'inventory', segment: 'inventory' },
-      activity: { id: 'activity', segment: 'activity' },
+jest.mock('@/features/navigation', () => {
+  const React = jest.requireActual<typeof import('react')>('react');
+  return {
+    DashboardFrame: function MockDashboardFrame({ children }: PropsWithChildren) {
+      React.useEffect(() => {
+        mockDashboardFrameMount();
+        mockTerminalMarqueeMount();
+      }, []);
+      mockDashboardFrameRender();
+      return children;
     },
-  },
-  dashboardPageHref: mockNavigateToAccount,
-}));
-
-jest.mock('@/features/navigation/navigation-config', () => ({
-  dashboardNavigation: {
-    defaultPage: { id: 'overview', segment: 'overview' },
-    pages: {
-      overview: { id: 'overview', segment: 'overview' },
-      settings: { id: 'settings', segment: 'settings' },
-      operators: { id: 'operators', segment: 'operators' },
-      inventory: { id: 'inventory', segment: 'inventory' },
-      activity: { id: 'activity', segment: 'activity' },
+    DashboardSmallScreenTabBar: mockDashboardSmallScreenTabBar,
+    dashboardNavigation: {
+      defaultPage: { id: 'overview', segment: 'overview' },
+      pages: {
+        overview: { id: 'overview', segment: 'overview' },
+        settings: { id: 'settings', segment: 'settings' },
+        operators: { id: 'operators', segment: 'operators' },
+        inventory: { id: 'inventory', segment: 'inventory' },
+        activity: { id: 'activity', segment: 'activity' },
+      },
     },
-  },
-  dashboardPageHref: mockNavigateToAccount,
-}));
+    dashboardPageHref: mockNavigateToAccount,
+  };
+});
 
 jest.mock('@/features/session', () => ({
   useSessionBackdrop: () => ({ setBackdropTint: mockSetBackdropTint }),
@@ -109,72 +118,69 @@ jest.mock('@/features/session', () => ({
 const DashboardLayout = jest.requireActual<
   typeof import('../src/app/(app)/dashboard/_layout')
 >('../src/app/(app)/dashboard/_layout').default;
-const DashboardIndexRoute = jest.requireActual<
-  typeof import('../src/app/(app)/dashboard/index')
->('../src/app/(app)/dashboard/index').default;
-const DashboardAccountLayout = jest.requireActual<
-  typeof import('../src/app/(app)/dashboard/[gameAccountId]/_layout')
->('../src/app/(app)/dashboard/[gameAccountId]/_layout').default;
+
+function setActiveAccount(account: string) {
+  const gameAccount = mockRoute.gameAccounts.find((candidate) => candidate.account === account);
+  if (!gameAccount) throw new Error(`Missing mock account ${account}.`);
+  mockRoute = { ...mockRoute, gameAccount, gameAccountId: account };
+}
 
 beforeEach(() => {
-  mockSlot.mockClear();
-  mockRedirect.mockClear();
-  mockDashboardTabs.mockClear();
-  mockDashboardTabsScreen.mockClear();
-  mockDashboardFrame.mockClear();
-  mockDashboardRouteProvider.mockClear();
-  mockSetBackdropTint.mockClear();
-  mockUseLayoutSize.mockReset();
+  jest.clearAllMocks();
   mockUseLayoutSize.mockReturnValue('small');
   mockRoute = {
     gameAccountId: 'account-1',
     gameAccount: { account: 'account-1' },
-    gameAccounts: [{ account: 'account-1' }, { account: 'account-2' }],
+    gameAccounts: [
+      { account: 'account-1' },
+      { account: 'account-2' },
+      { account: 'account-3' },
+    ],
     gameAccountsQuery: {
-      data: [{ account: 'account-1' }, { account: 'account-2' }],
+      data: [
+        { account: 'account-1' },
+        { account: 'account-2' },
+        { account: 'account-3' },
+      ],
       isError: false,
       isPending: false,
     },
   };
 });
 
-describe('Dashboard route layouts', () => {
-  it('routes the dashboard index to the first account overview', async () => {
-    await render(<DashboardIndexRoute />);
+describe('Dashboard route layout', () => {
+  it('canonicalizes a missing account search param to the first account', async () => {
+    mockRoute = { ...mockRoute, gameAccount: null, gameAccountId: null };
+
+    await render(<DashboardLayout />);
 
     expect(mockRedirect).toHaveBeenCalledWith({
       href: {
-        pathname: '/dashboard/[gameAccountId]/overview',
+        pathname: '/dashboard/overview',
         params: { gameAccountId: 'account-1' },
       },
     }, undefined);
   });
 
-  it('keeps the parent dashboard route as the Query-owned account-list gate', async () => {
+  it('owns the provider, stable frame, marquee, and page tabs above account selection', async () => {
     await render(<DashboardLayout />);
 
-    expect(mockDashboardRouteProvider).not.toHaveBeenCalled();
-    expect(mockSlot).toHaveBeenCalledTimes(1);
-    expect(mockDashboardFrame).not.toHaveBeenCalled();
-  });
-
-  it('owns local route state and the frame in the dynamic account layout', async () => {
-    await render(<DashboardAccountLayout />);
-
     expect(mockDashboardRouteProvider).toHaveBeenCalledTimes(1);
-    expect(mockDashboardFrame).toHaveBeenCalledTimes(1);
-    expect(mockDashboardTabs).toHaveBeenCalledWith(expect.objectContaining({
-      screenOptions: expect.objectContaining({ animation: 'shift', headerShown: false }),
-      tabBar: expect.any(Function),
-    }), undefined);
+    expect(mockDashboardFrameMount).toHaveBeenCalledTimes(1);
+    expect(mockTerminalMarqueeMount).toHaveBeenCalledTimes(1);
     expect(mockDashboardTabsScreen).toHaveBeenCalledTimes(5);
   });
 
-  it('redirects stale or foreign account IDs to the dashboard index', async () => {
-    mockRoute = { ...mockRoute, gameAccountId: 'missing', gameAccount: null };
+  it('does not remount the frame or marquee across G1, G2, and G3', async () => {
+    const screen = await render(<DashboardLayout />);
 
-    await render(<DashboardAccountLayout />);
+    setActiveAccount('account-2');
+    await screen.rerender(<DashboardLayout />);
+    setActiveAccount('account-3');
+    await screen.rerender(<DashboardLayout />);
 
-    expect(mockRedirect).toHaveBeenCalledWith({ href: '/dashboard' }, undefined);
+    expect(mockDashboardFrameRender).toHaveBeenCalledTimes(3);
+    expect(mockDashboardFrameMount).toHaveBeenCalledTimes(1);
+    expect(mockTerminalMarqueeMount).toHaveBeenCalledTimes(1);
   });
 });

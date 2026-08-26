@@ -1,6 +1,6 @@
 export {
   gameAccountIdSchema,
-  gameAccountRouteParamsSchema,
+  gameAccountSearchParamsSchema,
   gameAccountSchema,
 } from './game-account.schema';
 export type { GameAccount, GameAccountColor } from './game-account.schema';

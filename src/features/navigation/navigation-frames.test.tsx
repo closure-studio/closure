@@ -13,17 +13,23 @@ type NavigationFrameTestProps = PropsWithChildren<{
   onToggleScope: () => void;
 }>;
 
+type DashboardShellTestProps = PropsWithChildren<{
+  onSelectGameAccount: (gameAccountId: string) => void;
+  selectedGameAccountId: string;
+}>;
+
 const mockNavigationFrame = jest.fn<React.ReactNode, [NavigationFrameTestProps]>(
   ({ children }) => children,
 );
 const mockNavigationHeader = jest.fn((_props: object) => null);
-const mockDashboardShell = jest.fn(({ children }: PropsWithChildren) => children);
+const mockDashboardShell = jest.fn(({ children }: DashboardShellTestProps) => children);
 const mockRouterPush = jest.fn();
 const mockRouterReplace = jest.fn();
+const mockRouterSetParams = jest.fn();
 const mockRouterNavigate = jest.fn();
 const mockReturnToDashboard = jest.fn();
 const mockLogout = jest.fn();
-let mockPathname = '/dashboard/G1/overview';
+let mockPathname = '/dashboard/overview';
 let mockLayoutSize: LayoutSize = 'small';
 
 jest.mock('expo-router', () => ({
@@ -32,6 +38,7 @@ jest.mock('expo-router', () => ({
     navigate: mockRouterNavigate,
     push: mockRouterPush,
     replace: mockRouterReplace,
+    setParams: mockRouterSetParams,
   }),
 }));
 
@@ -42,7 +49,7 @@ jest.mock('react-i18next', () => ({
 }));
 
 jest.mock('@/features/dashboard', () => ({
-  DashboardShell: (props: PropsWithChildren) => mockDashboardShell(props),
+  DashboardShell: (props: DashboardShellTestProps) => mockDashboardShell(props),
   getGameAvatarImageUrl: () => 'avatar-url',
   useDashboardRoute: () => ({
     gameAccount: {
@@ -81,7 +88,7 @@ function readLastFrameProps(): NavigationFrameTestProps {
 describe('navigation scope frames', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPathname = '/dashboard/G1/overview';
+    mockPathname = '/dashboard/overview';
     mockLayoutSize = 'small';
   });
 
@@ -103,22 +110,27 @@ describe('navigation scope frames', () => {
 
     expect(frame.activeId).toBe('overview');
     expect(mockRouterReplace).toHaveBeenCalledWith({
-      pathname: '/dashboard/[gameAccountId]/operators',
+      pathname: '/dashboard/operators',
       params: { gameAccountId: 'G1' },
     });
   });
 
-  it('keeps the Dashboard shell outside account-scoped route content', async () => {
+  it('updates account selection without navigating to another route', async () => {
     await render(<DashboardFrame><Text>pager content</Text></DashboardFrame>);
+
+    const shellCall = mockDashboardShell.mock.calls.at(-1);
+    if (!shellCall) throw new Error('Expected DashboardShell props.');
+    shellCall[0].onSelectGameAccount('G2');
 
     expect(mockDashboardShell).toHaveBeenCalledWith(expect.objectContaining({
       selectedGameAccountId: 'G1',
     }));
-    expect(mockDashboardShell).toHaveBeenCalledTimes(1);
+    expect(mockRouterSetParams).toHaveBeenCalledWith({ gameAccountId: 'G2' });
+    expect(mockRouterReplace).not.toHaveBeenCalled();
   });
 
   it('keeps the last Dashboard page identity while Settings owns the global URL', async () => {
-    mockPathname = '/dashboard/G1/operators';
+    mockPathname = '/dashboard/operators';
     const screen = await render(<DashboardFrame />);
 
     expect(readLastFrameProps().activeId).toBe('operators');
@@ -131,7 +143,7 @@ describe('navigation scope frames', () => {
 
     backgroundFrame.onSelect('overview');
     expect(mockRouterReplace).toHaveBeenCalledWith({
-      pathname: '/dashboard/[gameAccountId]/overview',
+      pathname: '/dashboard/overview',
       params: { gameAccountId: 'G1' },
     });
   });

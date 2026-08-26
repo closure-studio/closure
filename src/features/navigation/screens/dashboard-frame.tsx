@@ -53,8 +53,8 @@ export function DashboardFrame({ children }: PropsWithChildren) {
 
   const handleSelectGameAccount = useCallback((nextGameAccountId: string) => {
     if (nextGameAccountId === gameAccountId) return;
-    router.replace(dashboardPageHref(activePageId, nextGameAccountId));
-  }, [activePageId, gameAccountId, router]);
+    router.setParams({ gameAccountId: nextGameAccountId });
+  }, [gameAccountId, router]);
 
   return (
     <NavigationFrame

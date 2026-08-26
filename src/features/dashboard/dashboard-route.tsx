@@ -1,9 +1,15 @@
-import { useLocalSearchParams } from 'expo-router';
-import { createContext, type PropsWithChildren, useContext } from 'react';
+import { useGlobalSearchParams, usePathname } from 'expo-router';
+import {
+  createContext,
+  type PropsWithChildren,
+  useContext,
+  useState,
+} from 'react';
 import * as v from 'valibot';
 
+import { ROUTES } from '@/constants/routes';
 import {
-  gameAccountRouteParamsSchema,
+  gameAccountSearchParamsSchema,
   type GameAccount,
 } from '@/schemas/game-account';
 import {
@@ -25,9 +31,20 @@ type DashboardRouteContextValue = {
 const DashboardRouteContext = createContext<DashboardRouteContextValue | null>(null);
 
 export function DashboardRouteProvider({ children }: PropsWithChildren) {
-  const params = useLocalSearchParams<DashboardRouteParams>();
-  const parsedParams = v.safeParse(gameAccountRouteParamsSchema, params);
-  const gameAccountId = parsedParams.success ? parsedParams.output.gameAccountId : null;
+  const pathname = usePathname();
+  const params = useGlobalSearchParams<DashboardRouteParams>();
+  const parsedParams = v.safeParse(gameAccountSearchParamsSchema, params);
+  const routeAccountId = parsedParams.success
+    ? parsedParams.output.gameAccountId ?? null
+    : null;
+  const [gameAccountId, setGameAccountId] = useState(routeAccountId);
+  const isDashboardPath = pathname === ROUTES.dashboard
+    || pathname.startsWith(`${ROUTES.dashboard}/`);
+
+  if (isDashboardPath && routeAccountId !== gameAccountId) {
+    setGameAccountId(routeAccountId);
+  }
+
   const gameAccountsQuery = useGameAccountsQuery();
   const gameAccounts = gameAccountsQuery.data ?? [];
   const gameAccount = findGameAccountById(gameAccounts, gameAccountId);

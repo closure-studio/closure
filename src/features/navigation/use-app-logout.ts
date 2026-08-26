@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 
 import { ROUTES } from '@/constants/routes';
 import { useSessionBackdrop } from '@/features/session';
@@ -18,9 +18,14 @@ export function useAppLogout() {
 }
 
 export function useReturnToDashboard() {
+  const appScopeNavigation = useNavigation('/(app)');
   const router = useRouter();
 
   return useCallback(() => {
-    router.dismissTo(ROUTES.dashboard);
-  }, [router]);
+    if (appScopeNavigation.canGoBack()) {
+      appScopeNavigation.goBack();
+      return;
+    }
+    router.replace(ROUTES.dashboard);
+  }, [appScopeNavigation, router]);
 }

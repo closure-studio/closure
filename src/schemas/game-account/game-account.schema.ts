@@ -9,8 +9,8 @@ import {
 export const gameAccountColorSchema = v.picklist(['primary', 'warning', 'muted']);
 export const gameAccountIdSchema = v.pipe(v.string(), v.minLength(1));
 
-export const gameAccountRouteParamsSchema = v.object({
-  gameAccountId: gameAccountIdSchema,
+export const gameAccountSearchParamsSchema = v.object({
+  gameAccountId: v.optional(gameAccountIdSchema),
 });
 
 export const gameAccountSchema = v.object({

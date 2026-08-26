@@ -10,8 +10,6 @@ import {
   useDashboardRoute,
 } from '@/features/dashboard';
 import type { GameAccount } from '@/schemas/game-account';
-import { dashboardPageHref } from './navigation-config';
-import type { DashboardPageId } from './navigation-config';
 
 type DashboardAccountPagerRoute = {
   gameAccount: GameAccount;
@@ -25,12 +23,10 @@ type DashboardAccountPagerState = {
 };
 
 type DashboardAccountPagerProps = {
-  pageId: DashboardPageId;
   renderAccount: (gameAccount: GameAccount) => ReactNode;
 };
 
 export function DashboardAccountPager({
-  pageId,
   renderAccount,
 }: DashboardAccountPagerProps) {
   const router = useRouter();
@@ -75,8 +71,8 @@ export function DashboardAccountPager({
       index: nextIndex,
     }));
     if (nextRoute.key === gameAccountId) return;
-    router.replace(dashboardPageHref(pageId, nextRoute.key));
-  }, [gameAccountId, pageId, router, routes]);
+    router.setParams({ gameAccountId: nextRoute.key });
+  }, [gameAccountId, router, routes]);
 
   const renderScene = useCallback(({
     route,
