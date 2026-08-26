@@ -5,7 +5,7 @@ import { DashboardPageFrame } from '../components/dashboard-shell';
 import { GameHostingConfigView } from '../components/game-hosting-config-view';
 import type { ArkHostFailure } from '../api';
 import type { ArkHostGameConfigPatch } from '@/schemas/arkhost';
-import { useDashboardRoute } from '../dashboard-route';
+import type { GameAccount } from '@/schemas/game-account';
 import { useUpdateGameConfig } from '../queries';
 
 type ConfigErrorKey =
@@ -30,27 +30,23 @@ function getConfigErrorKey(error: ArkHostFailure | null): ConfigErrorKey | null 
   return null;
 }
 
-export function GameHostingConfigScreen() {
+export function GameHostingConfigScreen({ gameAccount }: { gameAccount: GameAccount }) {
   const { t } = useTranslation('dashboard');
-  const { gameAccount } = useDashboardRoute();
   const {
     error,
     mutateAsync,
     reset,
     status,
   } = useUpdateGameConfig();
-  const account = gameAccount?.account ?? null;
+  const account = gameAccount.account;
 
   useEffect(() => {
     reset();
   }, [account, reset]);
 
   const handleSubmit = useCallback((patch: ArkHostGameConfigPatch) => {
-    if (!account) return Promise.resolve();
     return mutateAsync({ account, patch }).then(() => undefined);
   }, [account, mutateAsync]);
-
-  if (!gameAccount) return null;
 
   const errorKey = getConfigErrorKey(error ?? null);
 

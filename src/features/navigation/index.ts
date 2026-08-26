@@ -1,16 +1,17 @@
-export { NavigationLayout } from './screens/navigation-layout';
+export { AppScopeNavigator } from './app-scope-navigator';
 export { DashboardSmallScreenTabBar } from './dashboard-small-screen-tab-bar';
-export {
-  resolveNavigationBackAction,
-  useNavigationBackHandler,
-} from './back-navigation';
-export type { NavigationBackAction } from './back-navigation';
+export { DashboardAccountPager } from './dashboard-account-pager';
+export { SettingsTabBar } from './settings-tab-bar';
+export { DashboardFrame } from './screens/dashboard-frame';
+export { SettingsFrame } from './screens/settings-frame';
 export {
   dashboardNavigation,
   dashboardPageHref,
   getDashboardPageId,
-  getNavigationScope,
+  getSettingsPageId,
   settingsNavigation,
+  sortedDashboardPages,
+  sortedSettingsPages,
 } from './navigation-config';
 export type {
   DashboardPageId,

@@ -1,11 +1,8 @@
-import { render } from '@testing-library/react-native';
+import { fireEvent, render } from '@testing-library/react-native';
 import { TamaguiProvider } from 'tamagui';
 
 import { tamaguiConfig } from '../../../tamagui.config';
-import {
-  SettingsPagerTabs,
-  resolveSettingsSwipeAction,
-} from './components/settings-swipe-pager';
+import { SettingsPagerTabs } from './components/settings-swipe-pager';
 import { settingsNavigation } from './navigation-config';
 
 jest.mock('react-native-reanimated', () => {
@@ -23,103 +20,62 @@ const settingsItems = Object.values(settingsNavigation.pages)
   .sort((left, right) => left.sort - right.sort)
   .map(({ id }) => ({ id, label: id }));
 
-async function renderSettingsPagerTabs() {
-  return render(
+async function renderSettingsPagerTabs(activeId: 'network' | 'account' | 'contributors' = 'network') {
+  const onBack = jest.fn();
+  const onSelect = jest.fn();
+  const screen = await render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <SettingsPagerTabs
-        activeId="network"
+        activeId={activeId}
+        backLabel="Return to Dashboard"
         items={settingsItems}
-        onSelect={jest.fn()}
+        onBack={onBack}
+        onSelect={onSelect}
         swipeHint="SWIPE L/R"
         tabListLabel="Settings tabs"
       />
     </TamaguiProvider>,
   );
+
+  return { onBack, onSelect, screen };
 }
 
 describe('SettingsPagerTabs', () => {
-  it('shows the swipe instruction without using it as the tablist name', async () => {
-    const screen = await renderSettingsPagerTabs();
+  it('uses the active navigator page as the selected tab', async () => {
+    const { screen } = await renderSettingsPagerTabs();
     const tabList = screen.getByLabelText('Settings tabs');
 
-    expect(screen.getByText('SWIPE L/R')).toBeTruthy();
     expect(tabList.props['aria-label']).toBe('Settings tabs');
-    expect(tabList.props['aria-label']).not.toBe('SWIPE L/R');
-    expect(screen.getByRole('tab', { name: 'network' }).props['aria-selected']).toBe(true);
-  });
-
-  it('centers both direction icons against the complete pager content', async () => {
-    const screen = await renderSettingsPagerTabs();
-
-    expect(screen.getByTestId('settings-pager-layout')).toHaveStyle({
-      alignItems: 'center',
-    });
-    expect(screen.getByTestId('settings-previous-icon')).toHaveStyle({
-      alignItems: 'center',
-      height: 22,
-      justifyContent: 'center',
-    });
-    expect(screen.getByTestId('settings-next-icon')).toHaveStyle({
-      alignItems: 'center',
-      height: 22,
-      justifyContent: 'center',
-    });
-  });
-
-  it('keeps the direction icons on opposite sides of the pager content', async () => {
-    const screen = await renderSettingsPagerTabs();
-    const layoutNodes = screen.getAllByTestId(/settings-(previous-icon|pager-content|next-icon)/);
-
-    expect(layoutNodes).toHaveLength(3);
-    expect(layoutNodes.indexOf(screen.getByTestId('settings-previous-icon'))).toBe(0);
-    expect(layoutNodes.indexOf(screen.getByTestId('settings-pager-content'))).toBe(1);
-    expect(layoutNodes.indexOf(screen.getByTestId('settings-next-icon'))).toBe(2);
-  });
-
-  it('keeps both direction icons legible while preserving disabled-state contrast', async () => {
-    const screen = await renderSettingsPagerTabs();
-
-    expect(screen.getByTestId('settings-previous-icon')).toHaveStyle({ opacity: 0.35 });
-    expect(screen.getByTestId('settings-next-icon')).toHaveStyle({ opacity: 0.85 });
-  });
-
-  it('keeps the swipe hint centered when reduced motion is enabled', async () => {
-    const screen = await renderSettingsPagerTabs();
-
+    expect(screen.getByText('SWIPE L/R')).toBeTruthy();
     expect(screen.getByTestId('settings-swipe-hint')).toHaveStyle({
       transform: [{ translateX: 0 }],
     });
-  });
-});
-
-describe('resolveSettingsSwipeAction', () => {
-  it('moves forward for a left swipe at the threshold', () => {
-    expect(resolveSettingsSwipeAction({
-      activeId: 'network',
-      direction: 'left',
-      items: settingsItems,
-    })).toEqual({ pageId: 'account', type: 'select-page' });
+    expect(screen.getByRole('tab', { name: 'network' }).props['aria-selected']).toBe(true);
   });
 
-  it('moves backward for a right swipe', () => {
-    expect(resolveSettingsSwipeAction({
-      activeId: 'contributors',
-      direction: 'right',
-      items: settingsItems,
-    })).toEqual({ pageId: 'account', type: 'select-page' });
+  it('returns to Dashboard from the first page', async () => {
+    const { onBack, screen } = await renderSettingsPagerTabs();
+
+    await fireEvent.press(screen.getByLabelText('Return to Dashboard'));
+
+    expect(onBack).toHaveBeenCalledTimes(1);
   });
 
-  it('exits settings for a right swipe from the first page', () => {
-    expect(resolveSettingsSwipeAction({
-      activeId: 'network',
-      direction: 'right',
-      items: settingsItems,
-    })).toEqual({ type: 'exit' });
+  it('uses the arrow controls to select adjacent navigator pages', async () => {
+    const { onBack, onSelect, screen } = await renderSettingsPagerTabs('account');
+
+    await fireEvent.press(screen.getByTestId('settings-previous-icon'));
+    await fireEvent.press(screen.getByTestId('settings-next-icon'));
+
+    expect(onSelect).toHaveBeenNthCalledWith(1, 'network');
+    expect(onSelect).toHaveBeenNthCalledWith(2, 'contributors');
+    expect(onBack).not.toHaveBeenCalled();
   });
 
-  it.each([
-    { activeId: 'contributors', direction: 'left' },
-  ] as const)('does not navigate past the final page', (gesture) => {
-    expect(resolveSettingsSwipeAction({ ...gesture, items: settingsItems })).toBeNull();
+  it('keeps the final forward control disabled', async () => {
+    const { screen } = await renderSettingsPagerTabs('contributors');
+
+    expect(screen.getByTestId('settings-next-icon')).toBeDisabled();
+    expect(screen.getByTestId('settings-next-icon')).toHaveStyle({ opacity: 0.28 });
   });
 });

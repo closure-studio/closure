@@ -36,8 +36,6 @@ function DashboardShellTestTree({ pageId, onSelectGameAccount }: { pageId: strin
         <DashboardShell
           selectedGameAccountId="G18928069156"
           gameAccounts={initialGameAccounts}
-          isContentSwipeEnabled
-          onContentSwipe={jest.fn()}
           onSelectGameAccount={onSelectGameAccount}
         >
           <YStack testID={`dashboard-page-${pageId}`} />
