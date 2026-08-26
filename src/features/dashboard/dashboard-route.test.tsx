@@ -106,18 +106,24 @@ describe('DashboardRouteProvider', () => {
     expect(result.current.gameAccount).toBeNull();
   });
 
-  it('retains the Dashboard account while Settings owns the global URL', async () => {
+  it('updates the Dashboard account before retaining it across Settings', async () => {
     const { result, rerender } = await renderHook(() => useDashboardRoute(), {
       wrapper: createWrapper(),
     });
 
     expect(result.current.gameAccountId).toBe(mockFirstAccount.account);
 
+    mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: mockSecondAccount.account });
+    await rerender(undefined);
+
+    expect(result.current.gameAccountId).toBe(mockSecondAccount.account);
+    expect(result.current.gameAccount?.account).toBe(mockSecondAccount.account);
+
     mockPathname = '/settings/account';
     mockUseGlobalSearchParams.mockReturnValue({});
     await rerender(undefined);
 
-    expect(result.current.gameAccountId).toBe(mockFirstAccount.account);
-    expect(result.current.gameAccount?.account).toBe(mockFirstAccount.account);
+    expect(result.current.gameAccountId).toBe(mockSecondAccount.account);
+    expect(result.current.gameAccount?.account).toBe(mockSecondAccount.account);
   });
 });
