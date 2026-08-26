@@ -74,7 +74,7 @@ jest.mock('./components/navigation-header', () => ({
   NavigationHeader: (props: object) => mockNavigationHeader(props),
 }));
 
-jest.mock('./use-app-logout', () => ({
+jest.mock('./navigation-actions', () => ({
   useAppLogout: () => mockLogout,
   useReturnToDashboard: () => mockReturnToDashboard,
 }));
@@ -127,25 +127,6 @@ describe('navigation scope frames', () => {
     }));
     expect(mockRouterSetParams).toHaveBeenCalledWith({ gameAccountId: 'G2' });
     expect(mockRouterReplace).not.toHaveBeenCalled();
-  });
-
-  it('keeps the last Dashboard page identity while Settings owns the global URL', async () => {
-    mockPathname = '/dashboard/operators';
-    const screen = await render(<DashboardFrame />);
-
-    expect(readLastFrameProps().activeId).toBe('operators');
-
-    mockPathname = '/settings/account';
-    await screen.rerender(<DashboardFrame />);
-    const backgroundFrame = readLastFrameProps();
-
-    expect(backgroundFrame.activeId).toBe('operators');
-
-    backgroundFrame.onSelect('overview');
-    expect(mockRouterReplace).toHaveBeenCalledWith({
-      pathname: '/dashboard/overview',
-      params: { gameAccountId: 'G1' },
-    });
   });
 
   it('dismisses Settings to the preserved Dashboard stack screen', async () => {

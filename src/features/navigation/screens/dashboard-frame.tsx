@@ -1,5 +1,4 @@
 import type { PropsWithChildren } from 'react';
-import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
 import { YStack } from 'tamagui';
@@ -13,12 +12,12 @@ import { NavigationFrame } from '../components/navigation-frame';
 import { NavigationHeader } from '../components/navigation-header';
 import {
   dashboardNavigation,
+  dashboardPagesList,
   dashboardPageHref,
   getDashboardPageId,
   settingsNavigation,
-  sortedDashboardPages,
 } from '../navigation-config';
-import { useAppLogout } from '../use-app-logout';
+import { useAppLogout } from '../navigation-actions';
 
 export function DashboardFrame({ children }: PropsWithChildren) {
   const { t } = useTranslation('navigation');
@@ -27,34 +26,27 @@ export function DashboardFrame({ children }: PropsWithChildren) {
   const router = useRouter();
   const onLogout = useAppLogout();
   const { gameAccount, gameAccountId, gameAccounts } = useDashboardRoute();
-  const routePageId = getDashboardPageId(pathname);
-  const [lastActivePageId, setLastActivePageId] = useState(
-    routePageId ?? dashboardNavigation.defaultPage.id,
-  );
-  if (routePageId && routePageId !== lastActivePageId) {
-    setLastActivePageId(routePageId);
-  }
-  const activePageId = routePageId ?? lastActivePageId;
-  const items = sortedDashboardPages.map((page) => ({
+  const activePageId = getDashboardPageId(pathname) ?? dashboardNavigation.defaultPage.id;
+  const items = dashboardPagesList.map((page) => ({
     icon: page.icon,
     id: page.id,
     label: tDashboard(`navigation.sections.${page.id}.label`),
   }));
 
-  const handleSelect = useCallback((pageId: string) => {
-    const page = sortedDashboardPages.find((candidate) => candidate.id === pageId);
+  const handleSelect = (pageId: string) => {
+    const page = dashboardPagesList.find((candidate) => candidate.id === pageId);
     if (!page || !gameAccount || page.id === activePageId) return;
     router.replace(dashboardPageHref(page.id, gameAccount.account));
-  }, [activePageId, gameAccount, router]);
+  };
 
-  const handleOpenSettings = useCallback(() => {
+  const handleOpenSettings = () => {
     router.push(settingsNavigation.defaultPage.route);
-  }, [router]);
+  };
 
-  const handleSelectGameAccount = useCallback((nextGameAccountId: string) => {
+  const handleSelectGameAccount = (nextGameAccountId: string) => {
     if (nextGameAccountId === gameAccountId) return;
     router.setParams({ gameAccountId: nextGameAccountId });
-  }, [gameAccountId, router]);
+  };
 
   return (
     <NavigationFrame

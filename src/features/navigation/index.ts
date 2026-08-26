@@ -10,8 +10,8 @@ export {
   getDashboardPageId,
   getSettingsPageId,
   settingsNavigation,
-  sortedDashboardPages,
-  sortedSettingsPages,
+  dashboardPagesList,
+  settingsPagesList,
 } from './navigation-config';
 export type {
   DashboardPageId,

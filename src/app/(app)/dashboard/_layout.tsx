@@ -1,6 +1,6 @@
 import { Redirect } from 'expo-router';
 import { Tabs as DashboardTabs } from 'expo-router/tabs';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { getTokens, Spinner, YStack } from 'tamagui';
 
 import { MonoText } from '@/components';
@@ -12,6 +12,7 @@ import {
 import {
   DashboardFrame,
   DashboardSmallScreenTabBar,
+  dashboardPagesList,
   dashboardNavigation,
   dashboardPageHref,
 } from '@/features/navigation';
@@ -46,11 +47,6 @@ function DashboardContent() {
   useEffect(() => {
     setBackdropTint(backdropTint);
   }, [backdropTint, setBackdropTint]);
-
-  const screens = useMemo(
-    () => Object.values(dashboardNavigation.pages).map((page) => page.id),
-    [],
-  );
 
   if (gameAccountsQuery.isPending) return <DashboardState label="LOADING ARKHOST DATA" />;
   if (gameAccountsQuery.isError) return <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
@@ -88,8 +84,8 @@ function DashboardContent() {
           )
           : () => null}
       >
-        {screens.map((screen) => (
-          <DashboardTabs.Screen key={screen} name={screen} />
+        {dashboardPagesList.map((page) => (
+          <DashboardTabs.Screen key={page.id} name={page.id} />
         ))}
       </DashboardTabs>
     </DashboardFrame>

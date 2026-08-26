@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react-native';
 
 import { ROUTES } from '@/constants/routes';
-import { useAppLogout, useReturnToDashboard } from './use-app-logout';
+import { useAppLogout, useReturnToDashboard } from './navigation-actions';
 
 const mockBack = jest.fn();
 const mockCanGoBack = jest.fn(() => true);

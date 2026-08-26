@@ -1,5 +1,4 @@
 import type { PropsWithChildren } from 'react';
-import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
 import { YStack } from 'tamagui';
@@ -10,9 +9,9 @@ import { NavigationHeader } from '../components/navigation-header';
 import {
   getSettingsPageId,
   settingsNavigation,
-  sortedSettingsPages,
+  settingsPagesList,
 } from '../navigation-config';
-import { useAppLogout, useReturnToDashboard } from '../use-app-logout';
+import { useAppLogout, useReturnToDashboard } from '../navigation-actions';
 
 export function SettingsFrame({ children }: PropsWithChildren) {
   const { t } = useTranslation('navigation');
@@ -22,16 +21,16 @@ export function SettingsFrame({ children }: PropsWithChildren) {
   const onLogout = useAppLogout();
   const handleReturnToDashboard = useReturnToDashboard();
   const activePageId = getSettingsPageId(pathname) ?? settingsNavigation.defaultPage.id;
-  const items = sortedSettingsPages.map((page) => ({
+  const items = settingsPagesList.map((page) => ({
     icon: page.icon,
     id: page.id,
     label: t(`pages.${page.id}.label`),
   }));
 
-  const handleSelect = useCallback((pageId: string) => {
-    const page = sortedSettingsPages.find((candidate) => candidate.id === pageId);
+  const handleSelect = (pageId: string) => {
+    const page = settingsPagesList.find((candidate) => candidate.id === pageId);
     if (page && page.id !== activePageId) router.navigate(page.route);
-  }, [activePageId, router]);
+  };
 
   const header = layoutSize === 'large' ? (
     <YStack shrink={0} borderBottomWidth={1} borderColor="$appBorder">

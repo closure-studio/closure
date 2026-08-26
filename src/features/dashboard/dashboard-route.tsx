@@ -3,7 +3,7 @@ import {
   createContext,
   type PropsWithChildren,
   useContext,
-  useState,
+  useRef,
 } from 'react';
 import * as v from 'valibot';
 
@@ -37,13 +37,16 @@ export function DashboardRouteProvider({ children }: PropsWithChildren) {
   const routeAccountId = parsedParams.success
     ? parsedParams.output.gameAccountId ?? null
     : null;
-  const [gameAccountId, setGameAccountId] = useState(routeAccountId);
   const isDashboardPath = pathname === ROUTES.dashboard
     || pathname.startsWith(`${ROUTES.dashboard}/`);
+  const retainedAccountId = useRef(routeAccountId);
 
-  if (isDashboardPath && routeAccountId !== gameAccountId) {
-    setGameAccountId(routeAccountId);
+  if (isDashboardPath) {
+    // eslint-disable-next-line react-hooks/refs -- retain the last Dashboard account across Settings
+    retainedAccountId.current = routeAccountId;
   }
+  // eslint-disable-next-line react-hooks/refs -- read the retained account only outside Dashboard routes
+  const gameAccountId = isDashboardPath ? routeAccountId : retainedAccountId.current;
 
   const gameAccountsQuery = useGameAccountsQuery();
   const gameAccounts = gameAccountsQuery.data ?? [];
