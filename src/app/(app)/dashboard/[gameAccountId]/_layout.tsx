@@ -1,6 +1,7 @@
 import { Redirect, useIsFocused, usePathname, useRouter } from 'expo-router';
 import { Tabs as DashboardTabs } from 'expo-router/tabs';
 import { useCallback, useEffect, useMemo } from 'react';
+import { useReducedMotion } from 'react-native-reanimated';
 import { getTokens } from 'tamagui';
 
 import {
@@ -26,6 +27,7 @@ export default function DashboardAccountLayout() {
   const layoutSize = useLayoutSize();
   const isFocused = useIsFocused();
   const pathname = usePathname();
+  const reducedMotion = useReducedMotion();
   const router = useRouter();
   const { setBackdropTint } = useSessionBackdrop();
   const { gameAccountId, gameAccount, gameAccounts } = useDashboardRoute();
@@ -73,7 +75,7 @@ export default function DashboardAccountLayout() {
     >
       <DashboardTabs
         screenOptions={{
-          animation: 'none',
+          animation: reducedMotion ? 'none' : 'shift',
           freezeOnBlur: true,
           headerShown: false,
           lazy: true,

@@ -68,9 +68,3 @@ export function getDashboardPageId(pathname: string): DashboardPageId | null {
   const segment = pathname.split('/').filter(Boolean).at(-1);
   return Object.values(dashboardPages).find((page) => page.segment === segment)?.id ?? null;
 }
-
-export function getNavigationScope(pathname: string): NavigationScope {
-  return pathname === ROUTES.settings || pathname.startsWith(`${ROUTES.settings}/`)
-    ? 'settings'
-    : 'dashboard';
-}

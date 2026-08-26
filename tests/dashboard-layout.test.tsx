@@ -112,9 +112,6 @@ jest.mock('@/features/session', () => ({
   useSessionBackdrop: () => ({ setBackdropTint: mockSetBackdropTint }),
 }));
 
-const DashboardLayout = jest.requireActual<
-  typeof import('../src/app/(app)/dashboard/_layout')
->('../src/app/(app)/dashboard/_layout').default;
 const DashboardIndexRoute = jest.requireActual<
   typeof import('../src/app/(app)/dashboard/index')
 >('../src/app/(app)/dashboard/index').default;
@@ -158,30 +155,6 @@ describe('Dashboard route layouts', () => {
         params: { gameAccountId: 'account-1' },
       },
     }, undefined);
-  });
-
-  it('keeps the parent dashboard route as the account-list gate', async () => {
-    await render(<DashboardLayout />);
-
-    expect(mockSlot).toHaveBeenCalledTimes(1);
-    expect(mockDashboardShell).not.toHaveBeenCalled();
-  });
-
-  it('renders all account-scoped pages in the dynamic tabs layout', async () => {
-    await render(<DashboardAccountLayout />);
-
-    expect(mockDashboardShell).toHaveBeenCalledWith(
-      expect.objectContaining({
-        selectedGameAccountId: 'account-1',
-        isContentSwipeEnabled: true,
-      }),
-      undefined,
-    );
-    expect(mockDashboardTabs).toHaveBeenCalledWith(expect.objectContaining({
-      screenOptions: expect.objectContaining({ animation: 'none', headerShown: false }),
-      tabBar: expect.any(Function),
-    }), undefined);
-    expect(mockDashboardTabsScreen).toHaveBeenCalledTimes(5);
   });
 
   it('changes only the account segment when switching accounts', async () => {

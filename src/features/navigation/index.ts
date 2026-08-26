@@ -9,7 +9,6 @@ export {
   dashboardNavigation,
   dashboardPageHref,
   getDashboardPageId,
-  getNavigationScope,
   settingsNavigation,
 } from './navigation-config';
 export type {

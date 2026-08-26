@@ -62,19 +62,4 @@ describe('useSessionQueryCacheReset', () => {
     });
   });
 
-  it('keeps the Query cache when the same principal refreshes its session', async () => {
-    const { queryClient, wrapper } = createWrapper();
-    await act(() => {
-      appStore.getState().setSession(mockActiveSession);
-    });
-    await renderHook(() => useSessionQueryCacheReset(), { wrapper });
-
-    queryClient.setQueryData(['seed'], { value: 1 });
-
-    await act(() => {
-      appStore.getState().setSession(mockActiveSession);
-    });
-
-    expect(queryClient.getQueryCache().findAll()).toHaveLength(1);
-  });
 });

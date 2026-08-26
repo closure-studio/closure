@@ -11,10 +11,8 @@ import {
 
 const mockUsePathname = jest.fn(() => '/dashboard/G1/overview');
 const mockRouterReplace = jest.fn();
-const mockUseNavigationBackHandler = jest.fn<
-  void,
-  [pathname: string, onReturnToDashboard: () => void]
->();
+const mockLogout = jest.fn();
+const mockResetBackdropTint = jest.fn();
 let mockGameAccount: { account: string; nickname: string; avatar: { id: string; type: string } } | null = null;
 const mockGetGameAvatarImageUrl = jest.fn<string | null, [unknown]>();
 let mockLayoutSize: 'small' | 'large' = 'small';
@@ -54,15 +52,15 @@ jest.mock('@/providers/layout-size-provider', () => ({
 }));
 
 jest.mock('@/features/dashboard', () => ({
-  useDashboardRoute: () => ({ gameAccount: mockGameAccount }),
   getGameAvatarImageUrl: (avatar: unknown) => mockGetGameAvatarImageUrl(avatar),
 }));
 
-jest.mock('./back-navigation', () => ({
-  useNavigationBackHandler: (
-    pathname: string,
-    onReturnToDashboard: () => void,
-  ) => mockUseNavigationBackHandler(pathname, onReturnToDashboard),
+jest.mock('@/features/session', () => ({
+  useSessionBackdrop: () => ({ resetBackdropTint: mockResetBackdropTint }),
+}));
+
+jest.mock('@/store', () => ({
+  useAppStore: () => mockLogout,
 }));
 
 jest.mock('@/components', () => {
@@ -89,7 +87,10 @@ function NavigationTestTree({ scope }: { scope: 'dashboard' | 'settings' }) {
   return (
     <SafeAreaProvider initialMetrics={safeAreaMetrics}>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-        <NavigationLayout onLogout={jest.fn()}>
+        <NavigationLayout
+          gameAccount={mockGameAccount}
+          scope={scope}
+        >
           <YStack testID={`${scope}-route-content`} />
         </NavigationLayout>
       </TamaguiProvider>
@@ -101,7 +102,8 @@ describe('Small Screen NavigationLayout header', () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue('/dashboard/G1/overview');
     mockRouterReplace.mockClear();
-    mockUseNavigationBackHandler.mockClear();
+    mockLogout.mockClear();
+    mockResetBackdropTint.mockClear();
     mockGameAccount = null;
     mockGetGameAvatarImageUrl.mockReturnValue(null);
     mockLayoutSize = 'small';
@@ -149,6 +151,15 @@ describe('Small Screen NavigationLayout header', () => {
     expect(mockRouterReplace).toHaveBeenCalledWith('/settings/network');
   });
 
+  it('uses the explicit scope while an outgoing scene sees the destination pathname', async () => {
+    mockUsePathname.mockReturnValue('/settings/network');
+
+    const screen = await render(<NavigationTestTree scope="dashboard" />);
+
+    expect(screen.getByTestId('navigation-header')).toBeTruthy();
+    expect(screen.queryByLabelText('navigation:smallScreen.settingsTabsLabel')).toBeNull();
+  });
+
   it('keeps the settings page label as the header title on Large Screen Settings', async () => {
     mockLayoutSize = 'large';
     mockUsePathname.mockReturnValue('/settings/network');
@@ -157,44 +168,19 @@ describe('Small Screen NavigationLayout header', () => {
 
     expect(screen.getByText('navigation:pages.network.label')).toBeTruthy();
   });
+
 });
 
 describe('NavigationLayout settings swipe surface', () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue('/settings/network');
     mockRouterReplace.mockClear();
-    mockUseNavigationBackHandler.mockClear();
+    mockLogout.mockClear();
+    mockResetBackdropTint.mockClear();
     mockGameAccount = null;
     mockGetGameAvatarImageUrl.mockReturnValue(null);
     mockLayoutSize = 'small';
     mockSurfaceRecords.length = 0;
-  });
-
-  it('keeps a single enabled surface wrapping the pager header and route content on Small Screen Settings', async () => {
-    const screen = await render(<NavigationTestTree scope="settings" />);
-
-    expect(mockSurfaceRecords).toHaveLength(1);
-    expect(mockSurfaceRecords[0]?.enabled).toBe(true);
-    expect(screen.getAllByLabelText('navigation:smallScreen.settingsTabsLabel')).toHaveLength(1);
-    expect(screen.getByTestId('settings-route-content')).toBeTruthy();
-  });
-
-  it('keeps the same surface mounted but disabled on Dashboard', async () => {
-    mockUsePathname.mockReturnValue('/dashboard/G1/overview');
-    const screen = await render(<NavigationTestTree scope="dashboard" />);
-
-    expect(mockSurfaceRecords).toHaveLength(1);
-    expect(mockSurfaceRecords[0]?.enabled).toBe(false);
-    expect(screen.getByTestId('dashboard-route-content')).toBeTruthy();
-  });
-
-  it('keeps the same surface mounted but disabled on Large Screen Settings', async () => {
-    mockLayoutSize = 'large';
-    const screen = await render(<NavigationTestTree scope="settings" />);
-
-    expect(mockSurfaceRecords).toHaveLength(1);
-    expect(mockSurfaceRecords[0]?.enabled).toBe(false);
-    expect(screen.getByTestId('settings-route-content')).toBeTruthy();
   });
 
   it('selects the next Settings Page for a left swipe', async () => {
@@ -213,11 +199,11 @@ describe('NavigationLayout settings swipe surface', () => {
     expect(mockRouterReplace).toHaveBeenCalledWith('/dashboard');
   });
 
-  it('replaces Settings with Dashboard for hardware back navigation', async () => {
-    await render(<NavigationTestTree scope="settings" />);
+  it('returns to Dashboard from the Settings scope button', async () => {
+    mockLayoutSize = 'large';
+    const screen = await render(<NavigationTestTree scope="settings" />);
 
-    const onReturnToDashboard = mockUseNavigationBackHandler.mock.calls.at(-1)?.[1];
-    onReturnToDashboard?.();
+    await fireEvent.press(screen.getByLabelText('navigation:scopeSwitcher.returnToDashboard'));
 
     expect(mockRouterReplace).toHaveBeenCalledWith('/dashboard');
   });

@@ -7,11 +7,11 @@ import { XStack, YStack } from 'tamagui';
 
 import { HorizontalSwipeSurface } from '@/components';
 import { ROUTES } from '@/constants/routes';
-import {
-  getGameAvatarImageUrl,
-  useDashboardRoute,
-} from '@/features/dashboard';
+import { getGameAvatarImageUrl } from '@/features/dashboard';
+import { useSessionBackdrop } from '@/features/session';
 import { useLayoutSize } from '@/providers/layout-size-provider';
+import type { GameAccount } from '@/schemas/game-account';
+import { useAppStore } from '@/store';
 import type { HorizontalSwipeDirection } from '@/utils/horizontal-swipe';
 import { LargeScreenNavigationSidebar } from '../components/large-screen-navigation-sidebar';
 import { NavigationHeader } from '../components/navigation-header';
@@ -23,24 +23,29 @@ import {
   dashboardNavigation,
   dashboardPageHref,
   getDashboardPageId,
-  getNavigationScope,
   settingsNavigation,
   sortedDashboardPages as dashboardPages,
   sortedSettingsPages as settingsPages,
 } from '../navigation-config';
-import { useNavigationBackHandler } from '../back-navigation';
+import type { NavigationScope } from '../navigation-config';
 
 type NavigationLayoutProps = PropsWithChildren<{
-  onLogout: () => void;
+  gameAccount: Pick<GameAccount, 'account' | 'avatar' | 'nickname'> | null;
+  scope: NavigationScope;
 }>;
 
-export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) {
+export function NavigationLayout({
+  children,
+  gameAccount,
+  scope,
+}: NavigationLayoutProps) {
   const { t } = useTranslation('navigation');
   const { t: tDashboard } = useTranslation('dashboard');
   const layoutSize = useLayoutSize();
   const pathname = usePathname();
   const router = useRouter();
-  const scope = getNavigationScope(pathname);
+  const logout = useAppStore((state) => state.logout);
+  const { resetBackdropTint } = useSessionBackdrop();
   const matchedDashboardPageId = getDashboardPageId(pathname);
   const matchedDashboardPage = matchedDashboardPageId
     ? dashboardNavigation.pages[matchedDashboardPageId]
@@ -49,15 +54,19 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
   const activeDashboardPage = matchedDashboardPage ?? dashboardNavigation.defaultPage;
   const activeSettingsPage = matchedSettingsPage ?? settingsNavigation.defaultPage;
   const activePage = scope === 'dashboard' ? activeDashboardPage : activeSettingsPage;
-  const { gameAccount } = useDashboardRoute();
   const headerTitle = scope === 'dashboard'
     ? (gameAccount?.nickname ?? '')
     : t(`pages.${activeSettingsPage.id}.label`);
   const isSettingsSwipeEnabled = scope === 'settings' && layoutSize === 'small';
-
   const handleExitSettings = useCallback(() => {
     router.replace(ROUTES.dashboard);
   }, [router]);
+
+  const handleLogout = useCallback(() => {
+    resetBackdropTint();
+    logout();
+    router.replace(ROUTES.login);
+  }, [logout, resetBackdropTint, router]);
 
   const handleScopePress = useCallback(() => {
     if (scope === 'dashboard') {
@@ -67,8 +76,6 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
 
     handleExitSettings();
   }, [handleExitSettings, router, scope]);
-
-  useNavigationBackHandler(pathname, handleExitSettings);
 
   const handleSelectSidebarPage = useCallback((pageId: string) => {
     if (scope === 'dashboard') {
@@ -122,7 +129,7 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
           <LargeScreenNavigationSidebar
             activeId={activeSidebarId}
             items={pageItems}
-            onLogout={onLogout}
+            onLogout={handleLogout}
             onSelect={handleSelectSidebarPage}
             onToggleScope={handleScopePress}
             scope={scope}

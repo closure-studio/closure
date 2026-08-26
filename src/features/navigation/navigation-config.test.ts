@@ -2,25 +2,10 @@ import {
   dashboardPageHref,
   dashboardNavigation,
   getDashboardPageId,
-  getNavigationScope,
   settingsNavigation,
 } from './navigation-config';
 
 describe('navigation config', () => {
-  it.each(['/', '/dashboard', '/dashboard/G1/overview', '/dashboard/G1/settings', '/dashboard/G1/operators'] as const)(
-    'derives dashboard scope for %s',
-    (pathname) => {
-      expect(getNavigationScope(pathname)).toBe('dashboard');
-    },
-  );
-
-  it.each(['/settings', '/settings/network', '/settings/account', '/settings/contributors'] as const)(
-    'derives settings scope for %s',
-    (pathname) => {
-      expect(getNavigationScope(pathname)).toBe('settings');
-    },
-  );
-
   it('defines the canonical scope destinations', () => {
     expect(dashboardNavigation.defaultPage).toMatchObject({
       id: 'overview',

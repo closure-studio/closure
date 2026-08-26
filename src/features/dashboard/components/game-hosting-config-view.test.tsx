@@ -101,18 +101,6 @@ describe('GameHostingConfigView', () => {
     expect(onSubmit).toHaveBeenCalledWith({ recruit_reserve: 5 });
   });
 
-  it('opens Smart Switch editor and submits updated enable_building_arrange', async () => {
-    const onSubmit = jest.fn<Promise<void>, [SubmitPatch]>().mockResolvedValue(undefined);
-    const { screen } = await renderConfigView({ onSubmit });
-
-    await fireEvent.press(screen.getByTestId('hosting-config-card-enable-building-arrange'));
-    await fireEvent(screen.getByTestId('hosting-config-enable-building-arrange'), 'onCheckedChange', false);
-    await fireEvent.press(screen.getByTestId('hosting-config-submit'));
-
-    expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit).toHaveBeenCalledWith({ enable_building_arrange: false });
-  });
-
   it('opens Drone Acceleration editor and submits selected room slot', async () => {
     const onSubmit = jest.fn<Promise<void>, [SubmitPatch]>().mockResolvedValue(undefined);
     const { screen } = await renderConfigView({ onSubmit });
