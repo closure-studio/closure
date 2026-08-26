@@ -8,15 +8,16 @@ import {
   UsersRound,
   Wifi,
 } from 'lucide-react-native';
+import type { Href } from 'expo-router';
 
 import { ROUTES } from '@/constants/routes';
 
 const dashboardPages = {
-  overview: { id: 'overview', route: ROUTES.dashboardOverview, icon: Grid2X2, sort: 10 },
-  settings: { id: 'settings', route: ROUTES.dashboardSettings, icon: Settings2, sort: 20 },
-  operators: { id: 'operators', route: ROUTES.dashboardOperators, icon: UsersRound, sort: 30 },
-  inventory: { id: 'inventory', route: ROUTES.dashboardInventory, icon: Boxes, sort: 40 },
-  activity: { id: 'activity', route: ROUTES.dashboardActivity, icon: CalendarClock, sort: 50 },
+  overview: { id: 'overview', segment: 'overview', icon: Grid2X2, sort: 10 },
+  settings: { id: 'settings', segment: 'settings', icon: Settings2, sort: 20 },
+  operators: { id: 'operators', segment: 'operators', icon: UsersRound, sort: 30 },
+  inventory: { id: 'inventory', segment: 'inventory', icon: Boxes, sort: 40 },
+  activity: { id: 'activity', segment: 'activity', icon: CalendarClock, sort: 50 },
 } as const;
 
 export const dashboardNavigation = {
@@ -44,6 +45,29 @@ export type SettingsPageId = keyof typeof settingsNavigation.pages;
 export type SettingsPageRoute =
   (typeof settingsNavigation.pages)[SettingsPageId]['route'];
 export type NavigationScope = 'dashboard' | 'settings';
+
+export function dashboardPageHref(
+  pageId: DashboardPageId,
+  gameAccountId: string,
+): Href {
+  switch (pageId) {
+    case 'overview':
+      return { pathname: '/dashboard/[gameAccountId]/overview', params: { gameAccountId } };
+    case 'settings':
+      return { pathname: '/dashboard/[gameAccountId]/settings', params: { gameAccountId } };
+    case 'operators':
+      return { pathname: '/dashboard/[gameAccountId]/operators', params: { gameAccountId } };
+    case 'inventory':
+      return { pathname: '/dashboard/[gameAccountId]/inventory', params: { gameAccountId } };
+    case 'activity':
+      return { pathname: '/dashboard/[gameAccountId]/activity', params: { gameAccountId } };
+  }
+}
+
+export function getDashboardPageId(pathname: string): DashboardPageId | null {
+  const segment = pathname.split('/').filter(Boolean).at(-1);
+  return Object.values(dashboardPages).find((page) => page.segment === segment)?.id ?? null;
+}
 
 export function getNavigationScope(pathname: string): NavigationScope {
   return pathname === ROUTES.settings || pathname.startsWith(`${ROUTES.settings}/`)

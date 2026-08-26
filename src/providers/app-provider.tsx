@@ -38,6 +38,14 @@ const queryClient = new QueryClient({
   },
 });
 
+const appNavigationTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: 'transparent',
+  },
+};
+
 export function AppProvider({ children }: PropsWithChildren) {
   const [loaded, error] = useFonts({
     Oxanium_400Regular,
@@ -68,7 +76,7 @@ export function AppProvider({ children }: PropsWithChildren) {
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <ThemeProvider value={DarkTheme}>
+            <ThemeProvider value={appNavigationTheme}>
               <StatusBar style="light" />
               {children}
             </ThemeProvider>

@@ -2,20 +2,20 @@ import {
   DashboardPageFrame,
   EMPTY_INVENTORY,
   InventoryView,
+  useDashboardRoute,
+  useGameDetailQuery,
   useItemTable,
-  useSelectedGameDetailQuery,
 } from '@/features/dashboard';
-import { useAppStore } from '@/store';
 
 export default function DashboardInventoryRoute() {
-  const selectedGameAccountId = useAppStore((state) => state.selectedGameAccountId);
-  const detail = useSelectedGameDetailQuery().data;
+  const { gameAccountId } = useDashboardRoute();
+  const detail = useGameDetailQuery(gameAccountId).data;
   const itemTable = useItemTable();
 
   return (
     <DashboardPageFrame flushBottom>
       <InventoryView
-        accountId={selectedGameAccountId}
+        accountId={gameAccountId}
         inventory={detail?.inventory ?? EMPTY_INVENTORY}
         itemTable={itemTable}
       />

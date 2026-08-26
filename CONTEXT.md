@@ -3,7 +3,7 @@
 This context describes the domain vocabulary for identities, Game Accounts, and application data coordinated through the terminal.
 
 - **Game Account**: a server-owned player account and its current remote data. _Avoid_: Account, profile, user.
-- **Selected Game Account**: the Game Account currently chosen for Dashboard presentation. It exists only when `selectedGameAccountId` exactly matches an item in the current Game Account list. _Avoid_: Active Game Account, active account.
+- **Selected Game Account**: the Game Account identified by the current account-scoped Dashboard URL. It exists only when the route ID exactly matches an item in the current Game Account list. _Avoid_: Active Game Account, active account.
 - **User Account**: the identity a person uses to authenticate with Closure and manage their account security. _Avoid_: Account, profile, Game Account.
 - **User Session**: the authenticated period in which a person can access protected Closure capabilities as a User Account. _Avoid_: Auth state, login state.
 - **Session Principal**: the identity and authorization snapshot carried by a User Session for access decisions during that session. _Avoid_: Auth user, user info, complete User Account.

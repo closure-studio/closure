@@ -5,7 +5,8 @@ import { DashboardPageFrame } from '../components/dashboard-shell';
 import { GameHostingConfigView } from '../components/game-hosting-config-view';
 import type { ArkHostFailure } from '../api';
 import type { ArkHostGameConfigPatch } from '@/schemas/arkhost';
-import { useSelectedGameAccount, useUpdateGameConfig } from '../queries';
+import { useDashboardRoute } from '../dashboard-route';
+import { useUpdateGameConfig } from '../queries';
 
 type ConfigErrorKey =
   | 'hostingConfig.errors.invalidResponse'
@@ -31,14 +32,14 @@ function getConfigErrorKey(error: ArkHostFailure | null): ConfigErrorKey | null 
 
 export function GameHostingConfigScreen() {
   const { t } = useTranslation('dashboard');
-  const selectedGameAccount = useSelectedGameAccount();
+  const { gameAccount } = useDashboardRoute();
   const {
     error,
     mutateAsync,
     reset,
     status,
   } = useUpdateGameConfig();
-  const account = selectedGameAccount?.account ?? null;
+  const account = gameAccount?.account ?? null;
 
   useEffect(() => {
     reset();
@@ -49,16 +50,16 @@ export function GameHostingConfigScreen() {
     return mutateAsync({ account, patch }).then(() => undefined);
   }, [account, mutateAsync]);
 
-  if (!selectedGameAccount) return null;
+  if (!gameAccount) return null;
 
   const errorKey = getConfigErrorKey(error ?? null);
 
   return (
     <DashboardPageFrame scroll>
       <GameHostingConfigView
-        key={selectedGameAccount.account}
-        account={selectedGameAccount.account}
-        config={selectedGameAccount.config}
+        key={gameAccount.account}
+        account={gameAccount.account}
+        config={gameAccount.config}
         isSubmitting={status === 'pending'}
         onSubmit={handleSubmit}
         showSuccess={status === 'success'}

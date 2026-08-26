@@ -5,7 +5,7 @@ import type { UserSession } from '@/schemas/auth';
 
 type PostLoginDestination = Extract<Href, string>;
 
-const DEFAULT_POST_LOGIN_DESTINATION = ROUTES.dashboardOverview satisfies PostLoginDestination;
+const DEFAULT_POST_LOGIN_DESTINATION = ROUTES.dashboard satisfies PostLoginDestination;
 
 function isPostLoginDestination(pathname: string): pathname is PostLoginDestination {
   if (!pathname.startsWith('/') || pathname.startsWith('//')) return false;
