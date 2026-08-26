@@ -19,15 +19,14 @@ export {
 } from './inventory/components/inventory-view';
 export { OperatorRosterView } from './operator-roster/components/operator-roster-view';
 export {
-  selectGameAccountById,
+  findGameAccountById,
   useAdjacentGameAccountPrefetch,
   useArkHostSync,
+  useCharactersQuery,
+  useGameDetailQuery,
   useGameAccountsQuery,
+  useGameLogsQuery,
   useUpdateGameConfig,
-  useSelectedCharactersQuery,
-  useSelectedGameAccount,
-  useSelectedGameDetailQuery,
-  useSelectedGameLogsQuery,
   useSessionQueryCacheReset,
 } from './queries';
 export type { UpdateGameConfigInput } from './queries';
@@ -38,3 +37,4 @@ export {
 } from './resources';
 export { selectBackdropTint } from './selectors';
 export { GameHostingConfigScreen } from './screens/game-hosting-config-screen';
+export { DashboardRouteProvider, useDashboardRoute } from './dashboard-route';

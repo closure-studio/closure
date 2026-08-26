@@ -1,7 +1,12 @@
 import { Redirect } from 'expo-router';
 
-import { dashboardNavigation } from '@/features/navigation';
+import { useDashboardRoute } from '@/features/dashboard';
+import { dashboardPageHref } from '@/features/navigation';
 
 export default function DashboardIndexRoute() {
-  return <Redirect href={dashboardNavigation.defaultPage.route} />;
+  const { gameAccounts } = useDashboardRoute();
+  const firstGameAccount = gameAccounts[0];
+
+  if (!firstGameAccount) return null;
+  return <Redirect href={dashboardPageHref('overview', firstGameAccount.account)} />;
 }

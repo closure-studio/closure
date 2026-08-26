@@ -2,26 +2,26 @@ import {
   DashboardPageFrame,
   GameAccountOverviewView,
   getStageDisplayParts,
-  useSelectedGameAccount,
-  useSelectedGameDetailQuery,
-  useSelectedGameLogsQuery,
+  useDashboardRoute,
+  useGameDetailQuery,
+  useGameLogsQuery,
   useStageTable,
 } from '@/features/dashboard';
 
 export default function DashboardOverviewRoute() {
-  const selectedGameAccount = useSelectedGameAccount();
-  const detailQuery = useSelectedGameDetailQuery();
-  const logsQuery = useSelectedGameLogsQuery();
+  const { gameAccount, gameAccountId } = useDashboardRoute();
+  const detailQuery = useGameDetailQuery(gameAccountId);
+  const logsQuery = useGameLogsQuery(gameAccountId);
   const stageTable = useStageTable();
 
-  if (!selectedGameAccount) return null;
-  const stageDisplay = getStageDisplayParts(stageTable, selectedGameAccount.config.map_id, '—');
+  if (!gameAccount) return null;
+  const stageDisplay = getStageDisplayParts(stageTable, gameAccount.config.map_id, '—');
 
   return (
     <DashboardPageFrame scroll>
       <GameAccountOverviewView
         detail={detailQuery.data ?? null}
-        gameAccount={selectedGameAccount}
+        gameAccount={gameAccount}
         logs={logsQuery.data?.logs ?? []}
         stageSubtitle={stageDisplay.subtitle}
         stageTitle={stageDisplay.title}

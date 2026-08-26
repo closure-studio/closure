@@ -7,9 +7,14 @@ import {
 } from '@/schemas/arkhost';
 
 export const gameAccountColorSchema = v.picklist(['primary', 'warning', 'muted']);
+export const gameAccountIdSchema = v.pipe(v.string(), v.minLength(1));
+
+export const gameAccountRouteParamsSchema = v.object({
+  gameAccountId: gameAccountIdSchema,
+});
 
 export const gameAccountSchema = v.object({
-  account: v.pipe(v.string(), v.minLength(1)),
+  account: gameAccountIdSchema,
   ap: v.pipe(v.number(), v.integer(), v.minValue(0)),
   avatar: arkHostAvatarSchema,
   captchaInfo: arkHostCaptchaInfoSchema,

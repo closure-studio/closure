@@ -60,12 +60,15 @@ type MutationInput = {
   patch: ArkHostGameConfigPatch;
 };
 
-let mockSelectedGameAccount = firstGameAccount;
+let mockGameAccount = firstGameAccount;
 const mockResetMutation = jest.fn();
 const mockMutateAsync = jest.fn((_input: MutationInput) => Promise.resolve(undefined));
 
+jest.mock('../dashboard-route', () => ({
+  useDashboardRoute: () => ({ gameAccount: mockGameAccount }),
+}));
+
 jest.mock('../queries', () => ({
-  useSelectedGameAccount: () => mockSelectedGameAccount,
   useUpdateGameConfig: () => ({
     error: null,
     mutateAsync: mockMutateAsync,
@@ -93,7 +96,7 @@ function renderScreen() {
 
 describe('GameHostingConfigScreen', () => {
   beforeEach(() => {
-    mockSelectedGameAccount = firstGameAccount;
+    mockGameAccount = firstGameAccount;
     mockResetMutation.mockClear();
     mockMutateAsync.mockClear();
   });
@@ -116,7 +119,7 @@ describe('GameHostingConfigScreen', () => {
     const screen = await renderScreen();
     expect(mockResetMutation).toHaveBeenCalled();
 
-    mockSelectedGameAccount = secondGameAccount;
+    mockGameAccount = secondGameAccount;
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: { gcTime: 0, retry: false },

@@ -11,25 +11,21 @@ import { persistedStoreStateSchema } from "@/schemas/local-state";
 import type { PersistedStoreState } from "@/schemas/local-state";
 
 export type AppStore = PersistedStoreState & {
-  selectedGameAccountId: string | null;
   // auth
   setSession: (session: UserSession) => void;
   logout: () => void;
   // api node
   selectApiNode: (apiNodeId: unknown) => void;
-  // game account
-  selectGameAccount: (gameAccountId: string | null) => void;
 };
 
 export const APP_STORE_STORAGE_KEY = "closure.app-store";
 
 const APP_STORE_VERSION = 1;
 
-function initialState(): PersistedStoreState & { selectedGameAccountId: string | null } {
+function initialState(): PersistedStoreState {
   return {
     auth: { session: null },
     selectedApiNodeId: "domestic",
-    selectedGameAccountId: null,
   };
 }
 
@@ -84,28 +80,15 @@ export function createAppStore(options: AppStoreOptions = {}) {
       (set) => ({
         ...initialState(),
         logout: () => {
-          set({ auth: { session: null }, selectedGameAccountId: null });
+          set({ auth: { session: null } });
         },
         selectApiNode: (apiNodeId) => {
           const parsedApiNodeId = v.safeParse(apiNodeIdSchema, apiNodeId);
           if (!parsedApiNodeId.success) return;
           set({ selectedApiNodeId: parsedApiNodeId.output });
         },
-        selectGameAccount: (gameAccountId) => {
-          set({ selectedGameAccountId: gameAccountId });
-        },
         setSession: (session) => {
-          set((state) => {
-            const ownerChanged =
-              state.auth.session !== null &&
-              state.auth.session.principal.id !== session.principal.id;
-            return {
-              auth: { session },
-              selectedGameAccountId: ownerChanged
-                ? null
-                : state.selectedGameAccountId,
-            };
-          });
+          set({ auth: { session } });
         },
       }),
       {

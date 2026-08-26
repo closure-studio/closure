@@ -5,11 +5,13 @@ import {
   getCharacterDisplayName,
   OperatorRosterView,
   useCharacterTable,
-  useSelectedCharactersQuery,
+  useDashboardRoute,
+  useCharactersQuery,
 } from '@/features/dashboard';
 
 export default function DashboardOperatorsRoute() {
-  const characters = useSelectedCharactersQuery().data;
+  const { gameAccountId } = useDashboardRoute();
+  const characters = useCharactersQuery(gameAccountId).data;
   const characterTable = useCharacterTable();
 
   const operators = useMemo(

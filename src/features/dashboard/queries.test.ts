@@ -6,7 +6,7 @@ import {
   charactersQueryOptions,
   gameDetailQueryOptions,
   logsQueryOptions,
-  selectGameAccountById,
+  findGameAccountById,
 } from './queries';
 
 const baseAccount: GameAccount = v.parse(gameAccountSchema, {
@@ -84,18 +84,18 @@ describe('account query option factories', () => {
   });
 });
 
-describe('selectGameAccountById', () => {
-  it('returns null without an active selection', () => {
-    expect(selectGameAccountById([accountA, accountB], null)).toBeNull();
-    expect(selectGameAccountById(undefined, null)).toBeNull();
+describe('findGameAccountById', () => {
+  it('returns null without an account id', () => {
+    expect(findGameAccountById([accountA, accountB], null)).toBeNull();
+    expect(findGameAccountById(undefined, null)).toBeNull();
   });
 
-  it('returns null when the selected id is not in the account list', () => {
-    expect(selectGameAccountById([accountA], 'B')).toBeNull();
-    expect(selectGameAccountById(undefined, 'B')).toBeNull();
+  it('returns null when the id is not in the account list', () => {
+    expect(findGameAccountById([accountA], 'B')).toBeNull();
+    expect(findGameAccountById(undefined, 'B')).toBeNull();
   });
 
   it('returns the account matching the selected id', () => {
-    expect(selectGameAccountById([accountA, accountB], 'B')).toBe(accountB);
+    expect(findGameAccountById([accountA, accountB], 'B')).toBe(accountB);
   });
 });

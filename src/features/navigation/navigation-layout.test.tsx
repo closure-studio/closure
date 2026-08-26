@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react-native';
+import { fireEvent, render } from '@testing-library/react-native';
 import type { ReactElement } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider, YStack } from 'tamagui';
@@ -9,10 +9,13 @@ import {
   NavigationLayout,
 } from './screens/navigation-layout';
 
-const mockUsePathname = jest.fn(() => '/dashboard/overview');
+const mockUsePathname = jest.fn(() => '/dashboard/G1/overview');
 const mockRouterReplace = jest.fn();
-const mockReturnToDashboard = jest.fn();
-let mockSelectedGameAccount: { account: string; nickname: string; avatar: { id: string; type: string } } | null = null;
+const mockUseNavigationBackHandler = jest.fn<
+  void,
+  [pathname: string, onReturnToDashboard: () => void]
+>();
+let mockGameAccount: { account: string; nickname: string; avatar: { id: string; type: string } } | null = null;
 const mockGetGameAvatarImageUrl = jest.fn<string | null, [unknown]>();
 let mockLayoutSize: 'small' | 'large' = 'small';
 const mockSurfaceRecords: {
@@ -51,16 +54,15 @@ jest.mock('@/providers/layout-size-provider', () => ({
 }));
 
 jest.mock('@/features/dashboard', () => ({
-  useSelectedGameAccount: () => mockSelectedGameAccount,
+  useDashboardRoute: () => ({ gameAccount: mockGameAccount }),
   getGameAvatarImageUrl: (avatar: unknown) => mockGetGameAvatarImageUrl(avatar),
 }));
 
 jest.mock('./back-navigation', () => ({
-  useNavigationBackHandler: jest.fn(),
-  useSettingsBackNavigation: () => ({
-    enterSettings: jest.fn(),
-    returnToDashboard: mockReturnToDashboard,
-  }),
+  useNavigationBackHandler: (
+    pathname: string,
+    onReturnToDashboard: () => void,
+  ) => mockUseNavigationBackHandler(pathname, onReturnToDashboard),
 }));
 
 jest.mock('@/components', () => {
@@ -97,10 +99,10 @@ function NavigationTestTree({ scope }: { scope: 'dashboard' | 'settings' }) {
 
 describe('Small Screen NavigationLayout header', () => {
   beforeEach(() => {
-    mockUsePathname.mockReturnValue('/dashboard/overview');
+    mockUsePathname.mockReturnValue('/dashboard/G1/overview');
     mockRouterReplace.mockClear();
-    mockReturnToDashboard.mockClear();
-    mockSelectedGameAccount = null;
+    mockUseNavigationBackHandler.mockClear();
+    mockGameAccount = null;
     mockGetGameAvatarImageUrl.mockReturnValue(null);
     mockLayoutSize = 'small';
     mockSurfaceRecords.length = 0;
@@ -126,7 +128,7 @@ describe('Small Screen NavigationLayout header', () => {
   });
 
   it('shows the selected Game Account nickname as the dashboard header title', async () => {
-    mockSelectedGameAccount = {
+    mockGameAccount = {
       account: 'G1',
       nickname: '欧皇大佬',
       avatar: { id: 'avatar_def_10', type: 'DEFAULT' },
@@ -137,6 +139,14 @@ describe('Small Screen NavigationLayout header', () => {
 
     expect(screen.getByText('欧皇大佬')).toBeTruthy();
     expect(mockGetGameAvatarImageUrl).toHaveBeenCalledWith({ id: 'avatar_def_10', type: 'DEFAULT' });
+  });
+
+  it('replaces Dashboard with the default Settings page', async () => {
+    const screen = await render(<NavigationTestTree scope="dashboard" />);
+
+    await fireEvent.press(screen.getByLabelText('navigation:scopeSwitcher.openSettings'));
+
+    expect(mockRouterReplace).toHaveBeenCalledWith('/settings/network');
   });
 
   it('keeps the settings page label as the header title on Large Screen Settings', async () => {
@@ -153,8 +163,8 @@ describe('NavigationLayout settings swipe surface', () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue('/settings/network');
     mockRouterReplace.mockClear();
-    mockReturnToDashboard.mockClear();
-    mockSelectedGameAccount = null;
+    mockUseNavigationBackHandler.mockClear();
+    mockGameAccount = null;
     mockGetGameAvatarImageUrl.mockReturnValue(null);
     mockLayoutSize = 'small';
     mockSurfaceRecords.length = 0;
@@ -170,7 +180,7 @@ describe('NavigationLayout settings swipe surface', () => {
   });
 
   it('keeps the same surface mounted but disabled on Dashboard', async () => {
-    mockUsePathname.mockReturnValue('/dashboard/overview');
+    mockUsePathname.mockReturnValue('/dashboard/G1/overview');
     const screen = await render(<NavigationTestTree scope="dashboard" />);
 
     expect(mockSurfaceRecords).toHaveLength(1);
@@ -193,7 +203,6 @@ describe('NavigationLayout settings swipe surface', () => {
     mockSurfaceRecords[0]?.onSwipe('left');
 
     expect(mockRouterReplace).toHaveBeenCalledWith('/settings/account');
-    expect(mockReturnToDashboard).not.toHaveBeenCalled();
   });
 
   it('returns to Dashboard for a right swipe from the first Settings Page', async () => {
@@ -201,8 +210,16 @@ describe('NavigationLayout settings swipe surface', () => {
 
     mockSurfaceRecords[0]?.onSwipe('right');
 
-    expect(mockReturnToDashboard).toHaveBeenCalledTimes(1);
-    expect(mockRouterReplace).not.toHaveBeenCalled();
+    expect(mockRouterReplace).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('replaces Settings with Dashboard for hardware back navigation', async () => {
+    await render(<NavigationTestTree scope="settings" />);
+
+    const onReturnToDashboard = mockUseNavigationBackHandler.mock.calls.at(-1)?.[1];
+    onReturnToDashboard?.();
+
+    expect(mockRouterReplace).toHaveBeenCalledWith('/dashboard');
   });
 
   it('does not navigate for a left swipe past the final Settings Page', async () => {
@@ -212,6 +229,5 @@ describe('NavigationLayout settings swipe surface', () => {
     mockSurfaceRecords[0]?.onSwipe('left');
 
     expect(mockRouterReplace).not.toHaveBeenCalled();
-    expect(mockReturnToDashboard).not.toHaveBeenCalled();
   });
 });

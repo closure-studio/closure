@@ -16,7 +16,7 @@ const mockSessionShell = jest.fn(({ children }: PropsWithChildren) => children);
 const mockNavigationLayout = jest.fn(({ children }: PropsWithChildren) => children);
 const mockUseSessionQueryCacheReset = jest.fn();
 const mockUseArkHostSync = jest.fn();
-const mockUsePathname = jest.fn(() => '/dashboard/overview');
+const mockUsePathname = jest.fn(() => '/dashboard/G1/overview');
 const mockRouterReplace = jest.fn();
 const mockUseRouter = jest.fn(() => ({ replace: mockRouterReplace }));
 const mockResetBackdropTint = jest.fn();
@@ -38,6 +38,7 @@ jest.mock('react-native-safe-area-context', () => ({
 }));
 
 jest.mock('@/features/dashboard', () => ({
+  DashboardRouteProvider: mockAppProvider,
   useArkHostSync: mockUseArkHostSync,
   useSessionQueryCacheReset: mockUseSessionQueryCacheReset,
 }));
@@ -96,7 +97,7 @@ describe('route layouts', () => {
     mockUseLayoutSize.mockReset();
     mockUseLayoutSize.mockReturnValue('small');
     mockUsePathname.mockReset();
-    mockUsePathname.mockReturnValue('/dashboard/overview');
+    mockUsePathname.mockReturnValue('/dashboard/G1/overview');
     mockSession = { principal: 'doctor' };
   });
 

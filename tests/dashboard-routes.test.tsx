@@ -1,26 +1,21 @@
 import { render } from '@testing-library/react-native';
 import type { PropsWithChildren } from 'react';
 
-import DashboardActivityRoute from '../src/app/(app)/dashboard/activity';
-import DashboardInventoryRoute from '../src/app/(app)/dashboard/inventory';
-import DashboardOperatorsRoute from '../src/app/(app)/dashboard/operators';
-import DashboardOverviewRoute from '../src/app/(app)/dashboard/overview';
-import DashboardSettingsRoute from '../src/app/(app)/dashboard/settings';
+import DashboardActivityRoute from '../src/app/(app)/dashboard/[gameAccountId]/activity';
+import DashboardInventoryRoute from '../src/app/(app)/dashboard/[gameAccountId]/inventory';
+import DashboardOperatorsRoute from '../src/app/(app)/dashboard/[gameAccountId]/operators';
+import DashboardOverviewRoute from '../src/app/(app)/dashboard/[gameAccountId]/overview';
+import DashboardSettingsRoute from '../src/app/(app)/dashboard/[gameAccountId]/settings';
 import type { ArkHostGameLogEntry } from '@/schemas/arkhost';
 
-const mockUseSelectedGameLogsQuery = jest.fn((): { data: { hasMore: boolean; logs: ArkHostGameLogEntry[] } } => ({
+const mockUseGameLogsQuery = jest.fn((): { data: { hasMore: boolean; logs: ArkHostGameLogEntry[] } } => ({
   data: { hasMore: false, logs: [] },
 }));
 
-const mockSelectedGameAccount = {
+const mockGameAccount = {
   account: 'G1',
   config: { map_id: 'main_01-07' },
 };
-
-jest.mock('@/store', () => ({
-  useAppStore: (selector: (state: { selectedGameAccountId: string | null }) => unknown) =>
-    selector({ selectedGameAccountId: 'G1' }),
-}));
 
 jest.mock('@/features/dashboard', () => {
   const { Text, View } = jest.requireActual<typeof import('react-native')>('react-native');
@@ -40,10 +35,10 @@ jest.mock('@/features/dashboard', () => {
     getStageDisplayParts: (_table: object, stageId: string) => ({ title: stageId, subtitle: undefined }),
     InventoryView: () => <Text testID="inventory-screen" />,
     OperatorRosterView: () => <Text testID="operators-screen" />,
-    useSelectedGameAccount: () => mockSelectedGameAccount,
-    useSelectedGameDetailQuery: () => ({ data: { inventory: {} } }),
-    useSelectedCharactersQuery: () => ({ data: { chars: [], total: 0 } }),
-    useSelectedGameLogsQuery: () => mockUseSelectedGameLogsQuery(),
+    useDashboardRoute: () => ({ gameAccount: mockGameAccount, gameAccountId: 'G1' }),
+    useGameDetailQuery: () => ({ data: { inventory: {} } }),
+    useCharactersQuery: () => ({ data: { chars: [], total: 0 } }),
+    useGameLogsQuery: () => mockUseGameLogsQuery(),
     useCharacterTable: () => ({}),
     useItemTable: () => ({}),
     useStageTable: () => ({}),
@@ -51,8 +46,8 @@ jest.mock('@/features/dashboard', () => {
 });
 
 beforeEach(() => {
-  mockUseSelectedGameLogsQuery.mockReset();
-  mockUseSelectedGameLogsQuery.mockReturnValue({ data: { hasMore: false, logs: [] } });
+  mockUseGameLogsQuery.mockReset();
+  mockUseGameLogsQuery.mockReturnValue({ data: { hasMore: false, logs: [] } });
 });
 
 describe('dashboard routes', () => {
@@ -78,11 +73,11 @@ describe('dashboard routes', () => {
     const screen = await render(<DashboardActivityRoute />);
 
     expect(screen.getByTestId('activity-screen').props.children).toBe(5);
-    expect(mockUseSelectedGameLogsQuery).not.toHaveBeenCalled();
+    expect(mockUseGameLogsQuery).not.toHaveBeenCalled();
   });
 
   it('passes selected game logs into the overview summary grid', async () => {
-    mockUseSelectedGameLogsQuery.mockReturnValue({
+    mockUseGameLogsQuery.mockReturnValue({
       data: {
         hasMore: false,
         logs: [{ content: 'log entry', id: 1, logLevel: 1, name: 'G1', ts: 1 }],

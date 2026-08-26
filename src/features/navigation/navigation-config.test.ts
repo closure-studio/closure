@@ -1,11 +1,13 @@
 import {
+  dashboardPageHref,
   dashboardNavigation,
+  getDashboardPageId,
   getNavigationScope,
   settingsNavigation,
 } from './navigation-config';
 
 describe('navigation config', () => {
-  it.each(['/', '/dashboard', '/dashboard/overview', '/dashboard/settings', '/dashboard/operators'] as const)(
+  it.each(['/', '/dashboard', '/dashboard/G1/overview', '/dashboard/G1/settings', '/dashboard/G1/operators'] as const)(
     'derives dashboard scope for %s',
     (pathname) => {
       expect(getNavigationScope(pathname)).toBe('dashboard');
@@ -22,7 +24,7 @@ describe('navigation config', () => {
   it('defines the canonical scope destinations', () => {
     expect(dashboardNavigation.defaultPage).toMatchObject({
       id: 'overview',
-      route: '/dashboard/overview',
+      segment: 'overview',
     });
     expect(settingsNavigation.defaultPage).toMatchObject({
       id: 'network',
@@ -36,17 +38,26 @@ describe('navigation config', () => {
     const dashboardPages = Object.values(dashboardNavigation.pages).sort((left, right) => left.sort - right.sort);
     const settingsPages = Object.values(settingsNavigation.pages).sort((left, right) => left.sort - right.sort);
 
-    expect(dashboardPages.map(({ id, route }) => ({ id, route }))).toEqual([
-      { id: 'overview', route: '/dashboard/overview' },
-      { id: 'settings', route: '/dashboard/settings' },
-      { id: 'operators', route: '/dashboard/operators' },
-      { id: 'inventory', route: '/dashboard/inventory' },
-      { id: 'activity', route: '/dashboard/activity' },
+    expect(dashboardPages.map(({ id, segment }) => ({ id, segment }))).toEqual([
+      { id: 'overview', segment: 'overview' },
+      { id: 'settings', segment: 'settings' },
+      { id: 'operators', segment: 'operators' },
+      { id: 'inventory', segment: 'inventory' },
+      { id: 'activity', segment: 'activity' },
     ]);
     expect(settingsPages.map(({ id, route }) => ({ id, route }))).toEqual([
       { id: 'network', route: '/settings/network' },
       { id: 'account', route: '/settings/account' },
       { id: 'contributors', route: '/settings/contributors' },
     ]);
+  });
+
+  it('creates account-scoped hrefs and derives the active page from the URL', () => {
+    expect(dashboardPageHref('overview', 'G1')).toEqual({
+      pathname: '/dashboard/[gameAccountId]/overview',
+      params: { gameAccountId: 'G1' },
+    });
+    expect(getDashboardPageId('/dashboard/G1/inventory')).toBe('inventory');
+    expect(getDashboardPageId('/dashboard/G1/unknown')).toBeNull();
   });
 });

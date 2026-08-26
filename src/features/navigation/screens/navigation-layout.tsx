@@ -6,9 +6,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { XStack, YStack } from 'tamagui';
 
 import { HorizontalSwipeSurface } from '@/components';
+import { ROUTES } from '@/constants/routes';
 import {
   getGameAvatarImageUrl,
-  useSelectedGameAccount,
+  useDashboardRoute,
 } from '@/features/dashboard';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 import type { HorizontalSwipeDirection } from '@/utils/horizontal-swipe';
@@ -20,15 +21,14 @@ import {
 } from '../components/settings-swipe-pager';
 import {
   dashboardNavigation,
+  dashboardPageHref,
+  getDashboardPageId,
   getNavigationScope,
   settingsNavigation,
   sortedDashboardPages as dashboardPages,
   sortedSettingsPages as settingsPages,
 } from '../navigation-config';
-import {
-  useNavigationBackHandler,
-  useSettingsBackNavigation,
-} from '../back-navigation';
+import { useNavigationBackHandler } from '../back-navigation';
 
 type NavigationLayoutProps = PropsWithChildren<{
   onLogout: () => void;
@@ -41,42 +41,47 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
   const pathname = usePathname();
   const router = useRouter();
   const scope = getNavigationScope(pathname);
-  const matchedDashboardPage = dashboardPages.find((page) => page.route === pathname);
+  const matchedDashboardPageId = getDashboardPageId(pathname);
+  const matchedDashboardPage = matchedDashboardPageId
+    ? dashboardNavigation.pages[matchedDashboardPageId]
+    : undefined;
   const matchedSettingsPage = settingsPages.find((page) => page.route === pathname);
   const activeDashboardPage = matchedDashboardPage ?? dashboardNavigation.defaultPage;
   const activeSettingsPage = matchedSettingsPage ?? settingsNavigation.defaultPage;
-  const scopePages = scope === 'dashboard' ? dashboardPages : settingsPages;
   const activePage = scope === 'dashboard' ? activeDashboardPage : activeSettingsPage;
-  const selectedGameAccount = useSelectedGameAccount();
+  const { gameAccount } = useDashboardRoute();
   const headerTitle = scope === 'dashboard'
-    ? (selectedGameAccount?.nickname ?? '')
+    ? (gameAccount?.nickname ?? '')
     : t(`pages.${activeSettingsPage.id}.label`);
   const isSettingsSwipeEnabled = scope === 'settings' && layoutSize === 'small';
-  const { enterSettings, returnToDashboard } = useSettingsBackNavigation({
-    pathname,
-    router,
-    settingsRoute: activeSettingsPage.route,
-  });
 
   const handleExitSettings = useCallback(() => {
-    returnToDashboard();
-  }, [returnToDashboard]);
+    router.replace(ROUTES.dashboard);
+  }, [router]);
 
   const handleScopePress = useCallback(() => {
     if (scope === 'dashboard') {
-      enterSettings(settingsNavigation.defaultPage.route);
+      router.replace(settingsNavigation.defaultPage.route);
       return;
     }
 
     handleExitSettings();
-  }, [enterSettings, handleExitSettings, scope]);
+  }, [handleExitSettings, router, scope]);
 
   useNavigationBackHandler(pathname, handleExitSettings);
 
   const handleSelectSidebarPage = useCallback((pageId: string) => {
-    const page = scopePages.find((candidate) => candidate.id === pageId);
+    if (scope === 'dashboard') {
+      const page = dashboardPages.find((candidate) => candidate.id === pageId);
+      if (!page || !gameAccount) return;
+      if (page.id === matchedDashboardPageId) return;
+      router.replace(dashboardPageHref(page.id, gameAccount.account));
+      return;
+    }
+
+    const page = settingsPages.find((candidate) => candidate.id === pageId);
     if (page && page.route !== pathname) router.replace(page.route);
-  }, [pathname, router, scopePages]);
+  }, [gameAccount, matchedDashboardPageId, pathname, router, scope]);
 
   const handleSettingsSwipe = useCallback((direction: HorizontalSwipeDirection) => {
     const action = resolveSettingsSwipeAction({
@@ -146,7 +151,7 @@ export function NavigationLayout({ children, onLogout }: NavigationLayoutProps) 
                     <NavigationHeader
                       avatarLabel={t('smallScreen.avatarLabel')}
                       avatarUrl={scope === 'dashboard'
-                        ? getGameAvatarImageUrl(selectedGameAccount?.avatar)
+                        ? getGameAvatarImageUrl(gameAccount?.avatar)
                         : null}
                       isSettingsActive={scope === 'settings'}
                       onSettingsPress={handleScopePress}

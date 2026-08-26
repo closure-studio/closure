@@ -21,7 +21,6 @@ function createWrapper() {
 beforeEach(async () => {
   await act(() => {
     appStore.getState().logout();
-    appStore.getState().selectGameAccount(null);
   });
 });
 

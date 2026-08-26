@@ -201,44 +201,12 @@ export function useUpdateGameConfig() {
   });
 }
 
-export function selectGameAccountById(
+export function findGameAccountById(
   accounts: readonly GameAccount[] | undefined,
   accountId: string | null,
 ): GameAccount | null {
   if (accountId === null) return null;
   return accounts?.find((account) => account.account === accountId) ?? null;
-}
-
-/**
- * Single React composition entry for the selected Game Account object.
- * Derives the object from the Query list and the Store selection; never
- * stores a second copy of server data.
- */
-export function useSelectedGameAccount(): GameAccount | null {
-  const selectedGameAccountId = useAppStore((state) => state.selectedGameAccountId);
-  const gameAccounts = useGameAccountsQuery().data;
-  return selectGameAccountById(gameAccounts, selectedGameAccountId);
-}
-
-/**
- * Selected server resource hooks read the current account ID directly from
- * the Store and return the full Query result. They intentionally do not go
- * through `useSelectedGameAccount`, so querying detail/characters/logs does
- * not subscribe to the Game Account list.
- */
-export function useSelectedGameDetailQuery() {
-  const accountId = useAppStore((state) => state.selectedGameAccountId);
-  return useGameDetailQuery(accountId);
-}
-
-export function useSelectedCharactersQuery() {
-  const accountId = useAppStore((state) => state.selectedGameAccountId);
-  return useCharactersQuery(accountId);
-}
-
-export function useSelectedGameLogsQuery() {
-  const accountId = useAppStore((state) => state.selectedGameAccountId);
-  return useGameLogsQuery(accountId);
 }
 
 /**
@@ -248,13 +216,13 @@ export function useSelectedGameLogsQuery() {
  */
 export function useAdjacentGameAccountPrefetch(
   gameAccounts: readonly GameAccount[] | undefined,
-  selectedGameAccountId: string | null,
+  gameAccountId: string | null,
 ) {
   const queryClient = useQueryClient();
   useEffect(() => {
-    if (!gameAccounts || gameAccounts.length < 2 || selectedGameAccountId === null) return;
+    if (!gameAccounts || gameAccounts.length < 2 || gameAccountId === null) return;
     const activeIndex = gameAccounts.findIndex(
-      (account) => account.account === selectedGameAccountId,
+      (account) => account.account === gameAccountId,
     );
     if (activeIndex < 0) return;
     const adjacentAccounts = [
@@ -266,13 +234,12 @@ export function useAdjacentGameAccountPrefetch(
       void queryClient.prefetchQuery(charactersQueryOptions(account.account));
       void queryClient.prefetchQuery(logsQueryOptions(account.account));
     }
-  }, [gameAccounts, queryClient, selectedGameAccountId]);
+  }, [gameAccounts, gameAccountId, queryClient]);
 }
 
 export function useArkHostSync() {
   const session = useAppStore((state) => state.auth.session);
   const queryClient = useQueryClient();
-  useGameAccountsQuery();
   useEffect(() => {
     if (!session) return;
     const userId = session.principal.id;

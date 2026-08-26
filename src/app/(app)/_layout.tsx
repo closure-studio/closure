@@ -5,7 +5,7 @@ import {
   useSessionBackdrop,
 } from '@/features/session';
 import { NavigationLayout } from '@/features/navigation';
-import { useArkHostSync } from '@/features/dashboard';
+import { DashboardRouteProvider, useArkHostSync } from '@/features/dashboard';
 import { useAppStore } from '@/store';
 
 export default function AppLayout() {
@@ -27,15 +27,17 @@ export default function AppLayout() {
   };
 
   return (
-    <NavigationLayout onLogout={handleLogout}>
-      <AppStack
-        screenOptions={{
-          animation: 'none',
-          contentStyle: { backgroundColor: 'transparent' },
-          gestureEnabled: false,
-          headerShown: false,
-        }}
-      />
-    </NavigationLayout>
+    <DashboardRouteProvider>
+      <NavigationLayout onLogout={handleLogout}>
+        <AppStack
+          screenOptions={{
+            animation: 'none',
+            contentStyle: { backgroundColor: 'transparent' },
+            gestureEnabled: false,
+            headerShown: false,
+          }}
+        />
+      </NavigationLayout>
+    </DashboardRouteProvider>
   );
 }
