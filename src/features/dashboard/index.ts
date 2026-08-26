@@ -37,4 +37,9 @@ export {
 } from './resources';
 export { selectBackdropTint } from './selectors';
 export { GameHostingConfigScreen } from './screens/game-hosting-config-screen';
+export {
+  DashboardInventoryContent,
+  DashboardOperatorsContent,
+  DashboardOverviewContent,
+} from './screens/dashboard-account-content';
 export { DashboardRouteProvider, useDashboardRoute } from './dashboard-route';

@@ -1,24 +1,15 @@
 import {
-  DashboardPageFrame,
-  EMPTY_INVENTORY,
-  InventoryView,
-  useDashboardRoute,
-  useGameDetailQuery,
-  useItemTable,
+  DashboardInventoryContent,
 } from '@/features/dashboard';
+import { DashboardAccountPager } from '@/features/navigation';
 
 export default function DashboardInventoryRoute() {
-  const { gameAccountId } = useDashboardRoute();
-  const detail = useGameDetailQuery(gameAccountId).data;
-  const itemTable = useItemTable();
-
   return (
-    <DashboardPageFrame flushBottom>
-      <InventoryView
-        accountId={gameAccountId}
-        inventory={detail?.inventory ?? EMPTY_INVENTORY}
-        itemTable={itemTable}
-      />
-    </DashboardPageFrame>
+    <DashboardAccountPager
+      pageId="inventory"
+      renderAccount={(gameAccount) => (
+        <DashboardInventoryContent gameAccount={gameAccount} />
+      )}
+    />
   );
 }

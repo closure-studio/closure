@@ -28,9 +28,9 @@ export const dashboardNavigation = {
 export const sortedDashboardPages = Object.values(dashboardPages).sort((left, right) => left.sort - right.sort);
 
 const settingsPages = {
-  network: { id: 'network', route: ROUTES.settingsNetwork, icon: Wifi, sort: 10 },
-  account: { id: 'account', route: ROUTES.settingsAccount, icon: ShieldCheck, sort: 20 },
-  contributors: { id: 'contributors', route: ROUTES.settingsContributors, icon: HeartHandshake, sort: 30 },
+  network: { id: 'network', segment: 'network', route: ROUTES.settingsNetwork, icon: Wifi, sort: 10 },
+  account: { id: 'account', segment: 'account', route: ROUTES.settingsAccount, icon: ShieldCheck, sort: 20 },
+  contributors: { id: 'contributors', segment: 'contributors', route: ROUTES.settingsContributors, icon: HeartHandshake, sort: 30 },
 } as const;
 
 export const settingsNavigation = {
@@ -69,8 +69,7 @@ export function getDashboardPageId(pathname: string): DashboardPageId | null {
   return Object.values(dashboardPages).find((page) => page.segment === segment)?.id ?? null;
 }
 
-export function getNavigationScope(pathname: string): NavigationScope {
-  return pathname === ROUTES.settings || pathname.startsWith(`${ROUTES.settings}/`)
-    ? 'settings'
-    : 'dashboard';
+export function getSettingsPageId(pathname: string): SettingsPageId | null {
+  const segment = pathname.split('/').filter(Boolean).at(-1);
+  return Object.values(settingsPages).find((page) => page.segment === segment)?.id ?? null;
 }

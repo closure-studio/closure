@@ -5,11 +5,8 @@ const mockSlot = jest.fn(() => null);
 const mockRedirect = jest.fn(() => null);
 const mockDashboardTabs = jest.fn(({ children }: PropsWithChildren) => children);
 const mockDashboardTabsScreen = jest.fn(() => null);
-const mockDashboardShell = jest.fn(({ children }: PropsWithChildren) => children);
+const mockDashboardFrame = jest.fn(({ children }: PropsWithChildren) => children);
 const mockDashboardSmallScreenTabBar = jest.fn(() => null);
-const mockRouterReplace = jest.fn();
-const mockUseIsFocused = jest.fn(() => true);
-const mockUsePathname = jest.fn(() => '/dashboard/account-1/overview');
 const mockUseLayoutSize = jest.fn(() => 'small' as const);
 const mockSetBackdropTint = jest.fn();
 
@@ -37,9 +34,6 @@ let mockRoute: {
 jest.mock('expo-router', () => ({
   Redirect: mockRedirect,
   Slot: mockSlot,
-  useIsFocused: mockUseIsFocused,
-  usePathname: mockUsePathname,
-  useRouter: () => ({ replace: mockRouterReplace }),
 }));
 
 jest.mock('expo-router/tabs', () => ({
@@ -71,13 +65,12 @@ jest.mock('@/providers/layout-size-provider', () => ({
 }));
 
 jest.mock('@/features/dashboard', () => ({
-  DashboardShell: mockDashboardShell,
   selectBackdropTint: () => '#00ff00',
-  useAdjacentGameAccountPrefetch: () => undefined,
   useDashboardRoute: () => mockRoute,
 }));
 
 jest.mock('@/features/navigation', () => ({
+  DashboardFrame: mockDashboardFrame,
   DashboardSmallScreenTabBar: mockDashboardSmallScreenTabBar,
   dashboardNavigation: {
     defaultPage: { id: 'overview', segment: 'overview' },
@@ -90,7 +83,6 @@ jest.mock('@/features/navigation', () => ({
     },
   },
   dashboardPageHref: mockNavigateToAccount,
-  getDashboardPageId: (pathname: string) => pathname.split('/').at(-1) ?? null,
 }));
 
 jest.mock('@/features/navigation/navigation-config', () => ({
@@ -105,7 +97,6 @@ jest.mock('@/features/navigation/navigation-config', () => ({
     },
   },
   dashboardPageHref: mockNavigateToAccount,
-  getDashboardPageId: (pathname: string) => pathname.split('/').at(-1) ?? null,
 }));
 
 jest.mock('@/features/session', () => ({
@@ -127,13 +118,8 @@ beforeEach(() => {
   mockRedirect.mockClear();
   mockDashboardTabs.mockClear();
   mockDashboardTabsScreen.mockClear();
-  mockDashboardShell.mockClear();
-  mockRouterReplace.mockClear();
+  mockDashboardFrame.mockClear();
   mockSetBackdropTint.mockClear();
-  mockUsePathname.mockReset();
-  mockUsePathname.mockReturnValue('/dashboard/account-1/overview');
-  mockUseIsFocused.mockReset();
-  mockUseIsFocused.mockReturnValue(true);
   mockUseLayoutSize.mockReset();
   mockUseLayoutSize.mockReturnValue('small');
   mockRoute = {
@@ -164,39 +150,17 @@ describe('Dashboard route layouts', () => {
     await render(<DashboardLayout />);
 
     expect(mockSlot).toHaveBeenCalledTimes(1);
-    expect(mockDashboardShell).not.toHaveBeenCalled();
+    expect(mockDashboardFrame).toHaveBeenCalledTimes(1);
   });
 
   it('renders all account-scoped pages in the dynamic tabs layout', async () => {
     await render(<DashboardAccountLayout />);
 
-    expect(mockDashboardShell).toHaveBeenCalledWith(
-      expect.objectContaining({
-        selectedGameAccountId: 'account-1',
-        isContentSwipeEnabled: true,
-      }),
-      undefined,
-    );
     expect(mockDashboardTabs).toHaveBeenCalledWith(expect.objectContaining({
-      screenOptions: expect.objectContaining({ animation: 'none', headerShown: false }),
+      screenOptions: expect.objectContaining({ animation: 'shift', headerShown: false }),
       tabBar: expect.any(Function),
     }), undefined);
     expect(mockDashboardTabsScreen).toHaveBeenCalledTimes(5);
-  });
-
-  it('changes only the account segment when switching accounts', async () => {
-    await render(<DashboardAccountLayout />);
-
-    const shellProps = mockDashboardShell.mock.calls[0]?.[0];
-    if (typeof shellProps !== 'object' || shellProps === null) throw new Error('Expected shell props.');
-    const onSelect = Reflect.get(shellProps, 'onSelectGameAccount');
-    if (typeof onSelect !== 'function') throw new Error('Expected account navigation callback.');
-    Reflect.apply(onSelect, null, ['account-2']);
-
-    expect(mockRouterReplace).toHaveBeenCalledWith({
-      pathname: '/dashboard/[gameAccountId]/overview',
-      params: { gameAccountId: 'account-2' },
-    });
   });
 
   it('redirects stale or foreign account IDs to the dashboard index', async () => {

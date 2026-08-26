@@ -60,13 +60,8 @@ type MutationInput = {
   patch: ArkHostGameConfigPatch;
 };
 
-let mockGameAccount = firstGameAccount;
 const mockResetMutation = jest.fn();
 const mockMutateAsync = jest.fn((_input: MutationInput) => Promise.resolve(undefined));
-
-jest.mock('../dashboard-route', () => ({
-  useDashboardRoute: () => ({ gameAccount: mockGameAccount }),
-}));
 
 jest.mock('../queries', () => ({
   useUpdateGameConfig: () => ({
@@ -77,7 +72,7 @@ jest.mock('../queries', () => ({
   }),
 }));
 
-function renderScreen() {
+function renderScreen(gameAccount: GameAccount = firstGameAccount) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { gcTime: 0, retry: false },
@@ -87,7 +82,7 @@ function renderScreen() {
     <QueryClientProvider client={queryClient}>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <I18nextProvider i18n={i18n}>
-          <GameHostingConfigScreen />
+          <GameHostingConfigScreen gameAccount={gameAccount} />
         </I18nextProvider>
       </TamaguiProvider>
     </QueryClientProvider>,
@@ -96,7 +91,6 @@ function renderScreen() {
 
 describe('GameHostingConfigScreen', () => {
   beforeEach(() => {
-    mockGameAccount = firstGameAccount;
     mockResetMutation.mockClear();
     mockMutateAsync.mockClear();
   });
@@ -119,7 +113,6 @@ describe('GameHostingConfigScreen', () => {
     const screen = await renderScreen();
     expect(mockResetMutation).toHaveBeenCalled();
 
-    mockGameAccount = secondGameAccount;
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: { gcTime: 0, retry: false },
@@ -129,7 +122,7 @@ describe('GameHostingConfigScreen', () => {
       <QueryClientProvider client={queryClient}>
         <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
           <I18nextProvider i18n={i18n}>
-            <GameHostingConfigScreen />
+            <GameHostingConfigScreen gameAccount={secondGameAccount} />
           </I18nextProvider>
         </TamaguiProvider>
       </QueryClientProvider>,

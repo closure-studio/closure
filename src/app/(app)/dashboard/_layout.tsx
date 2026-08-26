@@ -3,6 +3,7 @@ import { Spinner, YStack } from 'tamagui';
 
 import { MonoText } from '@/components';
 import { useDashboardRoute } from '@/features/dashboard';
+import { DashboardFrame } from '@/features/navigation';
 
 function DashboardState({ label }: { label: string }) {
   return (
@@ -16,9 +17,10 @@ function DashboardState({ label }: { label: string }) {
 export default function DashboardLayout() {
   const { gameAccounts, gameAccountsQuery } = useDashboardRoute();
 
-  if (gameAccountsQuery.isPending) return <DashboardState label="LOADING ARKHOST DATA" />;
-  if (gameAccountsQuery.isError) return <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
-  if (gameAccounts.length === 0) return <DashboardState label="NO GAME ACCOUNTS" />;
+  let content = <Slot />;
+  if (gameAccountsQuery.isPending) content = <DashboardState label="LOADING ARKHOST DATA" />;
+  else if (gameAccountsQuery.isError) content = <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
+  else if (gameAccounts.length === 0) content = <DashboardState label="NO GAME ACCOUNTS" />;
 
-  return <Slot />;
+  return <DashboardFrame>{content}</DashboardFrame>;
 }
