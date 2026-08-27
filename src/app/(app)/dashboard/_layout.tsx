@@ -1,22 +1,18 @@
-import { Redirect } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Tabs as DashboardTabs } from 'expo-router/tabs';
 import { useEffect } from 'react';
-import { getTokens, Spinner, YStack } from 'tamagui';
+import { Spinner, YStack } from 'tamagui';
 
 import { MonoText } from '@/components';
 import {
   DashboardRouteProvider,
-  selectBackdropTint,
   useDashboardRoute,
 } from '@/features/dashboard';
 import {
   DashboardFrame,
   DashboardSmallScreenTabBar,
-  dashboardDefaultPage,
   dashboardPagesList,
-  dashboardPageHref,
 } from '@/features/navigation';
-import { useSessionBackdrop } from '@/features/session';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 
 function DashboardState({ label }: { label: string }) {
@@ -29,41 +25,27 @@ function DashboardState({ label }: { label: string }) {
 }
 
 function DashboardContent() {
-  const colors = getTokens().color;
   const layoutSize = useLayoutSize();
-  const { setBackdropTint } = useSessionBackdrop();
+  const router = useRouter();
   const {
     gameAccount,
     gameAccountId,
     gameAccounts,
     gameAccountsQuery,
   } = useDashboardRoute();
-  const backdropTint = selectBackdropTint(gameAccount, {
-    primary: colors.appAccent.val,
-    warning: colors.appWarning.val,
-    muted: colors.appMuted.val,
-  });
+  const fallbackGameAccountId = gameAccounts[0]?.account;
 
   useEffect(() => {
-    setBackdropTint(backdropTint);
-  }, [backdropTint, setBackdropTint]);
+    if ((!gameAccountId || !gameAccount) && fallbackGameAccountId) {
+      router.setParams({ gameAccountId: fallbackGameAccountId });
+    }
+  }, [fallbackGameAccountId, gameAccount, gameAccountId, router]);
 
   if (gameAccountsQuery.isPending) return <DashboardState label="LOADING ARKHOST DATA" />;
   if (gameAccountsQuery.isError) return <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
   if (gameAccounts.length === 0) return <DashboardState label="NO GAME ACCOUNTS" />;
 
-  if (!gameAccountId || !gameAccount) {
-    const firstGameAccount = gameAccounts[0];
-    if (!firstGameAccount) return null;
-    return (
-      <Redirect
-        href={dashboardPageHref(
-          dashboardDefaultPage.id,
-          firstGameAccount.account,
-        )}
-      />
-    );
-  }
+  if (!gameAccountId || !gameAccount) return null;
 
   return (
     <DashboardFrame>

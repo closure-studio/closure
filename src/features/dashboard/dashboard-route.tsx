@@ -1,12 +1,10 @@
-import { useGlobalSearchParams, usePathname } from 'expo-router';
+import { useGlobalSearchParams } from 'expo-router';
 import {
   createContext,
   type PropsWithChildren,
   useContext,
-  useState,
 } from 'react';
 
-import { ROUTES } from '@/constants/routes';
 import type { GameAccount } from '@/schemas/game-account';
 import {
   findGameAccountById,
@@ -27,17 +25,8 @@ type DashboardRouteContextValue = {
 const DashboardRouteContext = createContext<DashboardRouteContextValue | null>(null);
 
 export function DashboardRouteProvider({ children }: PropsWithChildren) {
-  const pathname = usePathname();
   const { gameAccountId: rawGameAccountId } = useGlobalSearchParams<DashboardRouteParams>();
-  const routeAccountId = typeof rawGameAccountId === 'string' ? rawGameAccountId : null;
-  const isDashboardPath = pathname === ROUTES.dashboard
-    || pathname.startsWith(`${ROUTES.dashboard}/`);
-  const [retainedAccountId, setRetainedAccountId] = useState(routeAccountId);
-
-  if (isDashboardPath && retainedAccountId !== routeAccountId) {
-    setRetainedAccountId(routeAccountId);
-  }
-  const gameAccountId = isDashboardPath ? routeAccountId : retainedAccountId;
+  const gameAccountId = typeof rawGameAccountId === 'string' ? rawGameAccountId : null;
 
   const gameAccountsQuery = useGameAccountsQuery();
   const gameAccounts = gameAccountsQuery.data ?? [];

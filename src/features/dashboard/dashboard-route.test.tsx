@@ -34,11 +34,9 @@ let mockGameAccountsQuery = {
   isError: false,
   isPending: false,
 };
-let mockPathname = '/dashboard/overview';
 
 jest.mock('expo-router', () => ({
   useGlobalSearchParams: jest.fn(() => ({ gameAccountId: 'G16601716973' })),
-  usePathname: jest.fn(() => mockPathname),
 }));
 
 jest.mock('./queries', () => ({
@@ -63,7 +61,6 @@ function createWrapper() {
 }
 
 beforeEach(() => {
-  mockPathname = '/dashboard/overview';
   mockUseGlobalSearchParams.mockReset();
   mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: mockFirstAccount.account });
   mockGameAccountsQuery = {
@@ -106,7 +103,7 @@ describe('DashboardRouteProvider', () => {
     expect(result.current.gameAccount).toBeNull();
   });
 
-  it('updates the Dashboard account before retaining it across Settings', async () => {
+  it('derives account changes directly from the URL without retained state', async () => {
     const { result, rerender } = await renderHook(() => useDashboardRoute(), {
       wrapper: createWrapper(),
     });
@@ -119,11 +116,10 @@ describe('DashboardRouteProvider', () => {
     expect(result.current.gameAccountId).toBe(mockSecondAccount.account);
     expect(result.current.gameAccount?.account).toBe(mockSecondAccount.account);
 
-    mockPathname = '/settings/account';
     mockUseGlobalSearchParams.mockReturnValue({});
     await rerender(undefined);
 
-    expect(result.current.gameAccountId).toBe(mockSecondAccount.account);
-    expect(result.current.gameAccount?.account).toBe(mockSecondAccount.account);
+    expect(result.current.gameAccountId).toBeNull();
+    expect(result.current.gameAccount).toBeNull();
   });
 });

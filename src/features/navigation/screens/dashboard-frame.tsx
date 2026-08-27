@@ -1,13 +1,15 @@
-import type { PropsWithChildren } from 'react';
+import { type PropsWithChildren, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
-import { YStack } from 'tamagui';
+import { getTokens, YStack } from 'tamagui';
 
 import {
   DashboardShell,
   getGameAvatarImageUrl,
+  selectBackdropTint,
   useDashboardRoute,
 } from '@/features/dashboard';
+import { useSessionBackdrop } from '@/features/session';
 import { NavigationFrame } from '../components/navigation-frame';
 import { NavigationHeader } from '../components/navigation-header';
 import {
@@ -20,18 +22,29 @@ import {
 import { useAppLogout } from '../navigation-actions';
 
 export function DashboardFrame({ children }: PropsWithChildren) {
+  const colors = getTokens().color;
   const { t } = useTranslation('navigation');
   const { t: tDashboard } = useTranslation('dashboard');
   const pathname = usePathname();
   const router = useRouter();
   const onLogout = useAppLogout();
+  const { setBackdropTint } = useSessionBackdrop();
   const { gameAccount, gameAccountId, gameAccounts } = useDashboardRoute();
+  const backdropTint = selectBackdropTint(gameAccount, {
+    primary: colors.appAccent.val,
+    warning: colors.appWarning.val,
+    muted: colors.appMuted.val,
+  });
   const activePageId = getDashboardPageId(pathname) ?? dashboardDefaultPage.id;
   const items = dashboardPagesList.map((page) => ({
     icon: page.icon,
     id: page.id,
     label: tDashboard(`navigation.sections.${page.id}.label`),
   }));
+
+  useEffect(() => {
+    setBackdropTint(backdropTint);
+  }, [backdropTint, setBackdropTint]);
 
   const handleSelect = (pageId: string) => {
     const page = dashboardPagesList.find((candidate) => candidate.id === pageId);

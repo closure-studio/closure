@@ -1,9 +1,11 @@
 import type { PropsWithChildren } from 'react';
 import { render } from '@testing-library/react-native';
 import { Text } from 'react-native';
+import { TamaguiProvider } from 'tamagui';
 
 import { ROUTES } from '@/constants/routes';
 import type { LayoutSize } from '@/schemas/layout-size';
+import { tamaguiConfig } from '../../../tamagui.config';
 import { DashboardFrame } from './screens/dashboard-frame';
 import { SettingsFrame } from './screens/settings-frame';
 
@@ -29,6 +31,7 @@ const mockRouterSetParams = jest.fn();
 const mockRouterNavigate = jest.fn();
 const mockReturnToDashboard = jest.fn();
 const mockLogout = jest.fn();
+const mockSetBackdropTint = jest.fn();
 let mockPathname = '/dashboard/overview';
 let mockLayoutSize: LayoutSize = 'small';
 
@@ -51,10 +54,12 @@ jest.mock('react-i18next', () => ({
 jest.mock('@/features/dashboard', () => ({
   DashboardShell: (props: DashboardShellTestProps) => mockDashboardShell(props),
   getGameAvatarImageUrl: () => 'avatar-url',
+  selectBackdropTint: () => '#3dccdf',
   useDashboardRoute: () => ({
     gameAccount: {
       account: 'G1',
       avatar: { id: 'avatar', type: 'DEFAULT' },
+      color: 'primary',
       nickname: 'Doctor',
     },
     gameAccountId: 'G1',
@@ -64,6 +69,10 @@ jest.mock('@/features/dashboard', () => ({
 
 jest.mock('@/providers/layout-size-provider', () => ({
   useLayoutSize: () => mockLayoutSize,
+}));
+
+jest.mock('@/features/session', () => ({
+  useSessionBackdrop: () => ({ setBackdropTint: mockSetBackdropTint }),
 }));
 
 jest.mock('./components/navigation-frame', () => ({
@@ -85,6 +94,14 @@ function readLastFrameProps(): NavigationFrameTestProps {
   return call[0];
 }
 
+function renderFrame(children: React.ReactNode) {
+  return render(
+    <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+      {children}
+    </TamaguiProvider>,
+  );
+}
+
 describe('navigation scope frames', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -93,17 +110,18 @@ describe('navigation scope frames', () => {
   });
 
   it('pushes the complete Settings screen from Dashboard', async () => {
-    const screen = await render(<DashboardFrame><Text>content</Text></DashboardFrame>);
+    const screen = await renderFrame(<DashboardFrame><Text>content</Text></DashboardFrame>);
     const frame = readLastFrameProps();
 
     frame.onToggleScope();
 
     expect(mockRouterPush).toHaveBeenCalledWith(ROUTES.settingsNetwork);
+    expect(mockSetBackdropTint).toHaveBeenCalledWith(expect.any(String));
     expect(screen.getByText('content')).toBeTruthy();
   });
 
   it('uses the active Dashboard tab and account when selecting a sidebar page', async () => {
-    await render(<DashboardFrame />);
+    await renderFrame(<DashboardFrame />);
     const frame = readLastFrameProps();
 
     frame.onSelect('operators');
@@ -116,7 +134,7 @@ describe('navigation scope frames', () => {
   });
 
   it('updates account selection without navigating to another route', async () => {
-    await render(<DashboardFrame><Text>pager content</Text></DashboardFrame>);
+    await renderFrame(<DashboardFrame><Text>pager content</Text></DashboardFrame>);
 
     const shellCall = mockDashboardShell.mock.calls.at(-1);
     if (!shellCall) throw new Error('Expected DashboardShell props.');
@@ -131,7 +149,7 @@ describe('navigation scope frames', () => {
 
   it('dismisses Settings to the preserved Dashboard stack screen', async () => {
     mockPathname = '/settings/account';
-    await render(<SettingsFrame />);
+    await renderFrame(<SettingsFrame />);
     const frame = readLastFrameProps();
 
     frame.onToggleScope();
@@ -142,7 +160,7 @@ describe('navigation scope frames', () => {
 
   it('navigates Settings pages through the nested tab route', async () => {
     mockPathname = '/settings/network';
-    await render(<SettingsFrame />);
+    await renderFrame(<SettingsFrame />);
     const frame = readLastFrameProps();
 
     frame.onSelect('contributors');
