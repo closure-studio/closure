@@ -1,9 +1,18 @@
-import { Slot } from 'expo-router';
+import { Tabs as DashboardTabs } from 'expo-router/tabs';
+import { useEffect } from 'react';
 import { Spinner, YStack } from 'tamagui';
 
 import { MonoText } from '@/components';
-import { useDashboardRoute } from '@/features/dashboard';
-import { DashboardFrame } from '@/features/navigation';
+import {
+  DashboardAccountProvider,
+  useDashboardAccount,
+} from '@/features/dashboard';
+import {
+  DashboardFrame,
+  DashboardSmallScreenTabBar,
+  dashboardPagesList,
+} from '@/features/navigation';
+import { useLayoutSize } from '@/providers/layout-size-provider';
 
 function DashboardState({ label }: { label: string }) {
   return (
@@ -14,13 +23,59 @@ function DashboardState({ label }: { label: string }) {
   );
 }
 
+function DashboardContent() {
+  const layoutSize = useLayoutSize();
+  const {
+    gameAccountsQuery,
+    selectedGameAccount,
+    selectGameAccount,
+  } = useDashboardAccount();
+  const gameAccounts = gameAccountsQuery.data ?? [];
+  const fallbackGameAccountId = gameAccounts[0]?.account;
+
+  useEffect(() => {
+    if (!selectedGameAccount && fallbackGameAccountId) {
+      selectGameAccount(fallbackGameAccountId);
+    }
+  }, [fallbackGameAccountId, selectedGameAccount, selectGameAccount]);
+
+  if (gameAccountsQuery.isPending) return <DashboardState label="LOADING ARKHOST DATA" />;
+  if (gameAccountsQuery.isError) return <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
+  if (gameAccounts.length === 0) return <DashboardState label="NO GAME ACCOUNTS" />;
+
+  if (!selectedGameAccount) return null;
+
+  return (
+    <DashboardFrame>
+      <DashboardTabs
+        screenOptions={{
+          animation: 'shift',
+          freezeOnBlur: true,
+          headerShown: false,
+          lazy: true,
+          sceneStyle: { backgroundColor: 'transparent' },
+        }}
+        tabBar={layoutSize === 'small'
+          ? (props) => (
+            <DashboardSmallScreenTabBar
+              {...props}
+              gameAccountId={selectedGameAccount.account}
+            />
+          )
+          : () => null}
+      >
+        {dashboardPagesList.map((page) => (
+          <DashboardTabs.Screen key={page.id} name={page.id} />
+        ))}
+      </DashboardTabs>
+    </DashboardFrame>
+  );
+}
+
 export default function DashboardLayout() {
-  const { gameAccounts, gameAccountsQuery } = useDashboardRoute();
-
-  let content = <Slot />;
-  if (gameAccountsQuery.isPending) content = <DashboardState label="LOADING ARKHOST DATA" />;
-  else if (gameAccountsQuery.isError) content = <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
-  else if (gameAccounts.length === 0) content = <DashboardState label="NO GAME ACCOUNTS" />;
-
-  return <DashboardFrame>{content}</DashboardFrame>;
+  return (
+    <DashboardAccountProvider>
+      <DashboardContent />
+    </DashboardAccountProvider>
+  );
 }

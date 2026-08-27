@@ -1,17 +1,16 @@
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
-import { useRouter } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
 import { TabView } from 'react-native-tab-view';
 import { YStack } from 'tamagui';
 
 import {
   useAdjacentGameAccountPrefetch,
-  useDashboardRoute,
+  useDashboardAccount,
 } from '@/features/dashboard';
 import type { GameAccount } from '@/schemas/game-account';
-import { dashboardPageHref } from './navigation-config';
-import type { DashboardPageId } from './navigation-config';
+
+const EMPTY_GAME_ACCOUNTS: readonly GameAccount[] = [];
 
 type DashboardAccountPagerRoute = {
   gameAccount: GameAccount;
@@ -19,17 +18,20 @@ type DashboardAccountPagerRoute = {
 };
 
 type DashboardAccountPagerProps = {
-  pageId: DashboardPageId;
   renderAccount: (gameAccount: GameAccount) => ReactNode;
 };
 
 export function DashboardAccountPager({
-  pageId,
   renderAccount,
 }: DashboardAccountPagerProps) {
-  const router = useRouter();
   const { width } = useWindowDimensions();
-  const { gameAccountId, gameAccounts } = useDashboardRoute();
+  const {
+    gameAccountsQuery,
+    selectedGameAccount,
+    selectGameAccount,
+  } = useDashboardAccount();
+  const gameAccounts = gameAccountsQuery.data ?? EMPTY_GAME_ACCOUNTS;
+  const selectedGameAccountId = selectedGameAccount?.account ?? null;
   const routes = useMemo<DashboardAccountPagerRoute[]>(
     () => gameAccounts.map((gameAccount) => ({
       gameAccount,
@@ -37,18 +39,18 @@ export function DashboardAccountPager({
     })),
     [gameAccounts],
   );
-  const activeIndex = Math.max(
+  const index = Math.max(
     0,
-    routes.findIndex((route) => route.key === gameAccountId),
+    routes.findIndex((route) => route.key === selectedGameAccountId),
   );
+  useAdjacentGameAccountPrefetch(gameAccounts, selectedGameAccountId);
 
-  useAdjacentGameAccountPrefetch(gameAccounts, gameAccountId);
+  const handleIndexChange = useCallback((nextIndex: number) => {
+    const nextRoute = routes[nextIndex];
+    if (!nextRoute) return;
 
-  const handleIndexChange = useCallback((index: number) => {
-    const nextRoute = routes[index];
-    if (!nextRoute || nextRoute.key === gameAccountId) return;
-    router.replace(dashboardPageHref(pageId, nextRoute.key));
-  }, [gameAccountId, pageId, router, routes]);
+    selectGameAccount(nextRoute.key);
+  }, [routes, selectGameAccount]);
 
   const renderScene = useCallback(({
     route,
@@ -67,7 +69,7 @@ export function DashboardAccountPager({
       initialLayout={{ width }}
       lazy
       lazyPreloadDistance={1}
-      navigationState={{ index: activeIndex, routes }}
+      navigationState={{ index, routes }}
       onIndexChange={handleIndexChange}
       renderScene={renderScene}
       renderTabBar={() => null}

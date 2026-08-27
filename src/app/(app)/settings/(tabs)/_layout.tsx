@@ -3,7 +3,7 @@ import { TopTabs as SettingsTopTabs } from 'expo-router/js-top-tabs';
 import {
   SettingsFrame,
   SettingsTabBar,
-  sortedSettingsPages,
+  settingsPagesList,
 } from '@/features/navigation';
 import { useLayoutSize } from '@/providers/layout-size-provider';
 
@@ -22,7 +22,7 @@ export default function SettingsTabsLayout() {
         }}
         tabBar={layoutSize === 'small' ? SettingsTabBar : () => null}
       >
-        {sortedSettingsPages.map((page) => (
+        {settingsPagesList.map((page) => (
           <SettingsTopTabs.Screen key={page.id} name={page.id} />
         ))}
       </SettingsTopTabs>

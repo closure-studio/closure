@@ -4,7 +4,7 @@
 
 The store persists its remembered `auth.session` and `selectedApiNodeId` through Zustand's persist middleware into the shared MMKV adapter in `src/lib/mmkv.ts`. No feature or UI module reads or writes MMKV directly. Actions, loading state, errors, forms, sheets, filters, responsive Layout Size, and other temporary UI state are not persisted.
 
-ArkHost server data — the Game Account list, detail, characters, and logs — lives exclusively in the TanStack Query cache. The account in the Dashboard URL is validated against that list by `DashboardRouteProvider`; route screens derive the corresponding Game Account object from the Query cache and never store a second copy.
+ArkHost server data — the Game Account list, detail, characters, and logs — lives exclusively in the TanStack Query cache. `DashboardAccountProvider` owns the selected Game Account for the mounted Dashboard and serializes changes to the URL; route screens derive the corresponding Game Account object from the Query cache and never store a second copy.
 
 The same Store persists validated Game Resource Catalog downloads under a fixed second key. This keeps large resource tables out of frequent User Session and Game Account list writes while preserving one Store and one persistence boundary across native and web.
 

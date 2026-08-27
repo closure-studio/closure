@@ -1,7 +1,7 @@
 import { Redirect } from 'expo-router';
 
-import { settingsNavigation } from '@/features/navigation';
+import { settingsDefaultPage } from '@/features/navigation';
 
 export default function SettingsIndexRoute() {
-  return <Redirect href={settingsNavigation.defaultPage.route} />;
+  return <Redirect href={settingsDefaultPage.route} />;
 }

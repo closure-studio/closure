@@ -1,9 +1,11 @@
 import type { PropsWithChildren } from 'react';
 import { render } from '@testing-library/react-native';
 import { Text } from 'react-native';
+import { TamaguiProvider } from 'tamagui';
 
 import { ROUTES } from '@/constants/routes';
 import type { LayoutSize } from '@/schemas/layout-size';
+import { tamaguiConfig } from '../../../tamagui.config';
 import { DashboardFrame } from './screens/dashboard-frame';
 import { SettingsFrame } from './screens/settings-frame';
 
@@ -13,17 +15,24 @@ type NavigationFrameTestProps = PropsWithChildren<{
   onToggleScope: () => void;
 }>;
 
+type DashboardShellTestProps = PropsWithChildren<{
+  onSelectGameAccount: (gameAccountId: string) => void;
+  selectedGameAccountId: string;
+}>;
+
 const mockNavigationFrame = jest.fn<React.ReactNode, [NavigationFrameTestProps]>(
   ({ children }) => children,
 );
 const mockNavigationHeader = jest.fn((_props: object) => null);
-const mockDashboardShell = jest.fn(({ children }: PropsWithChildren) => children);
+const mockDashboardShell = jest.fn(({ children }: DashboardShellTestProps) => children);
 const mockRouterPush = jest.fn();
 const mockRouterReplace = jest.fn();
 const mockRouterNavigate = jest.fn();
+const mockSelectGameAccount = jest.fn();
 const mockReturnToDashboard = jest.fn();
 const mockLogout = jest.fn();
-let mockPathname = '/dashboard/G1/overview';
+const mockSetBackdropTint = jest.fn();
+let mockPathname = '/dashboard/overview';
 let mockLayoutSize: LayoutSize = 'small';
 
 jest.mock('expo-router', () => ({
@@ -42,21 +51,29 @@ jest.mock('react-i18next', () => ({
 }));
 
 jest.mock('@/features/dashboard', () => ({
-  DashboardShell: (props: PropsWithChildren) => mockDashboardShell(props),
+  DashboardShell: (props: DashboardShellTestProps) => mockDashboardShell(props),
   getGameAvatarImageUrl: () => 'avatar-url',
-  useDashboardRoute: () => ({
-    gameAccount: {
+  selectBackdropTint: () => '#3dccdf',
+  useDashboardAccount: () => ({
+    selectedGameAccount: {
       account: 'G1',
       avatar: { id: 'avatar', type: 'DEFAULT' },
+      color: 'primary',
       nickname: 'Doctor',
     },
-    gameAccountId: 'G1',
-    gameAccounts: [{ account: 'G1' }, { account: 'G2' }],
+    gameAccountsQuery: {
+      data: [{ account: 'G1' }, { account: 'G2' }],
+    },
+    selectGameAccount: mockSelectGameAccount,
   }),
 }));
 
 jest.mock('@/providers/layout-size-provider', () => ({
   useLayoutSize: () => mockLayoutSize,
+}));
+
+jest.mock('@/features/session', () => ({
+  useSessionBackdrop: () => ({ setBackdropTint: mockSetBackdropTint }),
 }));
 
 jest.mock('./components/navigation-frame', () => ({
@@ -67,7 +84,7 @@ jest.mock('./components/navigation-header', () => ({
   NavigationHeader: (props: object) => mockNavigationHeader(props),
 }));
 
-jest.mock('./use-app-logout', () => ({
+jest.mock('./navigation-actions', () => ({
   useAppLogout: () => mockLogout,
   useReturnToDashboard: () => mockReturnToDashboard,
 }));
@@ -78,48 +95,62 @@ function readLastFrameProps(): NavigationFrameTestProps {
   return call[0];
 }
 
+function renderFrame(children: React.ReactNode) {
+  return render(
+    <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+      {children}
+    </TamaguiProvider>,
+  );
+}
+
 describe('navigation scope frames', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPathname = '/dashboard/G1/overview';
+    mockPathname = '/dashboard/overview';
     mockLayoutSize = 'small';
   });
 
   it('pushes the complete Settings screen from Dashboard', async () => {
-    const screen = await render(<DashboardFrame><Text>content</Text></DashboardFrame>);
+    const screen = await renderFrame(<DashboardFrame><Text>content</Text></DashboardFrame>);
     const frame = readLastFrameProps();
 
     frame.onToggleScope();
 
     expect(mockRouterPush).toHaveBeenCalledWith(ROUTES.settingsNetwork);
+    expect(mockSetBackdropTint).toHaveBeenCalledWith(expect.any(String));
     expect(screen.getByText('content')).toBeTruthy();
   });
 
   it('uses the active Dashboard tab and account when selecting a sidebar page', async () => {
-    await render(<DashboardFrame />);
+    await renderFrame(<DashboardFrame />);
     const frame = readLastFrameProps();
 
     frame.onSelect('operators');
 
     expect(frame.activeId).toBe('overview');
     expect(mockRouterReplace).toHaveBeenCalledWith({
-      pathname: '/dashboard/[gameAccountId]/operators',
+      pathname: '/dashboard/operators',
       params: { gameAccountId: 'G1' },
     });
   });
 
-  it('keeps the Dashboard shell outside account-scoped route content', async () => {
-    await render(<DashboardFrame><Text>pager content</Text></DashboardFrame>);
+  it('updates account selection without navigating to another route', async () => {
+    await renderFrame(<DashboardFrame><Text>pager content</Text></DashboardFrame>);
+
+    const shellCall = mockDashboardShell.mock.calls.at(-1);
+    if (!shellCall) throw new Error('Expected DashboardShell props.');
+    shellCall[0].onSelectGameAccount('G2');
 
     expect(mockDashboardShell).toHaveBeenCalledWith(expect.objectContaining({
       selectedGameAccountId: 'G1',
     }));
-    expect(mockDashboardShell).toHaveBeenCalledTimes(1);
+    expect(mockSelectGameAccount).toHaveBeenCalledWith('G2');
+    expect(mockRouterReplace).not.toHaveBeenCalled();
   });
 
   it('dismisses Settings to the preserved Dashboard stack screen', async () => {
     mockPathname = '/settings/account';
-    await render(<SettingsFrame />);
+    await renderFrame(<SettingsFrame />);
     const frame = readLastFrameProps();
 
     frame.onToggleScope();
@@ -130,7 +161,7 @@ describe('navigation scope frames', () => {
 
   it('navigates Settings pages through the nested tab route', async () => {
     mockPathname = '/settings/network';
-    await render(<SettingsFrame />);
+    await renderFrame(<SettingsFrame />);
     const frame = readLastFrameProps();
 
     frame.onSelect('contributors');

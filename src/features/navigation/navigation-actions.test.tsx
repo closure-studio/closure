@@ -1,16 +1,20 @@
 import { renderHook } from '@testing-library/react-native';
 
 import { ROUTES } from '@/constants/routes';
-import { useAppLogout, useReturnToDashboard } from './use-app-logout';
+import { useAppLogout, useReturnToDashboard } from './navigation-actions';
 
-const mockDismissTo = jest.fn();
+const mockBack = jest.fn();
+const mockCanGoBack = jest.fn(() => true);
 const mockReplace = jest.fn();
 const mockResetBackdropTint = jest.fn();
 const mockLogout = jest.fn();
 
 jest.mock('expo-router', () => ({
+  useNavigation: () => ({
+    canGoBack: mockCanGoBack,
+    goBack: mockBack,
+  }),
   useRouter: () => ({
-    dismissTo: mockDismissTo,
     replace: mockReplace,
   }),
 }));
@@ -28,6 +32,7 @@ jest.mock('@/store', () => ({
 describe('app navigation actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCanGoBack.mockReturnValue(true);
   });
 
   it('clears the session presentation before logging out and replacing the route', async () => {
@@ -40,11 +45,22 @@ describe('app navigation actions', () => {
     expect(mockReplace).toHaveBeenCalledWith(ROUTES.login);
   });
 
-  it('dismisses to Dashboard so deep links also have a deterministic destination', async () => {
+  it('pops Settings to the preserved Dashboard stack screen', async () => {
     const { result } = await renderHook(() => useReturnToDashboard());
 
     result.current();
 
-    expect(mockDismissTo).toHaveBeenCalledWith(ROUTES.dashboard);
+    expect(mockBack).toHaveBeenCalledTimes(1);
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it('replaces a direct Settings deep link with Dashboard when there is no history', async () => {
+    mockCanGoBack.mockReturnValue(false);
+    const { result } = await renderHook(() => useReturnToDashboard());
+
+    result.current();
+
+    expect(mockBack).not.toHaveBeenCalled();
+    expect(mockReplace).toHaveBeenCalledWith(ROUTES.dashboard);
   });
 });

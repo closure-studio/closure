@@ -5,13 +5,13 @@ export { SettingsTabBar } from './settings-tab-bar';
 export { DashboardFrame } from './screens/dashboard-frame';
 export { SettingsFrame } from './screens/settings-frame';
 export {
-  dashboardNavigation,
+  dashboardDefaultPage,
   dashboardPageHref,
   getDashboardPageId,
   getSettingsPageId,
-  settingsNavigation,
-  sortedDashboardPages,
-  sortedSettingsPages,
+  settingsDefaultPage,
+  dashboardPagesList,
+  settingsPagesList,
 } from './navigation-config';
 export type {
   DashboardPageId,

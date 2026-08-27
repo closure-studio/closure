@@ -7,21 +7,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import { MonoText } from '@/components';
-import { sortedDashboardPages as dashboardPages } from './navigation-config';
+import { dashboardPagesList } from './navigation-config';
 
-type DashboardSmallScreenTabBarProps = {
-  navigation: {
-    emit: (event: {
-      canPreventDefault: true;
-      target: string;
-      type: 'tabPress';
-    }) => { defaultPrevented: boolean };
-    navigate: (name: string, params: object | undefined) => void;
-  };
-  state: Pick<BottomTabBarProps['state'], 'index' | 'routes'>;
+type DashboardSmallScreenTabBarProps = BottomTabBarProps & {
+  gameAccountId: string;
 };
 
 export function DashboardSmallScreenTabBar({
+  gameAccountId,
   navigation,
   state,
 }: DashboardSmallScreenTabBarProps) {
@@ -31,8 +24,8 @@ export function DashboardSmallScreenTabBar({
   const { bottom: bottomInset } = useSafeAreaInsets();
   const [navigationWidth, setNavigationWidth] = useState(0);
   const activeRoute = state.routes[state.index];
-  const activeIndex = Math.max(0, dashboardPages.findIndex((page) => page.id === activeRoute?.name));
-  const buttonWidth = Math.max(0, (navigationWidth - 16) / dashboardPages.length);
+  const activeIndex = Math.max(0, dashboardPagesList.findIndex((page) => page.id === activeRoute?.name));
+  const buttonWidth = Math.max(0, (navigationWidth - 16) / dashboardPagesList.length);
   const indicatorWidth = Math.max(0, buttonWidth - 16);
   const indicatorLeft = 16 + activeIndex * buttonWidth;
 
@@ -51,7 +44,10 @@ export function DashboardSmallScreenTabBar({
     });
 
     if (route.key !== activeRoute?.key && !event.defaultPrevented) {
-      navigation.navigate(route.name, route.params);
+      navigation.navigate(route.name, {
+        ...route.params,
+        gameAccountId,
+      });
     }
   };
 
@@ -87,7 +83,7 @@ export function DashboardSmallScreenTabBar({
           bg="$appAccent"
           opacity={navigationWidth > 0 ? 1 : 0}
         />
-        {dashboardPages.map((page) => {
+        {dashboardPagesList.map((page) => {
           const isActive = page.id === activeRoute?.name;
           const Icon = page.icon;
           return (

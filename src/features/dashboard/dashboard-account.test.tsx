@@ -4,7 +4,7 @@ import * as v from 'valibot';
 
 import { mockArkHostGameListResponse } from '@/mocks/arkhost';
 import { gameAccountSchema } from '@/schemas/game-account';
-import { DashboardRouteProvider, useDashboardRoute } from './dashboard-route';
+import { DashboardAccountProvider, useDashboardAccount } from './dashboard-account';
 
 const accountEntries = mockArkHostGameListResponse.code === 1
   ? mockArkHostGameListResponse.data
@@ -29,6 +29,7 @@ const mockFirstAccount = v.parse(gameAccountSchema, {
   userId: firstAccountEntry.status.uuid,
 });
 const mockSecondAccount = { ...mockFirstAccount, account: 'G2' };
+const mockRouterSetParams = jest.fn();
 let mockGameAccountsQuery = {
   data: [mockFirstAccount, mockSecondAccount],
   isError: false,
@@ -36,7 +37,8 @@ let mockGameAccountsQuery = {
 };
 
 jest.mock('expo-router', () => ({
-  useGlobalSearchParams: jest.fn(() => ({ gameAccountId: 'G16601716973' })),
+  useLocalSearchParams: jest.fn(() => ({ gameAccountId: 'G16601716973' })),
+  useRouter: () => ({ setParams: mockRouterSetParams }),
 }));
 
 jest.mock('./queries', () => ({
@@ -48,21 +50,22 @@ jest.mock('./queries', () => ({
   useGameAccountsQuery: jest.fn(() => mockGameAccountsQuery),
 }));
 
-const mockUseGlobalSearchParams = jest.mocked(
-  jest.requireMock<typeof import('expo-router')>('expo-router').useGlobalSearchParams,
+const mockUseLocalSearchParams = jest.mocked(
+  jest.requireMock<typeof import('expo-router')>('expo-router').useLocalSearchParams,
 );
 
-function DashboardRouteTestWrapper({ children }: PropsWithChildren) {
-  return <DashboardRouteProvider>{children}</DashboardRouteProvider>;
+function DashboardAccountTestWrapper({ children }: PropsWithChildren) {
+  return <DashboardAccountProvider>{children}</DashboardAccountProvider>;
 }
 
 function createWrapper() {
-  return DashboardRouteTestWrapper;
+  return DashboardAccountTestWrapper;
 }
 
 beforeEach(() => {
-  mockUseGlobalSearchParams.mockReset();
-  mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: mockFirstAccount.account });
+  mockUseLocalSearchParams.mockReset();
+  mockUseLocalSearchParams.mockReturnValue({ gameAccountId: mockFirstAccount.account });
+  mockRouterSetParams.mockReset();
   mockGameAccountsQuery = {
     data: [mockFirstAccount, mockSecondAccount],
     isError: false,
@@ -70,36 +73,34 @@ beforeEach(() => {
   };
 });
 
-describe('DashboardRouteProvider', () => {
-  it('derives the route account from the Query-owned account list', async () => {
-    const { result } = await renderHook(() => useDashboardRoute(), {
+describe('DashboardAccountProvider', () => {
+  it('initializes the selected account from the Dashboard URL', async () => {
+    const { result } = await renderHook(() => useDashboardAccount(), {
       wrapper: createWrapper(),
     });
 
-    expect(result.current.gameAccountId).toBe(mockFirstAccount.account);
-    expect(result.current.gameAccount?.account).toBe(mockFirstAccount.account);
-    expect(result.current.gameAccounts).toHaveLength(2);
+    expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
+    expect(result.current.gameAccountsQuery.data).toHaveLength(2);
   });
 
-  it('rejects array route parameters before they reach account lookup', async () => {
-    mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: ['G1'] });
+  it('ignores non-string account route parameters', async () => {
+    mockUseLocalSearchParams.mockReturnValue({ gameAccountId: ['G1'] });
 
-    const { result } = await renderHook(() => useDashboardRoute(), {
+    const { result } = await renderHook(() => useDashboardAccount(), {
       wrapper: createWrapper(),
     });
 
-    expect(result.current.gameAccountId).toBeNull();
-    expect(result.current.gameAccount).toBeNull();
+    expect(result.current.selectedGameAccount).toBeNull();
   });
 
   it('keeps foreign account IDs out of the dashboard context', async () => {
-    mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: 'G9' });
+    mockUseLocalSearchParams.mockReturnValue({ gameAccountId: 'G9' });
 
-    const { result } = await renderHook(() => useDashboardRoute(), {
+    const { result } = await renderHook(() => useDashboardAccount(), {
       wrapper: createWrapper(),
     });
 
-    expect(result.current.gameAccountId).toBe('G9');
-    expect(result.current.gameAccount).toBeNull();
+    expect(result.current.selectedGameAccount).toBeNull();
   });
+
 });

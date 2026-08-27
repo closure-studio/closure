@@ -1,53 +1,65 @@
-import type { PropsWithChildren } from 'react';
-import { useCallback } from 'react';
+import { type PropsWithChildren, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
-import { YStack } from 'tamagui';
+import { getTokens, YStack } from 'tamagui';
 
 import {
   DashboardShell,
   getGameAvatarImageUrl,
-  useDashboardRoute,
+  selectBackdropTint,
+  useDashboardAccount,
 } from '@/features/dashboard';
+import { useSessionBackdrop } from '@/features/session';
 import { NavigationFrame } from '../components/navigation-frame';
 import { NavigationHeader } from '../components/navigation-header';
 import {
-  dashboardNavigation,
+  dashboardDefaultPage,
+  dashboardPagesList,
   dashboardPageHref,
   getDashboardPageId,
-  settingsNavigation,
-  sortedDashboardPages,
+  settingsDefaultPage,
 } from '../navigation-config';
-import { useAppLogout } from '../use-app-logout';
+import { useAppLogout } from '../navigation-actions';
 
 export function DashboardFrame({ children }: PropsWithChildren) {
+  const colors = getTokens().color;
   const { t } = useTranslation('navigation');
   const { t: tDashboard } = useTranslation('dashboard');
   const pathname = usePathname();
   const router = useRouter();
   const onLogout = useAppLogout();
-  const { gameAccount, gameAccountId, gameAccounts } = useDashboardRoute();
-  const activePageId = getDashboardPageId(pathname) ?? dashboardNavigation.defaultPage.id;
-  const items = sortedDashboardPages.map((page) => ({
+  const { setBackdropTint } = useSessionBackdrop();
+  const {
+    gameAccountsQuery,
+    selectedGameAccount,
+    selectGameAccount,
+  } = useDashboardAccount();
+  const gameAccounts = gameAccountsQuery.data ?? [];
+  const backdropTint = selectBackdropTint(selectedGameAccount, {
+    primary: colors.appAccent.val,
+    warning: colors.appWarning.val,
+    muted: colors.appMuted.val,
+  });
+  const activePageId = getDashboardPageId(pathname) ?? dashboardDefaultPage.id;
+  const items = dashboardPagesList.map((page) => ({
     icon: page.icon,
     id: page.id,
     label: tDashboard(`navigation.sections.${page.id}.label`),
   }));
 
-  const handleSelect = useCallback((pageId: string) => {
-    const page = sortedDashboardPages.find((candidate) => candidate.id === pageId);
-    if (!page || !gameAccount || page.id === activePageId) return;
-    router.replace(dashboardPageHref(page.id, gameAccount.account));
-  }, [activePageId, gameAccount, router]);
+  useEffect(() => {
+    setBackdropTint(backdropTint);
+  }, [backdropTint, setBackdropTint]);
 
-  const handleOpenSettings = useCallback(() => {
-    router.push(settingsNavigation.defaultPage.route);
-  }, [router]);
+  const handleSelect = (pageId: string) => {
+    const page = dashboardPagesList.find((candidate) => candidate.id === pageId);
+    if (!page || !selectedGameAccount || page.id === activePageId) return;
+    router.replace(dashboardPageHref(page.id, selectedGameAccount.account));
+  };
 
-  const handleSelectGameAccount = useCallback((nextGameAccountId: string) => {
-    if (nextGameAccountId === gameAccountId) return;
-    router.replace(dashboardPageHref(activePageId, nextGameAccountId));
-  }, [activePageId, gameAccountId, router]);
+  const handleOpenSettings = () => {
+    router.push(settingsDefaultPage.route);
+  };
 
   return (
     <NavigationFrame
@@ -56,11 +68,11 @@ export function DashboardFrame({ children }: PropsWithChildren) {
         <YStack shrink={0} borderBottomWidth={1} borderColor="$appBorder">
           <NavigationHeader
             avatarLabel={t('smallScreen.avatarLabel')}
-            avatarUrl={getGameAvatarImageUrl(gameAccount?.avatar)}
+            avatarUrl={getGameAvatarImageUrl(selectedGameAccount?.avatar)}
             isSettingsActive={false}
             onSettingsPress={handleOpenSettings}
             settingsLabel={t('scopeSwitcher.openSettings')}
-            title={gameAccount?.nickname ?? ''}
+            title={selectedGameAccount?.nickname ?? ''}
           />
         </YStack>
       )}
@@ -73,8 +85,8 @@ export function DashboardFrame({ children }: PropsWithChildren) {
     >
       <DashboardShell
         gameAccounts={gameAccounts}
-        onSelectGameAccount={handleSelectGameAccount}
-        selectedGameAccountId={gameAccountId ?? ''}
+        onSelectGameAccount={selectGameAccount}
+        selectedGameAccountId={selectedGameAccount?.account ?? ''}
       >
         {children}
       </DashboardShell>

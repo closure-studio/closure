@@ -6,11 +6,12 @@ import { ROUTES } from '@/constants/routes';
 const mockSlot = jest.fn(() => null);
 const mockRedirect = jest.fn(() => null);
 const mockAppProvider = jest.fn(({ children }: PropsWithChildren) => children);
+const mockDashboardAccountProvider = jest.fn(({ children }: PropsWithChildren) => children);
 const mockSessionShell = jest.fn(({ children }: PropsWithChildren) => children);
 const mockAppScopeNavigator = jest.fn(() => null);
 const mockUseSessionQueryCacheReset = jest.fn();
 const mockUseArkHostSync = jest.fn();
-const mockUsePathname = jest.fn(() => '/dashboard/G1/overview');
+const mockUsePathname = jest.fn(() => '/dashboard/overview');
 
 let mockSession: object | null = { principal: 'doctor' };
 
@@ -21,7 +22,7 @@ jest.mock('expo-router', () => ({
 }));
 
 jest.mock('@/features/dashboard', () => ({
-  DashboardRouteProvider: mockAppProvider,
+  DashboardAccountProvider: mockDashboardAccountProvider,
   useArkHostSync: mockUseArkHostSync,
   useSessionQueryCacheReset: mockUseSessionQueryCacheReset,
 }));
@@ -55,7 +56,7 @@ const SettingsLayout = jest.requireActual<typeof import('../src/app/(app)/settin
 describe('route layouts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUsePathname.mockReturnValue('/dashboard/G1/overview');
+    mockUsePathname.mockReturnValue('/dashboard/overview');
     mockSession = { principal: 'doctor' };
   });
 
@@ -69,7 +70,7 @@ describe('route layouts', () => {
     await render(<AppLayout />);
 
     expect(mockAppScopeNavigator).toHaveBeenCalledTimes(1);
-    expect(mockAppProvider).toHaveBeenCalled();
+    expect(mockDashboardAccountProvider).not.toHaveBeenCalled();
   });
 
   it('redirects unauthenticated App routes to Login with the current route', async () => {

@@ -2,8 +2,8 @@ import { fireEvent, render } from '@testing-library/react-native';
 import { TamaguiProvider } from 'tamagui';
 
 import { tamaguiConfig } from '../../../tamagui.config';
-import { SettingsPagerTabs } from './components/settings-swipe-pager';
-import { settingsNavigation } from './navigation-config';
+import { SettingsPagerTabs } from './components/settings-pager-tabs';
+import { settingsPagesList } from './navigation-config';
 
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
@@ -16,8 +16,7 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-const settingsItems = Object.values(settingsNavigation.pages)
-  .sort((left, right) => left.sort - right.sort)
+const settingsItems = settingsPagesList
   .map(({ id }) => ({ id, label: id }));
 
 async function renderSettingsPagerTabs(activeId: 'network' | 'account' | 'contributors' = 'network') {

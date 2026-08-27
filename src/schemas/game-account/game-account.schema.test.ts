@@ -2,8 +2,6 @@ import * as v from "valibot";
 
 import { mockArkHostGameListResponse } from "@/mocks/arkhost";
 import {
-  gameAccountIdSchema,
-  gameAccountRouteParamsSchema,
   gameAccountSchema,
   operatorSchema,
 } from ".";
@@ -50,12 +48,5 @@ describe("Game Account schemas", () => {
     expect(v.safeParse(operatorSchema, { charId: "", level: -1 }).success).toBe(
       false,
     );
-  });
-
-  it("validates the account-scoped dashboard route parameter", () => {
-    expect(v.safeParse(gameAccountIdSchema, "G1").success).toBe(true);
-    expect(v.safeParse(gameAccountRouteParamsSchema, { gameAccountId: "G1" }).success).toBe(true);
-    expect(v.safeParse(gameAccountRouteParamsSchema, { gameAccountId: "" }).success).toBe(false);
-    expect(v.safeParse(gameAccountRouteParamsSchema, { gameAccountId: ["G1"] }).success).toBe(false);
   });
 });

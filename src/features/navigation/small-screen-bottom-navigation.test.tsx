@@ -4,6 +4,7 @@ import { I18nextProvider } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider } from 'tamagui';
+import type { BottomTabBarProps } from 'expo-router/tabs';
 
 import { i18n } from '@/i18n';
 import { tamaguiConfig } from '../../../tamagui.config';
@@ -39,30 +40,57 @@ jest.mock('tamagui', () => {
 });
 
 async function renderMobileBottomNavigation(defaultPrevented = false) {
-  const emit = jest.fn(() => ({
-    type: 'tabPress' as const,
+  const emit = jest.fn();
+  emit.mockReturnValue({
+    type: 'tabPress',
     target: 'operators-key',
     defaultPrevented,
     preventDefault: jest.fn(),
-  }));
+  });
   const navigate = jest.fn();
+  const navigation = {
+    canGoBack: jest.fn(),
+    dispatch: jest.fn(),
+    emit,
+    getId: jest.fn(),
+    getParent: jest.fn(),
+    getState: jest.fn(),
+    goBack: jest.fn(),
+    isFocused: jest.fn(),
+    navigate,
+    navigateDeprecated: jest.fn(),
+    preload: jest.fn(),
+    replaceParams: jest.fn(),
+    reset: jest.fn(),
+    setParams: jest.fn(),
+  } satisfies BottomTabBarProps['navigation'];
+  const state = {
+    index: 1,
+    history: [],
+    key: 'tab-key',
+    preloadedRouteKeys: [],
+    routeNames: ['index', 'overview', 'settings', 'operators', 'inventory', 'activity'],
+    routes: [
+      { key: 'index-key', name: 'index' },
+      { key: 'overview-key', name: 'overview' },
+      { key: 'settings-key', name: 'settings' },
+      { key: 'operators-key', name: 'operators' },
+      { key: 'inventory-key', name: 'inventory' },
+      { key: 'activity-key', name: 'activity' },
+    ],
+    stale: false,
+    type: 'tab',
+  } satisfies BottomTabBarProps['state'];
   const screen = await render(
     <SafeAreaProvider initialMetrics={safeAreaMetrics}>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <I18nextProvider i18n={i18n}>
           <DashboardSmallScreenTabBar
-            navigation={{ emit, navigate }}
-            state={{
-              index: 1,
-              routes: [
-                { key: 'index-key', name: 'index' },
-                { key: 'overview-key', name: 'overview' },
-                { key: 'settings-key', name: 'settings' },
-                { key: 'operators-key', name: 'operators' },
-                { key: 'inventory-key', name: 'inventory' },
-                { key: 'activity-key', name: 'activity' },
-              ],
-            }}
+            descriptors={{}}
+            gameAccountId="G1"
+            insets={safeAreaMetrics.insets}
+            navigation={navigation}
+            state={state}
           />
         </I18nextProvider>
       </TamaguiProvider>
@@ -109,7 +137,7 @@ describe('MobileBottomNavigation', () => {
       target: 'operators-key',
       canPreventDefault: true,
     });
-    expect(navigate).toHaveBeenCalledWith('operators', undefined);
+    expect(navigate).toHaveBeenCalledWith('operators', { gameAccountId: 'G1' });
   });
 
   it('honors a prevented tabPress event', async () => {
