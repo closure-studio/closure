@@ -7,7 +7,7 @@ import {
   DashboardShell,
   getGameAvatarImageUrl,
   selectBackdropTint,
-  useDashboardRoute,
+  useDashboardAccount,
 } from '@/features/dashboard';
 import { useSessionBackdrop } from '@/features/session';
 import { NavigationFrame } from '../components/navigation-frame';
@@ -29,8 +29,13 @@ export function DashboardFrame({ children }: PropsWithChildren) {
   const router = useRouter();
   const onLogout = useAppLogout();
   const { setBackdropTint } = useSessionBackdrop();
-  const { gameAccount, gameAccountId, gameAccounts } = useDashboardRoute();
-  const backdropTint = selectBackdropTint(gameAccount, {
+  const {
+    gameAccountsQuery,
+    selectedGameAccount,
+    selectGameAccount,
+  } = useDashboardAccount();
+  const gameAccounts = gameAccountsQuery.data ?? [];
+  const backdropTint = selectBackdropTint(selectedGameAccount, {
     primary: colors.appAccent.val,
     warning: colors.appWarning.val,
     muted: colors.appMuted.val,
@@ -48,17 +53,12 @@ export function DashboardFrame({ children }: PropsWithChildren) {
 
   const handleSelect = (pageId: string) => {
     const page = dashboardPagesList.find((candidate) => candidate.id === pageId);
-    if (!page || !gameAccount || page.id === activePageId) return;
-    router.replace(dashboardPageHref(page.id, gameAccount.account));
+    if (!page || !selectedGameAccount || page.id === activePageId) return;
+    router.replace(dashboardPageHref(page.id, selectedGameAccount.account));
   };
 
   const handleOpenSettings = () => {
     router.push(settingsDefaultPage.route);
-  };
-
-  const handleSelectGameAccount = (nextGameAccountId: string) => {
-    if (nextGameAccountId === gameAccountId) return;
-    router.setParams({ gameAccountId: nextGameAccountId });
   };
 
   return (
@@ -68,11 +68,11 @@ export function DashboardFrame({ children }: PropsWithChildren) {
         <YStack shrink={0} borderBottomWidth={1} borderColor="$appBorder">
           <NavigationHeader
             avatarLabel={t('smallScreen.avatarLabel')}
-            avatarUrl={getGameAvatarImageUrl(gameAccount?.avatar)}
+            avatarUrl={getGameAvatarImageUrl(selectedGameAccount?.avatar)}
             isSettingsActive={false}
             onSettingsPress={handleOpenSettings}
             settingsLabel={t('scopeSwitcher.openSettings')}
-            title={gameAccount?.nickname ?? ''}
+            title={selectedGameAccount?.nickname ?? ''}
           />
         </YStack>
       )}
@@ -85,8 +85,8 @@ export function DashboardFrame({ children }: PropsWithChildren) {
     >
       <DashboardShell
         gameAccounts={gameAccounts}
-        onSelectGameAccount={handleSelectGameAccount}
-        selectedGameAccountId={gameAccountId ?? ''}
+        onSelectGameAccount={selectGameAccount}
+        selectedGameAccountId={selectedGameAccount?.account ?? ''}
       >
         {children}
       </DashboardShell>

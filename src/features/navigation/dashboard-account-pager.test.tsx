@@ -37,12 +37,8 @@ const mockTabView = jest.fn<ReactNode, [MockTabViewProps]>(({
     ))}
   </>
 ));
-const mockRouterSetParams = jest.fn();
 const mockUseAdjacentGameAccountPrefetch = jest.fn();
-
-jest.mock('expo-router', () => ({
-  useRouter: () => ({ setParams: mockRouterSetParams }),
-}));
+const mockSelectGameAccount = jest.fn();
 
 jest.mock('react-native-tab-view', () => ({
   TabView: (props: MockTabViewProps) => mockTabView(props),
@@ -52,7 +48,10 @@ jest.mock('@/features/dashboard', () => ({
   useAdjacentGameAccountPrefetch: (...args: unknown[]) => {
     mockUseAdjacentGameAccountPrefetch(...args);
   },
-  useDashboardRoute: () => mockDashboardRoute,
+  useDashboardAccount: () => ({
+    ...mockDashboardAccount,
+    selectGameAccount: mockSelectGameAccount,
+  }),
 }));
 
 const accountEntries = mockArkHostGameListResponse.code === 1
@@ -82,12 +81,12 @@ if (!firstGameAccount || !secondGameAccount || !thirdGameAccount) {
   throw new Error('Expected three game account fixtures.');
 }
 
-let mockDashboardRoute: {
-  gameAccountId: string;
-  gameAccounts: readonly GameAccount[];
+let mockDashboardAccount: {
+  selectedGameAccount: GameAccount;
+  gameAccountsQuery: { data: readonly GameAccount[] };
 } = {
-  gameAccountId: secondGameAccount.account,
-  gameAccounts,
+  selectedGameAccount: secondGameAccount,
+  gameAccountsQuery: { data: gameAccounts },
 };
 
 function readPagerProps(): MockTabViewProps {
@@ -119,9 +118,9 @@ function renderPager() {
 describe('DashboardAccountPager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockDashboardRoute = {
-      gameAccountId: secondGameAccount.account,
-      gameAccounts,
+    mockDashboardAccount = {
+      selectedGameAccount: secondGameAccount,
+      gameAccountsQuery: { data: gameAccounts },
     };
   });
 
@@ -144,7 +143,7 @@ describe('DashboardAccountPager', () => {
     );
   });
 
-  it('commits the controlled index before syncing the canonical URL', async () => {
+  it('selects the swiped account through the Dashboard account owner', async () => {
     await renderPager();
     const pager = readPagerProps();
 
@@ -152,31 +151,21 @@ describe('DashboardAccountPager', () => {
       pager.onIndexChange(2);
     });
 
-    expect(readPagerProps().navigationState.index).toBe(2);
-    expect(mockRouterSetParams).toHaveBeenCalledWith({
-      gameAccountId: thirdGameAccount.account,
-    });
-    expect(pager.renderTabBar()).toBeNull();
-
-    mockRouterSetParams.mockClear();
-    await act(() => {
-      readPagerProps().onIndexChange(1);
-    });
-
+    expect(mockSelectGameAccount).toHaveBeenCalledWith(thirdGameAccount.account);
     expect(readPagerProps().navigationState.index).toBe(1);
-    expect(mockRouterSetParams).not.toHaveBeenCalled();
+    expect(pager.renderTabBar()).toBeNull();
   });
 
-  it('synchronizes the controlled index when the route account changes externally', async () => {
+  it('derives the controlled index from Dashboard account state', async () => {
     const screen = await renderPager();
 
-    mockDashboardRoute = {
-      gameAccountId: firstGameAccount.account,
-      gameAccounts,
+    mockDashboardAccount = {
+      selectedGameAccount: firstGameAccount,
+      gameAccountsQuery: { data: gameAccounts },
     };
     await screen.rerender(<DashboardAccountPagerTestTree />);
 
     expect(readPagerProps().navigationState.index).toBe(0);
-    expect(mockRouterSetParams).not.toHaveBeenCalled();
+    expect(mockSelectGameAccount).not.toHaveBeenCalled();
   });
 });

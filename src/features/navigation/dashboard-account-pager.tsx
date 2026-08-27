@@ -1,15 +1,16 @@
 import type { ReactNode } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useCallback, useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { TabView } from 'react-native-tab-view';
 import { YStack } from 'tamagui';
 
 import {
   useAdjacentGameAccountPrefetch,
-  useDashboardRoute,
+  useDashboardAccount,
 } from '@/features/dashboard';
 import type { GameAccount } from '@/schemas/game-account';
+
+const EMPTY_GAME_ACCOUNTS: readonly GameAccount[] = [];
 
 type DashboardAccountPagerRoute = {
   gameAccount: GameAccount;
@@ -23,9 +24,14 @@ type DashboardAccountPagerProps = {
 export function DashboardAccountPager({
   renderAccount,
 }: DashboardAccountPagerProps) {
-  const router = useRouter();
   const { width } = useWindowDimensions();
-  const { gameAccountId, gameAccounts } = useDashboardRoute();
+  const {
+    gameAccountsQuery,
+    selectedGameAccount,
+    selectGameAccount,
+  } = useDashboardAccount();
+  const gameAccounts = gameAccountsQuery.data ?? EMPTY_GAME_ACCOUNTS;
+  const selectedGameAccountId = selectedGameAccount?.account ?? null;
   const routes = useMemo<DashboardAccountPagerRoute[]>(
     () => gameAccounts.map((gameAccount) => ({
       gameAccount,
@@ -33,27 +39,18 @@ export function DashboardAccountPager({
     })),
     [gameAccounts],
   );
-  const routeIndex = Math.max(
+  const index = Math.max(
     0,
-    routes.findIndex((route) => route.key === gameAccountId),
+    routes.findIndex((route) => route.key === selectedGameAccountId),
   );
-  const [index, setIndex] = useState(routeIndex);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronize after an external URL change
-    setIndex(routeIndex);
-  }, [routeIndex]);
-
-  useAdjacentGameAccountPrefetch(gameAccounts, gameAccountId);
+  useAdjacentGameAccountPrefetch(gameAccounts, selectedGameAccountId);
 
   const handleIndexChange = useCallback((nextIndex: number) => {
     const nextRoute = routes[nextIndex];
     if (!nextRoute) return;
 
-    setIndex(nextIndex);
-    if (nextRoute.key === gameAccountId) return;
-    router.setParams({ gameAccountId: nextRoute.key });
-  }, [gameAccountId, router, routes]);
+    selectGameAccount(nextRoute.key);
+  }, [routes, selectGameAccount]);
 
   const renderScene = useCallback(({
     route,

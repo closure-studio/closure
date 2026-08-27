@@ -42,4 +42,4 @@ export {
   DashboardOperatorsContent,
   DashboardOverviewContent,
 } from './screens/dashboard-account-content';
-export { DashboardRouteProvider, useDashboardRoute } from './dashboard-route';
+export { DashboardAccountProvider, useDashboardAccount } from './dashboard-account';

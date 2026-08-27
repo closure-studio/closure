@@ -1,12 +1,11 @@
-import { useRouter } from 'expo-router';
 import { Tabs as DashboardTabs } from 'expo-router/tabs';
 import { useEffect } from 'react';
 import { Spinner, YStack } from 'tamagui';
 
 import { MonoText } from '@/components';
 import {
-  DashboardRouteProvider,
-  useDashboardRoute,
+  DashboardAccountProvider,
+  useDashboardAccount,
 } from '@/features/dashboard';
 import {
   DashboardFrame,
@@ -26,26 +25,25 @@ function DashboardState({ label }: { label: string }) {
 
 function DashboardContent() {
   const layoutSize = useLayoutSize();
-  const router = useRouter();
   const {
-    gameAccount,
-    gameAccountId,
-    gameAccounts,
     gameAccountsQuery,
-  } = useDashboardRoute();
+    selectedGameAccount,
+    selectGameAccount,
+  } = useDashboardAccount();
+  const gameAccounts = gameAccountsQuery.data ?? [];
   const fallbackGameAccountId = gameAccounts[0]?.account;
 
   useEffect(() => {
-    if ((!gameAccountId || !gameAccount) && fallbackGameAccountId) {
-      router.setParams({ gameAccountId: fallbackGameAccountId });
+    if (!selectedGameAccount && fallbackGameAccountId) {
+      selectGameAccount(fallbackGameAccountId);
     }
-  }, [fallbackGameAccountId, gameAccount, gameAccountId, router]);
+  }, [fallbackGameAccountId, selectedGameAccount, selectGameAccount]);
 
   if (gameAccountsQuery.isPending) return <DashboardState label="LOADING ARKHOST DATA" />;
   if (gameAccountsQuery.isError) return <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
   if (gameAccounts.length === 0) return <DashboardState label="NO GAME ACCOUNTS" />;
 
-  if (!gameAccountId || !gameAccount) return null;
+  if (!selectedGameAccount) return null;
 
   return (
     <DashboardFrame>
@@ -61,7 +59,7 @@ function DashboardContent() {
           ? (props) => (
             <DashboardSmallScreenTabBar
               {...props}
-              gameAccountId={gameAccountId}
+              gameAccountId={selectedGameAccount.account}
             />
           )
           : () => null}
@@ -76,8 +74,8 @@ function DashboardContent() {
 
 export default function DashboardLayout() {
   return (
-    <DashboardRouteProvider>
+    <DashboardAccountProvider>
       <DashboardContent />
-    </DashboardRouteProvider>
+    </DashboardAccountProvider>
   );
 }

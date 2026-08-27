@@ -27,8 +27,8 @@ const mockNavigationHeader = jest.fn((_props: object) => null);
 const mockDashboardShell = jest.fn(({ children }: DashboardShellTestProps) => children);
 const mockRouterPush = jest.fn();
 const mockRouterReplace = jest.fn();
-const mockRouterSetParams = jest.fn();
 const mockRouterNavigate = jest.fn();
+const mockSelectGameAccount = jest.fn();
 const mockReturnToDashboard = jest.fn();
 const mockLogout = jest.fn();
 const mockSetBackdropTint = jest.fn();
@@ -41,7 +41,6 @@ jest.mock('expo-router', () => ({
     navigate: mockRouterNavigate,
     push: mockRouterPush,
     replace: mockRouterReplace,
-    setParams: mockRouterSetParams,
   }),
 }));
 
@@ -55,15 +54,17 @@ jest.mock('@/features/dashboard', () => ({
   DashboardShell: (props: DashboardShellTestProps) => mockDashboardShell(props),
   getGameAvatarImageUrl: () => 'avatar-url',
   selectBackdropTint: () => '#3dccdf',
-  useDashboardRoute: () => ({
-    gameAccount: {
+  useDashboardAccount: () => ({
+    selectedGameAccount: {
       account: 'G1',
       avatar: { id: 'avatar', type: 'DEFAULT' },
       color: 'primary',
       nickname: 'Doctor',
     },
-    gameAccountId: 'G1',
-    gameAccounts: [{ account: 'G1' }, { account: 'G2' }],
+    gameAccountsQuery: {
+      data: [{ account: 'G1' }, { account: 'G2' }],
+    },
+    selectGameAccount: mockSelectGameAccount,
   }),
 }));
 
@@ -143,7 +144,7 @@ describe('navigation scope frames', () => {
     expect(mockDashboardShell).toHaveBeenCalledWith(expect.objectContaining({
       selectedGameAccountId: 'G1',
     }));
-    expect(mockRouterSetParams).toHaveBeenCalledWith({ gameAccountId: 'G2' });
+    expect(mockSelectGameAccount).toHaveBeenCalledWith('G2');
     expect(mockRouterReplace).not.toHaveBeenCalled();
   });
 
