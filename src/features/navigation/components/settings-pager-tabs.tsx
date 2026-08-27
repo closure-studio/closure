@@ -122,7 +122,6 @@ export function SettingsPagerTabs({
 
   return (
     <YStack
-      display="flex"
       shrink={0}
       position="relative"
       overflow="hidden"
@@ -131,7 +130,6 @@ export function SettingsPagerTabs({
       borderBottomWidth={1}
       borderColor="$appBorder"
       bg="transparent"
-      $md={{ display: 'none' }}
     >
       <NavigationHeaderEdge />
 

@@ -1,4 +1,5 @@
 import { render } from '@testing-library/react-native';
+import { setMediaState } from '@tamagui/web';
 import { TamaguiProvider } from 'tamagui';
 
 import itemArtworkFilterLarge from '@/assets/images/inventory/grid-filter-large.webp';
@@ -18,12 +19,12 @@ jest.mock('expo-image', () => {
   };
 });
 
-async function renderArtwork(layoutSize: 'small' | 'large', source: string | number) {
+async function renderArtwork(large: boolean, source: string | number) {
+  setMediaState({ large });
   return await render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <ItemArtwork
         accessibilityLabel="Test item"
-        layoutSize={layoutSize}
         recyclingKey="test-item"
         source={source}
         testID="test-item-artwork"
@@ -33,11 +34,14 @@ async function renderArtwork(layoutSize: 'small' | 'large', source: string | num
 }
 
 describe('ItemArtwork', () => {
+  afterEach(() => {
+    setMediaState({ large: false });
+  });
   it.each([
-    { layoutSize: 'small' as const, size: 48, filter: itemArtworkFilterSmall },
-    { layoutSize: 'large' as const, size: 104, filter: itemArtworkFilterLarge },
-  ])('renders the $layoutSize artwork geometry and filter', async ({ filter, layoutSize, size }) => {
-    const view = await renderArtwork(layoutSize, 'https://example.test/item.webp');
+    { large: false, size: 48, filter: itemArtworkFilterSmall },
+    { large: true, size: 104, filter: itemArtworkFilterLarge },
+  ])('renders the responsive artwork geometry and filter', async ({ filter, large, size }) => {
+    const view = await renderArtwork(large, 'https://example.test/item.webp');
 
     expect(view.getByTestId('test-item-artwork')).toHaveStyle({
       borderBottomLeftRadius: 999,
@@ -66,7 +70,7 @@ describe('ItemArtwork', () => {
   });
 
   it('passes local asset module sources through the same image path', async () => {
-    const view = await renderArtwork('small', 42);
+    const view = await renderArtwork(false, 42);
 
     expect(view.getByTestId('test-item-artwork-image').props.src).toBe(42);
   });

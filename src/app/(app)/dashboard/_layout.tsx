@@ -1,6 +1,6 @@
 import { Tabs as DashboardTabs } from 'expo-router/tabs';
 import { useEffect } from 'react';
-import { Spinner, YStack } from 'tamagui';
+import { Spinner, YStack, useMedia } from 'tamagui';
 
 import { MonoText } from '@/components';
 import {
@@ -12,7 +12,6 @@ import {
   DashboardSmallScreenTabBar,
   dashboardPagesList,
 } from '@/features/navigation';
-import { useLayoutSize } from '@/providers/layout-size-provider';
 
 function DashboardState({ label }: { label: string }) {
   return (
@@ -24,7 +23,7 @@ function DashboardState({ label }: { label: string }) {
 }
 
 function DashboardContent() {
-  const layoutSize = useLayoutSize();
+  const { large } = useMedia();
   const {
     gameAccountsQuery,
     selectedGameAccount,
@@ -55,7 +54,7 @@ function DashboardContent() {
           lazy: true,
           sceneStyle: { backgroundColor: 'transparent' },
         }}
-        tabBar={layoutSize === 'small'
+        tabBar={!large
           ? (props) => (
             <DashboardSmallScreenTabBar
               {...props}

@@ -5,9 +5,7 @@ import { getTokens } from 'tamagui';
 
 import { ResponsiveGridRow } from '@/components';
 import { getResponsiveGridLayout, useResponsiveGridRows } from '@/hooks/use-responsive-grid-rows';
-import { useLayoutSize } from '@/providers/layout-size-provider';
 import type { Operator } from '@/schemas/game-account';
-import type { LayoutSize } from '@/schemas/layout-size';
 import { OperatorCard, OPERATOR_CARD_MIN_WIDTH, type OperatorCardLabels } from './operator-card';
 
 const OPERATOR_ROW_GAP_TOKEN = '$2';
@@ -26,13 +24,11 @@ const OperatorRow = memo(function OperatorRow({
   labels,
   row,
   gap,
-  size,
 }: {
   isLast: boolean;
   labels: OperatorCardLabels;
   row: OperatorViewModel[];
   gap: number;
-  size: LayoutSize;
 }) {
   return (
     <ResponsiveGridRow
@@ -45,7 +41,6 @@ const OperatorRow = memo(function OperatorRow({
           labels={labels}
           name={viewModel.name}
           operator={viewModel.operator}
-          size={size}
         />
       )}
     />
@@ -58,7 +53,6 @@ export function OperatorRosterView({
   operators: readonly OperatorViewModel[];
 }) {
   const { t } = useTranslation('dashboard');
-  const layoutSize = useLayoutSize();
   const gridGap = getTokens().space[OPERATOR_ROW_GAP_TOKEN].val;
   const labels = useMemo<OperatorCardLabels>(() => ({
     cellLevel: t('operators.cell.levelLabel'),
@@ -91,10 +85,9 @@ export function OperatorRosterView({
         labels={labels}
         row={row}
         gap={gridGap}
-        size={layoutSize}
       />
     ),
-    [gridGap, labels, layoutSize, rows.length],
+    [gridGap, labels, rows.length],
   );
 
   return (

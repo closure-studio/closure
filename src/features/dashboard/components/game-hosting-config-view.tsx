@@ -30,6 +30,7 @@ import {
   XStack,
   YStack,
   getTokens,
+  useMedia,
 } from 'tamagui';
 
 import {
@@ -115,6 +116,7 @@ export function GameHostingConfigView({
   const { t } = useTranslation('dashboard');
   const stageTable = useStageTable();
   const colors = getTokens().color;
+  const { large } = useMedia();
 
   const [activeEditor, setActiveEditor] = useState<ActiveConfigEditor>(null);
   const [draftNumeric, setDraftNumeric] = useState('');
@@ -265,7 +267,7 @@ export function GameHostingConfigView({
           title={t('hostingConfig.sections.reserves')}
           trailing={<DecorativeBarcode />}
         />
-        <XStack flexDirection="column" gap="$3" $sm={{ flexDirection: 'row' }}>
+        <XStack flexDirection="column" gap="$3" $large={{ flexDirection: 'row' }}>
           <YStack grow={1} shrink={1} minW={200}>
             <ConfigSummaryCard
               testID="hosting-config-card-keeping-ap"
@@ -298,7 +300,7 @@ export function GameHostingConfigView({
           title={t('hostingConfig.sections.switches')}
         />
         <XStack flexWrap="wrap" gap="$3">
-          <YStack width="100%" $sm={{ width: '48.5%' }}>
+          <YStack width="100%" $large={{ width: '48.5%' }}>
             <ConfigSummaryCard
               testID="hosting-config-card-enable-building-arrange"
               icon={Building2}
@@ -311,7 +313,7 @@ export function GameHostingConfigView({
             />
           </YStack>
 
-          <YStack width="100%" $sm={{ width: '48.5%' }}>
+          <YStack width="100%" $large={{ width: '48.5%' }}>
             <ConfigSummaryCard
               testID="hosting-config-card-auto-battle"
               icon={Swords}
@@ -324,7 +326,7 @@ export function GameHostingConfigView({
             />
           </YStack>
 
-          <YStack width="100%" $sm={{ width: '48.5%' }}>
+          <YStack width="100%" $large={{ width: '48.5%' }}>
             <ConfigSummaryCard
               testID="hosting-config-card-ignore-robot"
               icon={Bot}
@@ -337,7 +339,7 @@ export function GameHostingConfigView({
             />
           </YStack>
 
-          <YStack width="100%" $sm={{ width: '48.5%' }}>
+          <YStack width="100%" $large={{ width: '48.5%' }}>
             <ConfigSummaryCard
               testID="hosting-config-card-allow-login-assist"
               icon={ShieldAlert}
@@ -402,7 +404,7 @@ export function GameHostingConfigView({
           if (!open) closeEditor();
         }}
       >
-        <Adapt when="max-md" platform="touch">
+        <Adapt when={!large} platform="touch">
           <Sheet
             zIndex={200000}
             modal

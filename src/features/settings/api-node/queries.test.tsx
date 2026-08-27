@@ -2,11 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import type { PropsWithChildren } from 'react';
 
+import { apiNodeApi } from './api';
 import { useApiNodesQuery } from './queries';
-import {
-  configureQueryDependencies,
-  resetQueryDependencies,
-} from '@/services/query-dependencies';
 import { appStore } from '@/store';
 
 function createWrapper() {
@@ -22,7 +19,7 @@ function createWrapper() {
 }
 
 beforeEach(async () => {
-  resetQueryDependencies();
+  jest.restoreAllMocks();
   await act(() => {
     appStore.getState().logout();
   });
@@ -37,7 +34,7 @@ describe('API Node queries', () => {
       ],
       ok: true,
     });
-    configureQueryDependencies({ apiNodeAdapter: { queryNodes } });
+    jest.spyOn(apiNodeApi, 'queryNodes').mockImplementation(queryNodes);
     const { wrapper } = createWrapper();
 
     const first = await renderHook(() => useApiNodesQuery(), { wrapper });
@@ -57,7 +54,7 @@ describe('API Node queries', () => {
         data: [{ id: 'domestic', description: 'Domestic', latencyMs: 20, outcome: 'reachable' }],
         ok: true,
       }));
-    configureQueryDependencies({ apiNodeAdapter: { queryNodes } });
+    jest.spyOn(apiNodeApi, 'queryNodes').mockImplementation(queryNodes);
     const { wrapper } = createWrapper();
     const { result } = await renderHook(() => useApiNodesQuery(), { wrapper });
 

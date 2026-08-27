@@ -9,10 +9,6 @@ import { mockApiNodes } from '@/mocks/api-node';
 import { NetworkSettingsScreen } from './network-settings-screen';
 import type { ApiNode, ApiNodeId } from '@/schemas/api-node';
 
-jest.mock('@/providers/layout-size-provider', () => ({
-  useLayoutSize: () => 'small',
-}));
-
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
   const reanimatedMock = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated/mock');

@@ -40,7 +40,7 @@ export function NavigationHeader({
         items="center"
         flexDirection="row-reverse"
         gap="$2"
-        $md={{ flexDirection: 'row', px: '$5', gap: '$4' }}
+        $large={{ flexDirection: 'row', px: '$5', gap: '$4' }}
       >
         <Button
           unstyled
@@ -56,7 +56,7 @@ export function NavigationHeader({
           onPress={onSettingsPress}
           aria-label={settingsLabel}
           aria-pressed={isSettingsActive}
-          $md={{ display: 'none' }}
+          $large={{ display: 'none' }}
         >
           <Settings
             size={24}
@@ -65,7 +65,7 @@ export function NavigationHeader({
           />
         </Button>
 
-        <YStack grow={1} minW={0} items="center" justify="center" $md={{ items: 'flex-start' }}>
+        <YStack grow={1} minW={0} items="center" justify="center" $large={{ items: 'flex-start' }}>
           <TerminalText size="$4" fontWeight="700" numberOfLines={1}>{title}</TerminalText>
         </YStack>
 

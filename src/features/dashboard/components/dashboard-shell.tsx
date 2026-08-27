@@ -39,7 +39,7 @@ export function DashboardPageFrame({
       p="$3.5"
       pt="$3"
       pb={flushBottom ? '$0' : '$3.5'}
-      $md={{ px: '$5', pt: '$4', pb: '$3.5' }}
+      $large={{ px: '$5', pt: '$4', pb: '$3.5' }}
     >
       {children}
     </YStack>

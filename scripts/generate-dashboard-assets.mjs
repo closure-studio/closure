@@ -11,7 +11,6 @@ import {
   AVATAR_FILTER_SCANLINE_OPACITY,
   AVATAR_FILTER_WASH_STOPS,
 } from '../src/components/ui/avatar-filter-config.ts';
-import { ITEM_ARTWORK_SIZE } from '../src/components/ui/item-artwork-config.ts';
 import {
   OPERATOR_PORTRAIT_FILTER,
   OPERATOR_PORTRAIT_GEOMETRY,
@@ -78,9 +77,10 @@ const ICONS = [
   ...Array.from({ length: 6 }, (_, index) => ({ category: 'potential', name: `potential_${index}` })),
 ];
 
-const INVENTORY_FILTERS = Object.entries(ITEM_ARTWORK_SIZE).map(
-  ([layoutSize, size]) => ({ layoutSize, size }),
-);
+const INVENTORY_FILTERS = [
+  { name: 'small', size: 48 },
+  { name: 'large', size: 104 },
+];
 
 function parseColor(value) {
   const hexMatch = /^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(value);
@@ -505,13 +505,13 @@ async function generateCellBottomTransition(outputRoot) {
   return outputPath;
 }
 
-async function generateInventoryFilter(outputRoot, { layoutSize, size }) {
+async function generateInventoryFilter(outputRoot, { name, size }) {
   const outputPath = path.join(
     outputRoot,
     'assets',
     'images',
     'inventory',
-    `grid-filter-${layoutSize}.webp`,
+    `grid-filter-${name}.webp`,
   );
   const data = Buffer.alloc(size * size * 4);
 

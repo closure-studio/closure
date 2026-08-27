@@ -43,8 +43,7 @@ export function LargeScreenNavigationSidebar({
       borderRightWidth={1}
       borderColor="$appBorder"
       bg="$appSurface"
-      $md={{ display: 'flex' }}
-      $xl={{ width: 256 }}
+      $large={{ display: 'flex', width: 256 }}
     >
       <YStack px="$4.5" py="$4.5" gap="$2" borderBottomWidth={1} borderColor="$appBorder">
         <TerminalText size="$5" fontWeight="800" letterSpacing={2.8}>

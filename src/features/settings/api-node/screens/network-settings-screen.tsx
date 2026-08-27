@@ -2,7 +2,7 @@ import { Activity, Circle, CircleDot, Clock3, RefreshCw, Route, Server } from 'l
 import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { type QueryStatus } from '@tanstack/react-query';
-import { AnimatePresence, Button, RadioGroup, Spinner, XStack, YStack, getTokens } from 'tamagui';
+import { AnimatePresence, Button, RadioGroup, Spinner, XStack, YStack, getTokens, useMedia } from 'tamagui';
 
 import {
   MonoText,
@@ -16,7 +16,6 @@ import {
 } from '@/components';
 import { API_NODE_HOSTS } from '@/constants/api';
 import type { ApiNodeHost } from '@/constants/api';
-import { useLayoutSize } from '@/providers/layout-size-provider';
 import type { ApiNode, ApiNodeId } from '@/schemas/api-node';
 import type { ApiNodeFailure } from '../api';
 import { SettingsPage } from '../../components/settings-page';
@@ -52,7 +51,7 @@ export function NetworkSettingsScreen({
 }: NetworkSettingsScreenProps) {
   const { t } = useTranslation('settings');
   const colors = getTokens().color;
-  const layoutSize = useLayoutSize();
+  const { large } = useMedia();
   const reducedMotion = useReducedMotion();
   const nodesById = new Map(nodes.map((node) => [node.id, node]));
   const buildNode = (host: ApiNodeHost): ApiNode => {
@@ -97,8 +96,8 @@ export function NetworkSettingsScreen({
         title={t('network.title')}
       />
     )}>
-      <YStack gap="$3" $md={{ gap: '$5' }}>
-        {layoutSize === 'large' ? (
+      <YStack gap="$3" $large={{ gap: '$5' }}>
+        {large ? (
           <Frame cornerBrackets minH={320} overflow="hidden" p="$6" gap="$5">
             <YStack
               position="absolute"
@@ -108,8 +107,8 @@ export function NetworkSettingsScreen({
               opacity={isChecking ? 1 : 0.55}
             />
             {([
-              { t: '$4', r: '$4', width: '$12', height: '$12', opacity: 0.22, scale: isChecking ? 1.08 : 1, transition: reducedMotion ? '0ms' : 'slow', md: { t: '$5', r: '$6', width: '$15', height: '$15' } },
-              { t: '$6', r: '$6', width: '$8', height: '$8', opacity: 0.12, scale: 1, transition: '0ms', md: { t: '$8', r: '$9', width: '$10', height: '$10' } },
+              { t: '$5', r: '$6', width: '$15', height: '$15', opacity: 0.22, scale: isChecking ? 1.08 : 1, transition: reducedMotion ? '0ms' : 'slow' },
+              { t: '$8', r: '$9', width: '$10', height: '$10', opacity: 0.12, scale: 1, transition: '0ms' },
             ] as const).map((ring) => (
               <YStack
                 key={ring.t}
@@ -117,7 +116,6 @@ export function NetworkSettingsScreen({
                 t={ring.t} r={ring.r} width={ring.width} height={ring.height}
                 rounded="$10" borderWidth={1} borderColor="$appAccentBorder"
                 opacity={ring.opacity} scale={ring.scale} transition={ring.transition}
-                $md={ring.md}
               />
             ))}
 
@@ -129,7 +127,7 @@ export function NetworkSettingsScreen({
               <MonoText size="$1">{t('network.sessionId')}</MonoText>
             </XStack>
 
-            <XStack grow={1} flexDirection="column" justify="space-between" gap="$6" $md={{ flexDirection: 'row', items: 'flex-end', gap: '$8' }}>
+            <XStack grow={1} flexDirection="row" items="flex-end" justify="space-between" gap="$8">
               <YStack grow={1} minW={0} gap="$2">
                 <MonoText size="$1" color="$appMuted">{selectedApiNode.description}</MonoText>
                 <AnimatePresence mode="wait">
@@ -143,7 +141,6 @@ export function NetworkSettingsScreen({
                     <TerminalText
                       size="$10" lineHeight="$10" fontWeight="900" letterSpacing={-1.5}
                       color="$appText" textTransform="uppercase" numberOfLines={2}
-                      $md={{ size: '$10', lineHeight: '$10' }}
                     >
                       {t(`network.nodes.${selectedApiNode.id}`)}
                     </TerminalText>
@@ -151,7 +148,7 @@ export function NetworkSettingsScreen({
                 </AnimatePresence>
               </YStack>
 
-              <YStack minW={180} items="flex-start" gap="$1" $md={{ items: 'flex-end' }}>
+              <YStack minW={180} items="flex-end" gap="$1">
                 <XStack items="center" gap="$2">
                   <Activity size={14} color={colors.appMuted.val} strokeWidth={1.6} />
                   <MonoText size="$1">{t('network.latency')}</MonoText>
@@ -190,7 +187,7 @@ export function NetworkSettingsScreen({
         ) : null}
 
         <YStack gap="$3">
-          {layoutSize === 'large' ? (
+          {large ? (
             <XStack items="center" justify="space-between" gap="$3">
               <XStack items="baseline" gap="$2">
                 <TerminalText size="$5" fontWeight="800">{t('network.nodesTitle')}</TerminalText>
@@ -222,7 +219,7 @@ export function NetworkSettingsScreen({
               value={selectedApiNodeId}
               indicator={<NotchedSelectionIndicator />}
               width="100%" flexDirection="column" gap="$3"
-              $lg={{ flexDirection: 'row' }}
+              $large={{ flexDirection: 'row' }}
             >
               {displayNodes.map((apiNode, index) => {
                 const isSelected = apiNode.id === selectedApiNodeId;
@@ -231,7 +228,7 @@ export function NetworkSettingsScreen({
                 const SelectionIcon = isSelected ? CircleDot : Circle;
 
                 return (
-                  <SlidingSelection.Item key={apiNode.id} value={apiNode.id} width="100%" minW={0} $lg={{ flexBasis: 0, grow: 1 }}>
+                  <SlidingSelection.Item key={apiNode.id} value={apiNode.id} width="100%" minW={0} $large={{ flexBasis: 0, grow: 1 }}>
                     <RadioGroup.Item asChild unstyled id={`api-node-${apiNode.id}`} value={apiNode.id}>
                       <NotchedButton
                         isSelected={isSelected}
@@ -239,7 +236,7 @@ export function NetworkSettingsScreen({
                         width="100%" minW={0} overflow="hidden" p="$3"
                         flexDirection="column" items="stretch" justify="flex-start" gap="$2.5"
                         aria-label={t(`network.nodes.${apiNode.id}`)}
-                        $md={{ p: '$3.5', gap: '$3.5' }}
+                        $large={{ p: '$3.5', gap: '$3.5' }}
                       >
                         <TerminalText
                           position="absolute" t="$2" r="$3"
@@ -247,7 +244,7 @@ export function NetworkSettingsScreen({
                           color={isSelected ? '$appAccent' : '$appBorderSolid'}
                           opacity={isSelected ? 0.16 : 0.7}
                           fontVariant={['tabular-nums']}
-                          $md={{ size: '$10', lineHeight: '$10' }}
+                          $large={{ size: '$10', lineHeight: '$10' }}
                         >
                           {String(index + 1).padStart(2, '0')}
                         </TerminalText>
@@ -264,7 +261,7 @@ export function NetworkSettingsScreen({
 
                         <XStack items="flex-end" justify="space-between" gap="$3" z="$1">
                           <YStack grow={1} minW={0} gap="$0.5">
-                            <TerminalText size="$5" fontWeight="800" numberOfLines={1} $md={{ size: '$6' }}>
+                            <TerminalText size="$5" fontWeight="800" numberOfLines={1} $large={{ size: '$6' }}>
                               {t(`network.nodes.${apiNode.id}`)}
                             </TerminalText>
                             <MonoText size="$2" numberOfLines={1} selectable>{apiNode.description}</MonoText>
@@ -275,7 +272,7 @@ export function NetworkSettingsScreen({
                               size="$6" lineHeight="$6" fontWeight="900"
                               color={!isChecking ? latencyTone : '$appMuted'}
                               fontVariant={['tabular-nums']}
-                              $md={{ size: '$7', lineHeight: '$7' }}
+                              $large={{ size: '$7', lineHeight: '$7' }}
                             >
                               {!isChecking && isReachable ? apiNode.latencyMs : '--'}
                             </TerminalText>

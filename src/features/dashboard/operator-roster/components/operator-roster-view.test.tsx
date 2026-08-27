@@ -6,25 +6,17 @@ import * as v from 'valibot';
 import { i18n } from '@/i18n';
 import { operatorSchema } from '@/schemas/game-account';
 import type { Operator } from '@/schemas/game-account';
-import type { LayoutSize } from '@/schemas/layout-size';
 import { tamaguiConfig } from '../../../../../tamagui.config';
 import { OperatorRosterView, type OperatorViewModel } from './operator-roster-view';
-
-let mockLayoutSize: LayoutSize = 'small';
-
-jest.mock('@/providers/layout-size-provider', () => ({
-  useLayoutSize: () => mockLayoutSize,
-}));
 
 jest.mock('./operator-card', () => {
   const { Text: MockText, View: MockView } = jest.requireActual<typeof import('react-native')>('react-native');
 
   return {
     OPERATOR_CARD_MIN_WIDTH: 140,
-    OperatorCard: ({ name, operator, size }: { name: string; operator: Operator; size: LayoutSize }) => (
+    OperatorCard: ({ name, operator }: { name: string; operator: Operator }) => (
       <MockView testID={`operator-card-${operator.charId}`}>
         <MockText testID={`operator-card-name-${operator.charId}`}>{name}</MockText>
-        <MockText testID={`operator-card-size-${operator.charId}`}>{size}</MockText>
       </MockView>
     ),
   };
@@ -64,10 +56,6 @@ async function renderRoster() {
 }
 
 describe('OperatorRosterView', () => {
-  afterEach(() => {
-    mockLayoutSize = 'small';
-  });
-
   it('waits for measurement, then renders stable operator rows', async () => {
     const screen = await renderRoster();
 
@@ -82,16 +70,5 @@ describe('OperatorRosterView', () => {
     expect(screen.getByText('阿米娅')).toBeTruthy();
     expect(screen.getByText('德克萨斯')).toBeTruthy();
     expect(screen.getByText('能天使')).toBeTruthy();
-    expect(screen.getByTestId('operator-card-size-char_001').props.children).toBe('small');
-  });
-
-  it('passes the large layout branch to each card', async () => {
-    mockLayoutSize = 'large';
-    const screen = await renderRoster();
-
-    await fireEvent(screen.getByTestId('operator-roster-list'), 'layout', gridLayoutEvent(320));
-
-    expect(screen.getByTestId('operator-card-size-char_001').props.children).toBe('large');
-    expect(screen.getByTestId('operator-card-size-char_002').props.children).toBe('large');
   });
 });

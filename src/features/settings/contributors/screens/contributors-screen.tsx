@@ -25,7 +25,7 @@ export function ContributorsScreen() {
         />
       )}
     >
-      <YStack gap="$3" $md={{ gap: '$5' }}>
+      <YStack gap="$3" $large={{ gap: '$5' }}>
         <ContributorsTribute
           body={t('contributors.intro')}
           recipientCode={t('contributors.recipientCode')}

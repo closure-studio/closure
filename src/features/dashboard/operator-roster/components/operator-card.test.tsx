@@ -1,12 +1,12 @@
 import { render } from '@testing-library/react-native';
 import type { ReactElement, ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
+import { setMediaState } from '@tamagui/web';
 import { TamaguiProvider } from 'tamagui';
 import * as v from 'valibot';
 
 import { operatorSchema } from '@/schemas/game-account';
 import type { Operator } from '@/schemas/game-account';
-import type { LayoutSize } from '@/schemas/layout-size';
 import { tamaguiConfig } from '../../../../../tamagui.config';
 import { OperatorCard, type OperatorCardLabels } from './operator-card';
 import { getOperatorPortraitUrl } from '../portrait-image';
@@ -76,15 +76,18 @@ const labels: OperatorCardLabels = {
   },
 };
 
-async function renderCard(size: LayoutSize = 'small', cardOperator: Operator = operator) {
+async function renderCard(cardOperator: Operator = operator) {
   return render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-      <OperatorCard labels={labels} name="阿米娅" operator={cardOperator} size={size} />
+      <OperatorCard labels={labels} name="阿米娅" operator={cardOperator} />
     </TamaguiProvider>,
   );
 }
 
 describe('OperatorCard', () => {
+  beforeEach(() => {
+    setMediaState({ large: false });
+  });
   it('keeps the two required masks and removes redundant portrait wrappers', async () => {
     const screen = await renderCard();
     const edgeFadeMask = screen.getByTestId('operator-card-edge-fade-mask-char_001', {
@@ -163,7 +166,8 @@ describe('OperatorCard', () => {
   });
 
   it('does not create compact artwork on the large layout branch', async () => {
-    const screen = await renderCard('large');
+    setMediaState({ large: true });
+    const screen = await renderCard();
 
     expect(screen.getByTestId('operator-card-char_001')).toBeTruthy();
     expect(screen.queryByTestId('operator-card-edge-fade-mask-char_001')).toBeNull();

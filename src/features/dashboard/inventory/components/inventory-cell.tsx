@@ -3,13 +3,10 @@ import { XStack, YStack, styled } from 'tamagui';
 
 import { ItemArtwork, MonoText, TerminalText } from '@/components';
 import type { ItemTableItem } from '@/schemas/game-data';
-import type { LayoutSize } from '@/schemas/layout-size';
 import { getItemImageUrl } from '@/utils/item-image';
 
-export const INVENTORY_CELL_MIN_WIDTH_TOKEN = {
-  small: '$11',
-  large: '$16',
-} as const;
+export const INVENTORY_CELL_MIN_WIDTH = 124;
+export const INVENTORY_CELL_LARGE_MIN_WIDTH = 224;
 
 export type InventoryEntry = {
   item: ItemTableItem;
@@ -35,6 +32,14 @@ const InventoryCellFrame = styled(XStack, {
   pressStyle: {
     opacity: 0.68,
   },
+  gap: '$0',
+  px: '$0',
+  py: '$0',
+  $large: {
+    gap: '$3',
+    px: '$3',
+    py: '$2',
+  },
   variants: {
     imageOnly: {
       true: { justify: 'center' },
@@ -44,15 +49,10 @@ const InventoryCellFrame = styled(XStack, {
       true: { bg: '$appAccentSubtle' },
       false: {},
     },
-    layoutSize: {
-      small: { gap: '$0', px: '$0', py: '$0' },
-      large: { gap: '$3', px: '$3', py: '$2' },
-    },
   } as const,
   defaultVariants: {
     imageOnly: false,
     selected: false,
-    layoutSize: 'small',
   },
 });
 
@@ -77,19 +77,16 @@ export const InventoryCell = memo(function InventoryCell({
   itemWidth,
   onSelect,
   selected,
-  size,
 }: {
   entry: InventoryEntry;
   imageOnly: boolean;
   itemWidth: number | undefined;
   onSelect: (itemId: string) => void;
   selected: boolean;
-  size: LayoutSize;
 }) {
   const artwork = (
     <ItemArtwork
       accessibilityLabel={entry.item.name}
-      layoutSize={size}
       recyclingKey={entry.itemId}
       source={getItemImageUrl(entry.item.icon)}
       testID={`inventory-item-image-${entry.itemId}`}
@@ -105,37 +102,36 @@ export const InventoryCell = memo(function InventoryCell({
       onPress={() => onSelect(entry.itemId)}
       imageOnly={imageOnly}
       selected={selected}
-      layoutSize={size}
       width={itemWidth ?? '100%'}
     >
-      {size === 'small' ? (
-        <YStack ml="$1.5" my="$0.5">
-          {artwork}
-        </YStack>
-      ) : artwork}
+      <YStack ml="$1.5" my="$0.5" $large={{ ml: '$0', my: '$0' }}>
+        {artwork}
+      </YStack>
       {imageOnly ? null : (
         <YStack
           testID={`inventory-item-info-${entry.itemId}`}
           grow={1}
           shrink={1}
           minW={0}
-          pl={size === 'small' ? '$2' : '$0'}
-          pr={size === 'small' ? '$2.5' : '$0'}
-          py={size === 'small' ? '$1.5' : '$0'}
+          pl="$2"
+          pr="$2.5"
+          py="$1.5"
           items="flex-end"
           justify="center"
           gap="$1"
+          $large={{ pl: '$0', pr: '$0', py: '$0' }}
         >
           <TerminalText
             testID={`inventory-item-name-${entry.itemId}`}
             width="100%"
             shrink={1}
             minW={0}
-            size={size === 'small' ? '$2.5' : '$3'}
-            lineHeight={size === 'small' ? '$3' : '$4'}
+            size="$2.5"
+            lineHeight="$3"
             fontWeight="700"
             numberOfLines={2}
             text="right"
+            $large={{ size: '$3', lineHeight: '$4' }}
           >
             {entry.item.name}
           </TerminalText>
@@ -143,10 +139,11 @@ export const InventoryCell = memo(function InventoryCell({
             testID={`inventory-item-quantity-${entry.itemId}`}
             width="100%"
             shrink={0}
-            size={size === 'small' ? '$2' : '$2.5'}
-            lineHeight={size === 'small' ? '$2.5' : '$3'}
+            size="$2"
+            lineHeight="$2.5"
             color="$appAccent"
             text="right"
+            $large={{ size: '$2.5', lineHeight: '$3' }}
           >
             {formatInventoryQuantity(entry.quantity)}
           </MonoText>

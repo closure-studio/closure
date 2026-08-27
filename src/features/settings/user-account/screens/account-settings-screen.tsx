@@ -36,7 +36,6 @@ import {
   passwordChangeIssue,
 } from '@/schemas/user-account';
 import type { PasswordChangeInput } from '@/schemas/user-account';
-import { useLayoutSize } from '@/providers/layout-size-provider';
 import { SettingsPage } from '../../components/settings-page';
 
 type PasswordField = 'currentPassword' | 'newPassword' | 'repeatNewPassword';
@@ -151,7 +150,7 @@ function AccountIdentityPanel({
       gap="$4"
       tone="cyan"
       cornerBrackets
-      $md={{ p: '$4.5' }}
+      $large={{ p: '$4.5' }}
     >
       <AccountPanelHeading code={titleCode} title={title} />
 
@@ -186,7 +185,7 @@ function AccountIdentityPanel({
         </YStack>
       </XStack>
 
-      <XStack flexDirection="column" gap="$3" $sm={{ flexDirection: 'row' }}>
+      <XStack flexDirection="column" gap="$3" $large={{ flexDirection: 'row' }}>
         <AccountFact
           icon={CalendarClock}
           label={registeredAtLabel}
@@ -211,7 +210,6 @@ export function AccountSettingsScreen({
   const { t, i18n } = useTranslation('settings');
   const { t: tCommon } = useTranslation('common');
   const colors = getTokens().color;
-  const layoutSize = useLayoutSize();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [repeatNewPassword, setRepeatNewPassword] = useState('');
@@ -319,15 +317,13 @@ export function AccountSettingsScreen({
         />
       )}
     >
-      <YStack gap="$3" $md={{ gap: '$5' }}>
-        {layoutSize === 'small' ? (
-          <MonoText size="$2" lineHeight="$3" color="$appText" select="text">
-            {t('account.description')}
-          </MonoText>
-        ) : null}
+      <YStack gap="$3" $large={{ gap: '$5' }}>
+        <MonoText size="$2" lineHeight="$3" color="$appText" select="text" $large={{ display: 'none' }}>
+          {t('account.description')}
+        </MonoText>
 
-        <XStack minW={0} flexDirection="column" gap="$4" $lg={{ flexDirection: 'row', items: 'flex-start' }}>
-          <YStack width="100%" gap="$4" shrink={0} $lg={{ width: '34%', maxW: 380 }}>
+        <XStack minW={0} flexDirection="column" gap="$4" $large={{ flexDirection: 'row', items: 'flex-start' }}>
+          <YStack width="100%" gap="$4" shrink={0} $large={{ width: '34%', maxW: 380 }}>
             <AccountIdentityPanel
               email={principal.email}
               registeredAt={registeredAt}
@@ -341,14 +337,14 @@ export function AccountSettingsScreen({
             />
           </YStack>
 
-          <YStack grow={1} shrink={1} minW={0} width="100%" $lg={{ width: 'auto' }}>
+          <YStack grow={1} shrink={1} minW={0} width="100%" $large={{ width: 'auto' }}>
             <Form onSubmit={handlePasswordSubmit}>
               <Frame
                 testID="account-password-panel"
                 p="$3.5"
                 gap="$4"
                 cornerBrackets
-                $md={{ p: '$4.5' }}
+                $large={{ p: '$4.5' }}
               >
                 <AccountPanelHeading
                   code={t('account.passwordCode')}
@@ -367,7 +363,7 @@ export function AccountSettingsScreen({
                   value: currentPassword,
                 })}
 
-                <XStack flexDirection="column" gap="$3" $sm={{ flexDirection: 'row' }}>
+                <XStack flexDirection="column" gap="$3" $large={{ flexDirection: 'row' }}>
                   <YStack grow={1} minW={0}>
                     {renderPasswordField({
                       autoComplete: 'new-password',

@@ -39,10 +39,6 @@ jest.mock('@/providers', () => ({
   AppProvider: mockAppProvider,
 }));
 
-jest.mock('@/providers/layout-size-provider', () => ({
-  useLayoutSize: () => 'small',
-}));
-
 jest.mock('@/store', () => ({
   useAppStore: (selector: (state: { auth: { session: object | null } }) => unknown) => selector({
     auth: { session: mockSession },

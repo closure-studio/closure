@@ -4,7 +4,6 @@ import { Text } from 'react-native';
 import { TamaguiProvider } from 'tamagui';
 
 import { ROUTES } from '@/constants/routes';
-import type { LayoutSize } from '@/schemas/layout-size';
 import { tamaguiConfig } from '../../../tamagui.config';
 import { DashboardFrame } from './screens/dashboard-frame';
 import { SettingsFrame } from './screens/settings-frame';
@@ -33,7 +32,7 @@ const mockReturnToDashboard = jest.fn();
 const mockLogout = jest.fn();
 const mockSetBackdropTint = jest.fn();
 let mockPathname = '/dashboard/overview';
-let mockLayoutSize: LayoutSize = 'small';
+let mockLarge = false;
 
 jest.mock('expo-router', () => ({
   usePathname: () => mockPathname,
@@ -68,8 +67,9 @@ jest.mock('@/features/dashboard', () => ({
   }),
 }));
 
-jest.mock('@/providers/layout-size-provider', () => ({
-  useLayoutSize: () => mockLayoutSize,
+jest.mock('tamagui', () => ({
+  ...jest.requireActual<typeof import('tamagui')>('tamagui'),
+  useMedia: () => ({ large: mockLarge }),
 }));
 
 jest.mock('@/features/session', () => ({
@@ -107,7 +107,7 @@ describe('navigation scope frames', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPathname = '/dashboard/overview';
-    mockLayoutSize = 'small';
+    mockLarge = false;
   });
 
   it('pushes the complete Settings screen from Dashboard', async () => {
