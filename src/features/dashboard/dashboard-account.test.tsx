@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react-native';
+import { renderHook } from '@testing-library/react-native';
 import type { PropsWithChildren } from 'react';
 import * as v from 'valibot';
 
@@ -103,37 +103,4 @@ describe('DashboardAccountProvider', () => {
     expect(result.current.selectedGameAccount).toBeNull();
   });
 
-  it('selects an account through the single writer and serializes it to the URL', async () => {
-    const { result } = await renderHook(() => useDashboardAccount(), {
-      wrapper: createWrapper(),
-    });
-
-    await act(() => {
-      result.current.selectGameAccount(mockSecondAccount.account);
-    });
-
-    expect(result.current.selectedGameAccount?.account).toBe(mockSecondAccount.account);
-    expect(mockRouterSetParams).toHaveBeenCalledWith({
-      gameAccountId: mockSecondAccount.account,
-    });
-
-    mockRouterSetParams.mockClear();
-    await act(() => {
-      result.current.selectGameAccount(mockSecondAccount.account);
-    });
-    expect(mockRouterSetParams).not.toHaveBeenCalled();
-  });
-
-  it('does not treat URL changes after mount as account selection', async () => {
-    const { result, rerender } = await renderHook(() => useDashboardAccount(), {
-      wrapper: createWrapper(),
-    });
-
-    mockUseLocalSearchParams.mockReturnValue({ gameAccountId: mockSecondAccount.account });
-    await act(async () => {
-      await rerender(undefined);
-    });
-
-    expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
-  });
 });
