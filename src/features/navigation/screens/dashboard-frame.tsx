@@ -11,11 +11,11 @@ import {
 import { NavigationFrame } from '../components/navigation-frame';
 import { NavigationHeader } from '../components/navigation-header';
 import {
-  dashboardNavigation,
+  dashboardDefaultPage,
   dashboardPagesList,
   dashboardPageHref,
   getDashboardPageId,
-  settingsNavigation,
+  settingsDefaultPage,
 } from '../navigation-config';
 import { useAppLogout } from '../navigation-actions';
 
@@ -26,7 +26,7 @@ export function DashboardFrame({ children }: PropsWithChildren) {
   const router = useRouter();
   const onLogout = useAppLogout();
   const { gameAccount, gameAccountId, gameAccounts } = useDashboardRoute();
-  const activePageId = getDashboardPageId(pathname) ?? dashboardNavigation.defaultPage.id;
+  const activePageId = getDashboardPageId(pathname) ?? dashboardDefaultPage.id;
   const items = dashboardPagesList.map((page) => ({
     icon: page.icon,
     id: page.id,
@@ -40,7 +40,7 @@ export function DashboardFrame({ children }: PropsWithChildren) {
   };
 
   const handleOpenSettings = () => {
-    router.push(settingsNavigation.defaultPage.route);
+    router.push(settingsDefaultPage.route);
   };
 
   const handleSelectGameAccount = (nextGameAccountId: string) => {

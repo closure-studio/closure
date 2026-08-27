@@ -84,7 +84,7 @@ describe('DashboardRouteProvider', () => {
     expect(result.current.gameAccounts).toHaveLength(2);
   });
 
-  it('rejects array route parameters before they reach account lookup', async () => {
+  it('ignores non-string account route parameters', async () => {
     mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: ['G1'] });
 
     const { result } = await renderHook(() => useDashboardRoute(), {

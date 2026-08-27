@@ -12,8 +12,8 @@ import {
 import {
   DashboardFrame,
   DashboardSmallScreenTabBar,
+  dashboardDefaultPage,
   dashboardPagesList,
-  dashboardNavigation,
   dashboardPageHref,
 } from '@/features/navigation';
 import { useSessionBackdrop } from '@/features/session';
@@ -58,7 +58,7 @@ function DashboardContent() {
     return (
       <Redirect
         href={dashboardPageHref(
-          dashboardNavigation.defaultPage.id,
+          dashboardDefaultPage.id,
           firstGameAccount.account,
         )}
       />

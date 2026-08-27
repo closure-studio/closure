@@ -20,12 +20,8 @@ const dashboardPages = {
   activity: { id: 'activity', route: '/dashboard/activity', icon: CalendarClock },
 } as const;
 
-export const dashboardNavigation = {
-  defaultPage: dashboardPages.overview,
-  pages: dashboardPages,
-} as const;
-
 export const dashboardPagesList = Object.values(dashboardPages);
+export const dashboardDefaultPage = dashboardPages.overview;
 
 const settingsPages = {
   network: { id: 'network', route: ROUTES.settingsNetwork, icon: Wifi },
@@ -33,17 +29,13 @@ const settingsPages = {
   contributors: { id: 'contributors', route: ROUTES.settingsContributors, icon: HeartHandshake },
 } as const;
 
-export const settingsNavigation = {
-  defaultPage: settingsPages.network,
-  pages: settingsPages,
-} as const;
-
 export const settingsPagesList = Object.values(settingsPages);
+export const settingsDefaultPage = settingsPages.network;
 
-export type DashboardPageId = keyof typeof dashboardNavigation.pages;
-export type SettingsPageId = keyof typeof settingsNavigation.pages;
+export type DashboardPageId = keyof typeof dashboardPages;
+export type SettingsPageId = keyof typeof settingsPages;
 export type SettingsPageRoute =
-  (typeof settingsNavigation.pages)[SettingsPageId]['route'];
+  (typeof settingsPages)[SettingsPageId]['route'];
 export type NavigationScope = 'dashboard' | 'settings';
 
 export function dashboardPageHref(

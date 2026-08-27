@@ -5,13 +5,9 @@ import {
   useContext,
   useState,
 } from 'react';
-import * as v from 'valibot';
 
 import { ROUTES } from '@/constants/routes';
-import {
-  gameAccountSearchParamsSchema,
-  type GameAccount,
-} from '@/schemas/game-account';
+import type { GameAccount } from '@/schemas/game-account';
 import {
   findGameAccountById,
   useGameAccountsQuery,
@@ -32,11 +28,8 @@ const DashboardRouteContext = createContext<DashboardRouteContextValue | null>(n
 
 export function DashboardRouteProvider({ children }: PropsWithChildren) {
   const pathname = usePathname();
-  const params = useGlobalSearchParams<DashboardRouteParams>();
-  const parsedParams = v.safeParse(gameAccountSearchParamsSchema, params);
-  const routeAccountId = parsedParams.success
-    ? parsedParams.output.gameAccountId ?? null
-    : null;
+  const { gameAccountId: rawGameAccountId } = useGlobalSearchParams<DashboardRouteParams>();
+  const routeAccountId = typeof rawGameAccountId === 'string' ? rawGameAccountId : null;
   const isDashboardPath = pathname === ROUTES.dashboard
     || pathname.startsWith(`${ROUTES.dashboard}/`);
   const [retainedAccountId, setRetainedAccountId] = useState(routeAccountId);

@@ -8,7 +8,7 @@ import { NavigationFrame } from '../components/navigation-frame';
 import { NavigationHeader } from '../components/navigation-header';
 import {
   getSettingsPageId,
-  settingsNavigation,
+  settingsDefaultPage,
   settingsPagesList,
 } from '../navigation-config';
 import { useAppLogout, useReturnToDashboard } from '../navigation-actions';
@@ -20,7 +20,7 @@ export function SettingsFrame({ children }: PropsWithChildren) {
   const router = useRouter();
   const onLogout = useAppLogout();
   const handleReturnToDashboard = useReturnToDashboard();
-  const activePageId = getSettingsPageId(pathname) ?? settingsNavigation.defaultPage.id;
+  const activePageId = getSettingsPageId(pathname) ?? settingsDefaultPage.id;
   const items = settingsPagesList.map((page) => ({
     icon: page.icon,
     id: page.id,

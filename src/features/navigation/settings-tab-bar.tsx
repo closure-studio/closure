@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { SettingsPagerTabs } from './components/settings-pager-tabs';
-import { settingsNavigation, settingsPagesList } from './navigation-config';
+import { settingsDefaultPage, settingsPagesList } from './navigation-config';
 import { useReturnToDashboard } from './navigation-actions';
 
 type SettingsTabBarProps = {
@@ -19,7 +19,7 @@ export function SettingsTabBar({ navigation, state }: SettingsTabBarProps) {
   const onBack = useReturnToDashboard();
   const activeRoute = state.routes[state.index];
   const activeId = settingsPagesList.find((page) => page.id === activeRoute?.name)?.id
-    ?? settingsNavigation.defaultPage.id;
+    ?? settingsDefaultPage.id;
   const items = settingsPagesList.map((page) => ({
     id: page.id,
     label: t(`pages.${page.id}.label`),
