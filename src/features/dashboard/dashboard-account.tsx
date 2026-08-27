@@ -4,7 +4,6 @@ import {
   type PropsWithChildren,
   useCallback,
   useContext,
-  useState,
 } from 'react';
 import * as v from 'valibot';
 
@@ -32,10 +31,8 @@ const DashboardAccountContext = createContext<DashboardAccountContextValue | nul
 export function DashboardAccountProvider({ children }: PropsWithChildren) {
   const { gameAccountId: routeGameAccountId } = useLocalSearchParams<DashboardRouteParams>();
   const router = useRouter();
-  const [gameAccountId, setGameAccountId] = useState<string | null>(() => {
-    const result = v.safeParse(gameAccountIdSchema, routeGameAccountId);
-    return result.success ? result.output : null;
-  });
+  const gameAccountIdResult = v.safeParse(gameAccountIdSchema, routeGameAccountId);
+  const gameAccountId = gameAccountIdResult.success ? gameAccountIdResult.output : null;
   const gameAccountsQuery = useGameAccountsQuery();
   const selectedGameAccount = findGameAccountById(
     gameAccountsQuery.data,
@@ -45,7 +42,6 @@ export function DashboardAccountProvider({ children }: PropsWithChildren) {
   const selectGameAccount = useCallback((nextGameAccountId: string) => {
     if (nextGameAccountId === gameAccountId) return;
 
-    setGameAccountId(nextGameAccountId);
     router.setParams({ gameAccountId: nextGameAccountId });
   }, [gameAccountId, router]);
 
