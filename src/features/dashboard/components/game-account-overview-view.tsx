@@ -64,7 +64,11 @@ export function GameAccountOverviewView({
 
   return (
     <XStack testID="overview-summary-grid" flexWrap="wrap" items="flex-start" gap={20} pb="$4">
-      <YStack grow={2} minW={280} flexBasis={560}>
+      <YStack
+        testID="overview-profile-column"
+        width="100%"
+        $large={{ flexBasis: 560, grow: 2, minW: 280, width: 'auto' }}
+      >
         <DashboardSummaryFrame
           activeSection={activeSection}
           label={t('overview.profile')}
