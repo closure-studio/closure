@@ -77,6 +77,9 @@ const geistMonoFont = createFont({
 export const tamaguiConfig = createTamagui({
   ...defaultConfig,
   animations,
+  media: {
+    large: { minWidth: 768 },
+  },
   fonts: {
     ...defaultConfig.fonts,
     body: oxaniumFont,

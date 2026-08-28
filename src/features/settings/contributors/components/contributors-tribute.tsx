@@ -242,7 +242,7 @@ export function ContributorsTribute({
       onLayout={handleLayout}
       onPointerEnter={handleHoverIn}
       onPointerLeave={handleHoverOut}
-      $md={{ px: '$5', py: '$3' }}
+      $large={{ px: '$5', py: '$3' }}
       $platform-web={{
         clipPath: 'polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%)',
       }}
@@ -273,7 +273,7 @@ export function ContributorsTribute({
         position="relative"
         z={1}
         gap="$4"
-        $md={{ gap: '$4' }}
+        $large={{ gap: '$4' }}
       >
         <Animated.View style={[styles.animatedContent, bodyStyle]}>
           <MonoText
@@ -294,7 +294,7 @@ export function ContributorsTribute({
             minW={0}
             gap="$2"
             pt="$1"
-            $md={{ gap: '$2.5', pt: '$2' }}
+            $large={{ gap: '$2.5', pt: '$2' }}
           >
             <XStack
               self="flex-start"
@@ -303,7 +303,7 @@ export function ContributorsTribute({
               px="$2"
               py="$0.5"
               bg="$appWarning"
-              $md={{ px: '$2.5' }}
+              $large={{ px: '$2.5' }}
             >
               <MonoText
                 testID="contributors-tribute-recipient-title"
@@ -329,7 +329,7 @@ export function ContributorsTribute({
               flexWrap="wrap"
               gap="$1.5"
               pb="$1.5"
-              $md={{ pb: '$2' }}
+              $large={{ pb: '$2' }}
             >
               <TerminalText
                 testID="contributors-tribute-recipient-prefix"
@@ -341,9 +341,7 @@ export function ContributorsTribute({
                 textTransform="uppercase"
                 shrink={0}
                 select="text"
-                $xxs={{ size: '$3', lineHeight: '$3' }}
-                $xs={{ size: '$3', lineHeight: '$4' }}
-                $md={{ size: '$4', lineHeight: '$4' }}
+                $large={{ size: '$4', lineHeight: '$4' }}
               >
                 {recipientPrefix}
               </TerminalText>
@@ -358,9 +356,7 @@ export function ContributorsTribute({
                 letterSpacing={-0.6}
                 textTransform="uppercase"
                 select="text"
-                $xxs={{ size: '$8', lineHeight: '$8' }}
-                $xs={{ size: '$9', lineHeight: '$9' }}
-                $md={{ size: '$10', lineHeight: '$10' }}
+                $large={{ size: '$10', lineHeight: '$10' }}
               >
                 {recipientCallsign}
               </TerminalText>

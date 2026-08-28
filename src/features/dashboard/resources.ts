@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { GameResourceResult } from './api';
+import { gameResourcesApi, type GameResourceResult } from './api';
 import {
   GAME_RESOURCE_CACHE_KEYS,
   loadCachedGameResource,
@@ -12,7 +12,6 @@ import {
   bundledItemTable,
   bundledStageTable,
 } from './game-data';
-import { getQueryDependencies } from '@/services/query-dependencies';
 import {
   characterTableSchema,
   itemTableSchema,
@@ -90,7 +89,7 @@ export function useCharacterTable(): CharacterTable {
     GAME_RESOURCE_CACHE_KEYS.character,
     characterTableSchema,
     characterBundled,
-    (updatedAt) => getQueryDependencies().gameResourcesApi.fetchCharacter(updatedAt),
+    (updatedAt) => gameResourcesApi.fetchCharacter(updatedAt),
   ).data.table;
 }
 
@@ -100,7 +99,7 @@ export function useItemTable(): ItemTable {
     GAME_RESOURCE_CACHE_KEYS.item,
     itemTableSchema,
     itemBundled,
-    (updatedAt) => getQueryDependencies().gameResourcesApi.fetchItem(updatedAt),
+    (updatedAt) => gameResourcesApi.fetchItem(updatedAt),
   ).data.table;
 }
 
@@ -110,6 +109,6 @@ export function useStageTable(): StageTable {
     GAME_RESOURCE_CACHE_KEYS.stage,
     stageTableSchema,
     stageBundled,
-    (updatedAt) => getQueryDependencies().gameResourcesApi.fetchStage(updatedAt),
+    (updatedAt) => gameResourcesApi.fetchStage(updatedAt),
   ).data.table;
 }

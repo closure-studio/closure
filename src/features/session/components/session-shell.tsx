@@ -36,7 +36,7 @@ export function SessionShell({ children }: PropsWithChildren) {
           maxH="100%"
           overflow="hidden"
           bg="$appBackground"
-          $md={{ maxW: '100%' }}
+          $large={{ maxW: '100%' }}
         >
           <SessionBackdrop tint={backdropTint} />
           <SafeAreaView

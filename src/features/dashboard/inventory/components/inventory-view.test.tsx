@@ -1,5 +1,6 @@
 import { fireEvent, render } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
+import { setMediaState } from '@tamagui/web';
 import { TamaguiProvider } from 'tamagui';
 import * as v from 'valibot';
 
@@ -9,15 +10,8 @@ import inventoryGridFilterSmall from '@/assets/images/inventory/grid-filter-smal
 import { getResponsiveGridLayout } from '@/hooks/use-responsive-grid-rows';
 import { itemTableSchema } from '@/schemas/game-data';
 import { inventorySchema } from '@/schemas/game-account';
-import type { LayoutSize } from '@/schemas/layout-size';
 import { getItemImageUrl } from '@/utils/item-image';
 import { EMPTY_INVENTORY, InventoryView } from './inventory-view';
-
-let mockLayoutSize: LayoutSize = 'small';
-
-jest.mock('@/providers/layout-size-provider', () => ({
-  useLayoutSize: () => mockLayoutSize,
-}));
 
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
@@ -126,7 +120,7 @@ describe('getResponsiveGridLayout', () => {
 describe('InventoryView', () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    mockLayoutSize = 'small';
+    setMediaState({ large: false });
   });
 
   afterEach(() => {
@@ -256,7 +250,7 @@ describe('InventoryView', () => {
   });
 
   it('uses the larger cell variant and large minimum width on Large Screen', async () => {
-    mockLayoutSize = 'large';
+    setMediaState({ large: true });
     const screen = await render(
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <InventoryView accountId="account-a" inventory={inventory} itemTable={itemTable} />

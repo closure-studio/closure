@@ -1,32 +1,27 @@
 import { FlashList } from '@shopify/flash-list';
 import { PackageOpen } from 'lucide-react-native';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { XStack, YStack, getTokens } from 'tamagui';
+import { XStack, YStack, getTokens, useMedia } from 'tamagui';
 
-import { ITEM_ARTWORK_SIZE } from '@/components/ui/item-artwork-config';
+import { ITEM_ARTWORK_LARGE_SIZE, ITEM_ARTWORK_SIZE } from '@/components/ui/item-artwork';
 import { MonoText, ResponsiveGridRow, TerminalText } from '@/components';
 import { getResponsiveGridLayout, useResponsiveGridRows } from '@/hooks/use-responsive-grid-rows';
 import type { ItemTable } from '@/schemas/game-data';
 import type { Inventory } from '@/schemas/game-account';
-import type { LayoutSize } from '@/schemas/layout-size';
-import { useLayoutSize } from '@/providers/layout-size-provider';
 import { InventoryPreviewArtwork } from './inventory-artwork';
 import {
   formatInventoryQuantity,
   InventoryCell,
   type InventoryEntry,
-  INVENTORY_CELL_MIN_WIDTH_TOKEN,
+  INVENTORY_CELL_LARGE_MIN_WIDTH,
+  INVENTORY_CELL_MIN_WIDTH,
 } from './inventory-cell';
 
 const INVENTORY_GRID_GAP_TOKEN = '$2';
-const PREVIEW_ARTWORK_SIZE = {
-  small: 64,
-  large: 94,
-} as const;
-const PREVIEW_FALLBACK_ICON_SIZE = {
-  small: 28,
-  large: 34,
-} as const;
+const PREVIEW_ARTWORK_SIZE = 64;
+const PREVIEW_ARTWORK_LARGE_SIZE = 94;
+const PREVIEW_FALLBACK_ICON_SIZE = 28;
+const PREVIEW_FALLBACK_ICON_LARGE_SIZE = 34;
 
 export const EMPTY_INVENTORY: Inventory = {};
 
@@ -40,13 +35,12 @@ function getItemDescription(value: string | null | undefined): string | undefine
 
 const InventoryPreview = memo(function InventoryPreview({
   entry,
-  size,
 }: {
   entry: InventoryEntry;
-  size: LayoutSize;
 }) {
+  const { large } = useMedia();
   const description = getItemDescription(entry.item.description);
-  const artworkSize = PREVIEW_ARTWORK_SIZE[size];
+  const artworkSize = large ? PREVIEW_ARTWORK_LARGE_SIZE : PREVIEW_ARTWORK_SIZE;
 
   return (
     <XStack
@@ -54,23 +48,25 @@ const InventoryPreview = memo(function InventoryPreview({
       width="100%"
       p="$2.5"
       items="center"
-      gap={size === 'small' ? '$2.5' : '$3'}
+      gap="$2.5"
       bg="$appSurfaceRaisedTranslucent"
       borderBottomWidth={1}
       borderColor="$appRule"
+      $large={{ gap: '$3' }}
     >
       <YStack
         testID="inventory-preview-artwork"
-        width={size === 'small' ? '$7' : '$10'}
-        height={size === 'small' ? '$7' : '$10'}
+        width="$7"
+        height="$7"
         shrink={0}
         items="center"
         justify="center"
         overflow="hidden"
+        $large={{ width: '$10', height: '$10' }}
       >
         <InventoryPreviewArtwork
           key={entry.itemId}
-          fallbackSize={PREVIEW_FALLBACK_ICON_SIZE[size]}
+          fallbackSize={large ? PREVIEW_FALLBACK_ICON_LARGE_SIZE : PREVIEW_FALLBACK_ICON_SIZE}
           height={artworkSize}
           icon={entry.item.icon}
           itemId={entry.itemId}
@@ -86,24 +82,26 @@ const InventoryPreview = memo(function InventoryPreview({
             grow={1}
             shrink={1}
             minW={0}
-            size={size === 'small' ? '$4' : '$5'}
-            lineHeight={size === 'small' ? '$5' : '$6'}
+            size="$4"
+            lineHeight="$5"
             fontWeight="800"
             numberOfLines={1}
+            $large={{ size: '$5', lineHeight: '$6' }}
           >
             {entry.item.name}
           </TerminalText>
-          <MonoText shrink={0} size={size === 'small' ? '$2' : '$2.5'} color="$appAccent">
+          <MonoText shrink={0} size="$2" color="$appAccent" $large={{ size: '$2.5' }}>
             {formatInventoryQuantity(entry.quantity)}
           </MonoText>
         </XStack>
         {description ? (
           <MonoText
             testID="inventory-preview-description"
-            size={size === 'small' ? '$1' : '$2'}
+            size="$1"
             lineHeight="$2.5"
             color="$appMuted"
             numberOfLines={2}
+            $large={{ size: '$2' }}
           >
             {description}
           </MonoText>
@@ -119,7 +117,6 @@ const InventoryRow = memo(function InventoryRow({
   gap,
   imageOnly,
   itemWidth,
-  layoutSize,
   selectedItemId,
   onSelect,
 }: {
@@ -128,7 +125,6 @@ const InventoryRow = memo(function InventoryRow({
   gap: number;
   imageOnly: boolean;
   itemWidth: number | undefined;
-  layoutSize: LayoutSize;
   selectedItemId: string | null;
   onSelect: (itemId: string) => void;
 }) {
@@ -145,7 +141,6 @@ const InventoryRow = memo(function InventoryRow({
           itemWidth={itemWidth}
           onSelect={onSelect}
           selected={entry.itemId === selectedItemId}
-          size={layoutSize}
         />
       )}
     />
@@ -161,7 +156,7 @@ export function InventoryView({
   inventory: Inventory;
   itemTable: ItemTable;
 }) {
-  const layoutSize = useLayoutSize();
+  const { large } = useMedia();
   const { entries, byId } = useMemo(() => {
     const builtEntries: InventoryEntry[] = [];
     const builtById = new Map<string, InventoryEntry>();
@@ -195,8 +190,8 @@ export function InventoryView({
   }, [accountId]);
   const tokens = getTokens();
   const gridGap = tokens.space[INVENTORY_GRID_GAP_TOKEN].val;
-  const minimumItemWidth = tokens.size[INVENTORY_CELL_MIN_WIDTH_TOKEN[layoutSize]].val;
-  const artworkWidth = ITEM_ARTWORK_SIZE[layoutSize];
+  const minimumItemWidth = large ? INVENTORY_CELL_LARGE_MIN_WIDTH : INVENTORY_CELL_MIN_WIDTH;
+  const artworkWidth = large ? ITEM_ARTWORK_LARGE_SIZE : ITEM_ARTWORK_SIZE;
   const { rows, listWidth, layout, handleLayout, keyExtractor } = useResponsiveGridRows(
     entries,
     (width) => getResponsiveGridLayout(width, gridGap, minimumItemWidth),
@@ -214,12 +209,11 @@ export function InventoryView({
         gap={gridGap}
         imageOnly={imageOnly}
         itemWidth={itemWidth}
-        layoutSize={layoutSize}
         selectedItemId={extraData ?? null}
         onSelect={handleSelectItem}
       />
     ),
-    [gridGap, handleSelectItem, imageOnly, itemWidth, layoutSize, rows.length],
+    [gridGap, handleSelectItem, imageOnly, itemWidth, rows.length],
   );
 
   if (!selectedEntry) {
@@ -232,7 +226,7 @@ export function InventoryView({
 
   return (
     <YStack testID="inventory-grid-container" width="100%" grow={1} minH={0} onLayout={handleLayout}>
-      <InventoryPreview entry={selectedEntry} size={layoutSize} />
+      <InventoryPreview entry={selectedEntry} />
       {showCells ? (
         <FlashList
           testID={`inventory-grid-columns-${columnCount}`}

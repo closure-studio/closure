@@ -5,7 +5,7 @@ const FrameRoot = styled(YStack, {
   name: 'Frame',
   position: 'relative',
   overflow: 'hidden',
-  bg: '$appSurface',
+  bg: '$appSurfaceRaisedTranslucent',
   borderWidth: 1,
   borderColor: '$appBorder',
   rounded: '$0',

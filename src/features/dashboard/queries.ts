@@ -21,8 +21,7 @@ import type {
 import type { GameAccount } from '@/schemas/game-account';
 import { appStore, useAppStore } from '@/store';
 import { FailureError, unwrapResult } from '@/utils/failure-error';
-import { getQueryDependencies } from '@/services/query-dependencies';
-import type { ArkHostFailure, ArkHostSseSubscription } from './api';
+import { arkHostApi, type ArkHostFailure, type ArkHostSseSubscription } from './api';
 
 export const arkHostQueryKeys = {
   characters: (account: string) => ['arkhost', 'characters', account] as const,
@@ -76,7 +75,6 @@ export function useGameAccountsQuery() {
     queryKey: arkHostQueryKeys.gameAccounts(userId),
     enabled: session !== null,
     queryFn: async () => {
-      const { arkHostApi } = getQueryDependencies();
       const result = await arkHostApi.fetchGameList();
       const entries = parseArkHostPayload(
         v.array(arkHostGameListEntrySchema),
@@ -91,7 +89,6 @@ export const gameDetailQueryOptions = (account: string) =>
   queryOptions({
     queryKey: arkHostQueryKeys.detail(account),
     queryFn: async () => {
-      const { arkHostApi } = getQueryDependencies();
       const result = await arkHostApi.fetchGameDetail(account);
       return parseArkHostPayload(
         v.nullable(arkHostGameDetailSchema),
@@ -111,7 +108,6 @@ export const charactersQueryOptions = (account: string) =>
   queryOptions({
     queryKey: arkHostQueryKeys.characters(account),
     queryFn: async () => {
-      const { arkHostApi } = getQueryDependencies();
       const result = await arkHostApi.fetchCharacters(account);
       return parseArkHostPayload(arkHostCharactersSchema, unwrapResult(result));
     },
@@ -128,7 +124,6 @@ export const logsQueryOptions = (account: string) =>
   queryOptions({
     queryKey: arkHostQueryKeys.logs(account),
     queryFn: async () => {
-      const { arkHostApi } = getQueryDependencies();
       const result = await arkHostApi.fetchGameLogs(account, 0);
       return parseArkHostPayload(arkHostGameLogsSchema, unwrapResult(result));
     },
@@ -189,7 +184,6 @@ export function useUpdateGameConfig() {
           kind: 'business',
         });
       }
-      const { arkHostApi } = getQueryDependencies();
       unwrapResult(
         await arkHostApi.updateGameConfig(account, parsedPatch.output),
       );
@@ -243,7 +237,6 @@ export function useArkHostSync() {
   useEffect(() => {
     if (!session) return;
     const userId = session.principal.id;
-    const { arkHostApi } = getQueryDependencies();
     const subscription: ArkHostSseSubscription = arkHostApi.subscribe(
       session.accessToken,
       (event) => {

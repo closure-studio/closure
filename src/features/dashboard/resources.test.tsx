@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import type { PropsWithChildren } from 'react';
 
-import type { GameResourcesApi } from './api';
+import { gameResourcesApi, type GameResourcesApi } from './api';
 import { GAME_RESOURCE_CACHE_KEYS } from './game-resource-cache';
 import {
   bundledCharacterTable,
@@ -15,10 +15,6 @@ import {
   useStageTable,
 } from './resources';
 import { mmkvStateStorage } from '@/lib/mmkv';
-import {
-  configureQueryDependencies,
-  resetQueryDependencies,
-} from '@/services/query-dependencies';
 import { appStore } from '@/store';
 
 function createWrapper() {
@@ -44,9 +40,21 @@ function createGameResourcesApi(
   };
 }
 
+function mockGameResourcesApi(api: GameResourcesApi): void {
+  jest.spyOn(gameResourcesApi, 'fetchCharacter').mockImplementation(
+    (updatedAt) => api.fetchCharacter(updatedAt),
+  );
+  jest.spyOn(gameResourcesApi, 'fetchItem').mockImplementation(
+    (updatedAt) => api.fetchItem(updatedAt),
+  );
+  jest.spyOn(gameResourcesApi, 'fetchStage').mockImplementation(
+    (updatedAt) => api.fetchStage(updatedAt),
+  );
+}
+
 beforeEach(async () => {
-  resetQueryDependencies();
-  configureQueryDependencies({ gameResourcesApi: createGameResourcesApi() });
+  jest.restoreAllMocks();
+  mockGameResourcesApi(createGameResourcesApi());
   for (const key of Object.values(GAME_RESOURCE_CACHE_KEYS)) {
     mmkvStateStorage.removeItem(key);
   }
@@ -67,7 +75,7 @@ describe('Game resource queries', () => {
       }),
       fetchStage: () => Promise.reject(new Error('offline')),
     });
-    configureQueryDependencies({ gameResourcesApi: api });
+    mockGameResourcesApi(api);
     const { wrapper } = createWrapper();
     const { result } = await renderHook(
       () => ({
@@ -101,7 +109,7 @@ describe('Game resource queries', () => {
   it('deduplicates concurrent consumers and skips refetches within 24 hours', async () => {
     const fetchItem = jest.fn().mockResolvedValue({ kind: 'not-modified' });
     const api = createGameResourcesApi({ fetchItem });
-    configureQueryDependencies({ gameResourcesApi: api });
+    mockGameResourcesApi(api);
     const { wrapper } = createWrapper();
 
     const first = await renderHook(() => ({ item: useItemTable() }), { wrapper });
@@ -133,7 +141,7 @@ describe('Game resource queries', () => {
         updatedAt,
       }),
     });
-    configureQueryDependencies({ gameResourcesApi: api });
+    mockGameResourcesApi(api);
     const { wrapper } = createWrapper();
     const first = await renderHook(() => ({ item: useItemTable() }), {
       wrapper,
@@ -147,7 +155,7 @@ describe('Game resource queries', () => {
     expect(JSON.parse(raw)).toEqual({ table: updatedTable, updatedAt });
     await first.unmount();
 
-    configureQueryDependencies({ gameResourcesApi: createGameResourcesApi() });
+    mockGameResourcesApi(createGameResourcesApi());
     const second = await renderHook(() => ({ item: useItemTable() }), {
       wrapper,
     });

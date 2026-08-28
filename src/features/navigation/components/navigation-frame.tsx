@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Edge } from 'react-native-safe-area-context';
-import { XStack, YStack } from 'tamagui';
-
-import { useLayoutSize } from '@/providers/layout-size-provider';
+import { XStack, YStack, useMedia } from 'tamagui';
 import { LargeScreenNavigationSidebar } from './large-screen-navigation-sidebar';
 import type { DesktopNavigationItem } from './large-screen-navigation-sidebar';
 import type { NavigationScope } from '../navigation-config';
@@ -31,11 +29,11 @@ export function NavigationFrame({
   scope,
   smallScreenEdges,
 }: NavigationFrameProps) {
-  const layoutSize = useLayoutSize();
+  const { large } = useMedia();
 
   return (
     <SafeAreaView
-      edges={layoutSize === 'small' ? smallScreenEdges : ['bottom']}
+      edges={!large ? smallScreenEdges : ['bottom']}
       style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
     >
       <YStack grow={1} height="100%" maxH="100%" overflow="hidden">

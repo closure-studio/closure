@@ -23,7 +23,7 @@ Screen / Route
 - The App Store is the single owner of client state and client workflows; screens and routes read it through selectors and call its actions.
 - The Feature Query Layer (TanStack Query) is the single owner of server state: cache, mutations, and SSE updates.
 - Store actions own client workflows; query hooks, options, and mutations own server operations.
-- Screens never call the API service or MMKV directly; presentational UI receives values and callbacks through props and never imports the Store, query dependencies, services, or MMKV.
+- Screens never call the API service or MMKV directly; presentational UI receives values and callbacks through props and never imports the Store, query layer, services, or MMKV.
 - Combine Store and Query state in the owning feature hook, not in every Route.
 - Never mirror state across the boundary: no Query -> Store and no Store -> Query copies.
 - Validate server responses, SSE payloads, and persisted storage once at their ingress boundary with the owning Valibot schema. Never keep synchronized copies of the same data in UI, networking, and persistence.
@@ -38,6 +38,13 @@ Use Tamagui as the default UI and styling layer. Before writing Tamagui code, ru
 - Keep direct React Native or Expo APIs at real platform boundaries: Expo Router, native tabs, safe-area measurements, `TamaguiProvider` init, third-party native components.
 - Keep `tamagui` and `@tamagui/*` versions aligned. After UI or config changes run `npm run tamagui:check`, `npm run tamagui:generate`, and `npx tsc --noEmit`.
 - Put user-visible prose in i18n resources, not hardcoded strings.
+
+Closure has two width layouts. Small is the default; large starts at 768px.
+
+- Use small styles as component defaults and `$large` for structural overrides. Do not introduce additional width breakpoints.
+- Use flex, wrap, or grid for continuous resizing instead of adding breakpoints.
+- Call `useMedia().large` only when JavaScript values or different render trees are required. Read it at the lowest component that consumes it; never pass layout size through props.
+- Do not create layout schemas, layout providers, or wrapper hooks around Tamagui media APIs.
 
 # Valibot Schema-First Domain Models
 

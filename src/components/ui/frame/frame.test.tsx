@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { TamaguiProvider } from 'tamagui';
 
 import { tamaguiConfig } from '../../../../tamagui.config';
@@ -16,6 +16,28 @@ function FrameFixture({ selected }: { selected?: boolean }) {
 }
 
 describe('Frame', () => {
+  it('uses the shared translucent surface by default', async () => {
+    const screen = await render(<FrameFixture />);
+
+    expect(StyleSheet.flatten(screen.getByTestId('frame').props.style)).toEqual(
+      expect.objectContaining({ backgroundColor: 'rgba(29, 32, 34, 0.40)' }),
+    );
+  });
+
+  it('lets an explicit tone override the shared translucent surface', async () => {
+    const screen = await render(
+      <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+        <Frame testID="warning-frame" tone="warning">
+          <Text>Content</Text>
+        </Frame>
+      </TamaguiProvider>,
+    );
+
+    expect(StyleSheet.flatten(screen.getByTestId('warning-frame').props.style)).toEqual(
+      expect.objectContaining({ backgroundColor: 'rgba(255, 157, 54, 0.05)' }),
+    );
+  });
+
   it('renders four corner brackets only in the selected state', async () => {
     const screen = await render(<FrameFixture selected />);
 

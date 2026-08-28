@@ -9,19 +9,18 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle, G, Line, Path } from 'react-native-svg';
-import { YStack, getTokens } from 'tamagui';
+import { YStack, getTokens, useMedia } from 'tamagui';
 
 import { MonoText, TerminalText } from '@/components';
-import { useLayoutSize } from '@/providers/layout-size-provider';
 
 const AMBIENT_ORBIT_DURATION_MS = 18_000;
 
 export function AccessOrbit({ label, nodeId }: { label: string; nodeId: string }) {
   const colors = getTokens().color;
-  const layoutSize = useLayoutSize();
+  const { large } = useMedia();
   const reducedMotion = useReducedMotion();
   const rotation = useSharedValue(0);
-  const size = layoutSize === 'large' ? 430 : 144;
+  const size = large ? 430 : 144;
   const center = size / 2;
 
   useEffect(() => {
@@ -49,8 +48,8 @@ export function AccessOrbit({ label, nodeId }: { label: string; nodeId: string }
       height={size}
       items="center"
       justify="center"
-      r={layoutSize === 'large' ? -20 : -40}
-      t={layoutSize === 'large' ? -30 : -80}
+      r={large ? -20 : -40}
+      t={large ? -30 : -80}
       opacity={0.58}
       style={{ pointerEvents: 'none' }}
     >
@@ -74,10 +73,10 @@ export function AccessOrbit({ label, nodeId }: { label: string; nodeId: string }
       </Animated.View>
 
       <YStack position="absolute" width={size} height={size} items="center" justify="center" gap="$0.5">
-        <TerminalText size={layoutSize === 'large' ? '$10' : '$6'} fontWeight="900" color="$appText">
+        <TerminalText size={large ? '$10' : '$6'} fontWeight="900" color="$appText">
           {nodeId}
         </TerminalText>
-        <MonoText display="none" size="$1" color="$appAccent" textTransform="uppercase" text="center" $md={{ display: 'flex' }}>
+        <MonoText display="none" size="$1" color="$appAccent" textTransform="uppercase" text="center" $large={{ display: 'flex' }}>
           {label}
         </MonoText>
       </YStack>

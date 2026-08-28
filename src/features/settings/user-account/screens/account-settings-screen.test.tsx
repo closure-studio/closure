@@ -16,10 +16,6 @@ const principal = {
   status: 'active',
 } satisfies SessionPrincipal;
 
-jest.mock('@/providers/layout-size-provider', () => ({
-  useLayoutSize: () => 'small',
-}));
-
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
   const reanimatedMock = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated/mock');

@@ -122,7 +122,7 @@ export function LoginForm({
         <YStack key="login" transition={reducedMotion ? '0ms' : '400ms'} enterStyle={reducedMotion ? null : { opacity: 0, x: -24 }} exitStyle={reducedMotion ? null : { opacity: 0, x: -24 }} opacity={1} x={0} gap="$3">
           <Form onSubmit={handleLoginSubmit}>
             <Frame cornerBrackets p="$4.5" gap="$4">
-              <TerminalSectionHeading code="01" title={t('login.title')} {...(media.xxs ? { subtitle: 'AUTH' } : {})} />
+              <TerminalSectionHeading code="01" title={t('login.title')} {...(media.large ? { subtitle: 'AUTH' } : {})} />
               <TerminalTextField
                 ref={identifierRef}
                 icon={Mail}
@@ -190,7 +190,7 @@ export function LoginForm({
         <YStack key="forgot" transition={reducedMotion ? '0ms' : '400ms'} enterStyle={reducedMotion ? null : { opacity: 0, x: 24 }} exitStyle={reducedMotion ? null : { opacity: 0, x: 24 }} opacity={1} x={0}>
           <Form onSubmit={submitRecoveryRequest}>
             <Frame cornerBrackets p="$4.5" gap="$4">
-              <TerminalSectionHeading code="SOS" title={t('recovery.title')} {...(media.xxs ? { subtitle: 'RECOVERY' } : {})} />
+              <TerminalSectionHeading code="SOS" title={t('recovery.title')} {...(media.large ? { subtitle: 'RECOVERY' } : {})} />
               <AnimatePresence mode="wait">
                 {recoveryStatus === 'success' ? (
                   <YStack key="reset-sent" transition={reducedMotion ? '0ms' : '300ms'} enterStyle={reducedMotion ? null : { opacity: 0, scale: 0.96 }} exitStyle={reducedMotion ? null : { opacity: 0 }} opacity={1} scale={1} items="center" gap="$2" py="$3">

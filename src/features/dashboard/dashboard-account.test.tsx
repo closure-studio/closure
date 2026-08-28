@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-native';
+import { act, renderHook } from '@testing-library/react-native';
 import type { PropsWithChildren } from 'react';
 import * as v from 'valibot';
 
@@ -37,7 +37,7 @@ let mockGameAccountsQuery = {
 };
 
 jest.mock('expo-router', () => ({
-  useLocalSearchParams: jest.fn(() => ({ gameAccountId: 'G16601716973' })),
+  useGlobalSearchParams: jest.fn(() => ({ gameAccountId: 'G16601716973' })),
   useRouter: () => ({ setParams: mockRouterSetParams }),
 }));
 
@@ -50,8 +50,8 @@ jest.mock('./queries', () => ({
   useGameAccountsQuery: jest.fn(() => mockGameAccountsQuery),
 }));
 
-const mockUseLocalSearchParams = jest.mocked(
-  jest.requireMock<typeof import('expo-router')>('expo-router').useLocalSearchParams,
+const mockUseGlobalSearchParams = jest.mocked(
+  jest.requireMock<typeof import('expo-router')>('expo-router').useGlobalSearchParams,
 );
 
 function DashboardAccountTestWrapper({ children }: PropsWithChildren) {
@@ -63,8 +63,8 @@ function createWrapper() {
 }
 
 beforeEach(() => {
-  mockUseLocalSearchParams.mockReset();
-  mockUseLocalSearchParams.mockReturnValue({ gameAccountId: mockFirstAccount.account });
+  mockUseGlobalSearchParams.mockReset();
+  mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: mockFirstAccount.account });
   mockRouterSetParams.mockReset();
   mockGameAccountsQuery = {
     data: [mockFirstAccount, mockSecondAccount],
@@ -84,7 +84,7 @@ describe('DashboardAccountProvider', () => {
   });
 
   it('ignores non-string account route parameters', async () => {
-    mockUseLocalSearchParams.mockReturnValue({ gameAccountId: ['G1'] });
+    mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: ['G1'] });
 
     const { result } = await renderHook(() => useDashboardAccount(), {
       wrapper: createWrapper(),
@@ -94,7 +94,7 @@ describe('DashboardAccountProvider', () => {
   });
 
   it('keeps foreign account IDs out of the dashboard context', async () => {
-    mockUseLocalSearchParams.mockReturnValue({ gameAccountId: 'G9' });
+    mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: 'G9' });
 
     const { result } = await renderHook(() => useDashboardAccount(), {
       wrapper: createWrapper(),
@@ -103,4 +103,25 @@ describe('DashboardAccountProvider', () => {
     expect(result.current.selectedGameAccount).toBeNull();
   });
 
+  it('updates the selected account when the active Dashboard URL changes', async () => {
+    const { result, rerender } = await renderHook(() => useDashboardAccount(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(() => {
+      result.current.selectGameAccount(mockSecondAccount.account);
+    });
+
+    expect(mockRouterSetParams).toHaveBeenCalledWith({
+      gameAccountId: mockSecondAccount.account,
+    });
+    expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
+
+    mockUseGlobalSearchParams.mockReturnValue({
+      gameAccountId: mockSecondAccount.account,
+    });
+    await rerender(undefined);
+
+    expect(result.current.selectedGameAccount?.account).toBe(mockSecondAccount.account);
+  });
 });

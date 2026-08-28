@@ -69,10 +69,7 @@ const RosterRowFrame = styled(XStack, {
   hoverStyle: {
     bg: '$appAccentSoft',
   },
-  $xs: {
-    px: '$3.5',
-  },
-  $md: {
+  $large: {
     px: '$4',
   },
 
@@ -190,7 +187,7 @@ function ContributorRosterRow({
           shrink={1}
           justify="center"
           gap="$1"
-          $xs={{ flexDirection: 'row', items: 'center', gap: '$3' }}
+          $large={{ flexDirection: 'row', items: 'center', gap: '$3' }}
         >
           <TerminalText
             testID={`contributors-roster-name-${member.id}`}
@@ -203,8 +200,7 @@ function ContributorRosterRow({
             letterSpacing={-0.7}
             color="$appText"
             select="text"
-            $xs={{ width: '$8', ml: '$-1.5' }}
-            $lg={{ width: '$12', size: '$4' }}
+            $large={{ width: '$12', ml: '$-1.5', size: '$4' }}
           >
             {member.name}
           </TerminalText>

@@ -9,7 +9,6 @@ import diamondShdImage from '@/assets/images/inventory/original/DIAMOND_SHD.webp
 import goldImage from '@/assets/images/inventory/original/GOLD.webp';
 import recruitTicketImage from '@/assets/images/inventory/original/TKT_RECRUIT.webp';
 import { DecorativeBarcode, ItemArtwork, MonoText, TerminalMeterBar, TerminalSectionHeading, TerminalText } from '@/components';
-import { useLayoutSize } from '@/providers/layout-size-provider';
 import { ARK_HOST_GAME_STATUS_CODE, type ArkHostGameDetail, type ArkHostGameLogEntry } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
 import { DashboardSummaryFrame, formatDashboardSummaryTitle } from './dashboard-summary-frame';
@@ -44,7 +43,6 @@ export function GameAccountOverviewView({
   const { t } = useTranslation('dashboard');
   const { t: tCommon } = useTranslation('common');
   const [activeSection, setActiveSection] = useState<DashboardSummarySection>('profile');
-  const layoutSize = useLayoutSize();
   const colors = getTokens().color;
   const status = detail?.status;
   const accountBalances = [
@@ -66,7 +64,11 @@ export function GameAccountOverviewView({
 
   return (
     <XStack testID="overview-summary-grid" flexWrap="wrap" items="flex-start" gap={20} pb="$4">
-      <YStack width="100%" $xl={{ width: '65%' }}>
+      <YStack
+        testID="overview-profile-column"
+        width="100%"
+        $large={{ flexBasis: 560, grow: 2, minW: 280, width: 'auto' }}
+      >
         <DashboardSummaryFrame
           activeSection={activeSection}
           label={t('overview.profile')}
@@ -94,7 +96,7 @@ export function GameAccountOverviewView({
         </DashboardSummaryFrame>
       </YStack>
 
-      <YStack width="100%" $lg={{ width: '48%' }} $xl={{ width: '31.5%' }}>
+      <YStack grow={1} minW={280} flexBasis={280}>
         <DashboardSummaryFrame
           activeSection={activeSection}
           label={t('overview.sanity')}
@@ -109,7 +111,6 @@ export function GameAccountOverviewView({
             <XStack items="center" gap="$3" minW={0}>
               <ItemArtwork
                 accessibilityLabel={t('overview.sanity')}
-                layoutSize={layoutSize}
                 recyclingKey="overview-AP_GAMEPLAY"
                 source={SUMMARY_ITEM_IMAGES.AP_GAMEPLAY}
                 testID="overview-sanity-image"
@@ -140,7 +141,7 @@ export function GameAccountOverviewView({
         </DashboardSummaryFrame>
       </YStack>
 
-      <YStack width="100%" $lg={{ width: '48%' }} $xl={{ width: '31.5%' }}>
+      <YStack grow={1} minW={280} flexBasis={280}>
         <YStack gap="$2">
           <TerminalSectionHeading code="03" title={formatDashboardSummaryTitle(t('overview.assets'))} />
           <XStack flexWrap="wrap" gap="$2">
@@ -152,18 +153,16 @@ export function GameAccountOverviewView({
                 onActivate={setActiveSection}
                 section={balance.section}
                 testID={`overview-balance-frame-${balance.itemIcon}`}
-                width="48.7%"
                 minW={140}
+                flexBasis={140}
                 grow={1}
                 p="$3"
                 flexDirection="row"
                 items="center"
                 gap="$3"
-                $lg={{ width: '23.5%' }}
               >
                 <ItemArtwork
                   accessibilityLabel={balance.label}
-                  layoutSize={layoutSize}
                   recyclingKey={`overview-${balance.itemIcon}`}
                   source={SUMMARY_ITEM_IMAGES[balance.itemIcon]}
                   testID={`overview-balance-image-${balance.itemIcon}`}
@@ -178,7 +177,7 @@ export function GameAccountOverviewView({
         </YStack>
       </YStack>
 
-      <YStack width="100%" $lg={{ width: '48%' }} $xl={{ width: '31.5%' }}>
+      <YStack grow={1} minW={280} flexBasis={280}>
         <YStack gap="$2">
           <TerminalSectionHeading code="04" title={formatDashboardSummaryTitle(t('overview.operationMetrics'))} />
           <XStack flexWrap="wrap" gap="$2">
@@ -191,11 +190,10 @@ export function GameAccountOverviewView({
                   onActivate={setActiveSection}
                   section={metric.section}
                   testID={`overview-operation-metric-frame-${index}`}
-                  width="48.7%"
                   minW={140}
+                  flexBasis={140}
                   grow={1}
                   p="$3"
-                  $lg={{ width: '23.5%' }}
                 >
                   <MonoText size="$1" numberOfLines={1} ellipsizeMode="tail" minW={0} shrink={1}>{metric.label}</MonoText>
                   <TerminalText
@@ -217,7 +215,7 @@ export function GameAccountOverviewView({
         </YStack>
       </YStack>
 
-      <YStack width="100%" $xl={{ width: '31.5%' }}>
+      <YStack grow={1} minW={280} flexBasis={280}>
         <DashboardSummaryFrame
           activeSection={activeSection}
           label={t('overview.base')}

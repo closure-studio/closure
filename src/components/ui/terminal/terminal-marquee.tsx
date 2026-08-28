@@ -112,7 +112,7 @@ export const TerminalMarquee = memo(function TerminalMarquee({ items }: Terminal
       borderColor="$appBorder"
       bg="$appSurfaceRaised"
       overflow="hidden"
-      $md={{ mt: '$0' }}
+      $large={{ mt: '$0' }}
     >
       <Animated.View style={[{ flexDirection: 'row', alignSelf: 'flex-start' }, marqueeStyle]}>
         <XStack onLayout={handleContentLayout} shrink={0}>

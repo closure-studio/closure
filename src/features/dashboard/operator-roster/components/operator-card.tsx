@@ -2,7 +2,7 @@ import { MaskedView } from '@expo/ui/community/masked-view';
 import { Image } from 'expo-image';
 import { memo, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import { XStack, YStack, styled } from 'tamagui';
+import { XStack, YStack, styled, useMedia } from 'tamagui';
 
 import elite0 from '@/assets/images/operators/elite/prerendered/elite_0.webp';
 import elite1 from '@/assets/images/operators/elite/prerendered/elite_1.webp';
@@ -19,7 +19,6 @@ import potential4 from '@/assets/images/operators/potential/prerendered/potentia
 import potential5 from '@/assets/images/operators/potential/prerendered/potential_5.webp';
 import { Frame, MonoText, TerminalMeterBar, TerminalText } from '@/components';
 import type { Operator } from '@/schemas/game-account';
-import type { LayoutSize } from '@/schemas/layout-size';
 import { OPERATOR_PORTRAIT_GEOMETRY } from '../operator-portrait-config';
 import { getOperatorPortraitUrl } from '../portrait-image';
 
@@ -281,16 +280,15 @@ export const OperatorCard = memo(function OperatorCard({
   labels,
   name,
   operator,
-  size,
 }: {
   labels: OperatorCardLabels;
   name: string;
   operator: Operator;
-  size: LayoutSize;
 }) {
+  const { large } = useMedia();
   const level = operator.level;
 
-  if (size === 'small') {
+  if (!large) {
     return <SmallOperatorCard labels={labels} name={name} operator={operator} />;
   }
 

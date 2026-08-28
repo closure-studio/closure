@@ -1,17 +1,12 @@
 import { Image, type ImageProps } from 'expo-image';
 import { memo } from 'react';
 import { StyleSheet } from 'react-native';
-import { XStack, styled } from 'tamagui';
+import { XStack, styled, useMedia } from 'tamagui';
 
 import itemArtworkFilterLarge from '@/assets/images/inventory/grid-filter-large.webp';
 import itemArtworkFilterSmall from '@/assets/images/inventory/grid-filter-small.webp';
-import type { LayoutSize } from '@/schemas/layout-size';
-import { ITEM_ARTWORK_SIZE } from './item-artwork-config';
-
-const ITEM_ARTWORK_FILTER_IMAGES = {
-  small: itemArtworkFilterSmall,
-  large: itemArtworkFilterLarge,
-} as const satisfies Record<LayoutSize, number>;
+export const ITEM_ARTWORK_SIZE = 48;
+export const ITEM_ARTWORK_LARGE_SIZE = 104;
 
 const ItemArtworkFrame = styled(XStack, {
   name: 'ItemArtwork',
@@ -21,23 +16,16 @@ const ItemArtworkFrame = styled(XStack, {
   justify: 'center',
   overflow: 'hidden',
   rounded: 999,
-  variants: {
-    layoutSize: {
-      small: {
-        width: ITEM_ARTWORK_SIZE.small,
-        height: ITEM_ARTWORK_SIZE.small,
-      },
-      large: {
-        width: ITEM_ARTWORK_SIZE.large,
-        height: ITEM_ARTWORK_SIZE.large,
-      },
-    },
-  } as const,
+  width: ITEM_ARTWORK_SIZE,
+  height: ITEM_ARTWORK_SIZE,
+  $large: {
+    width: ITEM_ARTWORK_LARGE_SIZE,
+    height: ITEM_ARTWORK_LARGE_SIZE,
+  },
 });
 
 export type ItemArtworkProps = {
   accessibilityLabel: string;
-  layoutSize: LayoutSize;
   recyclingKey: string;
   source: Exclude<ImageProps['source'], undefined>;
   testID?: string;
@@ -45,16 +33,16 @@ export type ItemArtworkProps = {
 
 export const ItemArtwork = memo(function ItemArtwork({
   accessibilityLabel,
-  layoutSize,
   recyclingKey,
   source,
   testID,
 }: ItemArtworkProps) {
+  const { large } = useMedia();
   const imageTestID = testID ? `${testID}-image` : undefined;
   const filterTestID = testID ? `${testID}-filter` : undefined;
 
   return (
-    <ItemArtworkFrame testID={testID} layoutSize={layoutSize}>
+    <ItemArtworkFrame testID={testID}>
       <Image
         testID={imageTestID}
         source={source}
@@ -66,7 +54,7 @@ export const ItemArtwork = memo(function ItemArtwork({
       />
       <Image
         testID={filterTestID}
-        source={ITEM_ARTWORK_FILTER_IMAGES[layoutSize]}
+        source={large ? itemArtworkFilterLarge : itemArtworkFilterSmall}
         cachePolicy="memory"
         contentFit="fill"
         style={StyleSheet.absoluteFill}

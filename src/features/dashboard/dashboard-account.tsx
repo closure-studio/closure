@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useGlobalSearchParams, useRouter } from 'expo-router';
 import {
   createContext,
   type PropsWithChildren,
@@ -29,7 +29,7 @@ type DashboardAccountContextValue = {
 const DashboardAccountContext = createContext<DashboardAccountContextValue | null>(null);
 
 export function DashboardAccountProvider({ children }: PropsWithChildren) {
-  const { gameAccountId: routeGameAccountId } = useLocalSearchParams<DashboardRouteParams>();
+  const { gameAccountId: routeGameAccountId } = useGlobalSearchParams<DashboardRouteParams>();
   const router = useRouter();
   const gameAccountIdResult = v.safeParse(gameAccountIdSchema, routeGameAccountId);
   const gameAccountId = gameAccountIdResult.success ? gameAccountIdResult.output : null;

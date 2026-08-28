@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getQueryDependencies } from '@/services/query-dependencies';
+import { apiNodeApi } from './api';
 import { unwrapResult } from '@/utils/failure-error';
 import type { ApiNode } from '@/schemas/api-node';
 import type { ApiNodeFailure } from './api';
@@ -10,6 +10,6 @@ export function useApiNodesQuery() {
     queryKey: ['api-nodes'],
     staleTime: Infinity,
     queryFn: async () =>
-      unwrapResult(await getQueryDependencies().apiNodeAdapter.queryNodes()),
+      unwrapResult(await apiNodeApi.queryNodes()),
   });
 }

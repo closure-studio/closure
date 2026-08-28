@@ -1,10 +1,8 @@
 import type { PropsWithChildren, ReactNode } from 'react';
-import { ScrollView, YStack } from 'tamagui';
-
-import { useLayoutSize } from '@/providers/layout-size-provider';
+import { ScrollView, YStack, useMedia } from 'tamagui';
 
 export function SettingsPage({ children, header }: PropsWithChildren<{ header?: ReactNode }>) {
-  const layoutSize = useLayoutSize();
+  const { large } = useMedia();
   return (
     <ScrollView
       grow={1}
@@ -22,9 +20,9 @@ export function SettingsPage({ children, header }: PropsWithChildren<{ header?: 
         p="$3.5"
         pb="$8"
         gap="$5"
-        $md={{ p: '$5', pb: '$9' }}
+        $large={{ p: '$5', pb: '$9' }}
       >
-        {header && layoutSize === 'large' ? header : null}
+        {header && large ? header : null}
         {children}
       </YStack>
     </ScrollView>

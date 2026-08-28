@@ -1,9 +1,7 @@
 import type { PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'expo-router';
-import { YStack } from 'tamagui';
-
-import { useLayoutSize } from '@/providers/layout-size-provider';
+import { YStack, useMedia } from 'tamagui';
 import { NavigationFrame } from '../components/navigation-frame';
 import { NavigationHeader } from '../components/navigation-header';
 import {
@@ -15,7 +13,7 @@ import { useAppLogout, useReturnToDashboard } from '../navigation-actions';
 
 export function SettingsFrame({ children }: PropsWithChildren) {
   const { t } = useTranslation('navigation');
-  const layoutSize = useLayoutSize();
+  const { large } = useMedia();
   const pathname = usePathname();
   const router = useRouter();
   const onLogout = useAppLogout();
@@ -32,7 +30,7 @@ export function SettingsFrame({ children }: PropsWithChildren) {
     if (page && page.id !== activePageId) router.navigate(page.route);
   };
 
-  const header = layoutSize === 'large' ? (
+  const header = large ? (
     <YStack shrink={0} borderBottomWidth={1} borderColor="$appBorder">
       <NavigationHeader
         avatarLabel={t('smallScreen.avatarLabel')}
