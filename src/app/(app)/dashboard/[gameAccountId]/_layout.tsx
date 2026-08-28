@@ -5,7 +5,7 @@ import { useMedia } from 'tamagui';
 import { useDashboardAccount } from '@/features/dashboard';
 import {
   DashboardSmallScreenTabBar,
-  dashboardPagesList,
+  dashboardPages,
 } from '@/features/navigation';
 
 export default function DashboardAccountLayout() {
@@ -43,7 +43,7 @@ export default function DashboardAccountLayout() {
         )
         : () => null}
     >
-      {dashboardPagesList.map((page) => (
+      {dashboardPages.map((page) => (
         <DashboardTabs.Screen key={page.id} name={page.id} />
       ))}
     </DashboardTabs>

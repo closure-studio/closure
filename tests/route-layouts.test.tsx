@@ -44,7 +44,7 @@ jest.mock('@/features/navigation', () => ({
   DashboardFrame: mockDashboardFrame,
   DashboardSmallScreenTabBar: jest.fn(() => null),
   dashboardDefaultPageId: 'overview',
-  dashboardPagesList: [{ id: 'overview' }],
+  dashboardPages: [{ id: 'overview' }],
   dashboardPageHref: (pageId: string, gameAccountId: string) => `/dashboard/${gameAccountId}/${pageId}`,
 }));
 

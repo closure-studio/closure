@@ -14,7 +14,7 @@ import { NavigationFrame } from '../components/navigation-frame';
 import { NavigationHeader } from '../components/navigation-header';
 import {
   dashboardDefaultPageId,
-  dashboardPagesList,
+  dashboardPages,
   dashboardPageHref,
   settingsDefaultPage,
 } from '../navigation-config';
@@ -39,10 +39,10 @@ export function DashboardFrame({ children }: PropsWithChildren) {
     warning: colors.appWarning.val,
     muted: colors.appMuted.val,
   });
-  const activePageId = dashboardPagesList.find(
+  const activePageId = dashboardPages.find(
     (page) => page.id === segments.at(-1),
   )?.id ?? dashboardDefaultPageId;
-  const items = dashboardPagesList.map((page) => ({
+  const items = dashboardPages.map((page) => ({
     icon: page.icon,
     id: page.id,
     label: tDashboard(`navigation.sections.${page.id}.label`),
@@ -53,7 +53,7 @@ export function DashboardFrame({ children }: PropsWithChildren) {
   }, [backdropTint, setBackdropTint]);
 
   const handleSelect = (pageId: string) => {
-    const page = dashboardPagesList.find((candidate) => candidate.id === pageId);
+    const page = dashboardPages.find((candidate) => candidate.id === pageId);
     if (!page || !selectedGameAccount || page.id === activePageId) return;
     router.replace(dashboardPageHref(page.id, selectedGameAccount.account));
   };

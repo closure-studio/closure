@@ -7,9 +7,9 @@ export { SettingsFrame } from './screens/settings-frame';
 export {
   dashboardDefaultPageId,
   dashboardPageHref,
+  dashboardPages,
   getSettingsPageId,
   settingsDefaultPage,
-  dashboardPagesList,
   settingsPagesList,
 } from './navigation-config';
 export type {
