@@ -36,6 +36,7 @@ let mockLarge = false;
 
 jest.mock('expo-router', () => ({
   usePathname: () => mockPathname,
+  useSegments: () => mockPathname.split('/').filter(Boolean),
   useRouter: () => ({
     navigate: mockRouterNavigate,
     push: mockRouterPush,

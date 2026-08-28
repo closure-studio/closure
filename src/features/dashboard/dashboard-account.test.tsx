@@ -29,7 +29,7 @@ const mockFirstAccount = v.parse(gameAccountSchema, {
   userId: firstAccountEntry.status.uuid,
 });
 const mockSecondAccount = { ...mockFirstAccount, account: 'G2' };
-const mockOnSelectGameAccount = jest.fn();
+const mockRouterSetParams = jest.fn();
 let mockGameAccountsQuery = {
   data: [mockFirstAccount, mockSecondAccount],
   isError: false,
@@ -38,6 +38,7 @@ let mockGameAccountsQuery = {
 
 jest.mock('expo-router', () => ({
   useGlobalSearchParams: jest.fn(() => ({ gameAccountId: 'G16601716973' })),
+  useRouter: () => ({ setParams: mockRouterSetParams }),
 }));
 
 jest.mock('./queries', () => ({
@@ -54,11 +55,7 @@ const mockUseGlobalSearchParams = jest.mocked(
 );
 
 function DashboardAccountTestWrapper({ children }: PropsWithChildren) {
-  return (
-    <DashboardAccountProvider onSelectGameAccount={mockOnSelectGameAccount}>
-      {children}
-    </DashboardAccountProvider>
-  );
+  return <DashboardAccountProvider>{children}</DashboardAccountProvider>;
 }
 
 function createWrapper() {
@@ -68,7 +65,7 @@ function createWrapper() {
 beforeEach(() => {
   mockUseGlobalSearchParams.mockReset();
   mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: mockFirstAccount.account });
-  mockOnSelectGameAccount.mockReset();
+  mockRouterSetParams.mockReset();
   mockGameAccountsQuery = {
     data: [mockFirstAccount, mockSecondAccount],
     isError: false,
@@ -83,7 +80,6 @@ describe('DashboardAccountProvider', () => {
     });
 
     expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
-    expect(result.current.routeGameAccountId).toBe(mockFirstAccount.account);
     expect(result.current.gameAccountsQuery.data).toHaveLength(2);
   });
 
@@ -95,7 +91,6 @@ describe('DashboardAccountProvider', () => {
     });
 
     expect(result.current.selectedGameAccount).toBeNull();
-    expect(result.current.routeGameAccountId).toBeNull();
   });
 
   it('keeps foreign account IDs out of the dashboard context', async () => {
@@ -106,7 +101,6 @@ describe('DashboardAccountProvider', () => {
     });
 
     expect(result.current.selectedGameAccount).toBeNull();
-    expect(result.current.routeGameAccountId).toBe('G9');
   });
 
   it('updates the selected account when the active Dashboard URL changes', async () => {
@@ -118,7 +112,9 @@ describe('DashboardAccountProvider', () => {
       result.current.selectGameAccount(mockSecondAccount.account);
     });
 
-    expect(mockOnSelectGameAccount).toHaveBeenCalledWith(mockSecondAccount.account);
+    expect(mockRouterSetParams).toHaveBeenCalledWith({
+      gameAccountId: mockSecondAccount.account,
+    });
     expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
 
     mockUseGlobalSearchParams.mockReturnValue({
@@ -138,6 +134,6 @@ describe('DashboardAccountProvider', () => {
       result.current.selectGameAccount(mockFirstAccount.account);
     });
 
-    expect(mockOnSelectGameAccount).not.toHaveBeenCalled();
+    expect(mockRouterSetParams).not.toHaveBeenCalled();
   });
 });

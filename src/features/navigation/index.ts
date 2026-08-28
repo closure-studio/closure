@@ -7,7 +7,6 @@ export { SettingsFrame } from './screens/settings-frame';
 export {
   dashboardDefaultPage,
   dashboardPageHref,
-  getDashboardPageId,
   getSettingsPageId,
   settingsDefaultPage,
   dashboardPagesList,

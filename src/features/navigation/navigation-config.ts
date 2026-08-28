@@ -48,14 +48,6 @@ export function dashboardPageHref(
   };
 }
 
-export function getDashboardPageId(pathname: string): DashboardPageId | null {
-  const segments = pathname.split('/').filter(Boolean);
-  if (segments.length !== 3 || segments[0] !== 'dashboard') return null;
-
-  const pageSegment = segments[2];
-  return dashboardPagesList.find((page) => page.id === pageSegment)?.id ?? null;
-}
-
 export function getSettingsPageId(pathname: string): SettingsPageId | null {
   return settingsPagesList.find((page) => page.route === pathname)?.id ?? null;
 }

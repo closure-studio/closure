@@ -1,4 +1,5 @@
 import { Tabs as DashboardTabs } from 'expo-router/tabs';
+import { useEffect } from 'react';
 import { useMedia } from 'tamagui';
 
 import { useDashboardAccount } from '@/features/dashboard';
@@ -9,7 +10,18 @@ import {
 
 export default function DashboardAccountLayout() {
   const { large } = useMedia();
-  const { selectedGameAccount } = useDashboardAccount();
+  const {
+    gameAccountsQuery,
+    selectedGameAccount,
+    selectGameAccount,
+  } = useDashboardAccount();
+  const fallbackGameAccountId = gameAccountsQuery.data?.[0]?.account;
+
+  useEffect(() => {
+    if (!selectedGameAccount && fallbackGameAccountId) {
+      selectGameAccount(fallbackGameAccountId);
+    }
+  }, [fallbackGameAccountId, selectedGameAccount, selectGameAccount]);
 
   if (!selectedGameAccount) return null;
 
