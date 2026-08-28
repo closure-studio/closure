@@ -1,6 +1,5 @@
 import { Slot, usePathname, useRouter } from 'expo-router';
 import { useCallback, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Spinner, YStack } from 'tamagui';
 
 import { MonoText } from '@/components';
@@ -16,13 +15,11 @@ import {
   getDashboardPageId,
 } from '@/features/navigation';
 
-function DashboardState({ labelKey }: { labelKey: 'loading' | 'unavailable' | 'empty' }) {
-  const { t } = useTranslation('dashboard');
-
+function DashboardState({ label }: { label: string }) {
   return (
     <YStack grow={1} items="center" justify="center" gap="$3">
       <Spinner color="$appAccent" />
-      <MonoText size="$2">{t(`states.${labelKey}`)}</MonoText>
+      <MonoText size="$2">{label}</MonoText>
     </YStack>
   );
 }
@@ -50,9 +47,9 @@ function DashboardContent({ pathname }: { pathname: string }) {
     shouldSelectFallback,
   ]);
 
-  if (gameAccountsQuery.isPending) return <DashboardState labelKey="loading" />;
-  if (gameAccountsQuery.isError) return <DashboardState labelKey="unavailable" />;
-  if (gameAccounts.length === 0) return <DashboardState labelKey="empty" />;
+  if (gameAccountsQuery.isPending) return <DashboardState label="LOADING ARKHOST DATA" />;
+  if (gameAccountsQuery.isError) return <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
+  if (gameAccounts.length === 0) return <DashboardState label="NO GAME ACCOUNTS" />;
 
   if (!selectedGameAccount) return null;
 

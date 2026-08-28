@@ -16,11 +16,6 @@
     "network": "// Stable connection · 24ms latency",
     "recruitment": "// Limited Headhunting event now active"
   },
-  "states": {
-    "empty": "NO GAME ACCOUNTS",
-    "loading": "LOADING ARKHOST DATA",
-    "unavailable": "ARKHOST DATA UNAVAILABLE"
-  },
   "navigation": {
     "brandSubtitle": "CLOUD AUTOMATION",
     "brandTitle": "CLOSURE STUDIO",
