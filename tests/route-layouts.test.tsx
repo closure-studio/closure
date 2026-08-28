@@ -43,12 +43,9 @@ jest.mock('@/features/navigation', () => ({
   AppScopeNavigator: mockAppScopeNavigator,
   DashboardFrame: mockDashboardFrame,
   DashboardSmallScreenTabBar: jest.fn(() => null),
-  dashboardDefaultPage: { id: 'overview' },
+  dashboardDefaultPageId: 'overview',
   dashboardPagesList: [{ id: 'overview' }],
-  dashboardPageHref: (pageId: string, gameAccountId: string) => ({
-    pathname: `/dashboard/[gameAccountId]/${pageId}`,
-    params: { gameAccountId },
-  }),
+  dashboardPageHref: (pageId: string, gameAccountId: string) => `/dashboard/${gameAccountId}/${pageId}`,
 }));
 
 jest.mock('tamagui', () => ({
@@ -130,10 +127,7 @@ describe('route layouts', () => {
     await render(<DashboardIndexRoute />);
 
     expect(mockRedirect).toHaveBeenCalledWith({
-      href: {
-        pathname: '/dashboard/[gameAccountId]/overview',
-        params: { gameAccountId: 'G1' },
-      },
+      href: '/dashboard/G1/overview',
     }, undefined);
   });
 

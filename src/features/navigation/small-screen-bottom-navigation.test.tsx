@@ -143,10 +143,7 @@ describe('MobileBottomNavigation', () => {
       target: 'operators-key',
       canPreventDefault: true,
     });
-    expect(mockRouterReplace).toHaveBeenCalledWith({
-      pathname: '/dashboard/[gameAccountId]/operators',
-      params: { gameAccountId: 'G1' },
-    });
+    expect(mockRouterReplace).toHaveBeenCalledWith('/dashboard/G1/operators');
   });
 
   it('honors a prevented tabPress event', async () => {

@@ -13,15 +13,15 @@ import type { Href } from 'expo-router';
 import { ROUTES } from '@/constants/routes';
 
 const dashboardPages = {
-  overview: { id: 'overview', route: '/dashboard/[gameAccountId]/overview', icon: Grid2X2 },
-  settings: { id: 'settings', route: '/dashboard/[gameAccountId]/settings', icon: Settings2 },
-  operators: { id: 'operators', route: '/dashboard/[gameAccountId]/operators', icon: UsersRound },
-  inventory: { id: 'inventory', route: '/dashboard/[gameAccountId]/inventory', icon: Boxes },
-  activity: { id: 'activity', route: '/dashboard/[gameAccountId]/activity', icon: CalendarClock },
+  overview: { id: 'overview', icon: Grid2X2 },
+  settings: { id: 'settings', icon: Settings2 },
+  operators: { id: 'operators', icon: UsersRound },
+  inventory: { id: 'inventory', icon: Boxes },
+  activity: { id: 'activity', icon: CalendarClock },
 } as const;
 
 export const dashboardPagesList = Object.values(dashboardPages);
-export const dashboardDefaultPage = dashboardPages.overview;
+export const dashboardDefaultPageId: DashboardPageId = 'overview';
 
 const settingsPages = {
   network: { id: 'network', route: ROUTES.settingsNetwork, icon: Wifi },
@@ -42,10 +42,7 @@ export function dashboardPageHref(
   pageId: DashboardPageId,
   gameAccountId: string,
 ): Href {
-  return {
-    pathname: dashboardPages[pageId].route,
-    params: { gameAccountId },
-  };
+  return `/dashboard/${gameAccountId}/${pageId}`;
 }
 
 export function getSettingsPageId(pathname: string): SettingsPageId | null {

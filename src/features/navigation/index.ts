@@ -5,7 +5,7 @@ export { SettingsTabBar } from './settings-tab-bar';
 export { DashboardFrame } from './screens/dashboard-frame';
 export { SettingsFrame } from './screens/settings-frame';
 export {
-  dashboardDefaultPage,
+  dashboardDefaultPageId,
   dashboardPageHref,
   getSettingsPageId,
   settingsDefaultPage,

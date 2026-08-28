@@ -13,7 +13,7 @@ import { useSessionBackdrop } from '@/features/session';
 import { NavigationFrame } from '../components/navigation-frame';
 import { NavigationHeader } from '../components/navigation-header';
 import {
-  dashboardDefaultPage,
+  dashboardDefaultPageId,
   dashboardPagesList,
   dashboardPageHref,
   settingsDefaultPage,
@@ -41,7 +41,7 @@ export function DashboardFrame({ children }: PropsWithChildren) {
   });
   const activePageId = dashboardPagesList.find(
     (page) => page.id === segments.at(-1),
-  )?.id ?? dashboardDefaultPage.id;
+  )?.id ?? dashboardDefaultPageId;
   const items = dashboardPagesList.map((page) => ({
     icon: page.icon,
     id: page.id,

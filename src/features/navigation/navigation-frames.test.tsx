@@ -129,10 +129,7 @@ describe('navigation scope frames', () => {
     frame.onSelect('operators');
 
     expect(frame.activeId).toBe('overview');
-    expect(mockRouterReplace).toHaveBeenCalledWith({
-      pathname: '/dashboard/[gameAccountId]/operators',
-      params: { gameAccountId: 'G1' },
-    });
+    expect(mockRouterReplace).toHaveBeenCalledWith('/dashboard/G1/operators');
   });
 
   it('updates account selection without navigating to another route', async () => {
