@@ -31,7 +31,7 @@ const mockSelectGameAccount = jest.fn();
 const mockReturnToDashboard = jest.fn();
 const mockLogout = jest.fn();
 const mockSetBackdropTint = jest.fn();
-let mockPathname = '/dashboard/overview';
+let mockPathname = '/dashboard/G1/overview';
 let mockLarge = false;
 
 jest.mock('expo-router', () => ({
@@ -106,7 +106,7 @@ function renderFrame(children: React.ReactNode) {
 describe('navigation scope frames', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPathname = '/dashboard/overview';
+    mockPathname = '/dashboard/G1/overview';
     mockLarge = false;
   });
 
@@ -129,7 +129,7 @@ describe('navigation scope frames', () => {
 
     expect(frame.activeId).toBe('overview');
     expect(mockRouterReplace).toHaveBeenCalledWith({
-      pathname: '/dashboard/operators',
+      pathname: '/dashboard/[gameAccountId]/operators',
       params: { gameAccountId: 'G1' },
     });
   });

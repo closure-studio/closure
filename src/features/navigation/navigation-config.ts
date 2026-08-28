@@ -13,11 +13,11 @@ import type { Href } from 'expo-router';
 import { ROUTES } from '@/constants/routes';
 
 const dashboardPages = {
-  overview: { id: 'overview', route: '/dashboard/overview', icon: Grid2X2 },
-  settings: { id: 'settings', route: '/dashboard/settings', icon: Settings2 },
-  operators: { id: 'operators', route: '/dashboard/operators', icon: UsersRound },
-  inventory: { id: 'inventory', route: '/dashboard/inventory', icon: Boxes },
-  activity: { id: 'activity', route: '/dashboard/activity', icon: CalendarClock },
+  overview: { id: 'overview', route: '/dashboard/[gameAccountId]/overview', icon: Grid2X2 },
+  settings: { id: 'settings', route: '/dashboard/[gameAccountId]/settings', icon: Settings2 },
+  operators: { id: 'operators', route: '/dashboard/[gameAccountId]/operators', icon: UsersRound },
+  inventory: { id: 'inventory', route: '/dashboard/[gameAccountId]/inventory', icon: Boxes },
+  activity: { id: 'activity', route: '/dashboard/[gameAccountId]/activity', icon: CalendarClock },
 } as const;
 
 export const dashboardPagesList = Object.values(dashboardPages);
@@ -49,7 +49,11 @@ export function dashboardPageHref(
 }
 
 export function getDashboardPageId(pathname: string): DashboardPageId | null {
-  return dashboardPagesList.find((page) => page.route === pathname)?.id ?? null;
+  const segments = pathname.split('/').filter(Boolean);
+  if (segments.length !== 3 || segments[0] !== 'dashboard') return null;
+
+  const pageSegment = segments[2];
+  return dashboardPagesList.find((page) => page.id === pageSegment)?.id ?? null;
 }
 
 export function getSettingsPageId(pathname: string): SettingsPageId | null {

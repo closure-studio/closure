@@ -11,6 +11,7 @@ import { tamaguiConfig } from '../../../tamagui.config';
 import { DashboardSmallScreenTabBar } from './dashboard-small-screen-tab-bar';
 
 const mockYStack = jest.fn();
+const mockRouterReplace = jest.fn();
 const bottomInset = 34;
 const safeAreaMetrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
@@ -25,6 +26,10 @@ jest.mock('react-native-reanimated', () => {
     useReducedMotion: () => true,
   };
 });
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ replace: mockRouterReplace }),
+}));
 
 jest.mock('tamagui', () => {
   const tamagui = jest.requireActual<typeof import('tamagui')>('tamagui');
@@ -103,6 +108,7 @@ async function renderMobileBottomNavigation(defaultPrevented = false) {
 describe('MobileBottomNavigation', () => {
   beforeEach(() => {
     mockYStack.mockClear();
+    mockRouterReplace.mockClear();
   });
 
   it('keeps the active indicator static when reduced motion is enabled', async () => {
@@ -127,8 +133,8 @@ describe('MobileBottomNavigation', () => {
     expect(screen.getByRole('tab', { name: i18n.t('dashboard:navigation.sections.overview.label') }).props['aria-selected']).toBe(true);
   });
 
-  it('emits tabPress before navigating with the tab navigator', async () => {
-    const { emit, navigate, screen } = await renderMobileBottomNavigation();
+  it('navigates with the current account instead of the target tab\'s stale account', async () => {
+    const { emit, screen } = await renderMobileBottomNavigation();
 
     await fireEvent.press(screen.getByText(i18n.t('dashboard:navigation.sections.operators.label')));
 
@@ -137,14 +143,17 @@ describe('MobileBottomNavigation', () => {
       target: 'operators-key',
       canPreventDefault: true,
     });
-    expect(navigate).toHaveBeenCalledWith('operators', { gameAccountId: 'G1' });
+    expect(mockRouterReplace).toHaveBeenCalledWith({
+      pathname: '/dashboard/[gameAccountId]/operators',
+      params: { gameAccountId: 'G1' },
+    });
   });
 
   it('honors a prevented tabPress event', async () => {
-    const { navigate, screen } = await renderMobileBottomNavigation(true);
+    const { screen } = await renderMobileBottomNavigation(true);
 
     await fireEvent.press(screen.getByText(i18n.t('dashboard:navigation.sections.operators.label')));
 
-    expect(navigate).not.toHaveBeenCalled();
+    expect(mockRouterReplace).not.toHaveBeenCalled();
   });
 });

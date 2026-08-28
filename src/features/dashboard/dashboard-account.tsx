@@ -1,4 +1,4 @@
-import { useGlobalSearchParams, useRouter } from 'expo-router';
+import { useGlobalSearchParams } from 'expo-router';
 import {
   createContext,
   type PropsWithChildren,
@@ -21,6 +21,7 @@ type DashboardRouteParams = {
 };
 
 type DashboardAccountContextValue = {
+  routeGameAccountId: string | null;
   selectedGameAccount: GameAccount | null;
   gameAccountsQuery: ReturnType<typeof useGameAccountsQuery>;
   selectGameAccount: (gameAccountId: string) => void;
@@ -28,9 +29,11 @@ type DashboardAccountContextValue = {
 
 const DashboardAccountContext = createContext<DashboardAccountContextValue | null>(null);
 
-export function DashboardAccountProvider({ children }: PropsWithChildren) {
+export function DashboardAccountProvider({
+  children,
+  onSelectGameAccount,
+}: PropsWithChildren<{ onSelectGameAccount: (gameAccountId: string) => void }>) {
   const { gameAccountId: routeGameAccountId } = useGlobalSearchParams<DashboardRouteParams>();
-  const router = useRouter();
   const gameAccountIdResult = v.safeParse(gameAccountIdSchema, routeGameAccountId);
   const gameAccountId = gameAccountIdResult.success ? gameAccountIdResult.output : null;
   const gameAccountsQuery = useGameAccountsQuery();
@@ -42,12 +45,13 @@ export function DashboardAccountProvider({ children }: PropsWithChildren) {
   const selectGameAccount = useCallback((nextGameAccountId: string) => {
     if (nextGameAccountId === gameAccountId) return;
 
-    router.setParams({ gameAccountId: nextGameAccountId });
-  }, [gameAccountId, router]);
+    onSelectGameAccount(nextGameAccountId);
+  }, [gameAccountId, onSelectGameAccount]);
 
   return (
     <DashboardAccountContext.Provider
       value={{
+        routeGameAccountId: gameAccountId,
         selectedGameAccount,
         gameAccountsQuery,
         selectGameAccount,

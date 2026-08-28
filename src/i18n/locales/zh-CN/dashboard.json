@@ -16,6 +16,11 @@
     "network": "// 系统连接稳定 · 延迟 24ms",
     "recruitment": "// 限定寻访逐光图纪进行中"
   },
+  "states": {
+    "empty": "暂无游戏账号",
+    "loading": "正在载入 ARKHOST 数据",
+    "unavailable": "ARKHOST 数据不可用"
+  },
   "navigation": {
     "brandSubtitle": "云端无人托管",
     "brandTitle": "可露希尔工作室",

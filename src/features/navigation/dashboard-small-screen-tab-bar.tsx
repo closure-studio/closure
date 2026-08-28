@@ -1,4 +1,5 @@
 import type { BottomTabBarProps } from 'expo-router/tabs';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LayoutChangeEvent } from 'react-native';
@@ -7,7 +8,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import { MonoText } from '@/components';
-import { dashboardPagesList } from './navigation-config';
+import {
+  dashboardPageHref,
+  dashboardPagesList,
+  type DashboardPageId,
+} from './navigation-config';
 
 type DashboardSmallScreenTabBarProps = BottomTabBarProps & {
   gameAccountId: string;
@@ -19,6 +24,7 @@ export function DashboardSmallScreenTabBar({
   state,
 }: DashboardSmallScreenTabBarProps) {
   const { t } = useTranslation('dashboard');
+  const router = useRouter();
   const colors = getTokens().color;
   const reducedMotion = useReducedMotion();
   const { bottom: bottomInset } = useSafeAreaInsets();
@@ -33,7 +39,7 @@ export function DashboardSmallScreenTabBar({
     setNavigationWidth(event.nativeEvent.layout.width);
   };
 
-  const handleSelect = (pageId: string) => {
+  const handleSelect = (pageId: DashboardPageId) => {
     const route = state.routes.find((candidate) => candidate.name === pageId);
     if (!route) return;
 
@@ -44,10 +50,7 @@ export function DashboardSmallScreenTabBar({
     });
 
     if (route.key !== activeRoute?.key && !event.defaultPrevented) {
-      navigation.navigate(route.name, {
-        ...route.params,
-        gameAccountId,
-      });
+      router.replace(dashboardPageHref(pageId, gameAccountId));
     }
   };
 

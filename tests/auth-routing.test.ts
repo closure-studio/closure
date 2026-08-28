@@ -12,7 +12,7 @@ describe('auth routing', () => {
 
   it('accepts any internal destination without a route allowlist', () => {
     expect(resolvePostLoginDestination('/settings/network')).toBe('/settings/network');
-    expect(resolvePostLoginDestination('/dashboard/operators?gameAccountId=G1')).toBe('/dashboard/operators?gameAccountId=G1');
+    expect(resolvePostLoginDestination('/dashboard/G1/operators')).toBe('/dashboard/G1/operators');
     expect(resolvePostLoginDestination('/operators/doctor-7')).toBe('/operators/doctor-7');
     expect(resolvePostLoginDestination('/reports?range=week#summary')).toBe('/reports?range=week#summary');
   });

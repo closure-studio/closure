@@ -151,6 +151,7 @@ describe('DashboardAccountPager', () => {
       pager.onIndexChange(2);
     });
 
+    expect(mockSelectGameAccount).toHaveBeenCalledTimes(1);
     expect(mockSelectGameAccount).toHaveBeenCalledWith(thirdGameAccount.account);
     expect(readPagerProps().navigationState.index).toBe(1);
     expect(pager.renderTabBar()).toBeNull();
