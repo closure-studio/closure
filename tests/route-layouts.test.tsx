@@ -9,12 +9,14 @@ const mockAppProvider = jest.fn(({ children }: PropsWithChildren) => children);
 const mockDashboardAccountProvider = jest.fn(({ children }: PropsWithChildren) => children);
 const mockDashboardFrame = jest.fn(({ children }: PropsWithChildren) => children);
 const mockDashboardScope = jest.fn(({ children }: PropsWithChildren) => children);
+const mockDashboardTabs = jest.fn(({ children }: PropsWithChildren) => children);
+const mockDashboardTabScreen = jest.fn(() => null);
 const mockSelectGameAccount = jest.fn();
 const mockSessionShell = jest.fn(({ children }: PropsWithChildren) => children);
 const mockAppScopeNavigator = jest.fn(() => null);
 const mockUseSessionQueryCacheReset = jest.fn();
 const mockUseArkHostSync = jest.fn();
-const mockUsePathname = jest.fn(() => '/dashboard/G1/overview');
+const mockUsePathname = jest.fn(() => '/dashboard/overview');
 
 let mockSession: object | null = { principal: 'doctor' };
 let mockDashboardAccount = {
@@ -33,6 +35,10 @@ jest.mock('expo-router', () => ({
   usePathname: mockUsePathname,
 }));
 
+jest.mock('expo-router/tabs', () => ({
+  Tabs: Object.assign(mockDashboardTabs, { Screen: mockDashboardTabScreen }),
+}));
+
 jest.mock('@/features/dashboard', () => ({
   DashboardAccountProvider: mockDashboardAccountProvider,
   useArkHostSync: mockUseArkHostSync,
@@ -47,7 +53,7 @@ jest.mock('@/features/navigation', () => ({
   DashboardSmallScreenTabBar: jest.fn(() => null),
   dashboardDefaultPageId: 'overview',
   dashboardPages: [{ id: 'overview' }],
-  dashboardPageHref: (pageId: string, gameAccountId: string) => `/dashboard/${gameAccountId}/${pageId}`,
+  dashboardPageHref: (pageId: string) => `/dashboard/${pageId}`,
 }));
 
 jest.mock('tamagui', () => ({
@@ -73,13 +79,12 @@ const RootLayout = jest.requireActual<typeof import('../src/app/_layout')>('../s
 const AppLayout = jest.requireActual<typeof import('../src/app/(app)/_layout')>('../src/app/(app)/_layout').default;
 const DashboardLayout = jest.requireActual<typeof import('../src/app/(app)/dashboard/_layout')>('../src/app/(app)/dashboard/_layout').default;
 const DashboardIndexRoute = jest.requireActual<typeof import('../src/app/(app)/dashboard/index')>('../src/app/(app)/dashboard/index').default;
-const DashboardAccountLayout = jest.requireActual<typeof import('../src/app/(app)/dashboard/[gameAccountId]/_layout')>('../src/app/(app)/dashboard/[gameAccountId]/_layout').default;
 const SettingsLayout = jest.requireActual<typeof import('../src/app/(app)/settings/_layout')>('../src/app/(app)/settings/_layout').default;
 
 describe('route layouts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUsePathname.mockReturnValue('/dashboard/G1/overview');
+    mockUsePathname.mockReturnValue('/dashboard/overview');
     mockSession = { principal: 'doctor' };
     mockDashboardAccount = {
       gameAccountsQuery: {
@@ -105,16 +110,24 @@ describe('route layouts', () => {
     expect(mockDashboardAccountProvider).not.toHaveBeenCalled();
   });
 
-  it('keeps the Dashboard frame in the static layout above account routes', async () => {
+  it('keeps the Dashboard frame above the static page tabs', async () => {
     await render(<DashboardLayout />);
 
     expect(mockDashboardAccountProvider).toHaveBeenCalledTimes(1);
     expect(mockDashboardScope).toHaveBeenCalledTimes(1);
     expect(mockDashboardFrame).toHaveBeenCalledTimes(1);
-    expect(mockSlot).toHaveBeenCalledTimes(1);
+    expect(mockDashboardTabs).toHaveBeenCalledTimes(1);
+    expect(mockSlot).not.toHaveBeenCalled();
+    expect(mockDashboardTabs.mock.calls[0]?.[0]).toEqual(expect.objectContaining({
+      detachInactiveScreens: false,
+      screenOptions: expect.objectContaining({
+        freezeOnBlur: false,
+        lazy: true,
+      }),
+    }));
   });
 
-  it('keeps the Dashboard route mounted while an account route is unresolved', async () => {
+  it('does not gate the Dashboard navigator on an explicit Store selection', async () => {
     mockDashboardAccount = {
       ...mockDashboardAccount,
       selectedGameAccount: null,
@@ -123,27 +136,16 @@ describe('route layouts', () => {
     await render(<DashboardLayout />);
 
     expect(mockDashboardFrame).toHaveBeenCalledTimes(1);
-    expect(mockSlot).toHaveBeenCalledTimes(1);
+    expect(mockDashboardTabs).toHaveBeenCalledTimes(1);
+    expect(mockSelectGameAccount).not.toHaveBeenCalled();
   });
 
-  it('redirects the Dashboard index to the first account default page', async () => {
+  it('redirects the Dashboard index to the static default page', async () => {
     await render(<DashboardIndexRoute />);
 
     expect(mockRedirect).toHaveBeenCalledWith({
-      href: '/dashboard/G1/overview',
+      href: '/dashboard/overview',
     }, undefined);
-  });
-
-  it('selects the fallback account from an invalid account route', async () => {
-    mockDashboardAccount = {
-      ...mockDashboardAccount,
-      selectedGameAccount: null,
-    };
-
-    await render(<DashboardAccountLayout />);
-
-    expect(mockSelectGameAccount).toHaveBeenCalledTimes(1);
-    expect(mockSelectGameAccount).toHaveBeenCalledWith('G1');
   });
 
   it('redirects unauthenticated App routes to Login with the current route', async () => {

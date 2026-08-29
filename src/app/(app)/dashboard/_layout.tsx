@@ -1,12 +1,17 @@
-import { Slot } from 'expo-router';
-import { Spinner, YStack } from 'tamagui';
+import { Tabs as DashboardTabs } from 'expo-router/tabs';
+import { Spinner, useMedia, YStack } from 'tamagui';
 
 import { MonoText } from '@/components';
 import {
   DashboardAccountProvider,
   useDashboardAccount,
 } from '@/features/dashboard';
-import { DashboardFrame, DashboardScope } from '@/features/navigation';
+import {
+  DashboardFrame,
+  DashboardScope,
+  DashboardSmallScreenTabBar,
+  dashboardPages,
+} from '@/features/navigation';
 
 function DashboardState({ label }: { label: string }) {
   return (
@@ -18,6 +23,7 @@ function DashboardState({ label }: { label: string }) {
 }
 
 function DashboardContent() {
+  const { large } = useMedia();
   const { gameAccountsQuery } = useDashboardAccount();
   const gameAccounts = gameAccountsQuery.data ?? [];
 
@@ -27,7 +33,23 @@ function DashboardContent() {
 
   return (
     <DashboardFrame>
-      <Slot />
+      <DashboardTabs
+        detachInactiveScreens={false}
+        screenOptions={{
+          animation: 'shift',
+          freezeOnBlur: false,
+          headerShown: false,
+          lazy: true,
+          sceneStyle: { backgroundColor: 'transparent' },
+        }}
+        tabBar={!large
+          ? (props) => <DashboardSmallScreenTabBar {...props} />
+          : () => null}
+      >
+        {dashboardPages.map((page) => (
+          <DashboardTabs.Screen key={page.id} name={page.id} />
+        ))}
+      </DashboardTabs>
     </DashboardFrame>
   );
 }

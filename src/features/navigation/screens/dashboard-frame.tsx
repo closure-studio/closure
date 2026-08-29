@@ -54,8 +54,8 @@ export function DashboardFrame({ children }: PropsWithChildren) {
 
   const handleSelect = (pageId: string) => {
     const page = dashboardPages.find((candidate) => candidate.id === pageId);
-    if (!page || !selectedGameAccount || page.id === activePageId) return;
-    router.replace(dashboardPageHref(page.id, selectedGameAccount.account));
+    if (!page || page.id === activePageId) return;
+    router.replace(dashboardPageHref(page.id));
   };
 
   const handleOpenSettings = () => {

@@ -38,9 +38,8 @@ export type NavigationScope = 'dashboard' | 'settings';
 
 export function dashboardPageHref(
   pageId: DashboardPageId,
-  gameAccountId: string,
 ): Href {
-  return `/dashboard/${gameAccountId}/${pageId}`;
+  return `/dashboard/${pageId}`;
 }
 
 export function getSettingsPageId(pathname: string): SettingsPageId | null {

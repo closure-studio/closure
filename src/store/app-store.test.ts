@@ -1,4 +1,4 @@
-import { mockActiveSession } from '@/mocks/auth';
+import { mockActiveSession, mockAdminSession } from '@/mocks/auth';
 import type { StateStorage } from 'zustand/middleware';
 import { APP_STORE_STORAGE_KEY, createAppStore } from './app-store';
 
@@ -30,23 +30,27 @@ describe('App Store client state', () => {
     await rememberedStore.persist.rehydrate();
     expect(rememberedStore.getState().auth.session).toEqual(mockActiveSession);
     expect(rememberedStore.getState().selectedApiNodeId).toBe('domestic');
+    expect(rememberedStore.getState().selectedGameAccountId).toBeNull();
   });
 
-  it('clears the session on logout while keeping the node selection', async () => {
+  it('clears the session and account selection on logout while keeping the node selection', async () => {
     const { storage } = createMemoryStorage();
     const store = createAppStore({ storage });
 
     store.getState().setSession(mockActiveSession);
     store.getState().selectApiNode('overseas');
+    store.getState().selectGameAccount('G1');
     store.getState().logout();
 
     expect(store.getState().auth.session).toBeNull();
     expect(store.getState().selectedApiNodeId).toBe('overseas');
+    expect(store.getState().selectedGameAccountId).toBeNull();
 
     const rehydratedStore = createAppStore({ storage });
     await rehydratedStore.persist.rehydrate();
     expect(rehydratedStore.getState().auth.session).toBeNull();
     expect(rehydratedStore.getState().selectedApiNodeId).toBe('overseas');
+    expect(rehydratedStore.getState().selectedGameAccountId).toBeNull();
   });
 
   it('validates the API node selection and keeps the current one otherwise', () => {
@@ -61,6 +65,32 @@ describe('App Store client state', () => {
     expect(store.getState().selectedApiNodeId).toBe('overseas');
   });
 
+  it('validates transient Game Account selection', () => {
+    const { storage } = createMemoryStorage();
+    const store = createAppStore({ storage });
+
+    store.getState().selectGameAccount('G1');
+    expect(store.getState().selectedGameAccountId).toBe('G1');
+
+    store.getState().selectGameAccount('');
+    expect(store.getState().selectedGameAccountId).toBe('G1');
+  });
+
+  it('preserves selection for the same principal and clears it for another principal', () => {
+    const { storage } = createMemoryStorage();
+    const store = createAppStore({ storage });
+
+    store.getState().setSession(mockActiveSession);
+    store.getState().selectGameAccount('G1');
+    store.getState().setSession({
+      ...mockActiveSession,
+      accessToken: 'refreshed-session-token',
+    });
+    expect(store.getState().selectedGameAccountId).toBe('G1');
+
+    store.getState().setSession(mockAdminSession);
+    expect(store.getState().selectedGameAccountId).toBeNull();
+  });
 });
 
 describe('Persisted store format', () => {
@@ -78,11 +108,12 @@ describe('Persisted store format', () => {
     expect([...values.keys()]).toEqual([APP_STORE_STORAGE_KEY]);
   });
 
-  it('does not serialize transient route state', () => {
+  it('does not serialize transient Game Account selection', () => {
     const { storage, values } = createMemoryStorage();
     const store = createAppStore({ storage });
 
     store.getState().setSession(mockActiveSession);
+    store.getState().selectGameAccount('G1');
     const raw = values.get(APP_STORE_STORAGE_KEY);
     expect(raw).toBeDefined();
     const persisted: unknown = JSON.parse(raw ?? '{}');
@@ -105,6 +136,7 @@ describe('Persisted store format', () => {
     await store.persist.rehydrate();
     expect(store.getState().auth.session).toEqual(mockActiveSession);
     expect(store.getState().selectedApiNodeId).toBe('overseas');
+    expect(store.getState().selectedGameAccountId).toBeNull();
   });
 
   it('drops stored data that does not match the current shape', async () => {

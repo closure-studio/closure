@@ -4,6 +4,7 @@ import * as v from 'valibot';
 
 import { mockArkHostGameListResponse } from '@/mocks/arkhost';
 import { gameAccountSchema } from '@/schemas/game-account';
+import { appStore } from '@/store';
 import { DashboardAccountProvider, useDashboardAccount } from './dashboard-account';
 
 const accountEntries = mockArkHostGameListResponse.code === 1
@@ -29,17 +30,11 @@ const mockFirstAccount = v.parse(gameAccountSchema, {
   userId: firstAccountEntry.status.uuid,
 });
 const mockSecondAccount = { ...mockFirstAccount, account: 'G2' };
-const mockRouterSetParams = jest.fn();
 let mockGameAccountsQuery = {
   data: [mockFirstAccount, mockSecondAccount],
   isError: false,
   isPending: false,
 };
-
-jest.mock('expo-router', () => ({
-  useGlobalSearchParams: jest.fn(() => ({ gameAccountId: 'G16601716973' })),
-  useRouter: () => ({ setParams: mockRouterSetParams }),
-}));
 
 jest.mock('./queries', () => ({
   findGameAccountById: (accounts: readonly { account: string }[] | undefined, accountId: string | null) => (
@@ -50,22 +45,12 @@ jest.mock('./queries', () => ({
   useGameAccountsQuery: jest.fn(() => mockGameAccountsQuery),
 }));
 
-const mockUseGlobalSearchParams = jest.mocked(
-  jest.requireMock<typeof import('expo-router')>('expo-router').useGlobalSearchParams,
-);
-
 function DashboardAccountTestWrapper({ children }: PropsWithChildren) {
   return <DashboardAccountProvider>{children}</DashboardAccountProvider>;
 }
 
-function createWrapper() {
-  return DashboardAccountTestWrapper;
-}
-
 beforeEach(() => {
-  mockUseGlobalSearchParams.mockReset();
-  mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: mockFirstAccount.account });
-  mockRouterSetParams.mockReset();
+  appStore.setState({ selectedGameAccountId: null });
   mockGameAccountsQuery = {
     data: [mockFirstAccount, mockSecondAccount],
     isError: false,
@@ -74,66 +59,65 @@ beforeEach(() => {
 });
 
 describe('DashboardAccountProvider', () => {
-  it('initializes the selected account from the Dashboard URL', async () => {
+  it('derives the first account when the current run has no explicit selection', async () => {
     const { result } = await renderHook(() => useDashboardAccount(), {
-      wrapper: createWrapper(),
+      wrapper: DashboardAccountTestWrapper,
     });
 
     expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
     expect(result.current.gameAccountsQuery.data).toHaveLength(2);
+    expect(appStore.getState().selectedGameAccountId).toBeNull();
   });
 
-  it('ignores non-string account route parameters', async () => {
-    mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: ['G1'] });
-
+  it('updates every consumer from the Store selection without Router state', async () => {
     const { result } = await renderHook(() => useDashboardAccount(), {
-      wrapper: createWrapper(),
-    });
-
-    expect(result.current.selectedGameAccount).toBeNull();
-  });
-
-  it('keeps foreign account IDs out of the dashboard context', async () => {
-    mockUseGlobalSearchParams.mockReturnValue({ gameAccountId: 'G9' });
-
-    const { result } = await renderHook(() => useDashboardAccount(), {
-      wrapper: createWrapper(),
-    });
-
-    expect(result.current.selectedGameAccount).toBeNull();
-  });
-
-  it('updates the selected account when the active Dashboard URL changes', async () => {
-    const { result, rerender } = await renderHook(() => useDashboardAccount(), {
-      wrapper: createWrapper(),
+      wrapper: DashboardAccountTestWrapper,
     });
 
     await act(() => {
       result.current.selectGameAccount(mockSecondAccount.account);
     });
 
-    expect(mockRouterSetParams).toHaveBeenCalledWith({
-      gameAccountId: mockSecondAccount.account,
-    });
-    expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
-
-    mockUseGlobalSearchParams.mockReturnValue({
-      gameAccountId: mockSecondAccount.account,
-    });
-    await rerender(undefined);
-
+    expect(appStore.getState().selectedGameAccountId).toBe(mockSecondAccount.account);
     expect(result.current.selectedGameAccount?.account).toBe(mockSecondAccount.account);
   });
 
-  it('does not navigate when selecting the active account', async () => {
+  it('falls back to the first account when the selected account is unavailable', async () => {
+    appStore.setState({ selectedGameAccountId: 'G9' });
+
     const { result } = await renderHook(() => useDashboardAccount(), {
-      wrapper: createWrapper(),
+      wrapper: DashboardAccountTestWrapper,
     });
 
-    await act(() => {
-      result.current.selectGameAccount(mockFirstAccount.account);
+    expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
+  });
+
+  it('falls back when a previously selected account leaves the Query result', async () => {
+    appStore.setState({ selectedGameAccountId: mockSecondAccount.account });
+    const { result, rerender } = await renderHook(() => useDashboardAccount(), {
+      wrapper: DashboardAccountTestWrapper,
+    });
+    expect(result.current.selectedGameAccount?.account).toBe(mockSecondAccount.account);
+
+    mockGameAccountsQuery = {
+      ...mockGameAccountsQuery,
+      data: [mockFirstAccount],
+    };
+    await rerender(undefined);
+
+    expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
+  });
+
+  it('returns no selection when the account list is empty', async () => {
+    mockGameAccountsQuery = {
+      ...mockGameAccountsQuery,
+      data: [],
+    };
+
+    const { result } = await renderHook(() => useDashboardAccount(), {
+      wrapper: DashboardAccountTestWrapper,
     });
 
-    expect(mockRouterSetParams).not.toHaveBeenCalled();
+    expect(result.current.selectedGameAccount).toBeNull();
   });
 });

@@ -14,15 +14,10 @@ import {
   type DashboardPageId,
 } from './navigation-config';
 
-type DashboardSmallScreenTabBarProps = BottomTabBarProps & {
-  gameAccountId: string;
-};
-
 export function DashboardSmallScreenTabBar({
-  gameAccountId,
   navigation,
   state,
-}: DashboardSmallScreenTabBarProps) {
+}: BottomTabBarProps) {
   const { t } = useTranslation('dashboard');
   const router = useRouter();
   const colors = getTokens().color;
@@ -50,7 +45,7 @@ export function DashboardSmallScreenTabBar({
     });
 
     if (route.key !== activeRoute?.key && !event.defaultPrevented) {
-      router.replace(dashboardPageHref(pageId, gameAccountId));
+      router.replace(dashboardPageHref(pageId));
     }
   };
 
