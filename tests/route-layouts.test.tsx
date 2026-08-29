@@ -8,6 +8,7 @@ const mockRedirect = jest.fn(() => null);
 const mockAppProvider = jest.fn(({ children }: PropsWithChildren) => children);
 const mockDashboardAccountProvider = jest.fn(({ children }: PropsWithChildren) => children);
 const mockDashboardFrame = jest.fn(({ children }: PropsWithChildren) => children);
+const mockDashboardScope = jest.fn(({ children }: PropsWithChildren) => children);
 const mockSelectGameAccount = jest.fn();
 const mockSessionShell = jest.fn(({ children }: PropsWithChildren) => children);
 const mockAppScopeNavigator = jest.fn(() => null);
@@ -42,6 +43,7 @@ jest.mock('@/features/dashboard', () => ({
 jest.mock('@/features/navigation', () => ({
   AppScopeNavigator: mockAppScopeNavigator,
   DashboardFrame: mockDashboardFrame,
+  DashboardScope: mockDashboardScope,
   DashboardSmallScreenTabBar: jest.fn(() => null),
   dashboardDefaultPageId: 'overview',
   dashboardPages: [{ id: 'overview' }],
@@ -107,6 +109,7 @@ describe('route layouts', () => {
     await render(<DashboardLayout />);
 
     expect(mockDashboardAccountProvider).toHaveBeenCalledTimes(1);
+    expect(mockDashboardScope).toHaveBeenCalledTimes(1);
     expect(mockDashboardFrame).toHaveBeenCalledTimes(1);
     expect(mockSlot).toHaveBeenCalledTimes(1);
   });

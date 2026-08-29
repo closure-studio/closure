@@ -9,7 +9,7 @@ export function AppScopeNavigator() {
         headerShown: false,
       }}
     >
-      <Stack.Screen name="dashboard" />
+      <Stack.Screen name="dashboard" options={{ freezeOnBlur: false }} />
       <Stack.Screen name="settings" />
     </Stack>
   );

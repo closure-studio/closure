@@ -1,4 +1,5 @@
 export { AppScopeNavigator } from './app-scope-navigator';
+export { DashboardScope } from './dashboard-scope';
 export { DashboardSmallScreenTabBar } from './dashboard-small-screen-tab-bar';
 export { DashboardAccountPager } from './dashboard-account-pager';
 export { SettingsTabBar } from './settings-tab-bar';

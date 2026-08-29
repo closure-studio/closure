@@ -6,7 +6,7 @@ import {
   DashboardAccountProvider,
   useDashboardAccount,
 } from '@/features/dashboard';
-import { DashboardFrame } from '@/features/navigation';
+import { DashboardFrame, DashboardScope } from '@/features/navigation';
 
 function DashboardState({ label }: { label: string }) {
   return (
@@ -35,7 +35,9 @@ function DashboardContent() {
 export default function DashboardLayout() {
   return (
     <DashboardAccountProvider>
-      <DashboardContent />
+      <DashboardScope>
+        <DashboardContent />
+      </DashboardScope>
     </DashboardAccountProvider>
   );
 }
