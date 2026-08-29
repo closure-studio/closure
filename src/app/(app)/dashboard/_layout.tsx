@@ -1,6 +1,5 @@
 import { Tabs as DashboardTabs } from 'expo-router/tabs';
-import { useEffect } from 'react';
-import { Spinner, YStack, useMedia } from 'tamagui';
+import { Spinner, useMedia, YStack } from 'tamagui';
 
 import { MonoText } from '@/components';
 import {
@@ -9,8 +8,9 @@ import {
 } from '@/features/dashboard';
 import {
   DashboardFrame,
+  DashboardScope,
   DashboardSmallScreenTabBar,
-  dashboardPagesList,
+  dashboardPages,
 } from '@/features/navigation';
 
 function DashboardState({ label }: { label: string }) {
@@ -24,46 +24,29 @@ function DashboardState({ label }: { label: string }) {
 
 function DashboardContent() {
   const { large } = useMedia();
-  const {
-    gameAccountsQuery,
-    selectedGameAccount,
-    selectGameAccount,
-  } = useDashboardAccount();
+  const { gameAccountsQuery } = useDashboardAccount();
   const gameAccounts = gameAccountsQuery.data ?? [];
-  const fallbackGameAccountId = gameAccounts[0]?.account;
-
-  useEffect(() => {
-    if (!selectedGameAccount && fallbackGameAccountId) {
-      selectGameAccount(fallbackGameAccountId);
-    }
-  }, [fallbackGameAccountId, selectedGameAccount, selectGameAccount]);
 
   if (gameAccountsQuery.isPending) return <DashboardState label="LOADING ARKHOST DATA" />;
   if (gameAccountsQuery.isError) return <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
   if (gameAccounts.length === 0) return <DashboardState label="NO GAME ACCOUNTS" />;
 
-  if (!selectedGameAccount) return null;
-
   return (
     <DashboardFrame>
       <DashboardTabs
+        detachInactiveScreens={false}
         screenOptions={{
           animation: 'shift',
-          freezeOnBlur: true,
+          freezeOnBlur: false,
           headerShown: false,
           lazy: true,
           sceneStyle: { backgroundColor: 'transparent' },
         }}
         tabBar={!large
-          ? (props) => (
-            <DashboardSmallScreenTabBar
-              {...props}
-              gameAccountId={selectedGameAccount.account}
-            />
-          )
+          ? (props) => <DashboardSmallScreenTabBar {...props} />
           : () => null}
       >
-        {dashboardPagesList.map((page) => (
+        {dashboardPages.map((page) => (
           <DashboardTabs.Screen key={page.id} name={page.id} />
         ))}
       </DashboardTabs>
@@ -74,7 +57,9 @@ function DashboardContent() {
 export default function DashboardLayout() {
   return (
     <DashboardAccountProvider>
-      <DashboardContent />
+      <DashboardScope>
+        <DashboardContent />
+      </DashboardScope>
     </DashboardAccountProvider>
   );
 }

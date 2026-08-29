@@ -7,25 +7,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import { MonoText } from '@/components';
-import { dashboardPagesList } from './navigation-config';
-
-type DashboardSmallScreenTabBarProps = BottomTabBarProps & {
-  gameAccountId: string;
-};
+import { dashboardPages } from './navigation-config';
 
 export function DashboardSmallScreenTabBar({
-  gameAccountId,
   navigation,
   state,
-}: DashboardSmallScreenTabBarProps) {
+}: BottomTabBarProps) {
   const { t } = useTranslation('dashboard');
   const colors = getTokens().color;
   const reducedMotion = useReducedMotion();
   const { bottom: bottomInset } = useSafeAreaInsets();
   const [navigationWidth, setNavigationWidth] = useState(0);
   const activeRoute = state.routes[state.index];
-  const activeIndex = Math.max(0, dashboardPagesList.findIndex((page) => page.id === activeRoute?.name));
-  const buttonWidth = Math.max(0, (navigationWidth - 16) / dashboardPagesList.length);
+  const activeIndex = Math.max(0, dashboardPages.findIndex((page) => page.id === activeRoute?.name));
+  const buttonWidth = Math.max(0, (navigationWidth - 16) / dashboardPages.length);
   const indicatorWidth = Math.max(0, buttonWidth - 16);
   const indicatorLeft = 16 + activeIndex * buttonWidth;
 
@@ -44,10 +39,7 @@ export function DashboardSmallScreenTabBar({
     });
 
     if (route.key !== activeRoute?.key && !event.defaultPrevented) {
-      navigation.navigate(route.name, {
-        ...route.params,
-        gameAccountId,
-      });
+      navigation.navigate(route.name, route.params);
     }
   };
 
@@ -83,7 +75,7 @@ export function DashboardSmallScreenTabBar({
           bg="$appAccent"
           opacity={navigationWidth > 0 ? 1 : 0}
         />
-        {dashboardPagesList.map((page) => {
+        {dashboardPages.map((page) => {
           const isActive = page.id === activeRoute?.name;
           const Icon = page.icon;
           return (

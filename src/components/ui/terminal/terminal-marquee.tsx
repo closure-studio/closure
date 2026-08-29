@@ -105,6 +105,7 @@ export const TerminalMarquee = memo(function TerminalMarquee({ items }: Terminal
 
   return (
     <YStack
+      testID="terminal-marquee"
       mt="$2"
       py="$1.5"
       borderTopWidth={1}

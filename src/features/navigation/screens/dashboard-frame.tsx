@@ -1,6 +1,6 @@
 import { type PropsWithChildren, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { usePathname, useRouter } from 'expo-router';
+import { useRouter, useSegments } from 'expo-router';
 import { getTokens, YStack } from 'tamagui';
 
 import {
@@ -13,10 +13,9 @@ import { useSessionBackdrop } from '@/features/session';
 import { NavigationFrame } from '../components/navigation-frame';
 import { NavigationHeader } from '../components/navigation-header';
 import {
-  dashboardDefaultPage,
-  dashboardPagesList,
+  dashboardDefaultPageId,
+  dashboardPages,
   dashboardPageHref,
-  getDashboardPageId,
   settingsDefaultPage,
 } from '../navigation-config';
 import { useAppLogout } from '../navigation-actions';
@@ -25,7 +24,7 @@ export function DashboardFrame({ children }: PropsWithChildren) {
   const colors = getTokens().color;
   const { t } = useTranslation('navigation');
   const { t: tDashboard } = useTranslation('dashboard');
-  const pathname = usePathname();
+  const segments = useSegments();
   const router = useRouter();
   const onLogout = useAppLogout();
   const { setBackdropTint } = useSessionBackdrop();
@@ -40,8 +39,10 @@ export function DashboardFrame({ children }: PropsWithChildren) {
     warning: colors.appWarning.val,
     muted: colors.appMuted.val,
   });
-  const activePageId = getDashboardPageId(pathname) ?? dashboardDefaultPage.id;
-  const items = dashboardPagesList.map((page) => ({
+  const activePageId = dashboardPages.find(
+    (page) => page.id === segments.at(-1),
+  )?.id ?? dashboardDefaultPageId;
+  const items = dashboardPages.map((page) => ({
     icon: page.icon,
     id: page.id,
     label: tDashboard(`navigation.sections.${page.id}.label`),
@@ -52,9 +53,9 @@ export function DashboardFrame({ children }: PropsWithChildren) {
   }, [backdropTint, setBackdropTint]);
 
   const handleSelect = (pageId: string) => {
-    const page = dashboardPagesList.find((candidate) => candidate.id === pageId);
-    if (!page || !selectedGameAccount || page.id === activePageId) return;
-    router.replace(dashboardPageHref(page.id, selectedGameAccount.account));
+    const page = dashboardPages.find((candidate) => candidate.id === pageId);
+    if (!page || page.id === activePageId) return;
+    router.replace(dashboardPageHref(page.id));
   };
 
   const handleOpenSettings = () => {

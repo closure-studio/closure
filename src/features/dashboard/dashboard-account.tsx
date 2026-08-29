@@ -1,24 +1,15 @@
-import { useGlobalSearchParams, useRouter } from 'expo-router';
 import {
   createContext,
   type PropsWithChildren,
-  useCallback,
   useContext,
+  useState,
 } from 'react';
-import * as v from 'valibot';
 
-import {
-  gameAccountIdSchema,
-  type GameAccount,
-} from '@/schemas/game-account';
+import type { GameAccount } from '@/schemas/game-account';
 import {
   findGameAccountById,
   useGameAccountsQuery,
 } from './queries';
-
-type DashboardRouteParams = {
-  gameAccountId?: string | string[];
-};
 
 type DashboardAccountContextValue = {
   selectedGameAccount: GameAccount | null;
@@ -29,28 +20,31 @@ type DashboardAccountContextValue = {
 const DashboardAccountContext = createContext<DashboardAccountContextValue | null>(null);
 
 export function DashboardAccountProvider({ children }: PropsWithChildren) {
-  const { gameAccountId: routeGameAccountId } = useGlobalSearchParams<DashboardRouteParams>();
-  const router = useRouter();
-  const gameAccountIdResult = v.safeParse(gameAccountIdSchema, routeGameAccountId);
-  const gameAccountId = gameAccountIdResult.success ? gameAccountIdResult.output : null;
+  const [selectedGameAccountId, setSelectedGameAccountId] = useState<string | null>(null);
   const gameAccountsQuery = useGameAccountsQuery();
-  const selectedGameAccount = findGameAccountById(
+  const matchedGameAccount = findGameAccountById(
     gameAccountsQuery.data,
-    gameAccountId,
+    selectedGameAccountId,
   );
 
-  const selectGameAccount = useCallback((nextGameAccountId: string) => {
-    if (nextGameAccountId === gameAccountId) return;
+  if (
+    selectedGameAccountId !== null
+    && gameAccountsQuery.data
+    && !matchedGameAccount
+  ) {
+    setSelectedGameAccountId(null);
+  }
 
-    router.setParams({ gameAccountId: nextGameAccountId });
-  }, [gameAccountId, router]);
+  const selectedGameAccount = matchedGameAccount
+    ?? gameAccountsQuery.data?.[0]
+    ?? null;
 
   return (
     <DashboardAccountContext.Provider
       value={{
         selectedGameAccount,
         gameAccountsQuery,
-        selectGameAccount,
+        selectGameAccount: setSelectedGameAccountId,
       }}
     >
       {children}

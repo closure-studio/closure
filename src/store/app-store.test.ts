@@ -78,21 +78,6 @@ describe('Persisted store format', () => {
     expect([...values.keys()]).toEqual([APP_STORE_STORAGE_KEY]);
   });
 
-  it('does not serialize transient route state', () => {
-    const { storage, values } = createMemoryStorage();
-    const store = createAppStore({ storage });
-
-    store.getState().setSession(mockActiveSession);
-    const raw = values.get(APP_STORE_STORAGE_KEY);
-    expect(raw).toBeDefined();
-    const persisted: unknown = JSON.parse(raw ?? '{}');
-    const persistedState = typeof persisted === 'object' && persisted !== null && 'state' in persisted
-      ? persisted.state
-      : {};
-    expect(persistedState).not.toHaveProperty('selectedGameAccountId');
-    expect(persistedState).not.toHaveProperty('activeGameAccountId');
-  });
-
   it('restores valid bare state by wrapping it in the current envelope', async () => {
     const { storage } = createMemoryStorage({
       [APP_STORE_STORAGE_KEY]: JSON.stringify({

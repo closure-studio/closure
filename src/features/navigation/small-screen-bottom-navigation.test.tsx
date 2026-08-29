@@ -87,7 +87,6 @@ async function renderMobileBottomNavigation(defaultPrevented = false) {
         <I18nextProvider i18n={i18n}>
           <DashboardSmallScreenTabBar
             descriptors={{}}
-            gameAccountId="G1"
             insets={safeAreaMetrics.insets}
             navigation={navigation}
             state={state}
@@ -127,7 +126,7 @@ describe('MobileBottomNavigation', () => {
     expect(screen.getByRole('tab', { name: i18n.t('dashboard:navigation.sections.overview.label') }).props['aria-selected']).toBe(true);
   });
 
-  it('emits tabPress before navigating with the tab navigator', async () => {
+  it('navigates between static Dashboard page routes', async () => {
     const { emit, navigate, screen } = await renderMobileBottomNavigation();
 
     await fireEvent.press(screen.getByText(i18n.t('dashboard:navigation.sections.operators.label')));
@@ -137,7 +136,7 @@ describe('MobileBottomNavigation', () => {
       target: 'operators-key',
       canPreventDefault: true,
     });
-    expect(navigate).toHaveBeenCalledWith('operators', { gameAccountId: 'G1' });
+    expect(navigate).toHaveBeenCalledWith('operators', undefined);
   });
 
   it('honors a prevented tabPress event', async () => {
