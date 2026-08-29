@@ -11,7 +11,6 @@ import { tamaguiConfig } from '../../../tamagui.config';
 import { DashboardSmallScreenTabBar } from './dashboard-small-screen-tab-bar';
 
 const mockYStack = jest.fn();
-const mockRouterReplace = jest.fn();
 const bottomInset = 34;
 const safeAreaMetrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
@@ -26,10 +25,6 @@ jest.mock('react-native-reanimated', () => {
     useReducedMotion: () => true,
   };
 });
-
-jest.mock('expo-router', () => ({
-  useRouter: () => ({ replace: mockRouterReplace }),
-}));
 
 jest.mock('tamagui', () => {
   const tamagui = jest.requireActual<typeof import('tamagui')>('tamagui');
@@ -107,7 +102,6 @@ async function renderMobileBottomNavigation(defaultPrevented = false) {
 describe('MobileBottomNavigation', () => {
   beforeEach(() => {
     mockYStack.mockClear();
-    mockRouterReplace.mockClear();
   });
 
   it('keeps the active indicator static when reduced motion is enabled', async () => {
@@ -133,7 +127,7 @@ describe('MobileBottomNavigation', () => {
   });
 
   it('navigates between static Dashboard page routes', async () => {
-    const { emit, screen } = await renderMobileBottomNavigation();
+    const { emit, navigate, screen } = await renderMobileBottomNavigation();
 
     await fireEvent.press(screen.getByText(i18n.t('dashboard:navigation.sections.operators.label')));
 
@@ -142,14 +136,14 @@ describe('MobileBottomNavigation', () => {
       target: 'operators-key',
       canPreventDefault: true,
     });
-    expect(mockRouterReplace).toHaveBeenCalledWith('/dashboard/operators');
+    expect(navigate).toHaveBeenCalledWith('operators', undefined);
   });
 
   it('honors a prevented tabPress event', async () => {
-    const { screen } = await renderMobileBottomNavigation(true);
+    const { navigate, screen } = await renderMobileBottomNavigation(true);
 
     await fireEvent.press(screen.getByText(i18n.t('dashboard:navigation.sections.operators.label')));
 
-    expect(mockRouterReplace).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
   });
 });

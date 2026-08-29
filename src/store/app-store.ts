@@ -7,33 +7,25 @@ import type { StateStorage } from "zustand/middleware";
 import { mmkvStateStorage } from "@/lib/mmkv";
 import { apiNodeIdSchema } from "@/schemas/api-node";
 import type { UserSession } from "@/schemas/auth";
-import { gameAccountIdSchema } from "@/schemas/game-account";
 import { persistedStoreStateSchema } from "@/schemas/local-state";
 import type { PersistedStoreState } from "@/schemas/local-state";
 
 export type AppStore = PersistedStoreState & {
-  selectedGameAccountId: string | null;
   // auth
   setSession: (session: UserSession) => void;
   logout: () => void;
   // api node
   selectApiNode: (apiNodeId: unknown) => void;
-  // dashboard
-  selectGameAccount: (gameAccountId: unknown) => void;
 };
 
 export const APP_STORE_STORAGE_KEY = "closure.app-store";
 
 const APP_STORE_VERSION = 1;
 
-function initialState(): Pick<
-  AppStore,
-  "auth" | "selectedApiNodeId" | "selectedGameAccountId"
-> {
+function initialState(): Pick<AppStore, "auth" | "selectedApiNodeId"> {
   return {
     auth: { session: null },
     selectedApiNodeId: "domestic",
-    selectedGameAccountId: null,
   };
 }
 
@@ -88,29 +80,15 @@ export function createAppStore(options: AppStoreOptions = {}) {
       (set) => ({
         ...initialState(),
         logout: () => {
-          set({ auth: { session: null }, selectedGameAccountId: null });
+          set({ auth: { session: null } });
         },
         selectApiNode: (apiNodeId) => {
           const parsedApiNodeId = v.safeParse(apiNodeIdSchema, apiNodeId);
           if (!parsedApiNodeId.success) return;
           set({ selectedApiNodeId: parsedApiNodeId.output });
         },
-        selectGameAccount: (gameAccountId) => {
-          const parsedGameAccountId = v.safeParse(
-            gameAccountIdSchema,
-            gameAccountId,
-          );
-          if (!parsedGameAccountId.success) return;
-          set({ selectedGameAccountId: parsedGameAccountId.output });
-        },
         setSession: (session) => {
-          set((state) => ({
-            auth: { session },
-            selectedGameAccountId:
-              state.auth.session?.principal.id === session.principal.id
-                ? state.selectedGameAccountId
-                : null,
-          }));
+          set({ auth: { session } });
         },
       }),
       {

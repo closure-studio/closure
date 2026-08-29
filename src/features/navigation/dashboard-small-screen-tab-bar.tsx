@@ -1,5 +1,4 @@
 import type { BottomTabBarProps } from 'expo-router/tabs';
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LayoutChangeEvent } from 'react-native';
@@ -8,18 +7,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, XStack, YStack, getTokens } from 'tamagui';
 
 import { MonoText } from '@/components';
-import {
-  dashboardPageHref,
-  dashboardPages,
-  type DashboardPageId,
-} from './navigation-config';
+import { dashboardPages } from './navigation-config';
 
 export function DashboardSmallScreenTabBar({
   navigation,
   state,
 }: BottomTabBarProps) {
   const { t } = useTranslation('dashboard');
-  const router = useRouter();
   const colors = getTokens().color;
   const reducedMotion = useReducedMotion();
   const { bottom: bottomInset } = useSafeAreaInsets();
@@ -34,7 +28,7 @@ export function DashboardSmallScreenTabBar({
     setNavigationWidth(event.nativeEvent.layout.width);
   };
 
-  const handleSelect = (pageId: DashboardPageId) => {
+  const handleSelect = (pageId: string) => {
     const route = state.routes.find((candidate) => candidate.name === pageId);
     if (!route) return;
 
@@ -45,7 +39,7 @@ export function DashboardSmallScreenTabBar({
     });
 
     if (route.key !== activeRoute?.key && !event.defaultPrevented) {
-      router.replace(dashboardPageHref(pageId));
+      navigation.navigate(route.name, route.params);
     }
   };
 

@@ -4,7 +4,6 @@ import * as v from 'valibot';
 
 import { mockArkHostGameListResponse } from '@/mocks/arkhost';
 import { gameAccountSchema } from '@/schemas/game-account';
-import { appStore } from '@/store';
 import { DashboardAccountProvider, useDashboardAccount } from './dashboard-account';
 
 const accountEntries = mockArkHostGameListResponse.code === 1
@@ -50,7 +49,6 @@ function DashboardAccountTestWrapper({ children }: PropsWithChildren) {
 }
 
 beforeEach(() => {
-  appStore.setState({ selectedGameAccountId: null });
   mockGameAccountsQuery = {
     data: [mockFirstAccount, mockSecondAccount],
     isError: false,
@@ -66,10 +64,9 @@ describe('DashboardAccountProvider', () => {
 
     expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
     expect(result.current.gameAccountsQuery.data).toHaveLength(2);
-    expect(appStore.getState().selectedGameAccountId).toBeNull();
   });
 
-  it('updates every consumer from the Store selection without Router state', async () => {
+  it('updates every consumer from the Provider selection without Router state', async () => {
     const { result } = await renderHook(() => useDashboardAccount(), {
       wrapper: DashboardAccountTestWrapper,
     });
@@ -78,30 +75,42 @@ describe('DashboardAccountProvider', () => {
       result.current.selectGameAccount(mockSecondAccount.account);
     });
 
-    expect(appStore.getState().selectedGameAccountId).toBe(mockSecondAccount.account);
     expect(result.current.selectedGameAccount?.account).toBe(mockSecondAccount.account);
   });
 
   it('falls back to the first account when the selected account is unavailable', async () => {
-    appStore.setState({ selectedGameAccountId: 'G9' });
-
     const { result } = await renderHook(() => useDashboardAccount(), {
       wrapper: DashboardAccountTestWrapper,
+    });
+
+    await act(() => {
+      result.current.selectGameAccount('G9');
     });
 
     expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
   });
 
-  it('falls back when a previously selected account leaves the Query result', async () => {
-    appStore.setState({ selectedGameAccountId: mockSecondAccount.account });
+  it('clears a selection when its account leaves the Query result', async () => {
     const { result, rerender } = await renderHook(() => useDashboardAccount(), {
       wrapper: DashboardAccountTestWrapper,
+    });
+
+    await act(() => {
+      result.current.selectGameAccount(mockSecondAccount.account);
     });
     expect(result.current.selectedGameAccount?.account).toBe(mockSecondAccount.account);
 
     mockGameAccountsQuery = {
       ...mockGameAccountsQuery,
       data: [mockFirstAccount],
+    };
+    await rerender(undefined);
+
+    expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
+
+    mockGameAccountsQuery = {
+      ...mockGameAccountsQuery,
+      data: [mockFirstAccount, mockSecondAccount],
     };
     await rerender(undefined);
 

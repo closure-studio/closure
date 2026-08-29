@@ -2,10 +2,10 @@ import {
   createContext,
   type PropsWithChildren,
   useContext,
+  useState,
 } from 'react';
 
 import type { GameAccount } from '@/schemas/game-account';
-import { useAppStore } from '@/store';
 import {
   findGameAccountById,
   useGameAccountsQuery,
@@ -20,22 +20,31 @@ type DashboardAccountContextValue = {
 const DashboardAccountContext = createContext<DashboardAccountContextValue | null>(null);
 
 export function DashboardAccountProvider({ children }: PropsWithChildren) {
-  const selectedGameAccountId = useAppStore(
-    (state) => state.selectedGameAccountId,
-  );
-  const selectGameAccount = useAppStore((state) => state.selectGameAccount);
+  const [selectedGameAccountId, setSelectedGameAccountId] = useState<string | null>(null);
   const gameAccountsQuery = useGameAccountsQuery();
-  const selectedGameAccount = findGameAccountById(
+  const matchedGameAccount = findGameAccountById(
     gameAccountsQuery.data,
     selectedGameAccountId,
-  ) ?? gameAccountsQuery.data?.[0] ?? null;
+  );
+
+  if (
+    selectedGameAccountId !== null
+    && gameAccountsQuery.data
+    && !matchedGameAccount
+  ) {
+    setSelectedGameAccountId(null);
+  }
+
+  const selectedGameAccount = matchedGameAccount
+    ?? gameAccountsQuery.data?.[0]
+    ?? null;
 
   return (
     <DashboardAccountContext.Provider
       value={{
         selectedGameAccount,
         gameAccountsQuery,
-        selectGameAccount,
+        selectGameAccount: setSelectedGameAccountId,
       }}
     >
       {children}
