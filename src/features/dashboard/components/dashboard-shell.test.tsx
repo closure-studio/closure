@@ -17,11 +17,19 @@ jest.mock('react-native-reanimated', () => {
   return { ...reanimated, ...reanimatedMock, useReducedMotion: () => true };
 });
 
-function DashboardShellTestTree({ pageId, onSelectGameAccount }: { pageId: string; onSelectGameAccount: (gameAccountId: string) => void }) {
+function DashboardShellTestTree({
+  pageId,
+  onSelectGameAccount,
+  selectedGameAccountId = 'G18928069156',
+}: {
+  pageId: string;
+  onSelectGameAccount: (gameAccountId: string) => void;
+  selectedGameAccountId?: string;
+}) {
   return (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <I18nextProvider i18n={i18n}>
-        <DashboardShell selectedGameAccountId="G18928069156" gameAccounts={initialGameAccounts} onSelectGameAccount={onSelectGameAccount}>
+        <DashboardShell selectedGameAccountId={selectedGameAccountId} gameAccounts={initialGameAccounts} onSelectGameAccount={onSelectGameAccount}>
           <YStack testID={`dashboard-page-${pageId}`} />
         </DashboardShell>
       </I18nextProvider>
@@ -30,12 +38,21 @@ function DashboardShellTestTree({ pageId, onSelectGameAccount }: { pageId: strin
 }
 
 describe('DashboardShell', () => {
-  it('keeps the secondary header mounted while dashboard content changes', async () => {
+  it('keeps the Header and marquee mounted while page and account content change', async () => {
     const screen = await render(<DashboardShellTestTree pageId="overview" onSelectGameAccount={jest.fn()} />);
-    expect(screen.getByTestId('dashboard-secondary-header')).toBeTruthy();
+    const secondaryHeader = screen.getByTestId('dashboard-secondary-header');
+    const marquee = screen.getByTestId('terminal-marquee');
     expect(screen.getByTestId('dashboard-page-overview')).toBeTruthy();
 
-    await screen.rerender(<DashboardShellTestTree pageId="inventory" onSelectGameAccount={jest.fn()} />);
+    await screen.rerender(
+      <DashboardShellTestTree
+        pageId="inventory"
+        selectedGameAccountId="G16601716973"
+        onSelectGameAccount={jest.fn()}
+      />,
+    );
+    expect(screen.getByTestId('dashboard-secondary-header')).toBe(secondaryHeader);
+    expect(screen.getByTestId('terminal-marquee')).toBe(marquee);
     expect(screen.getByTestId('dashboard-page-inventory')).toBeTruthy();
     expect(screen.queryByTestId('dashboard-page-overview')).toBeNull();
   });

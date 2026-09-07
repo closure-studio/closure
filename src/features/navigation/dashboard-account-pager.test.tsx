@@ -109,6 +109,15 @@ function DashboardAccountPagerTestTree() {
   );
 }
 
+function DashboardAccountPagerPairTestTree() {
+  return (
+    <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+      <DashboardAccountPager renderAccount={() => null} />
+      <DashboardAccountPager renderAccount={() => null} />
+    </TamaguiProvider>
+  );
+}
+
 function renderPager() {
   return render(
     <DashboardAccountPagerTestTree />,
@@ -151,6 +160,7 @@ describe('DashboardAccountPager', () => {
       pager.onIndexChange(2);
     });
 
+    expect(mockSelectGameAccount).toHaveBeenCalledTimes(1);
     expect(mockSelectGameAccount).toHaveBeenCalledWith(thirdGameAccount.account);
     expect(readPagerProps().navigationState.index).toBe(1);
     expect(pager.renderTabBar()).toBeNull();
@@ -167,5 +177,25 @@ describe('DashboardAccountPager', () => {
 
     expect(readPagerProps().navigationState.index).toBe(0);
     expect(mockSelectGameAccount).not.toHaveBeenCalled();
+  });
+
+  it('aligns every mounted page Pager to one account selection', async () => {
+    const screen = await render(<DashboardAccountPagerPairTestTree />);
+    const initialPagers = mockTabView.mock.calls.slice(-2).map((call) => call[0]);
+    expect(initialPagers.map((pager) => pager.navigationState.index)).toEqual([1, 1]);
+
+    await act(() => {
+      initialPagers[0]?.onIndexChange(2);
+    });
+    expect(mockSelectGameAccount).toHaveBeenCalledWith(thirdGameAccount.account);
+
+    mockDashboardAccount = {
+      selectedGameAccount: thirdGameAccount,
+      gameAccountsQuery: { data: gameAccounts },
+    };
+    await screen.rerender(<DashboardAccountPagerPairTestTree />);
+
+    const alignedPagers = mockTabView.mock.calls.slice(-2).map((call) => call[0]);
+    expect(alignedPagers.map((pager) => pager.navigationState.index)).toEqual([2, 2]);
   });
 });

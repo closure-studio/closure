@@ -25,7 +25,7 @@ describe('native AppScopeNavigator', () => {
     mockStackScreen.mockClear();
   });
 
-  it('uses the platform-native transition for complete scope screens', async () => {
+  it('keeps scope screens transparent and Dashboard responsive to focus changes', async () => {
     await render(<AppScopeNavigator />);
 
     const stackCall = mockStack.mock.calls.at(-1);
@@ -35,7 +35,10 @@ describe('native AppScopeNavigator', () => {
       contentStyle: { backgroundColor: 'transparent' },
       headerShown: false,
     });
-    expect(mockStackScreen).toHaveBeenNthCalledWith(1, { name: 'dashboard' }, undefined);
+    expect(mockStackScreen).toHaveBeenNthCalledWith(1, {
+      name: 'dashboard',
+      options: { freezeOnBlur: false },
+    }, undefined);
     expect(mockStackScreen).toHaveBeenNthCalledWith(2, { name: 'settings' }, undefined);
   });
 });

@@ -22,7 +22,7 @@ export const APP_STORE_STORAGE_KEY = "closure.app-store";
 
 const APP_STORE_VERSION = 1;
 
-function initialState(): PersistedStoreState {
+function initialState(): Pick<AppStore, "auth" | "selectedApiNodeId"> {
   return {
     auth: { session: null },
     selectedApiNodeId: "domestic",

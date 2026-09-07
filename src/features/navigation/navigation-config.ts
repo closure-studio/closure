@@ -12,16 +12,14 @@ import type { Href } from 'expo-router';
 
 import { ROUTES } from '@/constants/routes';
 
-const dashboardPages = {
-  overview: { id: 'overview', route: '/dashboard/overview', icon: Grid2X2 },
-  settings: { id: 'settings', route: '/dashboard/settings', icon: Settings2 },
-  operators: { id: 'operators', route: '/dashboard/operators', icon: UsersRound },
-  inventory: { id: 'inventory', route: '/dashboard/inventory', icon: Boxes },
-  activity: { id: 'activity', route: '/dashboard/activity', icon: CalendarClock },
-} as const;
-
-export const dashboardPagesList = Object.values(dashboardPages);
-export const dashboardDefaultPage = dashboardPages.overview;
+export const dashboardPages = [
+  { id: 'overview', icon: Grid2X2 },
+  { id: 'settings', icon: Settings2 },
+  { id: 'operators', icon: UsersRound },
+  { id: 'inventory', icon: Boxes },
+  { id: 'activity', icon: CalendarClock },
+] as const;
+export const dashboardDefaultPageId: DashboardPageId = 'overview';
 
 const settingsPages = {
   network: { id: 'network', route: ROUTES.settingsNetwork, icon: Wifi },
@@ -32,7 +30,7 @@ const settingsPages = {
 export const settingsPagesList = Object.values(settingsPages);
 export const settingsDefaultPage = settingsPages.network;
 
-export type DashboardPageId = keyof typeof dashboardPages;
+export type DashboardPageId = (typeof dashboardPages)[number]['id'];
 export type SettingsPageId = keyof typeof settingsPages;
 export type SettingsPageRoute =
   (typeof settingsPages)[SettingsPageId]['route'];
@@ -40,16 +38,8 @@ export type NavigationScope = 'dashboard' | 'settings';
 
 export function dashboardPageHref(
   pageId: DashboardPageId,
-  gameAccountId: string,
 ): Href {
-  return {
-    pathname: dashboardPages[pageId].route,
-    params: { gameAccountId },
-  };
-}
-
-export function getDashboardPageId(pathname: string): DashboardPageId | null {
-  return dashboardPagesList.find((page) => page.route === pathname)?.id ?? null;
+  return `/dashboard/${pageId}`;
 }
 
 export function getSettingsPageId(pathname: string): SettingsPageId | null {
