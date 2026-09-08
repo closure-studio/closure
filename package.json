@@ -66,6 +66,7 @@
   },
   "scripts": {
     "start": "expo start --dev-client",
+    "mcp": "bash ./scripts/start-coding-tools-mcp.sh",
     "reset-project": "node ./scripts/reset-project.js",
     "resources:sync": "node --experimental-strip-types ./scripts/sync-game-resources.mjs",
     "assets:generate-dashboard": "node --experimental-strip-types ./scripts/generate-dashboard-assets.mjs",

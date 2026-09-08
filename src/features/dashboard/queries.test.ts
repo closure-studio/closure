@@ -31,7 +31,6 @@ const baseAccount: GameAccount = v.parse(gameAccountSchema, {
     battle_replay_actions: null,
     enable_building_arrange: false,
     is_auto_battle: false,
-    is_stopped: false,
     keeping_ap: 0,
     map_id: 'main_01-07',
     recruit_ignore_robot: false,
@@ -43,7 +42,6 @@ const baseAccount: GameAccount = v.parse(gameAccountSchema, {
   nickname: 'Base',
   platform: 1,
   statusCode: 0,
-  statusText: 'ok',
   userId: 'user-1',
 });
 

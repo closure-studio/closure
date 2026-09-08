@@ -1,7 +1,8 @@
-import type {
-  ArkHostGameConfigPatch,
-  ArkHostGameDetail,
-  ArkHostGameListEntry,
+import {
+  ARK_HOST_GAME_STATUS_CODE,
+  type ArkHostGameConfigPatch,
+  type ArkHostGameDetail,
+  type ArkHostGameListEntry,
 } from "@/schemas/arkhost";
 import type {
   ArkHostApi,
@@ -105,15 +106,25 @@ export class MockArkHostApi implements ArkHostApi {
     for (const subscription of this.#subscriptions) subscription.scheduleReconnect();
   }
 
+  #setGameStatusCode(account: string, statusCode: number): ArkHostResult<void> {
+    const entry = this.#gameList.find(
+      (game) => game.status.account === account,
+    );
+    if (!entry) return failure<void>();
+
+    entry.status.code = statusCode;
+    return success(undefined);
+  }
+
   async deleteGame(account: string) {
     await this.#wait();
     const index = this.#gameList.findIndex(
       (entry) => entry.status.account === account,
     );
-    if (index === -1) return failure<boolean>();
+    if (index === -1) return failure<void>();
     this.#gameList.splice(index, 1);
     if (this.#detail?.config.account === account) this.#detail = null;
-    return success(true);
+    return success(undefined);
   }
 
   async fetchCharacters(account: string) {
@@ -153,6 +164,20 @@ export class MockArkHostApi implements ArkHostApi {
         mockArkHostGameLogsResponse.data.hasMore,
       logs: structuredClone(logs),
     });
+  }
+  async loginGame(account: string) {
+    await this.#wait();
+    return this.#setGameStatusCode(
+      account,
+      ARK_HOST_GAME_STATUS_CODE.loggingIn,
+    );
+  }
+  async pauseGame(account: string) {
+    await this.#wait();
+    return this.#setGameStatusCode(
+      account,
+      ARK_HOST_GAME_STATUS_CODE.notStarted,
+    );
   }
   async updateGameConfig(account: string, patch: ArkHostGameConfigPatch) {
     await this.#wait();

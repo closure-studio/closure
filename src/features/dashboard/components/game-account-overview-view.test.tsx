@@ -1,6 +1,6 @@
-import { render } from '@testing-library/react-native';
+import { render, within } from '@testing-library/react-native';
 import { I18nextProvider } from 'react-i18next';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { TamaguiProvider } from 'tamagui';
 import * as v from 'valibot';
 
@@ -37,7 +37,6 @@ const gameAccount = v.parse(gameAccountSchema, {
   nickname: gameAccountEntry.status.nick_name,
   platform: gameAccountEntry.status.platform,
   statusCode: gameAccountEntry.status.code,
-  statusText: gameAccountEntry.status.text,
   userId: gameAccountEntry.status.uuid,
 });
 
@@ -52,7 +51,9 @@ describe('GameAccountOverviewView', () => {
             logs={[]}
             stageSubtitle={undefined}
             stageTitle="—"
-          />
+          >
+            <View testID="overview-profile-actions" />
+          </GameAccountOverviewView>
         </I18nextProvider>
       </TamaguiProvider>,
     );
@@ -60,5 +61,10 @@ describe('GameAccountOverviewView', () => {
     expect(StyleSheet.flatten(screen.getByTestId('overview-profile-column').props.style)).toEqual(
       expect.objectContaining({ width: '100%' }),
     );
+    expect(
+      within(screen.getByTestId('overview-profile-column')).getByTestId(
+        'overview-profile-actions',
+      ),
+    ).toBeTruthy();
   });
 });

@@ -68,10 +68,9 @@ const gameAccounts = accountEntries.map((entry) => v.parse(gameAccountSchema, {
   isVerified: entry.status.is_verify,
   level: entry.status.level,
   nickname: entry.status.nick_name,
-  platform: entry.status.platform,
-  statusCode: entry.status.code,
-  statusText: entry.status.text,
-  userId: entry.status.uuid,
+    platform: entry.status.platform,
+    statusCode: entry.status.code,
+    userId: entry.status.uuid,
 }));
 
 const firstGameAccount = gameAccounts[0];

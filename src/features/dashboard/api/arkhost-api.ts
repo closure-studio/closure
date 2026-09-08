@@ -22,11 +22,13 @@ export type ArkHostSseListener = (event: ArkHostSseEvent) => void;
 export type ArkHostSseSubscription = { unsubscribe: () => void };
 
 export interface ArkHostApi {
-  deleteGame(account: string): Promise<ArkHostResult<boolean>>;
+  deleteGame(account: string): Promise<ArkHostResult<void>>;
   fetchCharacters(account: string): Promise<ArkHostResult<ArkHostCharacters>>;
   fetchGameDetail(account: string): Promise<ArkHostResult<ArkHostGameDetail | null>>;
   fetchGameList(): Promise<ArkHostResult<ArkHostGameListEntry[]>>;
   fetchGameLogs(account: string, afterId: number): Promise<ArkHostResult<ArkHostGameLogs>>;
+  loginGame(account: string): Promise<ArkHostResult<void>>;
+  pauseGame(account: string): Promise<ArkHostResult<void>>;
   subscribe(accessToken: string, listener: ArkHostSseListener): ArkHostSseSubscription;
   updateGameConfig(
     account: string,

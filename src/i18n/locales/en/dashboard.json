@@ -49,6 +49,17 @@
     "upgradeProgress": "UPGRADE PROGRESS"
   },
   "overview": {
+    "actions": {
+      "start": "Start game",
+      "pause": "Pause game",
+      "starting": "Starting…",
+      "pausing": "Pausing…",
+      "delete": "Delete game",
+      "deleteTitle": "Delete game?",
+      "deleteDescription": "Confirm the game account you want to delete.",
+      "cancel": "Cancel",
+      "failed": "The action could not be completed. Please try again."
+    },
     "assets": "Assets",
     "balances": {
       "lmd": "LMD",

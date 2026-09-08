@@ -24,7 +24,6 @@ const initialGameAccounts = mockArkHostGameListResponse.code === 1
     nickname: entry.status.nick_name,
     platform: entry.status.platform,
     statusCode: entry.status.code,
-    statusText: entry.status.text,
     userId: entry.status.uuid,
   }))
   : [];
