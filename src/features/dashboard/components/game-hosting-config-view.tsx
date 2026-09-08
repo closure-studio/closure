@@ -44,6 +44,8 @@ import {
 import { useBackDismissal } from '@/hooks/use-back-dismissal';
 import { arkHostGameConfigPatchSchema } from '@/schemas/arkhost';
 import type {
+  ArkHostAccelerateSlot,
+  ArkHostBattleTask,
   ArkHostGameConfig,
   ArkHostGameConfigPatch,
 } from '@/schemas/arkhost';
@@ -68,7 +70,7 @@ export type ActiveConfigEditor =
   | 'is_auto_battle'
   | 'recruit_ignore_robot'
   | 'accelerate_slot'
-  | 'battle_maps'
+  | 'battle_tasks'
   | null;
 
 export type GameHostingConfigViewProps = {
@@ -105,6 +107,36 @@ const ACCELERATE_SLOT_I18N_KEYS: Record<
 
 const STEPPER_DELTAS = [-10, -1, 1, 10] as const;
 
+function replaceLoopBattleTasks(
+  tasks: readonly ArkHostBattleTask[],
+  loopStageIds: readonly string[],
+): ArkHostBattleTask[] {
+  const merged: ArkHostBattleTask[] = [];
+  let loopIndex = 0;
+
+  for (const task of tasks) {
+    if (task.mode !== 'LOOP') {
+      merged.push(task);
+      continue;
+    }
+
+    const stageId = loopStageIds[loopIndex];
+    loopIndex += 1;
+    if (stageId !== undefined) {
+      merged.push({ mode: 'LOOP', stage_id: stageId });
+    }
+  }
+
+  for (; loopIndex < loopStageIds.length; loopIndex += 1) {
+    const stageId = loopStageIds[loopIndex];
+    if (stageId !== undefined) {
+      merged.push({ mode: 'LOOP', stage_id: stageId });
+    }
+  }
+
+  return merged;
+}
+
 export function GameHostingConfigView({
   account,
   config,
@@ -121,7 +153,9 @@ export function GameHostingConfigView({
   const [activeEditor, setActiveEditor] = useState<ActiveConfigEditor>(null);
   const [draftNumeric, setDraftNumeric] = useState('');
   const [draftSwitch, setDraftSwitch] = useState(false);
-  const [draftSlot, setDraftSlot] = useState('');
+  const [draftSlot, setDraftSlot] = useState<ArkHostAccelerateSlot>(
+    config.accelerate_slot,
+  );
   const [draftQueue, setDraftQueue] = useState<string[]>([]);
   const [stageKeyword, setStageKeyword] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
@@ -148,15 +182,19 @@ export function GameHostingConfigView({
 
   const openDroneEditor = () => {
     setLocalError(null);
-    setDraftSlot(config.accelerate_slot_cn || '中层左');
+    setDraftSlot(config.accelerate_slot);
     setActiveEditor('accelerate_slot');
   };
 
   const openBattleQueueEditor = () => {
     setLocalError(null);
-    setDraftQueue([...config.battle_maps]);
+    setDraftQueue(
+      config.battle_tasks
+        .filter((task) => task.mode === 'LOOP')
+        .map((task) => task.stage_id),
+    );
     setStageKeyword('');
-    setActiveEditor('battle_maps');
+    setActiveEditor('battle_tasks');
   };
 
   const closeEditor = () => {
@@ -189,7 +227,7 @@ export function GameHostingConfigView({
   };
 
   const handleSaveSlot = () => {
-    const parsed = v.safeParse(arkHostGameConfigPatchSchema, { accelerate_slot_cn: draftSlot });
+    const parsed = v.safeParse(arkHostGameConfigPatchSchema, { accelerate_slot: draftSlot });
     if (!parsed.success) return;
 
     onSubmit(parsed.output)
@@ -198,7 +236,9 @@ export function GameHostingConfigView({
   };
 
   const handleSaveQueue = () => {
-    const parsed = v.safeParse(arkHostGameConfigPatchSchema, { battle_maps: draftQueue });
+    const parsed = v.safeParse(arkHostGameConfigPatchSchema, {
+      battle_tasks: replaceLoopBattleTasks(config.battle_tasks, draftQueue),
+    });
     if (!parsed.success) return;
 
     onSubmit(parsed.output)
@@ -234,8 +274,17 @@ export function GameHostingConfigView({
 
   const keepingApValue = `${config.keeping_ap} ${t('hostingConfig.units.ap')}`;
   const recruitReserveValue = `${config.recruit_reserve} ${t('hostingConfig.units.permits')}`;
-  const droneSlotValue = config.accelerate_slot_cn || t('hostingConfig.status.notSet');
-  const battleMapsBadge = `${config.battle_maps.length} ${t('hostingConfig.units.stages')}`;
+  const selectedSlot = ACCELERATE_SLOT_OPTIONS.find(
+    (option) => option.value === config.accelerate_slot,
+  );
+  const getSlotLabel = (key: SlotKey) => t(ACCELERATE_SLOT_I18N_KEYS[key]);
+  const droneSlotValue = selectedSlot
+    ? getSlotLabel(selectedSlot.key)
+    : t('hostingConfig.status.notSet');
+  const loopBattleTasks = config.battle_tasks.filter(
+    (task) => task.mode === 'LOOP',
+  );
+  const battleMapsBadge = `${loopBattleTasks.length} ${t('hostingConfig.units.stages')}`;
 
   return (
     <YStack testID="game-hosting-config-view" gap="$4" pb="$4">
@@ -368,7 +417,10 @@ export function GameHostingConfigView({
           actionLabel={t('hostingConfig.dialog.edit')}
           onPress={openDroneEditor}
         >
-          <BaseMiniGrid selectedSlot={config.accelerate_slot_cn} />
+          <BaseMiniGrid
+            getSlotLabel={getSlotLabel}
+            selectedSlot={config.accelerate_slot}
+          />
         </ConfigSummaryCard>
       </YStack>
 
@@ -383,14 +435,14 @@ export function GameHostingConfigView({
           icon={Flame}
           title={t('hostingConfig.battleQueue')}
           badge={battleMapsBadge}
-          badgeTone={config.battle_maps.length > 0 ? 'cyan' : 'default'}
+          badgeTone={loopBattleTasks.length > 0 ? 'cyan' : 'default'}
           description={t('hostingConfig.descriptions.battleMaps')}
           actionLabel={t('hostingConfig.dialog.edit')}
           onPress={openBattleQueueEditor}
         >
           <BattleStageChips
             emptyLabel={t('hostingConfig.dialog.queueEmpty')}
-            queue={config.battle_maps}
+            queue={loopBattleTasks.map((task) => task.stage_id)}
             stageTable={stageTable}
           />
         </ConfigSummaryCard>
@@ -669,7 +721,7 @@ export function GameHostingConfigView({
 
                 <BaseInteractiveSelector
                   draftSlot={draftSlot}
-                  getSlotLabel={(key) => t(ACCELERATE_SLOT_I18N_KEYS[key])}
+                  getSlotLabel={getSlotLabel}
                   onSelectSlot={setDraftSlot}
                 />
 
@@ -710,7 +762,7 @@ export function GameHostingConfigView({
             )}
 
             {/* Battle Queue Editor */}
-            {activeEditor === 'battle_maps' && (
+            {activeEditor === 'battle_tasks' && (
               <Form onSubmit={handleSaveQueue} gap="$3.5">
                 <YStack gap="$1.5">
                   <MonoText size="$1" color="$appAccent">

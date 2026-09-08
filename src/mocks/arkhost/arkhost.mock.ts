@@ -9,25 +9,24 @@ import {
 const userId = "492f6025-e5da-4ad0-9ced-de2a641816d7";
 const gameConfig = (
   account: string,
-  mapId: string,
-  replayActions: [] | null,
+  currentMap: string,
 ) => ({
   accelerate_slot: "slot_14",
-  accelerate_slot_cn: "中层左",
   account,
   allow_login_assist: false,
-  battle_maps: mapId
+  battle_tasks: (currentMap
     ? [
-        mapId,
+        currentMap,
         "main_01-07",
         ...(account === "G18928069156" ? ["act24side_08"] : []),
       ]
-    : ["main_01-07"],
-  battle_replay_actions: replayActions,
+    : ["main_01-07"]
+  ).map((stage_id) => ({ mode: "LOOP" as const, stage_id })),
+  current_map: currentMap,
   enable_building_arrange: true,
   is_auto_battle: true,
   keeping_ap: 0,
-  map_id: mapId,
+  operator_development_tasks: [],
   recruit_ignore_robot: false,
   recruit_reserve: 0,
 });
@@ -48,7 +47,7 @@ export const mockArkHostGameListResponse = v.parse(
     data: [
       {
         captcha_info: captchaInfo,
-        game_config: gameConfig("G18928069156", "act53side_08", []),
+        game_config: gameConfig("G18928069156", "act53side_08"),
         status: {
           account: "G18928069156",
           ap: 19,
@@ -65,7 +64,7 @@ export const mockArkHostGameListResponse = v.parse(
       },
       {
         captcha_info: captchaInfo,
-        game_config: gameConfig("G16601716973", "", null),
+        game_config: gameConfig("G16601716973", ""),
         status: {
           account: "G16601716973",
           ap: 612,
@@ -82,7 +81,7 @@ export const mockArkHostGameListResponse = v.parse(
       },
       {
         captcha_info: captchaInfo,
-        game_config: gameConfig("G17107372623", "", null),
+        game_config: gameConfig("G17107372623", ""),
         status: {
           account: "G17107372623",
           ap: 2666,
@@ -107,7 +106,7 @@ export const mockArkHostGameDetailResponse = v.parse(
   {
     code: 1,
     data: {
-      config: gameConfig("G18928069156", "act53side_08", []),
+      config: gameConfig("G18928069156", "act53side_08"),
       consumable: null,
       inventory: {
         "2001": 49206,

@@ -11,6 +11,8 @@ import {
 import {
   arkHostCharacterSchema,
   arkHostCharactersResponseSchema,
+  arkHostBattleTaskSchema,
+  arkHostGameConfigPatchSchema,
   arkHostGameConfigSchema,
   arkHostGameDetailResponseSchema,
   arkHostGameListResponseSchema,
@@ -63,6 +65,96 @@ describe("ArkHost server contracts", () => {
     });
 
     expect(config).not.toHaveProperty("is_stopped");
+  });
+
+  it("accepts the current game config task contracts", () => {
+    if (mockArkHostGameDetailResponse.code !== 1) {
+      throw new Error("Expected ArkHost game detail fixture.");
+    }
+
+    const config = v.parse(arkHostGameConfigSchema, {
+      ...mockArkHostGameDetailResponse.data.config,
+      battle_tasks: [
+        { mode: "LOOP", stage_id: "main_01-07" },
+        { mode: "LOOP", stage_id: "main_01-08", uuid: "" },
+        { mode: "SHARE", stage_id: "main_02-01", uuid: "share-1" },
+        { mode: "ADOPT", stage_id: "main_03-01", uuid: "adopt-1" },
+      ],
+      operator_development_tasks: [
+        {
+          char_id: "char_113_cqbw",
+          target: {
+            evolve_phase: 2,
+            level: 90,
+            masteries: [
+              { skill_id: "skchr_cqbw_1", target_level: 3 },
+            ],
+            skill_level: 7,
+          },
+        },
+      ],
+    });
+
+    expect(config.battle_tasks).toHaveLength(4);
+    expect(config.operator_development_tasks).toHaveLength(1);
+  });
+
+  it("enforces battle task mode and uuid rules", () => {
+    expect(
+      v.safeParse(arkHostBattleTaskSchema, {
+        mode: "LOOP",
+        stage_id: "main_01-07",
+        uuid: "unexpected",
+      }).success,
+    ).toBe(false);
+    expect(
+      v.safeParse(arkHostBattleTaskSchema, {
+        mode: "SHARE",
+        stage_id: "main_01-07",
+        uuid: "",
+      }).success,
+    ).toBe(false);
+    expect(
+      v.safeParse(arkHostBattleTaskSchema, {
+        mode: "ADOPT",
+        stage_id: " ",
+        uuid: "a".repeat(65),
+      }).success,
+    ).toBe(false);
+    expect(
+      v.safeParse(arkHostBattleTaskSchema, {
+        mode: "AUTO_BATTLE",
+        stage_id: "main_01-07",
+        uuid: "record-1",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rejects obsolete game config shapes and strips read-only patch fields", () => {
+    expect(
+      v.safeParse(arkHostGameConfigSchema, {
+        accelerate_slot: "slot_14",
+        accelerate_slot_cn: "中层左",
+        account: "G1",
+        allow_login_assist: false,
+        battle_maps: ["main_01-07"],
+        battle_replay_actions: null,
+        enable_building_arrange: true,
+        is_auto_battle: true,
+        keeping_ap: 0,
+        map_id: "main_01-07",
+        recruit_ignore_robot: false,
+        recruit_reserve: 0,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      v.parse(arkHostGameConfigPatchSchema, {
+        account: "G1",
+        current_map: "main_01-07",
+        keeping_ap: 12,
+      }),
+    ).toEqual({ keeping_ap: 12 });
   });
 
   it("accepts the confirmed character envelope and rejects obsolete or incomplete shapes", () => {

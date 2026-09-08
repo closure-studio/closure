@@ -1,25 +1,28 @@
 import { Button, RadioGroup, XStack, YStack } from 'tamagui';
 
 import { MonoText, TerminalText } from '@/components';
+import type { ArkHostAccelerateSlot } from '@/schemas/arkhost';
 
 export const ACCELERATE_SLOT_OPTIONS = [
-  { key: 'topLeft', label: '顶层左', value: '顶层左' },
-  { key: 'topCenter', label: '顶层中', value: '顶层中' },
-  { key: 'topRight', label: '顶层右', value: '顶层右' },
-  { key: 'middleLeft', label: '中层左', value: '中层左' },
-  { key: 'middleCenter', label: '中层中', value: '中层中' },
-  { key: 'middleRight', label: '中层右', value: '中层右' },
-  { key: 'bottomLeft', label: '底层左', value: '底层左' },
-  { key: 'bottomCenter', label: '底层中', value: '底层中' },
-  { key: 'bottomRight', label: '底层右', value: '底层右' },
-] as const;
+  { key: 'topLeft', value: 'slot_24' },
+  { key: 'topCenter', value: 'slot_25' },
+  { key: 'topRight', value: 'slot_26' },
+  { key: 'middleLeft', value: 'slot_14' },
+  { key: 'middleCenter', value: 'slot_15' },
+  { key: 'middleRight', value: 'slot_16' },
+  { key: 'bottomLeft', value: 'slot_5' },
+  { key: 'bottomCenter', value: 'slot_6' },
+  { key: 'bottomRight', value: 'slot_7' },
+] as const satisfies readonly { key: string; value: ArkHostAccelerateSlot }[];
 
 export type SlotKey = (typeof ACCELERATE_SLOT_OPTIONS)[number]['key'];
 
 export function BaseMiniGrid({
+  getSlotLabel,
   selectedSlot,
 }: {
-  selectedSlot: string;
+  getSlotLabel: (key: SlotKey) => string;
+  selectedSlot: ArkHostAccelerateSlot;
 }) {
   return (
     <YStack gap="$1" py="$1" items="center">
@@ -38,7 +41,7 @@ export function BaseMiniGrid({
               justify="center"
             >
               <MonoText size="$1" color={isSelected ? '$appBackground' : '$appMuted'}>
-                {slot.label.slice(-1)}
+                {getSlotLabel(slot.key).slice(-1)}
               </MonoText>
             </YStack>
           );
@@ -60,7 +63,7 @@ export function BaseMiniGrid({
               justify="center"
             >
               <MonoText size="$1" color={isSelected ? '$appBackground' : '$appMuted'}>
-                {slot.label.slice(-1)}
+                {getSlotLabel(slot.key).slice(-1)}
               </MonoText>
             </YStack>
           );
@@ -82,7 +85,7 @@ export function BaseMiniGrid({
               justify="center"
             >
               <MonoText size="$1" color={isSelected ? '$appBackground' : '$appMuted'}>
-                {slot.label.slice(-1)}
+                {getSlotLabel(slot.key).slice(-1)}
               </MonoText>
             </YStack>
           );
@@ -97,14 +100,19 @@ export function BaseInteractiveSelector({
   getSlotLabel,
   onSelectSlot,
 }: {
-  draftSlot: string;
+  draftSlot: ArkHostAccelerateSlot;
   getSlotLabel: (key: SlotKey) => string;
-  onSelectSlot: (value: string) => void;
+  onSelectSlot: (value: ArkHostAccelerateSlot) => void;
 }) {
   return (
     <RadioGroup
       value={draftSlot}
-      onValueChange={onSelectSlot}
+      onValueChange={(value) => {
+        const option = ACCELERATE_SLOT_OPTIONS.find(
+          (candidate) => candidate.value === value,
+        );
+        if (option) onSelectSlot(option.value);
+      }}
       aria-label="Drone Acceleration Slot"
     >
       <YStack gap="$2.5" items="center" py="$2" width="100%">

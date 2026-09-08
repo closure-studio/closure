@@ -23,6 +23,7 @@ const gameAccountFixture = gameAccountEntry;
 type SubmitPatch = Parameters<ComponentProps<typeof GameHostingConfigView>['onSubmit']>[0];
 
 async function renderConfigView(overrides?: {
+  config?: ComponentProps<typeof GameHostingConfigView>['config'];
   onSubmit?: (patch: SubmitPatch) => Promise<void>;
 }) {
   const queryClient = new QueryClient({
@@ -37,7 +38,7 @@ async function renderConfigView(overrides?: {
         <I18nextProvider i18n={i18n}>
           <GameHostingConfigView
             account={gameAccountFixture.status.account}
-            config={gameAccountFixture.game_config}
+            config={overrides?.config ?? gameAccountFixture.game_config}
             isSubmitting={false}
             onSubmit={onSubmit}
             showSuccess={false}
@@ -122,10 +123,10 @@ describe('GameHostingConfigView', () => {
     await fireEvent.press(screen.getByTestId('hosting-config-submit'));
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit).toHaveBeenCalledWith({ accelerate_slot_cn: '底层右' });
+    expect(onSubmit).toHaveBeenCalledWith({ accelerate_slot: 'slot_7' });
   });
 
-  it('opens Battle Queue editor, removes a stage, and submits updated battle_maps', async () => {
+  it('opens Battle Queue editor, removes a stage, and submits updated LOOP tasks', async () => {
     const onSubmit = jest.fn<Promise<void>, [SubmitPatch]>().mockResolvedValue(undefined);
     const { screen } = await renderConfigView({ onSubmit });
 
@@ -137,7 +138,36 @@ describe('GameHostingConfigView', () => {
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
     expect(onSubmit).toHaveBeenCalledWith({
-      battle_maps: ['main_01-07', 'act24side_08'],
+      battle_tasks: [
+        { mode: 'LOOP', stage_id: 'main_01-07' },
+        { mode: 'LOOP', stage_id: 'act24side_08' },
+      ],
+    });
+  });
+
+  it('preserves SHARE and ADOPT positions while replacing LOOP tasks', async () => {
+    const onSubmit = jest.fn<Promise<void>, [SubmitPatch]>().mockResolvedValue(undefined);
+    const config = {
+      ...gameAccountFixture.game_config,
+      battle_tasks: [
+        { mode: 'SHARE' as const, stage_id: 'main_01-01', uuid: 'share-1' },
+        { mode: 'LOOP' as const, stage_id: 'main_01-07' },
+        { mode: 'ADOPT' as const, stage_id: 'main_02-01', uuid: 'adopt-1' },
+        { mode: 'LOOP' as const, stage_id: 'act24side_08' },
+      ],
+    };
+    const { screen } = await renderConfigView({ config, onSubmit });
+
+    await fireEvent.press(screen.getByTestId('hosting-config-card-battle-maps'));
+    await fireEvent.press(screen.getByTestId('queue-remove-0'));
+    await fireEvent.press(screen.getByTestId('hosting-config-submit'));
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      battle_tasks: [
+        { mode: 'SHARE', stage_id: 'main_01-01', uuid: 'share-1' },
+        { mode: 'LOOP', stage_id: 'act24side_08' },
+        { mode: 'ADOPT', stage_id: 'main_02-01', uuid: 'adopt-1' },
+      ],
     });
   });
 

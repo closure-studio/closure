@@ -1,8 +1,13 @@
 import * as v from "valibot";
 
-import { nonEmptyStringSchema, nonNegativeIntegerSchema } from "@/schemas/primitives";
+import {
+  nonBlankStringSchema,
+  nonEmptyStringSchema,
+  nonNegativeIntegerSchema,
+} from "@/schemas/primitives";
 
 const integerSchema = v.pipe(v.number(), v.integer());
+const positiveIntegerSchema = v.pipe(integerSchema, v.minValue(1));
 
 export const ARK_HOST_GAME_STATUS_CODE = {
   loginFailed: -1,
@@ -17,29 +22,85 @@ export const arkHostAvatarSchema = v.object({
   type: v.string(),
 });
 
-export const arkHostBattleReplayActionSchema = v.object({
-  action_type: v.picklist(["SHARE", "AUTO_BATTLE"]),
-  stage_id: nonEmptyStringSchema,
-  uuid: nonEmptyStringSchema,
+export const arkHostAccelerateSlotSchema = v.picklist([
+  "slot_5",
+  "slot_6",
+  "slot_7",
+  "slot_14",
+  "slot_15",
+  "slot_16",
+  "slot_24",
+  "slot_25",
+  "slot_26",
+]);
+
+const arkHostBattleTaskUuidSchema = v.pipe(
+  nonBlankStringSchema,
+  v.maxLength(64),
+);
+
+export const arkHostBattleTaskSchema = v.variant("mode", [
+  v.object({
+    mode: v.literal("LOOP"),
+    stage_id: nonBlankStringSchema,
+    uuid: v.optional(v.literal("")),
+  }),
+  v.object({
+    mode: v.literal("SHARE"),
+    stage_id: nonBlankStringSchema,
+    uuid: arkHostBattleTaskUuidSchema,
+  }),
+  v.object({
+    mode: v.literal("ADOPT"),
+    stage_id: nonBlankStringSchema,
+    uuid: arkHostBattleTaskUuidSchema,
+  }),
+]);
+
+export const arkHostOperatorMasteryTargetSchema = v.object({
+  skill_id: nonBlankStringSchema,
+  target_level: v.picklist([1, 2, 3]),
+});
+
+export const arkHostOperatorDevelopmentTargetSchema = v.object({
+  evolve_phase: v.picklist([0, 1, 2]),
+  level: positiveIntegerSchema,
+  masteries: v.array(arkHostOperatorMasteryTargetSchema),
+  skill_level: v.picklist([1, 2, 3, 4, 5, 6, 7]),
+});
+
+export const arkHostOperatorDevelopmentTaskSchema = v.object({
+  char_id: nonBlankStringSchema,
+  target: arkHostOperatorDevelopmentTargetSchema,
 });
 
 export const arkHostGameConfigSchema = v.object({
-  accelerate_slot: v.string(),
-  accelerate_slot_cn: v.string(),
+  accelerate_slot: arkHostAccelerateSlotSchema,
   account: nonEmptyStringSchema,
   allow_login_assist: v.boolean(),
-  battle_maps: v.array(v.string()),
-  battle_replay_actions: v.nullable(v.array(arkHostBattleReplayActionSchema)),
+  battle_tasks: v.array(arkHostBattleTaskSchema),
+  current_map: v.string(),
   enable_building_arrange: v.boolean(),
   is_auto_battle: v.boolean(),
   keeping_ap: nonNegativeIntegerSchema,
-  map_id: v.string(),
+  operator_development_tasks: v.array(
+    arkHostOperatorDevelopmentTaskSchema,
+  ),
   recruit_ignore_robot: v.boolean(),
   recruit_reserve: nonNegativeIntegerSchema,
 });
 
 export const arkHostGameConfigPatchSchema = v.partial(
-  arkHostGameConfigSchema,
+  v.pick(arkHostGameConfigSchema, [
+    "accelerate_slot",
+    "battle_tasks",
+    "enable_building_arrange",
+    "is_auto_battle",
+    "keeping_ap",
+    "operator_development_tasks",
+    "recruit_ignore_robot",
+    "recruit_reserve",
+  ]),
 );
 
 export const arkHostCaptchaInfoSchema = v.object({
@@ -195,6 +256,15 @@ export const arkHostCharactersResponseSchema = responseSchema(
 );
 
 export type ArkHostAvatar = v.InferOutput<typeof arkHostAvatarSchema>;
+export type ArkHostAccelerateSlot = v.InferOutput<
+  typeof arkHostAccelerateSlotSchema
+>;
+export type ArkHostBattleTask = v.InferOutput<
+  typeof arkHostBattleTaskSchema
+>;
+export type ArkHostOperatorDevelopmentTask = v.InferOutput<
+  typeof arkHostOperatorDevelopmentTaskSchema
+>;
 export type ArkHostGameConfig = v.InferOutput<typeof arkHostGameConfigSchema>;
 export type ArkHostGameListEntry = v.InferOutput<
   typeof arkHostGameListEntrySchema
