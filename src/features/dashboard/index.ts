@@ -26,6 +26,8 @@ export {
   useGameDetailQuery,
   useGameAccountsQuery,
   useGameLogsQuery,
+  useLoginGame,
+  usePauseGame,
   useUpdateGameConfig,
   useSessionQueryCacheReset,
 } from './queries';

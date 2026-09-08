@@ -81,7 +81,7 @@ const GameAccountButton = memo(function GameAccountButton({
         </YStack>
         <YStack shrink={0}>
           <MonoText size="$2" lineHeight="$1" letterSpacing={0} color={isSelected ? '$appText' : '$appMuted'} fontWeight="600" numberOfLines={1}>{gameAccount.nickname || gameAccount.account}</MonoText>
-          <MonoText size="$1" letterSpacing={0} textTransform="uppercase" numberOfLines={1}>{t('operators.accountLevel', { level: gameAccount.level })} · {gameAccount.statusText}</MonoText>
+          <MonoText size="$1" letterSpacing={0} textTransform="uppercase" numberOfLines={1}>{t('operators.accountLevel', { level: gameAccount.level })}</MonoText>
         </YStack>
         <YStack width={6} height={6} shrink={0} rounded="$10" bg={gameAccount.statusCode === ARK_HOST_GAME_STATUS_CODE.running ? '$appSuccess' : '$appMuted'} opacity={gameAccount.statusCode === ARK_HOST_GAME_STATUS_CODE.running ? 1 : 0.5} />
       </XStack>

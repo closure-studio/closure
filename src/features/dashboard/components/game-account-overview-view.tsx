@@ -1,5 +1,5 @@
-import { Activity, TriangleAlert } from 'lucide-react-native';
-import { useState } from 'react';
+import { TriangleAlert } from 'lucide-react-native';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XStack, YStack, getTokens } from 'tamagui';
 
@@ -9,7 +9,7 @@ import diamondShdImage from '@/assets/images/inventory/original/DIAMOND_SHD.webp
 import goldImage from '@/assets/images/inventory/original/GOLD.webp';
 import recruitTicketImage from '@/assets/images/inventory/original/TKT_RECRUIT.webp';
 import { DecorativeBarcode, ItemArtwork, MonoText, TerminalMeterBar, TerminalSectionHeading, TerminalText } from '@/components';
-import { ARK_HOST_GAME_STATUS_CODE, type ArkHostGameDetail, type ArkHostGameLogEntry } from '@/schemas/arkhost';
+import type { ArkHostGameDetail, ArkHostGameLogEntry } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
 import { DashboardSummaryFrame, formatDashboardSummaryTitle } from './dashboard-summary-frame';
 import type { DashboardSummarySection } from './dashboard-summary-frame';
@@ -28,12 +28,14 @@ const SUMMARY_ITEM_IMAGES = {
 type SummaryItemIcon = keyof typeof SUMMARY_ITEM_IMAGES;
 
 export function GameAccountOverviewView({
+  children,
   detail,
   gameAccount,
   logs,
   stageSubtitle,
   stageTitle,
 }: {
+  children?: ReactNode;
   detail: ArkHostGameDetail | null;
   gameAccount: GameAccount;
   logs: readonly ArkHostGameLogEntry[];
@@ -82,18 +84,15 @@ export function GameAccountOverviewView({
             <TerminalSectionHeading code="01" title={formatDashboardSummaryTitle(t('overview.profile'))} trailing={<DecorativeBarcode />} />
             <XStack items="flex-end" justify="space-between" gap="$3">
               <YStack minW={0} grow={1} gap="$0.5">
-                <MonoText size="$2">{gameAccount.statusText || unavailable}</MonoText>
                 <TerminalText size="$6" fontWeight="800" numberOfLines={1}>{status?.nickName || gameAccount.nickname || gameAccount.account}</TerminalText>
                 <MonoText size="$1" numberOfLines={1}>{gameAccount.account} · {serverLabel}</MonoText>
               </YStack>
               <YStack items="flex-end"><MonoText size="$1">{t('overview.level')}</MonoText><TerminalText size="$9" lineHeight="$9" fontWeight="900" color="$appAccent">{status?.level ?? gameAccount.level}</TerminalText></YStack>
             </XStack>
-            <XStack items="center" justify="space-between">
-              <MonoText size="$1">{t('overview.experience')} {unavailable}</MonoText>
-              <XStack items="center" gap="$1"><Activity size={12} color={gameAccount.statusCode === ARK_HOST_GAME_STATUS_CODE.running ? colors.appSuccess.val : colors.appMuted.val} /><MonoText size="$1" color={gameAccount.statusCode === ARK_HOST_GAME_STATUS_CODE.running ? '$appSuccess' : '$appMuted'}>{gameAccount.statusText || unavailable}</MonoText></XStack>
-            </XStack>
+            <MonoText size="$1">{t('overview.experience')} {unavailable}</MonoText>
           </YStack>
         </DashboardSummaryFrame>
+        {children}
       </YStack>
 
       <YStack grow={1} minW={280} flexBasis={280}>

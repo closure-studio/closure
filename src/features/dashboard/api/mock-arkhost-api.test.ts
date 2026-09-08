@@ -33,7 +33,7 @@ describe("MockArkHostApi", () => {
   it("deletes a game account and keeps server reads consistent", async () => {
     const api = new MockArkHostApi(0);
     expect(await api.deleteGame("G18928069156")).toEqual({
-      data: true,
+      data: undefined,
       ok: true,
     });
     const games = await api.fetchGameList();
@@ -43,6 +43,43 @@ describe("MockArkHostApi", () => {
     ).toBe(false);
     const detail = await api.fetchGameDetail("G18928069156");
     expect(detail.ok && detail.data).toBeNull();
+  });
+
+  it("updates statusCode when pausing and logging in", async () => {
+    const api = new MockArkHostApi(0);
+
+    expect(await api.pauseGame("G18928069156")).toEqual({
+      data: undefined,
+      ok: true,
+    });
+    const pausedGames = await api.fetchGameList();
+    expect(
+      pausedGames.ok
+        && pausedGames.data.find((entry) => entry.status.account === "G18928069156")
+          ?.status,
+    ).toMatchObject({ code: 0 });
+
+    expect(await api.loginGame("G18928069156")).toEqual({
+      data: undefined,
+      ok: true,
+    });
+    const loggingInGames = await api.fetchGameList();
+    expect(
+      loggingInGames.ok
+        && loggingInGames.data.find((entry) => entry.status.account === "G18928069156")
+          ?.status,
+    ).toMatchObject({ code: 1 });
+  });
+
+  it("rejects pausing or logging in an unknown game account", async () => {
+    const api = new MockArkHostApi(0);
+    const expectedFailure = {
+      error: { code: "operation-rejected", kind: "business" },
+      ok: false,
+    };
+
+    await expect(api.pauseGame("G00000000000")).resolves.toEqual(expectedFailure);
+    await expect(api.loginGame("G00000000000")).resolves.toEqual(expectedFailure);
   });
 
   it("rejects deleting an unknown game account", async () => {
@@ -57,7 +94,6 @@ describe("MockArkHostApi", () => {
     const api = new MockArkHostApi(0);
     expect(
       await api.updateGameConfig("G18928069156", {
-        is_stopped: true,
         keeping_ap: 12,
       }),
     ).toEqual({ data: undefined, ok: true });
@@ -70,9 +106,8 @@ describe("MockArkHostApi", () => {
       games.ok
         && games.data.find((entry) => entry.status.account === "G18928069156")
           ?.game_config,
-    ).toMatchObject({ is_stopped: true, keeping_ap: 12 });
+    ).toMatchObject({ keeping_ap: 12 });
     expect(detail.ok && detail.data?.config).toMatchObject({
-      is_stopped: true,
       keeping_ap: 12,
     });
     expect(detail.ok && detail.data?.config.is_auto_battle).toBe(true);
@@ -81,7 +116,7 @@ describe("MockArkHostApi", () => {
   it("rejects updating an unknown game account", async () => {
     const api = new MockArkHostApi(0);
     expect(
-      await api.updateGameConfig("G00000000000", { is_stopped: true }),
+      await api.updateGameConfig("G00000000000", { keeping_ap: 12 }),
     ).toEqual({
       error: { code: "operation-rejected", kind: "business" },
       ok: false,

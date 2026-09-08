@@ -32,7 +32,6 @@ export const arkHostGameConfigSchema = v.object({
   battle_replay_actions: v.nullable(v.array(arkHostBattleReplayActionSchema)),
   enable_building_arrange: v.boolean(),
   is_auto_battle: v.boolean(),
-  is_stopped: v.boolean(),
   keeping_ap: nonNegativeIntegerSchema,
   map_id: v.string(),
   recruit_ignore_robot: v.boolean(),
@@ -67,7 +66,6 @@ export const arkHostGameListEntrySchema = v.object({
     nick_name: v.string(),
     password: v.nullable(v.string()),
     platform: integerSchema,
-    text: v.string(),
     uuid: nonEmptyStringSchema,
   }),
 });

@@ -11,6 +11,7 @@ import {
 import {
   arkHostCharacterSchema,
   arkHostCharactersResponseSchema,
+  arkHostGameConfigSchema,
   arkHostGameDetailResponseSchema,
   arkHostGameListResponseSchema,
   arkHostGameLogsResponseSchema,
@@ -50,6 +51,18 @@ describe("ArkHost server contracts", () => {
         mockArkHostTertiaryCharactersResponse,
       ).success,
     ).toBe(true);
+  });
+
+  it("strips the deprecated is_stopped config field", () => {
+    if (mockArkHostGameDetailResponse.code !== 1) {
+      throw new Error("Expected ArkHost game detail fixture.");
+    }
+    const config = v.parse(arkHostGameConfigSchema, {
+      ...mockArkHostGameDetailResponse.data.config,
+      is_stopped: true,
+    });
+
+    expect(config).not.toHaveProperty("is_stopped");
   });
 
   it("accepts the confirmed character envelope and rejects obsolete or incomplete shapes", () => {

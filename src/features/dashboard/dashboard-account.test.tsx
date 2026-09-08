@@ -25,7 +25,6 @@ const mockFirstAccount = v.parse(gameAccountSchema, {
   nickname: firstAccountEntry.status.nick_name,
   platform: firstAccountEntry.status.platform,
   statusCode: firstAccountEntry.status.code,
-  statusText: firstAccountEntry.status.text,
   userId: firstAccountEntry.status.uuid,
 });
 const mockSecondAccount = { ...mockFirstAccount, account: 'G2' };

@@ -49,6 +49,17 @@
     "upgradeProgress": "升级进度"
   },
   "overview": {
+    "actions": {
+      "start": "游戏启动",
+      "pause": "游戏暂停",
+      "starting": "启动中…",
+      "pausing": "暂停中…",
+      "delete": "删除游戏",
+      "deleteTitle": "删除游戏？",
+      "deleteDescription": "请确认要删除的游戏账号。",
+      "cancel": "取消",
+      "failed": "操作未完成，请重试。"
+    },
     "assets": "资产",
     "balances": {
       "lmd": "龙门币",

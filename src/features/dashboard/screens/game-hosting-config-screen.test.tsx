@@ -35,7 +35,6 @@ const firstGameAccount: GameAccount = {
   nickname: firstGameAccountEntry.status.nick_name,
   platform: firstGameAccountEntry.status.platform,
   statusCode: firstGameAccountEntry.status.code,
-  statusText: firstGameAccountEntry.status.text,
   userId: firstGameAccountEntry.status.uuid,
 };
 const secondGameAccount: GameAccount = {
@@ -51,7 +50,6 @@ const secondGameAccount: GameAccount = {
   nickname: secondGameAccountEntry.status.nick_name,
   platform: secondGameAccountEntry.status.platform,
   statusCode: secondGameAccountEntry.status.code,
-  statusText: secondGameAccountEntry.status.text,
   userId: secondGameAccountEntry.status.uuid,
 };
 

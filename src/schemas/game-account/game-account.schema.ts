@@ -22,7 +22,6 @@ export const gameAccountSchema = v.object({
   nickname: v.string(),
   platform: v.pipe(v.number(), v.integer()),
   statusCode: v.pipe(v.number(), v.integer()),
-  statusText: v.string(),
   userId: v.pipe(v.string(), v.minLength(1)),
 });
 

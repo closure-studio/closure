@@ -24,7 +24,6 @@ const gameAccount = {
   nickname: firstEntry.status.nick_name,
   platform: firstEntry.status.platform,
   statusCode: firstEntry.status.code,
-  statusText: firstEntry.status.text,
   userId: firstEntry.status.uuid,
 };
 

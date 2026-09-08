@@ -12,14 +12,12 @@ import {
   arkHostSseEventSchema,
 } from '@/schemas/arkhost';
 import type {
-  ArkHostGameConfig,
   ArkHostGameConfigPatch,
-  ArkHostGameDetail,
   ArkHostGameListEntry,
   ArkHostGameLogs,
 } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
-import { appStore, useAppStore } from '@/store';
+import { useAppStore } from '@/store';
 import { FailureError, unwrapResult } from '@/utils/failure-error';
 import { arkHostApi, type ArkHostFailure, type ArkHostSseSubscription } from './api';
 
@@ -63,7 +61,6 @@ function mapGameAccount(entry: ArkHostGameListEntry): GameAccount {
     nickname: entry.status.nick_name,
     platform: entry.status.platform,
     statusCode: entry.status.code,
-    statusText: entry.status.text,
     userId: entry.status.uuid,
   };
 }
@@ -141,39 +138,19 @@ export type UpdateGameConfigInput = {
   patch: ArkHostGameConfigPatch;
 };
 
-function mergeGameConfig(
-  config: ArkHostGameConfig,
-  patch: ArkHostGameConfigPatch,
-): ArkHostGameConfig {
-  return Object.assign({ ...config }, patch);
-}
-
-function updateGameConfigCache(
+async function invalidateGameAccountsQuery(
   queryClient: ReturnType<typeof useQueryClient>,
-  { account, patch }: UpdateGameConfigInput,
-) {
-  const userId = appStore.getState().auth.session?.principal.id;
-  if (userId) {
-    queryClient.setQueryData<GameAccount[]>(
-      arkHostQueryKeys.gameAccounts(userId),
-      (previous) => previous?.map((gameAccount) => (
-        gameAccount.account === account
-          ? { ...gameAccount, config: mergeGameConfig(gameAccount.config, patch) }
-          : gameAccount
-      )),
-    );
-  }
-
-  queryClient.setQueryData<ArkHostGameDetail | null>(
-    arkHostQueryKeys.detail(account),
-    (previous) => previous
-      ? { ...previous, config: mergeGameConfig(previous.config, patch) }
-      : previous,
-  );
+  userId: string | undefined,
+): Promise<void> {
+  if (!userId) return;
+  await queryClient.invalidateQueries({
+    queryKey: arkHostQueryKeys.gameAccounts(userId),
+  });
 }
 
 export function useUpdateGameConfig() {
   const queryClient = useQueryClient();
+  const userId = useAppStore((state) => state.auth.session?.principal.id);
   return useMutation<ArkHostGameConfigPatch, ArkHostFailure, UpdateGameConfigInput>({
     mutationFn: async ({ account, patch }) => {
       const parsedPatch = v.safeParse(arkHostGameConfigPatchSchema, patch);
@@ -189,8 +166,49 @@ export function useUpdateGameConfig() {
       );
       return parsedPatch.output;
     },
-    onSuccess: (parsedPatch, { account }) => {
-      updateGameConfigCache(queryClient, { account, patch: parsedPatch });
+    onSuccess: async (_, { account }) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: arkHostQueryKeys.detail(account) }),
+        invalidateGameAccountsQuery(queryClient, userId),
+      ]);
+    },
+  });
+}
+
+export function useLoginGame() {
+  const queryClient = useQueryClient();
+  const userId = useAppStore((state) => state.auth.session?.principal.id);
+  return useMutation<void, ArkHostFailure, string>({
+    mutationFn: async (account) => {
+      unwrapResult(await arkHostApi.loginGame(account));
+    },
+    onSuccess: () => invalidateGameAccountsQuery(queryClient, userId),
+  });
+}
+
+export function usePauseGame() {
+  const queryClient = useQueryClient();
+  const userId = useAppStore((state) => state.auth.session?.principal.id);
+  return useMutation<void, ArkHostFailure, string>({
+    mutationFn: async (account) => {
+      unwrapResult(await arkHostApi.pauseGame(account));
+    },
+    onSuccess: () => invalidateGameAccountsQuery(queryClient, userId),
+  });
+}
+
+export function useDeleteGame() {
+  const queryClient = useQueryClient();
+  const userId = useAppStore((state) => state.auth.session?.principal.id);
+  return useMutation<void, ArkHostFailure, string>({
+    mutationFn: async (account: string) => {
+      unwrapResult(await arkHostApi.deleteGame(account));
+    },
+    onSuccess: async (_, account) => {
+      queryClient.removeQueries({ queryKey: arkHostQueryKeys.detail(account) });
+      queryClient.removeQueries({ queryKey: arkHostQueryKeys.characters(account) });
+      queryClient.removeQueries({ queryKey: arkHostQueryKeys.logs(account) });
+      await invalidateGameAccountsQuery(queryClient, userId);
     },
   });
 }
