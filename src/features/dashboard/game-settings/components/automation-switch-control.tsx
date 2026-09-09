@@ -1,17 +1,13 @@
-import { useEffect } from 'react';
 import Animated, {
   Easing,
-  cancelAnimation,
   interpolate,
   useAnimatedStyle,
+  useDerivedValue,
   useReducedMotion,
-  useSharedValue,
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import { Switch, XStack, YStack, getTokens, useMedia } from 'tamagui';
-
-import { MonoText } from '@/components';
+import { Switch, YStack, getTokens, useMedia } from 'tamagui';
 
 type AutomationSwitchControlProps = {
   checked: boolean;
@@ -19,14 +15,9 @@ type AutomationSwitchControlProps = {
   label: string;
   onCheckedChange?: (checked: boolean) => void;
   pending?: boolean;
-  statusLabel?: string;
   testID: string;
 };
 
-const SWITCH_HEIGHT = {
-  large: 26,
-  small: 18,
-} as const;
 const LOADING_GLOW_INSET = 3;
 const LOADING_PULSE_DURATION_MS = 700;
 
@@ -36,41 +27,23 @@ export function AutomationSwitchControl({
   label,
   onCheckedChange,
   pending = false,
-  statusLabel,
   testID,
 }: AutomationSwitchControlProps) {
   const colors = getTokens().color;
   const { large } = useMedia();
   const reducedMotion = useReducedMotion();
-  const loadingProgress = useSharedValue(0);
-  const switchHeight = large ? SWITCH_HEIGHT.large : SWITCH_HEIGHT.small;
-  const switchWidth = switchHeight * 2;
-
-  useEffect(() => {
-    cancelAnimation(loadingProgress);
-
-    if (!pending) {
-      loadingProgress.set(0);
-      return;
-    }
-
-    if (reducedMotion) {
-      loadingProgress.set(0.5);
-      return;
-    }
-
-    loadingProgress.set(0);
-    loadingProgress.set(withRepeat(
+  const loadingProgress = useDerivedValue(() => {
+    if (!pending) return 0;
+    if (reducedMotion) return 0.5;
+    return withRepeat(
       withTiming(1, {
         duration: LOADING_PULSE_DURATION_MS,
         easing: Easing.inOut(Easing.quad),
       }),
       -1,
       true,
-    ));
-
-    return () => cancelAnimation(loadingProgress);
-  }, [loadingProgress, pending, reducedMotion]);
+    );
+  }, [pending, reducedMotion]);
 
   const loadingGlowStyle = useAnimatedStyle(() => ({
     opacity: interpolate(loadingProgress.value, [0, 1], [0.28, 0.72]),
@@ -80,52 +53,41 @@ export function AutomationSwitchControl({
   }));
 
   return (
-    <XStack items="center" gap="$1.5" shrink={0}>
-      {statusLabel ? (
-        <MonoText size="$1" color="$appWarning" fontWeight="700">
-          {statusLabel}
-        </MonoText>
+    <YStack position="relative" shrink={0}>
+      {pending ? (
+        <Animated.View
+          style={[
+            {
+              position: 'absolute',
+              pointerEvents: 'none',
+              top: -LOADING_GLOW_INSET,
+              right: -LOADING_GLOW_INSET,
+              bottom: -LOADING_GLOW_INSET,
+              left: -LOADING_GLOW_INSET,
+              borderRadius: 999,
+              backgroundColor: colors.appAccentSoft.val,
+              borderWidth: 1,
+              borderColor: colors.appAccentRing.val,
+            },
+            loadingGlowStyle,
+          ]}
+        />
       ) : null}
-      <YStack
-        width={switchWidth}
-        height={switchHeight}
-        items="center"
-        justify="center"
-        position="relative"
+      <Switch
+        testID={testID}
+        aria-label={label}
+        aria-busy={pending}
+        aria-disabled={disabled}
+        checked={checked}
+        disabled={disabled}
+        size={large ? '$3.5' : '$2'}
+        bg={checked ? '$appAccentSoft' : '$appSurface'}
+        borderWidth={1}
+        borderColor={checked ? '$appAccentBorder' : '$appBorder'}
+        {...(onCheckedChange ? { onCheckedChange } : {})}
       >
-        {pending ? (
-          <Animated.View
-            style={[
-              {
-                position: 'absolute',
-                pointerEvents: 'none',
-                width: switchWidth + LOADING_GLOW_INSET * 2,
-                height: switchHeight + LOADING_GLOW_INSET * 2,
-                borderRadius: 999,
-                backgroundColor: colors.appAccentSoft.val,
-                borderWidth: 1,
-                borderColor: colors.appAccentRing.val,
-              },
-              loadingGlowStyle,
-            ]}
-          />
-        ) : null}
-        <Switch
-          testID={testID}
-          aria-label={label}
-          aria-busy={pending}
-          aria-disabled={disabled}
-          checked={checked}
-          disabled={disabled}
-          size={large ? '$3.5' : '$2'}
-          bg={checked ? '$appAccentSoft' : '$appSurface'}
-          borderWidth={1}
-          borderColor={checked ? '$appAccentBorder' : '$appBorder'}
-          {...(onCheckedChange ? { onCheckedChange } : {})}
-        >
-          <Switch.Thumb bg={checked ? '$appAccent' : '$appMuted'} />
-        </Switch>
-      </YStack>
-    </XStack>
+        <Switch.Thumb bg={checked ? '$appAccent' : '$appMuted'} />
+      </Switch>
+    </YStack>
   );
 }

@@ -1,11 +1,11 @@
-import { Check, ChevronRight, Cpu } from 'lucide-react-native';
+import { ChevronRight, Cpu } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Dialog, Form, RadioGroup, Spinner, XStack, YStack, getTokens, useMedia } from 'tamagui';
+import { Button, Dialog, Form, RadioGroup, XStack, YStack, getTokens, useMedia } from 'tamagui';
 
 import { Frame, MonoText, TerminalText } from '@/components';
 import type { ArkHostAccelerateSlot, ArkHostBuilding, ArkHostGameConfigPatch } from '@/schemas/arkhost';
-import { AdaptiveEditorDialog } from './adaptive-editor-dialog';
+import { AdaptiveEditorDialog, EditorActions } from './adaptive-editor-dialog';
 import { BASE_VIEWBOX, BaseBlueprintArtwork, baseRoomBounds, type BaseArtworkLabels, type BaseRoomType } from './base-blueprint-artwork';
 
 const ACCELERATE_SLOTS = [
@@ -41,31 +41,22 @@ function BaseRoomPreview({ selectedSlot, rooms }: { selectedSlot: ArkHostAcceler
   );
 }
 
-type BaseAccelerationCardProps = {
-  rooms?: ArkHostBuilding['rooms'] | undefined;
-  actionLabel: string;
-  ariaLabel: string;
-  description: string;
-  selectedLabel: string;
-  selectedSlot: ArkHostAccelerateSlot;
-  testID: string;
-};
-
 function BaseAccelerationCard({
-  actionLabel,
-  ariaLabel,
-  description,
   selectedLabel,
   selectedSlot,
   rooms,
-  testID,
-}: BaseAccelerationCardProps) {
+}: {
+  rooms?: ArkHostBuilding['rooms'] | undefined;
+  selectedLabel: string;
+  selectedSlot: ArkHostAccelerateSlot;
+}) {
+  const { t } = useTranslation('dashboard');
   const colors = getTokens().color;
 
   return (
     <Frame
-      testID={testID}
-      aria-label={ariaLabel}
+      testID="hosting-config-card-drone-acceleration"
+      aria-label={`${t('hostingConfig.sections.drone')}: ${selectedLabel}`}
       role="button"
       cursor="pointer"
       p="$3.5"
@@ -86,7 +77,7 @@ function BaseAccelerationCard({
 
         <XStack items="center" gap="$1" shrink={0}>
           <MonoText size="$2" color="$appAccent">
-            {actionLabel}
+            {t('hostingConfig.dialog.edit')}
           </MonoText>
           <ChevronRight size={13} color={colors.appAccent.val} />
         </XStack>
@@ -94,7 +85,7 @@ function BaseAccelerationCard({
 
       <XStack items="center" justify="space-between" gap="$3" minW={0}>
         <MonoText size="$2" color="$appMuted" numberOfLines={2} grow={1} minW={0}>
-          {description}
+          {t('hostingConfig.summaries.droneAcceleration', { roomType: selectedLabel })}
         </MonoText>
         <BaseRoomPreview selectedSlot={selectedSlot} rooms={rooms} />
       </XStack>
@@ -115,18 +106,20 @@ export function DroneAccelerationSetting({
 }) {
   const { t } = useTranslation('dashboard');
   const labels: BaseArtworkLabels = {
-    roomTypes: {
-      MANUFACTURE: t('hostingConfig.roomTypes.manufacture'),
-      TRADING: t('hostingConfig.roomTypes.trading'),
-      POWER: t('hostingConfig.roomTypes.power'),
+    MANUFACTURE: {
+      title: t('hostingConfig.roomTypes.manufacture'),
+      status: t('hostingConfig.roomStatuses.manufacture'),
     },
-    roomStatuses: {
-      POWER: t('hostingConfig.roomStatuses.power'),
-      MANUFACTURE: t('hostingConfig.roomStatuses.manufacture'),
-      TRADING: t('hostingConfig.roomStatuses.trading'),
+    TRADING: {
+      title: t('hostingConfig.roomTypes.trading'),
+      status: t('hostingConfig.roomStatuses.trading'),
+    },
+    POWER: {
+      title: t('hostingConfig.roomTypes.power'),
+      status: t('hostingConfig.roomStatuses.power'),
     },
   };
-  const selectedLabel = labels.roomTypes[getRoomType(rooms, value)];
+  const selectedLabel = labels[getRoomType(rooms, value)].title;
 
   return (
     <AdaptiveEditorDialog
@@ -134,12 +127,8 @@ export function DroneAccelerationSetting({
       trigger={(
         <BaseAccelerationCard
           rooms={rooms}
-          testID="hosting-config-card-drone-acceleration"
-          ariaLabel={`${t('hostingConfig.sections.drone')}: ${selectedLabel}`}
           selectedLabel={selectedLabel}
           selectedSlot={value}
-          description={t('hostingConfig.summaries.droneAcceleration', { roomType: selectedLabel })}
-          actionLabel={t('hostingConfig.dialog.edit')}
         />
       )}
     >
@@ -174,12 +163,11 @@ function DroneAccelerationEditor({
 }) {
   const { t } = useTranslation('dashboard');
   const { large } = useMedia();
-  const colors = getTokens().color;
   const [draftSlot, setDraftSlot] = useState(initialValue);
-  const canSave = draftSlot !== initialValue && isAccelerateSlotSelectable(rooms, draftSlot) && !isSubmitting;
+  const canSave = draftSlot !== initialValue && isAccelerateSlotSelectable(rooms, draftSlot);
 
   const handleSubmit = () => {
-    if (!canSave) return;
+    if (!canSave || isSubmitting) return;
     onSubmit({ accelerate_slot: draftSlot }).then(onSaved).catch(() => undefined);
   };
 
@@ -204,33 +192,12 @@ function DroneAccelerationEditor({
         onSelectSlot={setDraftSlot}
       />
 
-      <XStack items="center" justify="flex-end" gap="$2">
-        <Button
-          testID="hosting-config-dialog-cancel"
-          unstyled
-          minH="$4"
-          px="$3"
-          py="$2"
-          hoverStyle={{ bg: '$appSurfaceRaised' }}
-          pressStyle={{ opacity: 0.7 }}
-          disabled={isSubmitting}
-          onPress={onSaved}
-        >
-          <MonoText size={large ? '$2' : '$2.5'}>{t('hostingConfig.dialog.cancel')}</MonoText>
-        </Button>
-        <Form.Trigger asChild>
-          <Button
-            testID="hosting-config-submit" unstyled minH="$4" px="$4" py="$2"
-            borderWidth={1} borderColor="$appAccent" bg="$appAccent"
-            opacity={canSave ? 1 : 0.4} hoverStyle={{ opacity: 0.85 }} pressStyle={{ opacity: 0.7 }} disabled={!canSave}
-          >
-            <XStack items="center" justify="center" gap="$2">
-              {isSubmitting ? <Spinner size="small" color="$appBackground" /> : <Check size={14} color={colors.appBackground.val} />}
-              <MonoText size={large ? '$2' : '$2.5'} color="$appBackground" fontWeight="700">{t('hostingConfig.dialog.save')}</MonoText>
-            </XStack>
-          </Button>
-        </Form.Trigger>
-      </XStack>
+      <EditorActions
+        canSave={canSave}
+        isSubmitting={isSubmitting}
+        onCancel={onSaved}
+        solid
+      />
     </Form>
   );
 }
@@ -253,7 +220,7 @@ function BaseInteractiveSelector({
   rooms,
 }: BaseInteractiveSelectorProps) {
   const getRoomLabel = (slot: ArkHostAccelerateSlot) =>
-    labels.roomTypes[getRoomType(rooms, slot)];
+    labels[getRoomType(rooms, slot)].title;
   const selectedIndex = ACCELERATE_SLOTS.indexOf(draftSlot);
   return (
     <YStack gap="$2">
@@ -272,6 +239,7 @@ function BaseInteractiveSelector({
               selectedIndex={selectedIndex}
               roomTypes={ACCELERATE_SLOTS.map(slot => getRoomType(rooms, slot))}
               labels={labels}
+              animated
             />
           </YStack>
           {ACCELERATE_SLOTS.map((slot, index) => {

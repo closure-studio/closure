@@ -1,12 +1,12 @@
-import { Check, ChevronRight, Minus, Plus, Ticket, Zap } from 'lucide-react-native';
+import { ChevronRight, Minus, Plus, Ticket, Zap } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Dialog, Form, Spinner, XStack, YStack, getTokens, useMedia } from 'tamagui';
+import { Button, Dialog, Form, XStack, YStack, getTokens, useMedia } from 'tamagui';
 
 import { Frame, MonoText, TerminalText } from '@/components';
 import type { ArkHostGameConfigPatch } from '@/schemas/arkhost';
-import { AdaptiveEditorDialog } from './adaptive-editor-dialog';
+import { AdaptiveEditorDialog, EditorActions } from './adaptive-editor-dialog';
 
 const LONG_PRESS_DELAY_MS = 400;
 const REPEAT_INTERVAL_MS = 100;
@@ -197,34 +197,11 @@ function ReserveEditor({
         ><Plus size={18} color={colors.appAccent.val} /></Button>
       </XStack>
 
-      <XStack items="center" justify="flex-end" gap="$2">
-        <Button
-          testID="hosting-config-dialog-cancel"
-          unstyled
-          minH="$4"
-          px="$3"
-          py="$2"
-          hoverStyle={{ bg: '$appSurfaceRaised' }}
-          pressStyle={{ opacity: 0.7 }}
-          disabled={isSubmitting}
-          onPress={onSaved}
-        >
-          <MonoText size={large ? '$2' : '$2.5'}>{t('hostingConfig.dialog.cancel')}</MonoText>
-        </Button>
-        <Form.Trigger asChild>
-          <Button
-            testID="hosting-config-submit" unstyled minH="$4" px="$4" py="$2"
-            borderWidth={1} borderColor="$appAccent" bg="$appAccentSoft"
-            opacity={!hasChanges || isSubmitting ? 0.4 : 1}
-            hoverStyle={{ bg: '$appSurfaceRaised' }} pressStyle={{ opacity: 0.7 }} disabled={!hasChanges || isSubmitting}
-          >
-            <XStack items="center" justify="center" gap="$2">
-              {isSubmitting ? <Spinner size="small" color="$appAccent" /> : <Check size={14} color={colors.appAccent.val} />}
-              <MonoText size={large ? '$2' : '$2.5'} color="$appAccent" fontWeight="700">{t('hostingConfig.dialog.save')}</MonoText>
-            </XStack>
-          </Button>
-        </Form.Trigger>
-      </XStack>
+      <EditorActions
+        canSave={hasChanges}
+        isSubmitting={isSubmitting}
+        onCancel={onSaved}
+      />
     </Form>
   );
 }

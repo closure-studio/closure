@@ -114,6 +114,12 @@ function AutomationSettings({
 }: Pick<GameHostingConfigViewProps, 'config' | 'isSubmitting' | 'onSubmit'>) {
   const { t } = useTranslation('dashboard');
   const [pendingField, setPendingField] = useState<EditableAutomationField | null>(null);
+  const settings = [
+    { id: 'enable-building-arrange', field: 'enable_building_arrange', icon: Building2, checked: config.enable_building_arrange, title: t('hostingConfig.enableBuildingArrange'), description: t('hostingConfig.summaries.enableBuildingArrange'), statusLabel: undefined },
+    { id: 'auto-battle', field: 'is_auto_battle', icon: Swords, checked: config.is_auto_battle, title: t('hostingConfig.autoBattle'), description: t('hostingConfig.summaries.isAutoBattle'), statusLabel: undefined },
+    { id: 'ignore-robot', field: 'recruit_ignore_robot', icon: Bot, checked: config.recruit_ignore_robot, title: t('hostingConfig.ignoreRobot'), description: t('hostingConfig.summaries.recruitIgnoreRobot'), statusLabel: undefined },
+    { id: 'allow-login-assist', field: null, icon: ShieldAlert, checked: config.allow_login_assist, title: t('hostingConfig.allowLoginAssist'), description: t('hostingConfig.summaries.allowLoginAssist'), statusLabel: t('hostingConfig.status.maintenance') },
+  ] as const;
 
   const update = (field: EditableAutomationField, checked: boolean) => {
     if (isSubmitting || pendingField !== null) return;
@@ -127,57 +133,31 @@ function AutomationSettings({
     <YStack gap="$2.5">
       <TerminalSectionHeading code="02" title={t('hostingConfig.sections.switches')} />
       <XStack flexWrap="wrap" gap="$2">
-        <AutomationCard
-          testID="hosting-config-card-enable-building-arrange"
-          switchTestID="hosting-config-enable-building-arrange"
-          icon={Building2}
-          title={t('hostingConfig.enableBuildingArrange')}
-          description={t('hostingConfig.summaries.enableBuildingArrange')}
-          checked={config.enable_building_arrange}
-          disabled={isSubmitting || pendingField !== null}
-          pending={pendingField === 'enable_building_arrange'}
-          onCheckedChange={(checked) => update('enable_building_arrange', checked)}
-        />
-        <AutomationCard
-          testID="hosting-config-card-auto-battle"
-          switchTestID="hosting-config-auto-battle"
-          icon={Swords}
-          title={t('hostingConfig.autoBattle')}
-          description={t('hostingConfig.summaries.isAutoBattle')}
-          checked={config.is_auto_battle}
-          disabled={isSubmitting || pendingField !== null}
-          pending={pendingField === 'is_auto_battle'}
-          onCheckedChange={(checked) => update('is_auto_battle', checked)}
-        />
-        <AutomationCard
-          testID="hosting-config-card-ignore-robot"
-          switchTestID="hosting-config-ignore-robot"
-          icon={Bot}
-          title={t('hostingConfig.ignoreRobot')}
-          description={t('hostingConfig.summaries.recruitIgnoreRobot')}
-          checked={config.recruit_ignore_robot}
-          disabled={isSubmitting || pendingField !== null}
-          pending={pendingField === 'recruit_ignore_robot'}
-          onCheckedChange={(checked) => update('recruit_ignore_robot', checked)}
-        />
-        <AutomationCard
-          testID="hosting-config-card-allow-login-assist"
-          switchTestID="hosting-config-allow-login-assist"
-          icon={ShieldAlert}
-          title={t('hostingConfig.allowLoginAssist')}
-          description={t('hostingConfig.summaries.allowLoginAssist')}
-          checked={config.allow_login_assist}
-          disabled
-          statusLabel={t('hostingConfig.status.maintenance')}
-        />
+        {settings.map((setting) => {
+          const field = setting.field;
+          const editable = field !== null;
+          return (
+            <AutomationCard
+              key={setting.id}
+              id={setting.id}
+              icon={setting.icon}
+              title={setting.title}
+              description={setting.description}
+              checked={setting.checked}
+              disabled={!editable || isSubmitting || pendingField !== null}
+              pending={editable && pendingField === field}
+              {...(setting.statusLabel ? { statusLabel: setting.statusLabel } : {})}
+              {...(field ? { onCheckedChange: (checked: boolean) => update(field, checked) } : {})}
+            />
+          );
+        })}
       </XStack>
     </YStack>
   );
 }
 
 function AutomationCard({
-  testID,
-  switchTestID,
+  id,
   icon: Icon,
   title,
   description,
@@ -187,8 +167,7 @@ function AutomationCard({
   statusLabel,
   onCheckedChange,
 }: {
-  testID: string;
-  switchTestID: string;
+  id: string;
   icon: typeof Building2;
   title: string;
   description: string;
@@ -203,7 +182,7 @@ function AutomationCard({
   return (
     <YStack width="100%" $large={{ width: '49%' }}>
       <Frame
-        testID={testID}
+        testID={`hosting-config-card-${id}`}
         p="$3"
         gap="$1.5"
         opacity={onCheckedChange ? 1 : 0.65}
@@ -215,15 +194,21 @@ function AutomationCard({
               {title}
             </TerminalText>
           </XStack>
-          <AutomationSwitchControl
-            testID={switchTestID}
-            label={title}
-            checked={checked}
-            disabled={disabled}
-            pending={pending}
-            {...(statusLabel ? { statusLabel } : {})}
-            {...(onCheckedChange ? { onCheckedChange } : {})}
-          />
+          <XStack items="center" gap="$1.5" shrink={0}>
+            {statusLabel ? (
+              <MonoText size="$1" color="$appWarning" fontWeight="700">
+                {statusLabel}
+              </MonoText>
+            ) : null}
+            <AutomationSwitchControl
+              testID={`hosting-config-${id}`}
+              label={title}
+              checked={checked}
+              disabled={disabled}
+              pending={pending}
+              {...(onCheckedChange ? { onCheckedChange } : {})}
+            />
+          </XStack>
         </XStack>
         <MonoText size="$2" color="$appMuted" numberOfLines={2}>
           {description}

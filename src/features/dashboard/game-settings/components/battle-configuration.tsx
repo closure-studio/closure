@@ -7,16 +7,15 @@ import {
   Trash2,
   X,
 } from 'lucide-react-native';
+import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useWindowDimensions } from 'react-native';
 import {
   Button,
   Dialog,
   Form,
   Input,
   ScrollView,
-  Spinner,
   XStack,
   YStack,
   getTokens,
@@ -26,63 +25,30 @@ import {
 import { Frame, MonoText, TerminalText } from '@/components';
 import type { ArkHostBattleTask, ArkHostGameConfigPatch } from '@/schemas/arkhost';
 import type { StageTable } from '@/schemas/game-data';
-import { AdaptiveEditorDialog } from './adaptive-editor-dialog';
+import { getStageDisplayParts } from '@/utils/stage-display';
+import { AdaptiveEditorDialog, EditorActions } from './adaptive-editor-dialog';
 
 const CARD_PREVIEW_LIMIT = 3;
 const SEARCH_RESULT_LIMIT = 10;
 const DEFAULT_STAGE_CODE = '1-7';
 const FIRST_PRIORITY_INDEX = '01';
 
-function formatStageLabel(
-  stageTable: StageTable,
-  stageId: string,
-): { code: string; name: string } {
-  const stage = stageTable[stageId];
-  if (stage) {
-    return {
-      code: stage.code,
-      name: stage.name,
-    };
-  }
-  return { code: stageId, name: '' };
-}
-
-type BattleConfigurationCardProps = {
-  actionLabel: string;
-  ariaLabel: string;
-  countLabel: string;
-  defaultLabel: string;
-  description: string;
-  emptyLabel: string;
-  firstLabel: string;
-  moreLabel: string;
-  queue: readonly string[];
-  stageTable: StageTable;
-  testID: string;
-  title: string;
-};
-
 function BattleConfigurationCard({
-  actionLabel,
-  ariaLabel,
-  countLabel,
-  defaultLabel,
-  description,
-  emptyLabel,
-  firstLabel,
-  moreLabel,
   queue,
   stageTable,
-  testID,
-  title,
-}: BattleConfigurationCardProps) {
+}: {
+  queue: readonly string[];
+  stageTable: StageTable;
+}) {
+  const { t } = useTranslation('dashboard');
   const colors = getTokens().color;
   const previewQueue = queue.slice(0, CARD_PREVIEW_LIMIT);
+  const countLabel = `${queue.length} ${t('hostingConfig.units.stages')}`;
 
   return (
     <Frame
-      testID={testID}
-      aria-label={ariaLabel}
+      testID="hosting-config-card-battle-maps"
+      aria-label={`${t('hostingConfig.battleQueue')}: ${countLabel}`}
       role="button"
       cursor="pointer"
       p="$3.5"
@@ -97,7 +63,7 @@ function BattleConfigurationCard({
         <XStack items="center" gap="$2" minW={0} shrink={1}>
           <Flame size={17} color={colors.appMuted.val} />
           <TerminalText size="$3" fontWeight="700" numberOfLines={1}>
-            {title}
+            {t('hostingConfig.battleQueue')}
           </TerminalText>
           <XStack
             px="$2"
@@ -120,14 +86,14 @@ function BattleConfigurationCard({
 
         <XStack items="center" gap="$1" shrink={0}>
           <MonoText size="$2" color="$appAccent">
-            {actionLabel}
+            {t('hostingConfig.dialog.edit')}
           </MonoText>
           <ChevronRight size={13} color={colors.appAccent.val} />
         </XStack>
       </XStack>
 
       <MonoText size="$2" color="$appMuted" numberOfLines={2}>
-        {description}
+        {t('hostingConfig.summaries.battleMaps')}
       </MonoText>
 
       <YStack borderTopWidth={1} borderColor="$appRule">
@@ -148,15 +114,15 @@ function BattleConfigurationCard({
               {DEFAULT_STAGE_CODE}
             </TerminalText>
             <MonoText size="$1" color="$appMuted" numberOfLines={1} grow={1} minW={0}>
-              {emptyLabel}
+              {t('hostingConfig.card.defaultStage')}
             </MonoText>
             <MonoText size="$1" color="$appWarning" fontWeight="700" shrink={0}>
-              {defaultLabel}
+              {t('hostingConfig.status.default')}
             </MonoText>
           </XStack>
         ) : (
           previewQueue.map((stageId, index) => {
-            const { code, name } = formatStageLabel(stageTable, stageId);
+            const { title: code, subtitle: name } = getStageDisplayParts(stageTable, stageId, stageId);
             const isFirst = index === 0;
 
             return (
@@ -197,7 +163,7 @@ function BattleConfigurationCard({
                 )}
                 {isFirst ? (
                   <MonoText size="$1" color="$appAccent" fontWeight="700" shrink={0}>
-                    {firstLabel}
+                    {t('hostingConfig.card.firstPriority')}
                   </MonoText>
                 ) : null}
               </XStack>
@@ -213,7 +179,7 @@ function BattleConfigurationCard({
             pt="$2"
             fontVariant={['tabular-nums']}
           >
-            {moreLabel}
+            {t('hostingConfig.card.moreStages', { count: Math.max(0, queue.length - CARD_PREVIEW_LIMIT) })}
           </MonoText>
         ) : null}
       </YStack>
@@ -255,24 +221,12 @@ export function BattleQueueSetting({
   isSubmitting: boolean;
   onSubmit: (patch: ArkHostGameConfigPatch) => Promise<void>;
 }) {
-  const { t } = useTranslation('dashboard');
   const queue = tasks.filter((task) => task.mode === 'LOOP').map((task) => task.stage_id);
-  const countLabel = `${queue.length} ${t('hostingConfig.units.stages')}`;
 
   return (
     <AdaptiveEditorDialog
       trigger={(
         <BattleConfigurationCard
-          testID="hosting-config-card-battle-maps"
-          ariaLabel={`${t('hostingConfig.battleQueue')}: ${countLabel}`}
-          title={t('hostingConfig.battleQueue')}
-          countLabel={countLabel}
-          defaultLabel={t('hostingConfig.status.default')}
-          description={t('hostingConfig.summaries.battleMaps')}
-          emptyLabel={t('hostingConfig.card.defaultStage')}
-          firstLabel={t('hostingConfig.card.firstPriority')}
-          moreLabel={t('hostingConfig.card.moreStages', { count: Math.max(0, queue.length - 3) })}
-          actionLabel={t('hostingConfig.dialog.edit')}
           queue={queue}
           stageTable={stageTable}
         />
@@ -289,6 +243,101 @@ export function BattleQueueSetting({
         />
       )}
     </AdaptiveEditorDialog>
+  );
+}
+
+function BattleStageRow({
+  stageId,
+  stageTable,
+  index,
+  search = false,
+  testID,
+  trailing,
+}: {
+  stageId: string;
+  stageTable: StageTable;
+  index?: number;
+  search?: boolean;
+  testID: string;
+  trailing: ReactNode;
+}) {
+  const { t } = useTranslation('dashboard');
+  const stage = stageTable[stageId];
+  const { title: code, subtitle: name } = getStageDisplayParts(stageTable, stageId, stageId);
+  const first = index === 0;
+  const accent = search || first;
+
+  return (
+    <XStack
+      testID={testID}
+      items="center"
+      gap="$2"
+      p="$2"
+      minW={0}
+      borderWidth={1}
+      borderColor={first ? '$appAccentBorder' : '$appBorder'}
+      bg={search ? '$appSurface' : first ? '$appAccentSubtle' : '$appSurfaceRaised'}
+    >
+      {index !== undefined ? (
+        <MonoText
+          size="$2"
+          $large={{ size: '$1' }}
+          color={first ? '$appAccent' : '$appMuted'}
+          fontWeight="700"
+          fontVariant={['tabular-nums']}
+          width="$2.5"
+          text="center"
+          shrink={0}
+        >
+          {String(index + 1).padStart(2, '0')}
+        </MonoText>
+      ) : null}
+
+      <YStack grow={1} shrink={1} minW={0} gap="$0.5">
+        <XStack items="center" gap="$2" minW={0}>
+          <TerminalText
+            size="$3"
+            $large={{ size: '$2.5' }}
+            color={accent ? '$appAccent' : '$appText'}
+            fontWeight="800"
+            shrink={0}
+          >
+            {code}
+          </TerminalText>
+          {search && name ? (
+            <MonoText
+              size="$2"
+              $large={{ size: '$1' }}
+              color="$appMuted"
+              numberOfLines={1}
+              shrink={1}
+            >
+              {name}
+            </MonoText>
+          ) : null}
+        </XStack>
+        <XStack items="center" gap="$1.5" minW={0}>
+          {!search && name ? (
+            <MonoText
+              size="$2"
+              $large={{ size: '$1' }}
+              color="$appMuted"
+              numberOfLines={1}
+              shrink={1}
+            >
+              {name}
+            </MonoText>
+          ) : null}
+          {stage ? (
+            <MonoText size="$2" $large={{ size: '$1' }} color="$appMuted" shrink={0}>
+              {t('hostingConfig.dialog.stageCost', { cost: stage.ap })}
+            </MonoText>
+          ) : null}
+        </XStack>
+      </YStack>
+
+      {trailing}
+    </XStack>
   );
 }
 
@@ -310,11 +359,9 @@ function BattleQueueSettingEditor({
   const { t } = useTranslation('dashboard');
   const colors = getTokens().color;
   const { large } = useMedia();
-  const { height: viewportHeight } = useWindowDimensions();
   const [queue, setQueue] = useState([...initialQueue]);
   const [keyword, setKeyword] = useState('');
   const hasChanges = queue.length !== initialQueue.length || queue.some((id, index) => id !== initialQueue[index]);
-  const desktopBodyMaxHeight = Math.max(220, Math.floor(viewportHeight * 0.58));
   const captionTextSize = large ? '$1' : '$2';
   const bodyTextSize = large ? '$2' : '$2.5';
   const stageCodeSize = large ? '$2.5' : '$3';
@@ -328,14 +375,14 @@ function BattleQueueSettingEditor({
     const query = keyword.trim().toUpperCase();
     if (!query) return [];
 
-    const results: { id: string; code: string; name: string; ap: number }[] = [];
+    const results: string[] = [];
     for (const [id, entry] of Object.entries(stageTable)) {
       if (
         id.toUpperCase().includes(query) ||
         entry.code.toUpperCase().includes(query) ||
         entry.name.toUpperCase().includes(query)
       ) {
-        results.push({ ap: entry.ap, code: entry.code, id, name: entry.name });
+        results.push(id);
         if (results.length >= SEARCH_RESULT_LIMIT) break;
       }
     }
@@ -388,63 +435,14 @@ function BattleQueueSettingEditor({
         </XStack>
       ) : (
         <YStack gap="$1.5">
-          {queue.map((stageId, index) => {
-            const { code, name } = formatStageLabel(stageTable, stageId);
-            const stage = stageTable[stageId];
-            const isFirst = index === 0;
-
-            return (
-              <XStack
-                key={`${stageId}-${index}`}
-                testID={`queue-item-${index}`}
-                items="center"
-                gap="$2"
-                p="$2"
-                minW={0}
-                borderWidth={1}
-                borderColor={isFirst ? '$appAccentBorder' : '$appBorder'}
-                bg={isFirst ? '$appAccentSubtle' : '$appSurfaceRaised'}
-              >
-                <MonoText
-                  size={captionTextSize}
-                  color={isFirst ? '$appAccent' : '$appMuted'}
-                  fontWeight="700"
-                  fontVariant={['tabular-nums']}
-                  width="$2.5"
-                  text="center"
-                  shrink={0}
-                >
-                  {String(index + 1).padStart(2, '0')}
-                </MonoText>
-
-                <YStack grow={1} shrink={1} minW={0} gap="$0.5">
-                  <TerminalText
-                    size={stageCodeSize}
-                    color={isFirst ? '$appAccent' : '$appText'}
-                    fontWeight="800"
-                    numberOfLines={1}
-                  >
-                    {code}
-                  </TerminalText>
-                  <XStack items="center" gap="$1.5" minW={0}>
-                    {name ? (
-                      <MonoText
-                        size={captionTextSize}
-                        color="$appMuted"
-                        numberOfLines={1}
-                        shrink={1}
-                      >
-                        {name}
-                      </MonoText>
-                    ) : null}
-                    {stage ? (
-                      <MonoText size={captionTextSize} color="$appMuted" shrink={0}>
-                        {t('hostingConfig.dialog.stageCost', { cost: stage.ap })}
-                      </MonoText>
-                    ) : null}
-                  </XStack>
-                </YStack>
-
+          {queue.map((stageId, index) => (
+            <BattleStageRow
+              key={`${stageId}-${index}`}
+              stageId={stageId}
+              stageTable={stageTable}
+              index={index}
+              testID={`queue-item-${index}`}
+              trailing={(
                 <Button
                   testID={`queue-remove-${index}`}
                   aria-label={t('hostingConfig.dialog.removeStage')}
@@ -462,9 +460,9 @@ function BattleQueueSettingEditor({
                 >
                   <Trash2 size={14} color={colors.appDanger.val} />
                 </Button>
-              </XStack>
-            );
-          })}
+              )}
+            />
+          ))}
         </YStack>
       )}
     </YStack>
@@ -481,45 +479,17 @@ function BattleQueueSettingEditor({
         </MonoText>
       ) : (
         <YStack gap="$1">
-          {filteredStages.map(({ ap, code, id, name }) => {
+          {filteredStages.map((id) => {
             const isAlreadyInQueue = queue.includes(id);
 
             return (
-              <XStack
+              <BattleStageRow
                 key={id}
+                stageId={id}
+                stageTable={stageTable}
+                search
                 testID={`stage-search-result-${id}`}
-                items="center"
-                gap="$2"
-                p="$2"
-                minW={0}
-                borderWidth={1}
-                borderColor="$appBorder"
-                bg="$appSurface"
-              >
-                <YStack grow={1} shrink={1} minW={0} gap="$0.5">
-                  <XStack items="center" gap="$2" minW={0}>
-                    <TerminalText
-                      size={stageCodeSize}
-                      fontWeight="800"
-                      color="$appAccent"
-                      shrink={0}
-                    >
-                      {code}
-                    </TerminalText>
-                    <MonoText
-                      size={captionTextSize}
-                      color="$appMuted"
-                      numberOfLines={1}
-                      shrink={1}
-                    >
-                      {name}
-                    </MonoText>
-                  </XStack>
-                  <MonoText size={captionTextSize} color="$appMuted">
-                    {t('hostingConfig.dialog.stageCost', { cost: ap })}
-                  </MonoText>
-                </YStack>
-
+                trailing={(
                 <Button
                   testID={`stage-add-${id}`}
                   aria-label={isAlreadyInQueue ? addedLabel : addStageLabel}
@@ -552,7 +522,8 @@ function BattleQueueSettingEditor({
                     </MonoText>
                   </XStack>
                 </Button>
-              </XStack>
+                )}
+              />
             );
           })}
         </YStack>
@@ -611,60 +582,14 @@ function BattleQueueSettingEditor({
     </YStack>
   );
 
-  const actions = (
-    <XStack items="center" justify="flex-end" gap="$2">
-      <Button
-        testID="hosting-config-dialog-cancel"
-        unstyled
-        minH="$4"
-        items="center"
-        justify="center"
-        px="$3"
-        py="$2"
-        hoverStyle={{ bg: '$appSurfaceRaised' }}
-        pressStyle={{ opacity: 0.7 }}
-        disabled={isSubmitting}
-        onPress={onSaved}
-      >
-        <MonoText size={bodyTextSize}>{t('hostingConfig.dialog.cancel')}</MonoText>
-      </Button>
-
-      <Form.Trigger asChild>
-        <Button
-          testID="hosting-config-submit"
-          unstyled
-          minH="$4"
-          items="center"
-          justify="center"
-          px="$4"
-          py="$2"
-          borderWidth={1}
-          borderColor="$appAccent"
-          bg="$appAccentSoft"
-          opacity={!hasChanges || isSubmitting ? 0.4 : 1}
-          hoverStyle={{ bg: '$appSurfaceRaised' }}
-          pressStyle={{ opacity: 0.7 }}
-          disabled={!hasChanges || isSubmitting}
-        >
-          <XStack items="center" justify="center" gap="$2">
-            {isSubmitting ? (
-              <Spinner size="small" color="$appAccent" />
-            ) : (
-              <Check size={14} color={colors.appAccent.val} />
-            )}
-            <MonoText size={bodyTextSize} color="$appAccent" fontWeight="700">
-              {t('hostingConfig.dialog.save')}
-            </MonoText>
-          </XStack>
-        </Button>
-      </Form.Trigger>
-    </XStack>
-  );
-
   const scrollContent = (
     <YStack gap="$4" pb="$1">
       {isSearching ? searchResultsContent : queueContent}
-      {actions}
+      <EditorActions
+        canSave={hasChanges}
+        isSubmitting={isSubmitting}
+        onCancel={onSaved}
+      />
     </YStack>
   );
 
@@ -688,7 +613,7 @@ function BattleQueueSettingEditor({
       {large ? (
         <ScrollView
           key={isSearching ? 'search' : 'queue'}
-          maxH={desktopBodyMaxHeight}
+          shrink={1}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}

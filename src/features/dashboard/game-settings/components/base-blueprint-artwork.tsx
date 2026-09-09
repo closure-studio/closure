@@ -1,14 +1,5 @@
-import { useEffect, useId } from 'react';
-import Animated, {
-  Easing,
-  cancelAnimation,
-  useAnimatedProps,
-  useReducedMotion,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-  type SharedValue,
-} from 'react-native-reanimated';
+import { useEffect, useId, useState } from 'react';
+import { useReducedMotion } from 'react-native-reanimated';
 import Svg, { Circle, ClipPath, Defs, G, LinearGradient, Path, Rect, Stop, Text } from 'react-native-svg';
 import { getTokens } from 'tamagui';
 
@@ -25,63 +16,37 @@ const ROOM_MOTIFS = {
   TRADING: 'M67 55L112 29L154 52V107L110 129L67 106ZM67 55L110 79L154 52M110 79V129M76 60V111M86 66V115M97 72V120M127 88V112M135 83V106M144 79V101M201 32L224 55M234 65L258 89M201 89L224 65M234 55L258 32',
 };
 export type BaseRoomType = keyof typeof ROOM_MOTIFS;
-export type BaseArtworkLabels = {
-  roomTypes: Record<BaseRoomType, string>;
-  roomStatuses: Record<BaseRoomType, string>;
-};
+export type BaseArtworkLabels = Record<BaseRoomType, { title: string; status: string }>;
 
 const PANEL = 'M43 10H99L104 15H197L202 10H265L270 15V63L267 67V74L270 78V123L265 128H43L39 124V78L42 74V67L39 63V15Z';
 const STRIPE = 'M13 10H32L35 13V63L32 67V74L35 78V125L32 128H13L10 125V78L13 74V67L10 63V13Z';
-const AnimatedPath = Animated.createAnimatedComponent(Path);
-const AnimatedRect = Animated.createAnimatedComponent(Rect);
+const ANIMATION_STEPS = 5;
+const ANIMATION_STEP_MS = 1000;
 
-type WorkStepProps = {
-  progress: SharedValue<number>;
-  step: number;
-  count: number;
-  roomOpacity: number;
-};
-
-function WorkPath({ progress, step, count, roomOpacity, d, transform }: WorkStepProps & {
-  d: string;
-  transform: string;
-}) {
-  const animatedProps = useAnimatedProps(() => ({
-    opacity: roomOpacity * (progress.value >= step / count ? 1 : 0),
-  }));
-  return <AnimatedPath animatedProps={animatedProps} d={d} transform={transform} />;
+function stepVisible(phase: number, step: number, count: number) {
+  return phase >= Math.ceil(step * ANIMATION_STEPS / count);
 }
 
-function WorkRect({ progress, step, count, roomOpacity, baseOpacity, dimOpacity = 0, fill, transform }: WorkStepProps & {
-  baseOpacity: number;
-  dimOpacity?: number;
-  fill: string;
-  transform: string;
-}) {
-  const animatedProps = useAnimatedProps(() => ({
-    opacity: roomOpacity * baseOpacity * (progress.value >= step / count ? 1 : dimOpacity),
-  }));
-  return <AnimatedRect animatedProps={animatedProps} transform={transform} width={39} height={6} fill={fill} />;
-}
-
-export function BaseBlueprintArtwork({ selectedIndex, roomTypes, labels }: {
+export function BaseBlueprintArtwork({ selectedIndex, roomTypes, labels, animated = false }: {
   selectedIndex: number;
   roomTypes: readonly BaseRoomType[];
   labels?: BaseArtworkLabels;
+  animated?: boolean;
 }) {
   const id = useId().replace(/:/g, '');
   const colors = getTokens().color;
   const reducedMotion = useReducedMotion();
-  const progress = useSharedValue(1);
-  const animate = labels !== undefined && !reducedMotion;
+  const [phase, setPhase] = useState(0);
+  const animate = animated && !reducedMotion;
+  const visiblePhase = animate ? phase : ANIMATION_STEPS;
 
   useEffect(() => {
-    progress.set(animate ? 0 : 1);
-    if (animate) {
-      progress.set(withRepeat(withTiming(1, { duration: 5000, easing: Easing.linear }), -1, false));
-    }
-    return () => cancelAnimation(progress);
-  }, [animate, progress]);
+    if (!animate) return;
+    const timer = setInterval(() => {
+      setPhase((current) => (current + 1) % ANIMATION_STEPS);
+    }, ANIMATION_STEP_MS);
+    return () => clearInterval(timer);
+  }, [animate]);
 
   const accents = { POWER: colors.appMaterial.val, MANUFACTURE: colors.appWarning.val, TRADING: colors.appAccent.val };
   return (
@@ -102,8 +67,8 @@ export function BaseBlueprintArtwork({ selectedIndex, roomTypes, labels }: {
         const active = selectedIndex === index;
         const roomOpacity = active ? 1 : 0.4;
         const accent = accents[roomType];
-        const title = labels?.roomTypes[roomType];
-        const status = labels?.roomStatuses[roomType];
+        const title = labels?.[roomType].title;
+        const status = labels?.[roomType].status;
         const titleSize = title && title.length > 5 ? 23 : 30;
         return (
           <G key={index} transform={`translate(${x} ${y})`}>
@@ -126,13 +91,20 @@ export function BaseBlueprintArtwork({ selectedIndex, roomTypes, labels }: {
                 <Text opacity={roomOpacity} transform="translate(52 76)" fill={accent} fontFamily="sans-serif" fontSize={17} fontWeight="600">{status}</Text>
                 <G transform={`translate(${56 + status.length * (status.length > 5 ? 10 : 17)} 63)`} fill={accent}>
                   {[0, 1, 2].map(step => (
-                    <WorkPath key={step} progress={progress} step={step} count={3} roomOpacity={roomOpacity} transform={`translate(${step * 11} 0)`} d="M0 0L10 6L0 12Z" />
+                    <Path key={step} opacity={roomOpacity * (stepVisible(visiblePhase, step, 3) ? 1 : 0)} transform={`translate(${step * 11} 0)`} d="M0 0L10 6L0 12Z" />
                   ))}
                 </G>
               </G>
             ) : null}
             {[0, 1, 2, 3, 4].map(segment => (
-              <WorkRect key={segment} progress={progress} step={segment} count={5} roomOpacity={roomOpacity} baseOpacity={active ? 0.8 : 0.65} dimOpacity={0.18} transform={`translate(${49 + segment * 43} 119)`} fill={active ? colors.appAccent.val : colors.appMuted.val} />
+              <Rect
+                key={segment}
+                opacity={roomOpacity * (active ? 0.8 : 0.65) * (stepVisible(visiblePhase, segment, 5) ? 1 : 0.18)}
+                transform={`translate(${49 + segment * 43} 119)`}
+                width={39}
+                height={6}
+                fill={active ? colors.appAccent.val : colors.appMuted.val}
+              />
             ))}
             {active ? (
               <G fill="none" stroke={colors.appAccent.val}>
