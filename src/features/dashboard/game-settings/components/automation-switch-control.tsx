@@ -13,7 +13,7 @@ import { Switch, XStack, YStack, getTokens, useMedia } from 'tamagui';
 
 import { MonoText } from '@/components';
 
-export type AutomationSwitchControlProps = {
+type AutomationSwitchControlProps = {
   checked: boolean;
   disabled?: boolean;
   label: string;

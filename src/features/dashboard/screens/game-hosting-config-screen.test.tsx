@@ -113,7 +113,7 @@ describe('GameHostingConfigScreen', () => {
     expect(mockResetMutation).toHaveBeenCalled();
     await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
     await waitFor(() => {
-      expect(screen.getByTestId('hosting-config-slot-bottomLeft')).toHaveAccessibleName(
+      expect(screen.getByTestId('hosting-config-slot-slot_5')).toHaveAccessibleName(
         new RegExp(i18n.t('hostingConfig.roomTypes.trading', { ns: 'dashboard' })),
       );
     });
@@ -137,7 +137,7 @@ describe('GameHostingConfigScreen', () => {
       expect(mockResetMutation).toHaveBeenCalledTimes(2);
     });
     await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
-    expect(screen.getByTestId('hosting-config-slot-bottomLeft')).toHaveAccessibleName(
+    expect(screen.getByTestId('hosting-config-slot-slot_5')).toHaveAccessibleName(
       new RegExp(i18n.t('hostingConfig.roomTypes.power', { ns: 'dashboard' })),
     );
   });

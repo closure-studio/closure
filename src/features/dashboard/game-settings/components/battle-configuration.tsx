@@ -7,7 +7,8 @@ import {
   Trash2,
   X,
 } from 'lucide-react-native';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useWindowDimensions } from 'react-native';
 import {
   Button,
@@ -23,7 +24,9 @@ import {
 } from 'tamagui';
 
 import { Frame, MonoText, TerminalText } from '@/components';
+import type { ArkHostBattleTask, ArkHostGameConfigPatch } from '@/schemas/arkhost';
 import type { StageTable } from '@/schemas/game-data';
+import { AdaptiveEditorDialog } from './adaptive-editor-dialog';
 
 const CARD_PREVIEW_LIMIT = 3;
 const SEARCH_RESULT_LIMIT = 10;
@@ -53,14 +56,13 @@ type BattleConfigurationCardProps = {
   emptyLabel: string;
   firstLabel: string;
   moreLabel: string;
-  onPress: () => void;
   queue: readonly string[];
   stageTable: StageTable;
   testID: string;
   title: string;
 };
 
-export function BattleConfigurationCard({
+function BattleConfigurationCard({
   actionLabel,
   ariaLabel,
   countLabel,
@@ -69,7 +71,6 @@ export function BattleConfigurationCard({
   emptyLabel,
   firstLabel,
   moreLabel,
-  onPress,
   queue,
   stageTable,
   testID,
@@ -91,7 +92,6 @@ export function BattleConfigurationCard({
         borderColor: '$appAccentBorder',
       }}
       pressStyle={{ opacity: 0.8 }}
-      onPress={onPress}
     >
       <XStack items="center" justify="space-between" gap="$3" minW={0}>
         <XStack items="center" gap="$2" minW={0} shrink={1}>
@@ -221,60 +221,108 @@ export function BattleConfigurationCard({
   );
 }
 
-type BattleQueueEditorLabels = {
-  addStage: string;
-  added: string;
-  cancel: string;
-  clearSearch: string;
-  count: string;
-  currentQueue: string;
-  description: string;
-  empty: string;
-  noSearchResults: string;
-  removeStage: string;
-  save: string;
-  searchResults: string;
-  searchStages: string;
-  stageCost: (cost: number) => string;
-  title: string;
-};
+function replaceLoopBattleTasks(
+  tasks: readonly ArkHostBattleTask[],
+  loopStageIds: readonly string[],
+): ArkHostBattleTask[] {
+  const merged: ArkHostBattleTask[] = [];
+  let loopIndex = 0;
 
-type BattleQueueEditorProps = {
-  hasChanges: boolean;
-  isSubmitting: boolean;
-  keyword: string;
-  labels: BattleQueueEditorLabels;
-  onAdd: (stageId: string) => void;
-  onCancel: () => void;
-  onKeywordChange: (keyword: string) => void;
-  onRemove: (index: number) => void;
-  onSubmit: () => void;
-  queue: readonly string[];
-  stageTable: StageTable;
-};
+  for (const task of tasks) {
+    if (task.mode !== 'LOOP') {
+      merged.push(task);
+      continue;
+    }
+    const stageId = loopStageIds[loopIndex++];
+    if (stageId !== undefined) merged.push({ mode: 'LOOP', stage_id: stageId });
+  }
 
-export function BattleQueueEditor({
-  hasChanges,
-  isSubmitting,
-  keyword,
-  labels,
-  onAdd,
-  onCancel,
-  onKeywordChange,
-  onRemove,
-  onSubmit,
-  queue,
+  for (; loopIndex < loopStageIds.length; loopIndex += 1) {
+    const stageId = loopStageIds[loopIndex];
+    if (stageId !== undefined) merged.push({ mode: 'LOOP', stage_id: stageId });
+  }
+  return merged;
+}
+
+export function BattleQueueSetting({
+  tasks,
   stageTable,
-}: BattleQueueEditorProps) {
+  isSubmitting,
+  onSubmit,
+}: {
+  tasks: readonly ArkHostBattleTask[];
+  stageTable: StageTable;
+  isSubmitting: boolean;
+  onSubmit: (patch: ArkHostGameConfigPatch) => Promise<void>;
+}) {
+  const { t } = useTranslation('dashboard');
+  const queue = tasks.filter((task) => task.mode === 'LOOP').map((task) => task.stage_id);
+  const countLabel = `${queue.length} ${t('hostingConfig.units.stages')}`;
+
+  return (
+    <AdaptiveEditorDialog
+      trigger={(
+        <BattleConfigurationCard
+          testID="hosting-config-card-battle-maps"
+          ariaLabel={`${t('hostingConfig.battleQueue')}: ${countLabel}`}
+          title={t('hostingConfig.battleQueue')}
+          countLabel={countLabel}
+          defaultLabel={t('hostingConfig.status.default')}
+          description={t('hostingConfig.summaries.battleMaps')}
+          emptyLabel={t('hostingConfig.card.defaultStage')}
+          firstLabel={t('hostingConfig.card.firstPriority')}
+          moreLabel={t('hostingConfig.card.moreStages', { count: Math.max(0, queue.length - 3) })}
+          actionLabel={t('hostingConfig.dialog.edit')}
+          queue={queue}
+          stageTable={stageTable}
+        />
+      )}
+    >
+      {(close) => (
+        <BattleQueueSettingEditor
+          initialQueue={queue}
+          tasks={tasks}
+          stageTable={stageTable}
+          isSubmitting={isSubmitting}
+          onSubmit={onSubmit}
+          onSaved={close}
+        />
+      )}
+    </AdaptiveEditorDialog>
+  );
+}
+
+function BattleQueueSettingEditor({
+  initialQueue,
+  tasks,
+  stageTable,
+  isSubmitting,
+  onSubmit,
+  onSaved,
+}: {
+  initialQueue: readonly string[];
+  tasks: readonly ArkHostBattleTask[];
+  stageTable: StageTable;
+  isSubmitting: boolean;
+  onSubmit: (patch: ArkHostGameConfigPatch) => Promise<void>;
+  onSaved: () => void;
+}) {
+  const { t } = useTranslation('dashboard');
   const colors = getTokens().color;
   const { large } = useMedia();
   const { height: viewportHeight } = useWindowDimensions();
+  const [queue, setQueue] = useState([...initialQueue]);
+  const [keyword, setKeyword] = useState('');
+  const hasChanges = queue.length !== initialQueue.length || queue.some((id, index) => id !== initialQueue[index]);
   const desktopBodyMaxHeight = Math.max(220, Math.floor(viewportHeight * 0.58));
   const captionTextSize = large ? '$1' : '$2';
   const bodyTextSize = large ? '$2' : '$2.5';
   const stageCodeSize = large ? '$2.5' : '$3';
   const titleTextSize = large ? '$5' : '$5.5';
   const isSearching = keyword.trim().length > 0;
+  const addStageLabel = t('hostingConfig.dialog.addStage');
+  const addedLabel = t('hostingConfig.dialog.added');
+  const searchStagesLabel = t('hostingConfig.dialog.searchStages');
 
   const filteredStages = useMemo(() => {
     const query = keyword.trim().toUpperCase();
@@ -294,11 +342,18 @@ export function BattleQueueEditor({
     return results;
   }, [keyword, stageTable]);
 
+  const handleSubmit = () => {
+    if (!hasChanges || isSubmitting) return;
+    onSubmit({ battle_tasks: replaceLoopBattleTasks(tasks, queue) })
+      .then(onSaved)
+      .catch(() => undefined);
+  };
+
   const queueContent = (
     <YStack gap="$2">
       <XStack items="center" justify="space-between" gap="$2">
         <MonoText size={captionTextSize} color="$appMuted" fontWeight="700">
-          {labels.currentQueue}
+          {t('hostingConfig.dialog.currentQueue')}
         </MonoText>
         <MonoText
           size={captionTextSize}
@@ -306,7 +361,7 @@ export function BattleQueueEditor({
           fontWeight="700"
           fontVariant={['tabular-nums']}
         >
-          {labels.count}
+          {queue.length} {t('hostingConfig.units.stages')}
         </MonoText>
       </XStack>
 
@@ -328,7 +383,7 @@ export function BattleQueueEditor({
             shrink={1}
             minW={0}
           >
-            {labels.empty}
+            {t('hostingConfig.dialog.queueEmpty')}
           </MonoText>
         </XStack>
       ) : (
@@ -384,7 +439,7 @@ export function BattleQueueEditor({
                     ) : null}
                     {stage ? (
                       <MonoText size={captionTextSize} color="$appMuted" shrink={0}>
-                        {labels.stageCost(stage.ap)}
+                        {t('hostingConfig.dialog.stageCost', { cost: stage.ap })}
                       </MonoText>
                     ) : null}
                   </XStack>
@@ -392,7 +447,7 @@ export function BattleQueueEditor({
 
                 <Button
                   testID={`queue-remove-${index}`}
-                  aria-label={labels.removeStage}
+                  aria-label={t('hostingConfig.dialog.removeStage')}
                   unstyled
                   width="$4"
                   height="$4"
@@ -403,7 +458,7 @@ export function BattleQueueEditor({
                   hoverStyle={{ bg: '$appDangerSoft' }}
                   pressStyle={{ opacity: 0.65 }}
                   disabled={isSubmitting}
-                  onPress={() => onRemove(index)}
+                  onPress={() => setQueue((current) => current.filter((_, itemIndex) => itemIndex !== index))}
                 >
                   <Trash2 size={14} color={colors.appDanger.val} />
                 </Button>
@@ -418,11 +473,11 @@ export function BattleQueueEditor({
   const searchResultsContent = (
     <YStack gap="$1.5">
       <MonoText size={captionTextSize} color="$appMuted" fontWeight="700">
-        {labels.searchResults}
+        {t('hostingConfig.dialog.searchResults')}
       </MonoText>
       {filteredStages.length === 0 ? (
         <MonoText size={bodyTextSize} color="$appWarning" py="$2">
-          {labels.noSearchResults}
+          {t('hostingConfig.dialog.noSearchResults')}
         </MonoText>
       ) : (
         <YStack gap="$1">
@@ -461,13 +516,13 @@ export function BattleQueueEditor({
                     </MonoText>
                   </XStack>
                   <MonoText size={captionTextSize} color="$appMuted">
-                    {labels.stageCost(ap)}
+                    {t('hostingConfig.dialog.stageCost', { cost: ap })}
                   </MonoText>
                 </YStack>
 
                 <Button
                   testID={`stage-add-${id}`}
-                  aria-label={isAlreadyInQueue ? labels.added : labels.addStage}
+                  aria-label={isAlreadyInQueue ? addedLabel : addStageLabel}
                   unstyled
                   minW="$5"
                   minH="$4"
@@ -480,7 +535,7 @@ export function BattleQueueEditor({
                   opacity={isSubmitting ? 0.4 : 1}
                   disabled={isAlreadyInQueue || isSubmitting}
                   pressStyle={{ opacity: 0.65 }}
-                  onPress={() => onAdd(id)}
+                  onPress={() => setQueue((current) => current.includes(id) ? current : [...current, id])}
                 >
                   <XStack items="center" justify="center" gap="$1">
                     {isAlreadyInQueue ? (
@@ -493,7 +548,7 @@ export function BattleQueueEditor({
                       color={isAlreadyInQueue ? '$appMuted' : '$appAccent'}
                       fontWeight="700"
                     >
-                      {isAlreadyInQueue ? labels.added : labels.addStage}
+                      {isAlreadyInQueue ? addedLabel : addStageLabel}
                     </MonoText>
                   </XStack>
                 </Button>
@@ -508,7 +563,7 @@ export function BattleQueueEditor({
   const searchField = (
     <YStack gap="$2">
       <MonoText size={captionTextSize} color="$appMuted" fontWeight="700">
-        {labels.addStage}
+        {addStageLabel}
       </MonoText>
       <XStack
         items="center"
@@ -522,7 +577,7 @@ export function BattleQueueEditor({
         <Search size={14} color={colors.appMuted.val} />
         <Input
           testID="hosting-config-stage-search"
-          aria-label={labels.searchStages}
+          aria-label={searchStagesLabel}
           grow={1}
           minW={0}
           unstyled
@@ -530,24 +585,24 @@ export function BattleQueueEditor({
           fontSize={stageCodeSize}
           fontFamily="$mono"
           color="$appText"
-          placeholder={labels.searchStages}
+          placeholder={searchStagesLabel}
           placeholderTextColor="$appMuted"
           autoCapitalize="characters"
           autoCorrect={false}
           spellCheck={false}
           value={keyword}
           disabled={isSubmitting}
-          onChangeText={onKeywordChange}
+          onChangeText={setKeyword}
         />
         {keyword ? (
           <Button
-            aria-label={labels.clearSearch}
+            aria-label={t('hostingConfig.dialog.clearSearch')}
             unstyled
             width="$4"
             height="$4"
             items="center"
             justify="center"
-            onPress={() => onKeywordChange('')}
+            onPress={() => setKeyword('')}
           >
             <X size={14} color={colors.appMuted.val} />
           </Button>
@@ -569,9 +624,9 @@ export function BattleQueueEditor({
         hoverStyle={{ bg: '$appSurfaceRaised' }}
         pressStyle={{ opacity: 0.7 }}
         disabled={isSubmitting}
-        onPress={onCancel}
+        onPress={onSaved}
       >
-        <MonoText size={bodyTextSize}>{labels.cancel}</MonoText>
+        <MonoText size={bodyTextSize}>{t('hostingConfig.dialog.cancel')}</MonoText>
       </Button>
 
       <Form.Trigger asChild>
@@ -598,7 +653,7 @@ export function BattleQueueEditor({
               <Check size={14} color={colors.appAccent.val} />
             )}
             <MonoText size={bodyTextSize} color="$appAccent" fontWeight="700">
-              {labels.save}
+              {t('hostingConfig.dialog.save')}
             </MonoText>
           </XStack>
         </Button>
@@ -614,16 +669,16 @@ export function BattleQueueEditor({
   );
 
   return (
-    <Form onSubmit={onSubmit} gap="$4" shrink={1} minH={0}>
+    <Form onSubmit={handleSubmit} gap="$4" shrink={1} minH={0}>
       <YStack gap="$2" pr="$4">
         <Dialog.Title asChild>
           <TerminalText size={titleTextSize} fontWeight="800" numberOfLines={2}>
-            {labels.title}
+            {t('hostingConfig.battleQueue')}
           </TerminalText>
         </Dialog.Title>
         <Dialog.Description asChild>
           <MonoText size={bodyTextSize} color="$appMuted">
-            {labels.description}
+            {t('hostingConfig.descriptions.battleMaps')}
           </MonoText>
         </Dialog.Description>
       </YStack>

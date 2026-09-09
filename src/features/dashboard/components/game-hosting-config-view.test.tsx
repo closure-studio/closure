@@ -175,13 +175,13 @@ describe('GameHostingConfigView', () => {
     const { screen } = await renderConfigView();
     await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
     const expected = {
-      topLeft: 'power', topCenter: 'manufacture', topRight: 'power',
-      middleLeft: 'manufacture', middleCenter: 'manufacture', middleRight: 'manufacture',
-      bottomLeft: 'trading', bottomCenter: 'manufacture', bottomRight: 'trading',
+      slot_24: 'power', slot_25: 'manufacture', slot_26: 'power',
+      slot_14: 'manufacture', slot_15: 'manufacture', slot_16: 'manufacture',
+      slot_5: 'trading', slot_6: 'manufacture', slot_7: 'trading',
     } as const;
     expect(screen.getAllByTestId(/^hosting-config-slot-/)).toHaveLength(9);
-    for (const [position, type] of Object.entries(expected)) {
-      expect(screen.getByTestId(`hosting-config-slot-${position}`)).toHaveAccessibleName(
+    for (const [slot, type] of Object.entries(expected)) {
+      expect(screen.getByTestId(`hosting-config-slot-${slot}`)).toHaveAccessibleName(
         new RegExp(i18n.t(`hostingConfig.roomTypes.${type}`, { ns: 'dashboard' })),
       );
     }
@@ -194,10 +194,10 @@ describe('GameHostingConfigView', () => {
       TRAINING: { slot_14: { completeWorkTime: '', trainee: { charId: 'trainee', skillId: '' } } },
     } });
     await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
-    for (const [position, type] of [
-      ['topLeft', 'trading'], ['bottomRight', 'manufacture'], ['bottomLeft', 'manufacture'], ['middleLeft', 'power'],
+    for (const [slot, type] of [
+      ['slot_24', 'trading'], ['slot_7', 'manufacture'], ['slot_5', 'manufacture'], ['slot_14', 'power'],
     ] as const) {
-      expect(screen.getByTestId(`hosting-config-slot-${position}`)).toHaveAccessibleName(
+      expect(screen.getByTestId(`hosting-config-slot-${slot}`)).toHaveAccessibleName(
         new RegExp(i18n.t(`hostingConfig.roomTypes.${type}`, { ns: 'dashboard' })),
       );
     }
@@ -209,15 +209,15 @@ describe('GameHostingConfigView', () => {
 
     await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
 
-    expect(screen.getByTestId('hosting-config-slot-topLeft')).toBeDisabled();
-    expect(screen.getByTestId('hosting-config-slot-topRight')).toBeDisabled();
-    expect(screen.getByTestId('hosting-config-slot-middleLeft')).not.toBeDisabled();
+    expect(screen.getByTestId('hosting-config-slot-slot_24')).toBeDisabled();
+    expect(screen.getByTestId('hosting-config-slot-slot_26')).toBeDisabled();
+    expect(screen.getByTestId('hosting-config-slot-slot_14')).not.toBeDisabled();
 
-    await fireEvent.press(screen.getByTestId('hosting-config-slot-topLeft'));
+    await fireEvent.press(screen.getByTestId('hosting-config-slot-slot_24'));
     await fireEvent.press(screen.getByTestId('hosting-config-submit'));
     expect(onSubmit).not.toHaveBeenCalled();
 
-    await fireEvent.press(screen.getByTestId('hosting-config-slot-bottomRight'));
+    await fireEvent.press(screen.getByTestId('hosting-config-slot-slot_7'));
     await fireEvent.press(screen.getByTestId('hosting-config-submit'));
     expect(onSubmit).toHaveBeenCalledWith({ accelerate_slot: 'slot_7' });
   });
@@ -227,7 +227,7 @@ describe('GameHostingConfigView', () => {
     const { screen } = await renderConfigView({ onSubmit });
 
     await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
-    await fireEvent.press(screen.getByTestId('hosting-config-slot-bottomRight'));
+    await fireEvent.press(screen.getByTestId('hosting-config-slot-slot_7'));
     await fireEvent.press(screen.getByTestId('hosting-config-submit'));
 
     expect(onSubmit).toHaveBeenCalledTimes(1);

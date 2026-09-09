@@ -140,7 +140,6 @@
     "allowLoginAssist": "Login assistance",
     "autoBattle": "Auto battle",
     "battleQueue": "Stage priority",
-    "disabled": "Read only",
     "enableBuildingArrange": "Automatic base shifts",
     "errors": {
       "invalidResponse": "The server returned an invalid response. Try again.",
@@ -149,12 +148,6 @@
     },
     "keepingAp": "Reserve sanity",
     "recruitReserve": "Reserve recruitment permits",
-    "save": "Submit",
-    "smartSwitches": "Smart switches",
-    "stageMap": "Combat stage",
-    "stageQueueDeferred": "Battle queue controls are not enabled yet",
-    "stageSearchPlaceholder": "Enter a stage code or name",
-    "submitValidation": "Sanity and Recruitment Permit reserves must be zero or positive whole numbers.",
     "warning": "Use under Presight guidance",
     "ignoreRobot": "Deprioritize robots",
     "sections": {
@@ -170,7 +163,6 @@
     },
     "status": {
       "default": "Default",
-      "notSet": "Not Set",
       "maintenance": "Maintenance"
     },
     "card": {
@@ -209,7 +201,6 @@
       "save": "Save Changes",
       "cancel": "Cancel",
       "clearSearch": "Clear stage search",
-      "close": "Close",
       "decrease": "Decrease by one",
       "increase": "Increase by one",
       "targetRoom": "Choose Acceleration Room Type",
@@ -222,8 +213,7 @@
       "added": "Added",
       "removeStage": "Remove",
       "stageCost": "Costs {{cost}} AP",
-      "noSearchResults": "No matching combat stages found",
-      "searchPrompt": "Enter a stage code or name to add it to Stage Priority"
+      "noSearchResults": "No matching combat stages found"
     }
   }
 }

@@ -115,7 +115,7 @@ export function useGameLogsQuery(account: string | null) {
   });
 }
 
-export type UpdateGameConfigInput = {
+type UpdateGameConfigInput = {
   account: string;
   patch: ArkHostGameConfigPatch;
 };

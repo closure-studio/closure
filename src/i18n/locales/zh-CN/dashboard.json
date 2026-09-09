@@ -140,7 +140,6 @@
     "allowLoginAssist": "登录协助",
     "autoBattle": "自动作战",
     "battleQueue": "刷关优先级",
-    "disabled": "不可编辑",
     "enableBuildingArrange": "自动基建换班",
     "errors": {
       "invalidResponse": "服务端返回了无效响应，请重试。",
@@ -149,12 +148,6 @@
     },
     "keepingAp": "保留理智",
     "recruitReserve": "保留招聘许可",
-    "save": "递交",
-    "smartSwitches": "智能开关",
-    "stageMap": "作战地图",
-    "stageQueueDeferred": "作战队列功能暂未启用",
-    "stageSearchPlaceholder": "请输入代号或名称",
-    "submitValidation": "保留理智和保留招聘许可必须是 0 或正整数。",
     "warning": "请在普瑞赛斯指导下使用",
     "ignoreRobot": "不优先招募小车",
     "sections": {
@@ -170,7 +163,6 @@
     },
     "status": {
       "default": "默认",
-      "notSet": "未配置",
       "maintenance": "维护中"
     },
     "card": {
@@ -209,7 +201,6 @@
       "save": "保存并应用",
       "cancel": "取消",
       "clearSearch": "清空关卡搜索",
-      "close": "关闭",
       "decrease": "减少 1",
       "increase": "增加 1",
       "targetRoom": "选择加速房间类型",
@@ -222,8 +213,7 @@
       "added": "已添加",
       "removeStage": "移除",
       "stageCost": "消耗 {{cost}} 理智",
-      "noSearchResults": "未找到匹配的作战关卡",
-      "searchPrompt": "输入关卡代号或名称，添加到刷关优先级"
+      "noSearchResults": "未找到匹配的作战关卡"
     }
   }
 }
