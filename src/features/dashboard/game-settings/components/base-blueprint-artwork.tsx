@@ -1,4 +1,4 @@
-import { useEffect, useId, type ReactNode } from 'react';
+import { useEffect, useId } from 'react';
 import Animated, {
   Easing,
   cancelAnimation,
@@ -32,19 +32,36 @@ export type BaseArtworkLabels = {
 
 const PANEL = 'M43 10H99L104 15H197L202 10H265L270 15V63L267 67V74L270 78V123L265 128H43L39 124V78L42 74V67L39 63V15Z';
 const STRIPE = 'M13 10H32L35 13V63L32 67V74L35 78V125L32 128H13L10 125V78L13 74V67L10 63V13Z';
-const AnimatedGroup = Animated.createAnimatedComponent(G);
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+const AnimatedRect = Animated.createAnimatedComponent(Rect);
 
-function WorkStep({ progress, step, count, dimOpacity = 0, children }: {
+type WorkStepProps = {
   progress: SharedValue<number>;
   step: number;
   count: number;
-  dimOpacity?: number;
-  children: ReactNode;
+  roomOpacity: number;
+};
+
+function WorkPath({ progress, step, count, roomOpacity, d, transform }: WorkStepProps & {
+  d: string;
+  transform: string;
 }) {
   const animatedProps = useAnimatedProps(() => ({
-    opacity: progress.value >= step / count ? 1 : dimOpacity,
+    opacity: roomOpacity * (progress.value >= step / count ? 1 : 0),
   }));
-  return <AnimatedGroup animatedProps={animatedProps}>{children}</AnimatedGroup>;
+  return <AnimatedPath animatedProps={animatedProps} d={d} transform={transform} />;
+}
+
+function WorkRect({ progress, step, count, roomOpacity, baseOpacity, dimOpacity = 0, fill, transform }: WorkStepProps & {
+  baseOpacity: number;
+  dimOpacity?: number;
+  fill: string;
+  transform: string;
+}) {
+  const animatedProps = useAnimatedProps(() => ({
+    opacity: roomOpacity * baseOpacity * (progress.value >= step / count ? 1 : dimOpacity),
+  }));
+  return <AnimatedRect animatedProps={animatedProps} transform={transform} width={39} height={6} fill={fill} />;
 }
 
 export function BaseBlueprintArtwork({ selectedIndex, roomTypes, labels }: {
@@ -83,49 +100,46 @@ export function BaseBlueprintArtwork({ selectedIndex, roomTypes, labels }: {
       {roomTypes.map((roomType, index) => {
         const { x, y } = baseRoomBounds(index);
         const active = selectedIndex === index;
+        const roomOpacity = active ? 1 : 0.4;
         const accent = accents[roomType];
         const title = labels?.roomTypes[roomType];
         const status = labels?.roomStatuses[roomType];
         const titleSize = title && title.length > 5 ? 23 : 30;
         return (
-          <G key={index} transform={`translate(${x} ${y})`} opacity={active ? 1 : 0.4}>
-            <Rect transform="translate(2 2)" width={276} height={136} fill={colors.appSurfaceRaised.val} fillOpacity={0.35} stroke={colors.appBorder.val} />
-            <Path d="M16 5H5V17M263 5H275V17M5 121V135H17M263 135H275V121M19 7H7V19M261 7H273V19M7 119V133H19M261 133H273V119" fill="none" stroke={colors.appAccentBorder.val} strokeOpacity={0.5} />
-            <Path d={PANEL} transform="translate(0 3)" fill={colors.appBackground.val} opacity={0.65} />
-            <Path d={STRIPE} fill={accent} fillOpacity={active ? 0.95 : 0.65} stroke={accent} strokeOpacity={0.7} strokeWidth={1} />
-            <Path d={PANEL} fill={`url(#${id}-panel)`} stroke={colors.appBorderSolid.val} />
-            {active ? <Path d={PANEL} fill={colors.appAccent.val} fillOpacity={0.18} /> : null}
+          <G key={index} transform={`translate(${x} ${y})`}>
+            <Rect opacity={roomOpacity} transform="translate(2 2)" width={276} height={136} fill={colors.appSurfaceRaised.val} fillOpacity={0.35} stroke={colors.appBorder.val} />
+            <Path opacity={roomOpacity} d="M16 5H5V17M263 5H275V17M5 121V135H17M263 135H275V121M19 7H7V19M261 7H273V19M7 119V133H19M261 133H273V119" fill="none" stroke={colors.appAccentBorder.val} strokeOpacity={0.5} />
+            <Path opacity={roomOpacity * 0.65} d={PANEL} transform="translate(0 3)" fill={colors.appBackground.val} />
+            <Path opacity={roomOpacity} d={STRIPE} fill={accent} fillOpacity={active ? 0.95 : 0.65} stroke={accent} strokeOpacity={0.7} strokeWidth={1} />
+            <Path opacity={roomOpacity} d={PANEL} fill={`url(#${id}-panel)`} stroke={colors.appBorderSolid.val} />
+            {active ? <Path opacity={roomOpacity} d={PANEL} fill={colors.appAccent.val} fillOpacity={0.18} /> : null}
             <G clipPath={`url(#${id}-clip)`}>
-              <Path d={ROOM_MOTIFS[roomType]} fill="none" stroke={colors.appAccent.val} strokeWidth={5} opacity={0.09} />
-              <Path d="M46 11H87L158 49V128H127V61Z" fill={colors.appAccent.val} opacity={0.035} />
+              <Path opacity={roomOpacity * 0.09} d={ROOM_MOTIFS[roomType]} fill="none" stroke={colors.appAccent.val} strokeWidth={5} />
+              <Path opacity={roomOpacity * 0.035} d="M46 11H87L158 49V128H127V61Z" fill={colors.appAccent.val} />
             </G>
             {title && status ? (
               <G>
-                <Text transform="translate(52 53)" fill={colors.appText.val} fontFamily="sans-serif" fontSize={titleSize}>{title}</Text>
+                <Text opacity={roomOpacity} transform="translate(52 53)" fill={colors.appText.val} fontFamily="sans-serif" fontSize={titleSize}>{title}</Text>
                 <G transform={`translate(${Math.min(235, 56 + title.length * titleSize * (title.length > 5 ? 0.51 : 1))} 31)`} fill={accent}>
-                  {[0, 10, 20].map(offset => <Path key={offset} transform={`translate(${offset} 0)`} d="M0 3L4 0L8 3V20L4 24L0 20Z" />)}
+                  {[0, 10, 20].map(offset => <Path key={offset} opacity={roomOpacity} transform={`translate(${offset} 0)`} d="M0 3L4 0L8 3V20L4 24L0 20Z" />)}
                 </G>
-                <Text transform="translate(52 76)" fill={accent} fontFamily="sans-serif" fontSize={17} fontWeight="600">{status}</Text>
+                <Text opacity={roomOpacity} transform="translate(52 76)" fill={accent} fontFamily="sans-serif" fontSize={17} fontWeight="600">{status}</Text>
                 <G transform={`translate(${56 + status.length * (status.length > 5 ? 10 : 17)} 63)`} fill={accent}>
                   {[0, 1, 2].map(step => (
-                    <WorkStep key={step} progress={progress} step={step} count={3}>
-                      <Path transform={`translate(${step * 11} 0)`} d="M0 0L10 6L0 12Z" />
-                    </WorkStep>
+                    <WorkPath key={step} progress={progress} step={step} count={3} roomOpacity={roomOpacity} transform={`translate(${step * 11} 0)`} d="M0 0L10 6L0 12Z" />
                   ))}
                 </G>
               </G>
             ) : null}
             {[0, 1, 2, 3, 4].map(segment => (
-              <WorkStep key={segment} progress={progress} step={segment} count={5} dimOpacity={0.18}>
-                <Rect transform={`translate(${49 + segment * 43} 119)`} width={39} height={6} fill={active ? colors.appAccent.val : colors.appMuted.val} opacity={active ? 0.8 : 0.65} />
-              </WorkStep>
+              <WorkRect key={segment} progress={progress} step={segment} count={5} roomOpacity={roomOpacity} baseOpacity={active ? 0.8 : 0.65} dimOpacity={0.18} transform={`translate(${49 + segment * 43} 119)`} fill={active ? colors.appAccent.val : colors.appMuted.val} />
             ))}
             {active ? (
               <G fill="none" stroke={colors.appAccent.val}>
-                <Path d={PANEL} strokeWidth={10} opacity={0.05} />
-                <Path d={PANEL} strokeWidth={5} opacity={0.12} />
-                <Path d={PANEL} strokeWidth={3} />
-                <Path d={STRIPE} strokeWidth={5} opacity={0.15} />
+                <Path opacity={roomOpacity * 0.05} d={PANEL} strokeWidth={10} />
+                <Path opacity={roomOpacity * 0.12} d={PANEL} strokeWidth={5} />
+                <Path opacity={roomOpacity} d={PANEL} strokeWidth={3} />
+                <Path opacity={roomOpacity * 0.15} d={STRIPE} strokeWidth={5} />
               </G>
             ) : null}
           </G>
@@ -138,10 +152,10 @@ export function BaseBlueprintArtwork({ selectedIndex, roomTypes, labels }: {
         <Path d="M18 38H54L61 45H82L89 38H124L128 42V96L124 101H89L82 94H61L54 101H18L14 97V42Z" transform="translate(0 2)" fill={colors.appBackground.val} opacity={0.25} />
         <Path d="M18 38H54L61 45H82L89 38H124L128 42V96L124 101H89L82 94H61L54 101H18L14 97V42Z" fill={colors.appBackground.val} />
         <G transform="scale(0.42945)" fill={colors.appAccent.val}>
-          <G opacity={0.65}>
-            <Circle cx={148} cy={130} r={9} />
+          <G>
+            <Circle opacity={0.65} cx={148} cy={130} r={9} />
             {/* Outline traced from the reference: bent front leg and long diagonal rear leg. */}
-            <Path d="M162 134H179L184 138L191 150V152L188 154L184 153L177 141H165L164 145L174 160L179 166V184L181 186H199L202 187V191L198 193L172 192L171 177L168 176L163 185L150 203L146 205H141L142 200L155 181L163 169L161 165L151 152L148 153L147 159L144 163H130L129 158L139 157L141 155L144 145L148 142L155 141Z" />
+            <Path opacity={0.65} d="M162 134H179L184 138L191 150V152L188 154L184 153L177 141H165L164 145L174 160L179 166V184L181 186H199L202 187V191L198 193L172 192L171 177L168 176L163 185L150 203L146 205H141L142 200L155 181L163 169L161 165L151 152L148 153L147 159L144 163H130L129 158L139 157L141 155L144 145L148 142L155 141Z" />
           </G>
           <Path d="M63 165L84 154V176ZM86 165L106 154V176ZM223 154L243 165L223 176ZM246 154L265 165L246 176Z" opacity={0.9} />
         </G>
