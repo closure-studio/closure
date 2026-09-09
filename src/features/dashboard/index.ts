@@ -22,7 +22,6 @@ export {
   findGameAccountById,
   useAdjacentGameAccountPrefetch,
   useArkHostSync,
-  useCharactersQuery,
   useGameDetailQuery,
   useGameAccountsQuery,
   useGameLogsQuery,

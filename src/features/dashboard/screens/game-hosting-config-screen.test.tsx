@@ -62,6 +62,7 @@ const mockResetMutation = jest.fn();
 const mockMutateAsync = jest.fn((_input: MutationInput) => Promise.resolve(undefined));
 
 jest.mock('../queries', () => ({
+  ...jest.requireActual<typeof import('../queries')>('../queries'),
   useUpdateGameConfig: () => ({
     error: null,
     mutateAsync: mockMutateAsync,
@@ -97,19 +98,25 @@ describe('GameHostingConfigScreen', () => {
     const screen = await renderScreen();
 
     await fireEvent.press(screen.getByTestId('hosting-config-card-keeping-ap'));
-    await fireEvent.changeText(screen.getByTestId('hosting-config-keeping-ap'), '8');
+    await fireEvent.press(screen.getByTestId('numeric-step-increase'));
     await fireEvent.press(screen.getByTestId('hosting-config-submit'));
 
     await waitFor(() => {
       const input = mockMutateAsync.mock.calls[0]?.[0];
       expect(input?.account).toBe(firstGameAccount.account);
-      expect(input?.patch.keeping_ap).toBe(8);
+      expect(input?.patch.keeping_ap).toBe(1);
     });
   });
 
-  it('resets the mutation when the selected account changes', async () => {
+  it('resets the mutation and reads the new account building when selection changes', async () => {
     const screen = await renderScreen();
     expect(mockResetMutation).toHaveBeenCalled();
+    await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
+    await waitFor(() => {
+      expect(screen.getByTestId('hosting-config-slot-bottomLeft')).toHaveAccessibleName(
+        new RegExp(i18n.t('hostingConfig.roomTypes.trading', { ns: 'dashboard' })),
+      );
+    });
 
     const queryClient = new QueryClient({
       defaultOptions: {
@@ -129,5 +136,9 @@ describe('GameHostingConfigScreen', () => {
     await waitFor(() => {
       expect(mockResetMutation).toHaveBeenCalledTimes(2);
     });
+    await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
+    expect(screen.getByTestId('hosting-config-slot-bottomLeft')).toHaveAccessibleName(
+      new RegExp(i18n.t('hostingConfig.roomTypes.power', { ns: 'dashboard' })),
+    );
   });
 });

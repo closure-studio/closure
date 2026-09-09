@@ -4,30 +4,46 @@ import { MockArkHostApi } from './arkhost-api.mock';
 describe("MockArkHostApi", () => {
   it("serves core ArkHost data", async () => {
     const api = new MockArkHostApi(0);
-    const [games, detail, characters, logs] = await Promise.all([
+    const [games, detail, logs] = await Promise.all([
       api.fetchGameList(),
       api.fetchGameDetail("G18928069156"),
-      api.fetchCharacters("G18928069156"),
       api.fetchGameLogs("G18928069156", 0),
     ]);
     expect(games.ok && games.data).toHaveLength(3);
     expect(detail.ok && detail.data?.inventory?.["31034"]).toBe(131);
-    expect(characters.ok && characters.data.total).toBe(422);
+    expect(detail.ok && Object.keys(detail.data?.troop?.chars ?? {})).toHaveLength(426);
     expect(logs.ok && logs.data.logs).toHaveLength(10);
   });
 
   it("serves a distinct character roster for each mock game account", async () => {
     const api = new MockArkHostApi(0);
     const [primary, secondary, tertiary, unknown] = await Promise.all([
-      api.fetchCharacters("G18928069156"),
-      api.fetchCharacters("G16601716973"),
-      api.fetchCharacters("G17107372623"),
-      api.fetchCharacters("G00000000000"),
+      api.fetchGameDetail("G18928069156"),
+      api.fetchGameDetail("G16601716973"),
+      api.fetchGameDetail("G17107372623"),
+      api.fetchGameDetail("G00000000000"),
     ]);
-    expect(primary.ok && primary.data.total).toBe(422);
-    expect(secondary.ok && secondary.data.total).toBe(60);
-    expect(tertiary.ok && tertiary.data.total).toBe(103);
-    expect(unknown.ok && unknown.data).toEqual({ chars: [], total: 0 });
+    expect(primary.ok && Object.keys(primary.data?.troop?.chars ?? {})).toHaveLength(426);
+    expect(secondary.ok && Object.keys(secondary.data?.troop?.chars ?? {})).toHaveLength(60);
+    expect(tertiary.ok && Object.keys(tertiary.data?.troop?.chars ?? {})).toHaveLength(103);
+    expect(unknown.ok && unknown.data).toBeNull();
+  });
+
+  it("isolates snapshots between callers, accounts and API instances", async () => {
+    const api = new MockArkHostApi(0);
+    const first = await api.fetchGameDetail('G18928069156');
+    if (!first.ok || !first.data?.troop) throw new Error('Expected troop');
+    first.data.troop.chars = {};
+    const second = await api.fetchGameDetail('G18928069156');
+    expect(second.ok && Object.keys(second.data?.troop?.chars ?? {})).toHaveLength(426);
+    await api.updateGameConfig('G16601716973', { keeping_ap: 42 });
+    const secondary = await api.fetchGameDetail('G16601716973');
+    expect(secondary.ok && secondary.data?.config.keeping_ap).toBe(42);
+    const fresh = await new MockArkHostApi(0).fetchGameDetail('G16601716973');
+    expect(fresh.ok && fresh.data?.config.keeping_ap).toBe(0);
+    await api.deleteGame('G16601716973');
+    expect(await api.fetchGameDetail('G16601716973')).toEqual({ ok: true, data: null });
+    expect(second.ok && second.data?.config.keeping_ap).toBe(0);
   });
 
   it("deletes a game account and keeps server reads consistent", async () => {

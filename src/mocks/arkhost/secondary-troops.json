@@ -1,0 +1,1151 @@
+[
+  {
+    "chars": {
+      "1": {
+        "charId": "char_501_durin",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "2": {
+        "charId": "char_212_ansel",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "3": {
+        "charId": "char_285_medic2",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "4": {
+        "charId": "char_4130_luton",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "5": {
+        "charId": "char_193_frostl",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "6": {
+        "charId": "char_218_cuttle",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "7": {
+        "charId": "char_283_midn",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "8": {
+        "charId": "char_282_catap",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "9": {
+        "charId": "char_137_brownb",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "10": {
+        "charId": "char_149_scave",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "11": {
+        "charId": "char_500_noirc",
+        "level": 30,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "12": {
+        "charId": "char_381_bubble",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "13": {
+        "charId": "char_488_buildr",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "14": {
+        "charId": "char_301_cutter",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "15": {
+        "charId": "char_199_yak",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "16": {
+        "charId": "char_4132_ascln",
+        "level": 50,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "17": {
+        "charId": "char_230_savage",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "18": {
+        "charId": "char_122_beagle",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "19": {
+        "charId": "char_235_jesica",
+        "level": 45,
+        "evolvePhase": 0,
+        "potentialRank": 1,
+        "skills": []
+      },
+      "20": {
+        "charId": "char_185_frncat",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "21": {
+        "charId": "char_141_nights",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "22": {
+        "charId": "char_422_aurora",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "23": {
+        "charId": "char_208_melan",
+        "level": 40,
+        "evolvePhase": 0,
+        "potentialRank": 4,
+        "skills": []
+      },
+      "24": {
+        "charId": "char_284_spot",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "25": {
+        "charId": "char_236_rope",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "26": {
+        "charId": "char_1036_fang2",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "27": {
+        "charId": "char_469_indigo",
+        "level": 45,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "28": {
+        "charId": "char_366_acdrop",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "29": {
+        "charId": "char_123_fang",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "30": {
+        "charId": "char_277_sqrrel",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "31": {
+        "charId": "char_210_stward",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "32": {
+        "charId": "char_446_aroma",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "33": {
+        "charId": "char_503_rang",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "34": {
+        "charId": "char_452_bstalk",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "35": {
+        "charId": "char_475_akafyu",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "36": {
+        "charId": "char_215_mantic",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "37": {
+        "charId": "char_192_falco",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "38": {
+        "charId": "char_124_kroos",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "39": {
+        "charId": "char_302_glaze",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "40": {
+        "charId": "char_400_weedy",
+        "level": 50,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "41": {
+        "charId": "char_002_amiya",
+        "level": 50,
+        "evolvePhase": 0,
+        "potentialRank": 2,
+        "skills": []
+      },
+      "42": {
+        "charId": "char_121_lava",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "43": {
+        "charId": "char_133_mm",
+        "level": 45,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "44": {
+        "charId": "char_150_snakek",
+        "level": 45,
+        "evolvePhase": 0,
+        "potentialRank": 1,
+        "skills": []
+      },
+      "45": {
+        "charId": "char_009_12fce",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "46": {
+        "charId": "char_4015_spuria",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "47": {
+        "charId": "char_289_gyuki",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "48": {
+        "charId": "char_209_ardign",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "49": {
+        "charId": "char_502_nblade",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "50": {
+        "charId": "char_240_wyvern",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "51": {
+        "charId": "char_196_sunbr",
+        "level": 45,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "52": {
+        "charId": "char_349_chiave",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "53": {
+        "charId": "char_120_hibisc",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "54": {
+        "charId": "char_278_orchid",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "55": {
+        "charId": "char_211_adnach",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "56": {
+        "charId": "char_271_spikes",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "57": {
+        "charId": "char_151_myrtle",
+        "level": 45,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "58": {
+        "charId": "char_109_fmout",
+        "level": 45,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "59": {
+        "charId": "char_281_popka",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "60": {
+        "charId": "char_130_doberm",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      }
+    }
+  },
+  {
+    "chars": {
+      "1": {
+        "charId": "char_009_12fce",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "2": {
+        "charId": "char_121_lava",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "3": {
+        "charId": "char_271_spikes",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "4": {
+        "charId": "char_134_ifrit",
+        "level": 28,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "5": {
+        "charId": "char_347_jaksel",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "6": {
+        "charId": "char_458_rfrost",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "7": {
+        "charId": "char_187_ccheal",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "8": {
+        "charId": "char_235_jesica",
+        "level": 20,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "9": {
+        "charId": "char_192_falco",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "10": {
+        "charId": "char_328_cammou",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "11": {
+        "charId": "char_181_flower",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "12": {
+        "charId": "char_475_akafyu",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "13": {
+        "charId": "char_489_serum",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "14": {
+        "charId": "char_337_utage",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "15": {
+        "charId": "char_258_podego",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "16": {
+        "charId": "char_212_ansel",
+        "level": 23,
+        "evolvePhase": 0,
+        "potentialRank": 1,
+        "skills": []
+      },
+      "17": {
+        "charId": "char_126_shotst",
+        "level": 28,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "18": {
+        "charId": "char_122_beagle",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "19": {
+        "charId": "char_236_rope",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "20": {
+        "charId": "char_272_strong",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "21": {
+        "charId": "char_497_ctable",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "22": {
+        "charId": "char_4014_lunacu",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "23": {
+        "charId": "char_491_humus",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "24": {
+        "charId": "char_120_hibisc",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "25": {
+        "charId": "char_123_fang",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "26": {
+        "charId": "char_196_sunbr",
+        "level": 24,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "27": {
+        "charId": "char_133_mm",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "28": {
+        "charId": "char_141_nights",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "29": {
+        "charId": "char_109_fmout",
+        "level": 23,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "30": {
+        "charId": "char_241_panda",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "31": {
+        "charId": "char_366_acdrop",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "32": {
+        "charId": "char_124_kroos",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "33": {
+        "charId": "char_281_popka",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "34": {
+        "charId": "char_376_therex",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "35": {
+        "charId": "char_253_greyy",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "36": {
+        "charId": "char_1014_nearl2",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "37": {
+        "charId": "char_4019_ncdeer",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "38": {
+        "charId": "char_484_robrta",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "39": {
+        "charId": "char_4041_chnut",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "40": {
+        "charId": "char_240_wyvern",
+        "level": 22,
+        "evolvePhase": 0,
+        "potentialRank": 1,
+        "skills": []
+      },
+      "41": {
+        "charId": "char_282_catap",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "42": {
+        "charId": "char_302_glaze",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "43": {
+        "charId": "char_136_hsguma",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "44": {
+        "charId": "char_421_crow",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "45": {
+        "charId": "char_4009_irene",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "46": {
+        "charId": "char_4062_totter",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "47": {
+        "charId": "char_150_snakek",
+        "level": 27,
+        "evolvePhase": 0,
+        "potentialRank": 1,
+        "skills": []
+      },
+      "48": {
+        "charId": "char_199_yak",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "49": {
+        "charId": "char_198_blackd",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "50": {
+        "charId": "char_137_brownb",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "51": {
+        "charId": "char_338_iris",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "52": {
+        "charId": "char_487_bobb",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "53": {
+        "charId": "char_230_savage",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "54": {
+        "charId": "char_301_cutter",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "55": {
+        "charId": "char_002_amiya",
+        "level": 27,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "56": {
+        "charId": "char_457_blitz",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "57": {
+        "charId": "char_385_finlpp",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "58": {
+        "charId": "char_452_bstalk",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "59": {
+        "charId": "char_260_durnar",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "60": {
+        "charId": "char_381_bubble",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "61": {
+        "charId": "char_4032_provs",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "62": {
+        "charId": "char_502_nblade",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "63": {
+        "charId": "char_173_slchan",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "64": {
+        "charId": "char_209_ardign",
+        "level": 20,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "65": {
+        "charId": "char_284_spot",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "66": {
+        "charId": "char_278_orchid",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "67": {
+        "charId": "char_144_red",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "68": {
+        "charId": "char_201_moeshd",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "69": {
+        "charId": "char_149_scave",
+        "level": 28,
+        "evolvePhase": 0,
+        "potentialRank": 1,
+        "skills": []
+      },
+      "70": {
+        "charId": "char_118_yuki",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "71": {
+        "charId": "char_367_swllow",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "72": {
+        "charId": "char_110_deepcl",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "73": {
+        "charId": "char_219_meteo",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "74": {
+        "charId": "char_193_frostl",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "75": {
+        "charId": "char_298_susuro",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "76": {
+        "charId": "char_185_frncat",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "77": {
+        "charId": "char_503_rang",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "78": {
+        "charId": "char_455_nothin",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "79": {
+        "charId": "char_130_doberm",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "80": {
+        "charId": "char_171_bldsk",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "81": {
+        "charId": "char_501_durin",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "82": {
+        "charId": "char_440_pinecn",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "83": {
+        "charId": "char_204_platnm",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "84": {
+        "charId": "char_226_hmau",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "85": {
+        "charId": "char_174_slbell",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "86": {
+        "charId": "char_190_clour",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "87": {
+        "charId": "char_289_gyuki",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "88": {
+        "charId": "char_4203_kichi",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "89": {
+        "charId": "char_117_myrrh",
+        "level": 23,
+        "evolvePhase": 0,
+        "potentialRank": 1,
+        "skills": []
+      },
+      "90": {
+        "charId": "char_211_adnach",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "91": {
+        "charId": "char_210_stward",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "92": {
+        "charId": "char_277_sqrrel",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "93": {
+        "charId": "char_208_melan",
+        "level": 23,
+        "evolvePhase": 0,
+        "potentialRank": 2,
+        "skills": []
+      },
+      "94": {
+        "charId": "char_151_myrtle",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "95": {
+        "charId": "char_237_gravel",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "96": {
+        "charId": "char_1028_texas2",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "97": {
+        "charId": "char_290_vigna",
+        "level": 26,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "98": {
+        "charId": "char_283_midn",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "99": {
+        "charId": "char_2014_nian",
+        "level": 35,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "100": {
+        "charId": "char_373_lionhd",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "101": {
+        "charId": "char_476_blkngt",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "102": {
+        "charId": "char_214_kafka",
+        "level": 1,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      },
+      "103": {
+        "charId": "char_500_noirc",
+        "level": 11,
+        "evolvePhase": 0,
+        "potentialRank": 0,
+        "skills": []
+      }
+    }
+  }
+]

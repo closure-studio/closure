@@ -1,7 +1,9 @@
-import { Button, RadioGroup, XStack, YStack } from 'tamagui';
+import { ChevronRight, Cpu } from 'lucide-react-native';
+import { Button, RadioGroup, XStack, YStack, getTokens } from 'tamagui';
 
-import { MonoText, TerminalText } from '@/components';
-import type { ArkHostAccelerateSlot } from '@/schemas/arkhost';
+import { Frame, MonoText, TerminalText } from '@/components';
+import type { ArkHostAccelerateSlot, ArkHostBuilding } from '@/schemas/arkhost';
+import { BASE_VIEWBOX, BaseBlueprintArtwork, baseRoomBounds, type BaseArtworkLabels, type BaseRoomType } from './base-blueprint-artwork';
 
 export const ACCELERATE_SLOT_OPTIONS = [
   { key: 'topLeft', value: 'slot_24' },
@@ -13,226 +15,177 @@ export const ACCELERATE_SLOT_OPTIONS = [
   { key: 'bottomLeft', value: 'slot_5' },
   { key: 'bottomCenter', value: 'slot_6' },
   { key: 'bottomRight', value: 'slot_7' },
-] as const satisfies readonly { key: string; value: ArkHostAccelerateSlot }[];
+] as const satisfies readonly {
+  key: string;
+  value: ArkHostAccelerateSlot;
+}[];
 
-export type SlotKey = (typeof ACCELERATE_SLOT_OPTIONS)[number]['key'];
+export function getRoomType(rooms: ArkHostBuilding['rooms'] | undefined, slot: ArkHostAccelerateSlot): BaseRoomType {
+  if (rooms?.TRADING?.[slot]) return 'TRADING';
+  if (rooms?.MANUFACTURE?.[slot]) return 'MANUFACTURE';
+  return 'POWER';
+}
 
-export function BaseMiniGrid({
-  getSlotLabel,
-  selectedSlot,
-}: {
-  getSlotLabel: (key: SlotKey) => string;
-  selectedSlot: ArkHostAccelerateSlot;
-}) {
+export function isAccelerateSlotSelectable(
+  rooms: ArkHostBuilding['rooms'] | undefined,
+  slot: ArkHostAccelerateSlot,
+): boolean {
+  return getRoomType(rooms, slot) !== 'POWER';
+}
+
+export type BaseMatrixLabels = BaseArtworkLabels;
+
+function BaseRoomPreview({ selectedSlot, rooms }: { selectedSlot: ArkHostAccelerateSlot; rooms: ArkHostBuilding['rooms'] | undefined }) {
   return (
-    <YStack gap="$1" py="$1" items="center">
-      <XStack gap="$1.5">
-        {ACCELERATE_SLOT_OPTIONS.slice(0, 3).map((slot) => {
-          const isSelected = selectedSlot === slot.value;
-          return (
-            <YStack
-              key={slot.key}
-              width={42}
-              height={22}
-              borderWidth={1}
-              borderColor={isSelected ? '$appAccent' : '$appBorder'}
-              bg={isSelected ? '$appAccent' : '$appSurfaceRaised'}
-              items="center"
-              justify="center"
-            >
-              <MonoText size="$1" color={isSelected ? '$appBackground' : '$appMuted'}>
-                {getSlotLabel(slot.key).slice(-1)}
-              </MonoText>
-            </YStack>
-          );
-        })}
-      </XStack>
-
-      <XStack gap="$1.5" ml={-16}>
-        {ACCELERATE_SLOT_OPTIONS.slice(3, 6).map((slot) => {
-          const isSelected = selectedSlot === slot.value;
-          return (
-            <YStack
-              key={slot.key}
-              width={42}
-              height={22}
-              borderWidth={1}
-              borderColor={isSelected ? '$appAccent' : '$appBorder'}
-              bg={isSelected ? '$appAccent' : '$appSurfaceRaised'}
-              items="center"
-              justify="center"
-            >
-              <MonoText size="$1" color={isSelected ? '$appBackground' : '$appMuted'}>
-                {getSlotLabel(slot.key).slice(-1)}
-              </MonoText>
-            </YStack>
-          );
-        })}
-      </XStack>
-
-      <XStack gap="$1.5">
-        {ACCELERATE_SLOT_OPTIONS.slice(6, 9).map((slot) => {
-          const isSelected = selectedSlot === slot.value;
-          return (
-            <YStack
-              key={slot.key}
-              width={42}
-              height={22}
-              borderWidth={1}
-              borderColor={isSelected ? '$appAccent' : '$appBorder'}
-              bg={isSelected ? '$appAccent' : '$appSurfaceRaised'}
-              items="center"
-              justify="center"
-            >
-              <MonoText size="$1" color={isSelected ? '$appBackground' : '$appMuted'}>
-                {getSlotLabel(slot.key).slice(-1)}
-              </MonoText>
-            </YStack>
-          );
-        })}
-      </XStack>
+    <YStack width={100} aspectRatio={BASE_VIEWBOX.width / BASE_VIEWBOX.height} aria-hidden shrink={0}>
+      <BaseBlueprintArtwork roomTypes={ACCELERATE_SLOT_OPTIONS.map(slot => getRoomType(rooms, slot.value))} selectedIndex={ACCELERATE_SLOT_OPTIONS.findIndex(slot => slot.value === selectedSlot)} />
     </YStack>
   );
 }
 
-export function BaseInteractiveSelector({
-  draftSlot,
-  getSlotLabel,
-  onSelectSlot,
-}: {
-  draftSlot: ArkHostAccelerateSlot;
-  getSlotLabel: (key: SlotKey) => string;
-  onSelectSlot: (value: ArkHostAccelerateSlot) => void;
-}) {
+export type BaseAccelerationCardProps = {
+  rooms?: ArkHostBuilding['rooms'] | undefined;
+  actionLabel: string;
+  ariaLabel: string;
+  description: string;
+  onPress: () => void;
+  selectedLabel: string;
+  selectedSlot: ArkHostAccelerateSlot;
+  testID: string;
+};
+
+export function BaseAccelerationCard({
+  actionLabel,
+  ariaLabel,
+  description,
+  onPress,
+  selectedLabel,
+  selectedSlot,
+  rooms,
+  testID,
+}: BaseAccelerationCardProps) {
+  const colors = getTokens().color;
+
   return (
-    <RadioGroup
-      value={draftSlot}
-      onValueChange={(value) => {
-        const option = ACCELERATE_SLOT_OPTIONS.find(
-          (candidate) => candidate.value === value,
-        );
-        if (option) onSelectSlot(option.value);
+    <Frame
+      testID={testID}
+      aria-label={ariaLabel}
+      role="button"
+      cursor="pointer"
+      p="$3.5"
+      gap="$2.5"
+      hoverStyle={{
+        bg: '$appSurfaceStrong',
+        borderColor: '$appAccentBorder',
       }}
-      aria-label="Drone Acceleration Slot"
+      pressStyle={{ opacity: 0.8 }}
+      onPress={onPress}
     >
-      <YStack gap="$2.5" items="center" py="$2" width="100%">
-        {/* Top Floor */}
-        <XStack gap="$2" width="100%" justify="center">
-          {ACCELERATE_SLOT_OPTIONS.slice(0, 3).map((option) => {
-            const selected = draftSlot === option.value;
-            return (
-              <RadioGroup.Item
-                key={option.value}
-                value={option.value}
-                id={`hosting-config-slot-${option.key}`}
-                asChild
-                unstyled
-              >
-                <Button
-                  testID={`hosting-config-slot-${option.key}`}
-                  unstyled
-                  minW={94}
-                  py="$2.5"
-                  px="$3"
-                  borderWidth={1}
-                  borderColor={selected ? '$appAccent' : '$appBorder'}
-                  bg={selected ? '$appAccentSoft' : '$appSurfaceRaised'}
-                  hoverStyle={{ borderColor: '$appAccentBorder' }}
-                  pressStyle={{ opacity: 0.8 }}
-                  items="center"
-                  justify="center"
-                >
-                  <TerminalText
-                    size="$2.5"
-                    color={selected ? '$appAccent' : '$appText'}
-                    fontWeight={selected ? '800' : '500'}
-                  >
-                    {getSlotLabel(option.key)}
-                  </TerminalText>
-                </Button>
-              </RadioGroup.Item>
-            );
-          })}
+      <XStack items="center" justify="space-between" gap="$3" minW={0}>
+        <XStack items="center" gap="$2" minW={0} shrink={1}>
+          <Cpu size={17} color={colors.appMuted.val} />
+          <TerminalText size="$5" fontWeight="800" numberOfLines={1}>
+            {selectedLabel}
+          </TerminalText>
         </XStack>
 
-        {/* Middle Floor */}
-        <XStack gap="$2" width="100%" justify="center" ml={-24}>
-          {ACCELERATE_SLOT_OPTIONS.slice(3, 6).map((option) => {
-            const selected = draftSlot === option.value;
-            return (
-              <RadioGroup.Item
-                key={option.value}
-                value={option.value}
-                id={`hosting-config-slot-${option.key}`}
-                asChild
-                unstyled
-              >
-                <Button
-                  testID={`hosting-config-slot-${option.key}`}
-                  unstyled
-                  minW={94}
-                  py="$2.5"
-                  px="$3"
-                  borderWidth={1}
-                  borderColor={selected ? '$appAccent' : '$appBorder'}
-                  bg={selected ? '$appAccentSoft' : '$appSurfaceRaised'}
-                  hoverStyle={{ borderColor: '$appAccentBorder' }}
-                  pressStyle={{ opacity: 0.8 }}
-                  items="center"
-                  justify="center"
-                >
-                  <TerminalText
-                    size="$2.5"
-                    color={selected ? '$appAccent' : '$appText'}
-                    fontWeight={selected ? '800' : '500'}
-                  >
-                    {getSlotLabel(option.key)}
-                  </TerminalText>
-                </Button>
-              </RadioGroup.Item>
-            );
-          })}
+        <XStack items="center" gap="$1" shrink={0}>
+          <MonoText size="$2" color="$appAccent">
+            {actionLabel}
+          </MonoText>
+          <ChevronRight size={13} color={colors.appAccent.val} />
         </XStack>
+      </XStack>
 
-        {/* Bottom Floor */}
-        <XStack gap="$2" width="100%" justify="center">
-          {ACCELERATE_SLOT_OPTIONS.slice(6, 9).map((option) => {
-            const selected = draftSlot === option.value;
+      <XStack items="center" justify="space-between" gap="$3" minW={0}>
+        <MonoText size="$2" color="$appMuted" numberOfLines={2} grow={1} minW={0}>
+          {description}
+        </MonoText>
+        <BaseRoomPreview selectedSlot={selectedSlot} rooms={rooms} />
+      </XStack>
+    </Frame>
+  );
+}
+
+export type BaseInteractiveSelectorProps = {
+  rooms?: ArkHostBuilding['rooms'] | undefined;
+  ariaLabel: string;
+  disabled?: boolean;
+  draftSlot: ArkHostAccelerateSlot;
+  labels: BaseMatrixLabels;
+  onSelectSlot: (value: ArkHostAccelerateSlot) => void;
+};
+
+export function BaseInteractiveSelector({
+  ariaLabel,
+  disabled = false,
+  draftSlot,
+  labels,
+  onSelectSlot,
+  rooms,
+}: BaseInteractiveSelectorProps) {
+  const getRoomLabel = (slot: (typeof ACCELERATE_SLOT_OPTIONS)[number]) =>
+    labels.roomTypes[getRoomType(rooms, slot.value)];
+  const selectedIndex = ACCELERATE_SLOT_OPTIONS.findIndex(slot => slot.value === draftSlot);
+  return (
+    <YStack gap="$2">
+      <RadioGroup
+        value={draftSlot}
+        disabled={disabled}
+        onValueChange={(value) => {
+          const option = ACCELERATE_SLOT_OPTIONS.find(candidate => candidate.value === value);
+          if (option) onSelectSlot(option.value);
+        }}
+        aria-label={ariaLabel}
+      >
+        <YStack position="relative" width="100%" aspectRatio={BASE_VIEWBOX.width / BASE_VIEWBOX.height} opacity={disabled ? 0.45 : 1}>
+          <YStack position="absolute" t={0} l={0} r={0} b={0} aria-hidden style={{ pointerEvents: 'none' }}>
+            <BaseBlueprintArtwork
+              selectedIndex={selectedIndex}
+              roomTypes={ACCELERATE_SLOT_OPTIONS.map(slot => getRoomType(rooms, slot.value))}
+              labels={labels}
+            />
+          </YStack>
+          {ACCELERATE_SLOT_OPTIONS.map((option, index) => {
+            const room = baseRoomBounds(index);
+            const optionDisabled = disabled || !isAccelerateSlotSelectable(rooms, option.value);
             return (
               <RadioGroup.Item
                 key={option.value}
                 value={option.value}
                 id={`hosting-config-slot-${option.key}`}
+                aria-label={getRoomLabel(option)}
+                disabled={optionDisabled}
                 asChild
                 unstyled
               >
                 <Button
                   testID={`hosting-config-slot-${option.key}`}
                   unstyled
-                  minW={94}
-                  py="$2.5"
-                  px="$3"
-                  borderWidth={1}
-                  borderColor={selected ? '$appAccent' : '$appBorder'}
-                  bg={selected ? '$appAccentSoft' : '$appSurfaceRaised'}
-                  hoverStyle={{ borderColor: '$appAccentBorder' }}
-                  pressStyle={{ opacity: 0.8 }}
-                  items="center"
-                  justify="center"
-                >
-                  <TerminalText
-                    size="$2.5"
-                    color={selected ? '$appAccent' : '$appText'}
-                    fontWeight={selected ? '800' : '500'}
-                  >
-                    {getSlotLabel(option.key)}
-                  </TerminalText>
-                </Button>
+                  position="absolute"
+                  l={`${room.x / BASE_VIEWBOX.width * 100}%`}
+                  t={`${room.y / BASE_VIEWBOX.height * 100}%`}
+                  width={`${room.width / BASE_VIEWBOX.width * 100}%`}
+                  height={`${room.height / BASE_VIEWBOX.height * 100}%`}
+                  disabled={optionDisabled}
+                  bg="transparent"
+                  cursor={optionDisabled ? 'default' : 'pointer'}
+                  rounded="$0"
+                  hoverStyle={{ bg: '$appGrid' }}
+                  focusStyle={{ outlineColor: '$appAccent', outlineWidth: 2, borderWidth: 1, borderColor: '$appAccent' }}
+                  pressStyle={{ bg: '$appGrid' }}
+                />
               </RadioGroup.Item>
             );
           })}
-        </XStack>
-      </YStack>
-    </RadioGroup>
+        </YStack>
+      </RadioGroup>
+      <XStack items="center" gap="$2" borderTopWidth={1} borderColor="$appBorder" pt="$3">
+        <YStack width={3} height={22} bg="$appAccent" />
+        <TerminalText color="$appAccent" size="$4" fontWeight="800" aria-live="polite">
+          {ACCELERATE_SLOT_OPTIONS.filter(slot => slot.value === draftSlot).map(getRoomLabel)}
+        </TerminalText>
+      </XStack>
+    </YStack>
   );
 }

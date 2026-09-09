@@ -119,9 +119,6 @@ describe('game account mutations', () => {
       queryKey: arkHostQueryKeys.detail(account),
     });
     expect(removeQueries).toHaveBeenCalledWith({
-      queryKey: arkHostQueryKeys.characters(account),
-    });
-    expect(removeQueries).toHaveBeenCalledWith({
       queryKey: arkHostQueryKeys.logs(account),
     });
     expect(invalidateQueries).toHaveBeenCalledWith({

@@ -3,7 +3,6 @@ import * as v from 'valibot';
 import { gameAccountSchema, type GameAccount } from '@/schemas/game-account';
 import {
   arkHostQueryKeys,
-  charactersQueryOptions,
   gameDetailQueryOptions,
   logsQueryOptions,
   findGameAccountById,
@@ -48,15 +47,13 @@ const accountA: GameAccount = { ...baseAccount, account: 'A' };
 const accountB: GameAccount = { ...baseAccount, account: 'B' };
 
 describe('arkHostQueryKeys', () => {
-  it('scopes detail, characters, and logs queries per account', () => {
+  it('scopes detail and logs queries per account', () => {
     expect(arkHostQueryKeys.detail('A')).not.toEqual(arkHostQueryKeys.detail('B'));
-    expect(arkHostQueryKeys.characters('A')).not.toEqual(arkHostQueryKeys.characters('B'));
     expect(arkHostQueryKeys.logs('A')).not.toEqual(arkHostQueryKeys.logs('B'));
   });
 
   it('keeps the same account key stable across reads', () => {
     expect(arkHostQueryKeys.detail('A')).toEqual(arkHostQueryKeys.detail('A'));
-    expect(arkHostQueryKeys.characters('A')).toEqual(arkHostQueryKeys.characters('A'));
     expect(arkHostQueryKeys.logs('A')).toEqual(arkHostQueryKeys.logs('A'));
   });
 
@@ -70,13 +67,11 @@ describe('arkHostQueryKeys', () => {
 describe('account query option factories', () => {
   it('builds options whose query keys match the per-account scoping', () => {
     expect(gameDetailQueryOptions('A').queryKey).toEqual(arkHostQueryKeys.detail('A'));
-    expect(charactersQueryOptions('A').queryKey).toEqual(arkHostQueryKeys.characters('A'));
     expect(logsQueryOptions('A').queryKey).toEqual(arkHostQueryKeys.logs('A'));
   });
 
   it('never produces a cross-account cache hit from the same factory', () => {
     expect(gameDetailQueryOptions('A').queryKey).not.toEqual(gameDetailQueryOptions('B').queryKey);
-    expect(charactersQueryOptions('A').queryKey).not.toEqual(charactersQueryOptions('B').queryKey);
     expect(logsQueryOptions('A').queryKey).not.toEqual(logsQueryOptions('B').queryKey);
   });
 });

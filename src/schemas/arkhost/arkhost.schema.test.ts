@@ -1,16 +1,13 @@
 import * as v from "valibot";
+import rawDetail from "@/mocks/arkhost/game-detail.response.json";
 
 import {
-  mockArkHostCharactersResponse,
   mockArkHostGameDetailResponse,
   mockArkHostGameListResponse,
   mockArkHostGameLogsResponse,
-  mockArkHostSecondaryCharactersResponse,
-  mockArkHostTertiaryCharactersResponse,
 } from "@/mocks/arkhost";
 import {
   arkHostCharacterSchema,
-  arkHostCharactersResponseSchema,
   arkHostBattleTaskSchema,
   arkHostGameConfigPatchSchema,
   arkHostGameConfigSchema,
@@ -35,24 +32,32 @@ describe("ArkHost server contracts", () => {
       v.safeParse(arkHostGameLogsResponseSchema, mockArkHostGameLogsResponse)
         .success,
     ).toBe(true);
-    expect(
-      v.safeParse(
-        arkHostCharactersResponseSchema,
-        mockArkHostCharactersResponse,
-      ).success,
-    ).toBe(true);
-    expect(
-      v.safeParse(
-        arkHostCharactersResponseSchema,
-        mockArkHostSecondaryCharactersResponse,
-      ).success,
-    ).toBe(true);
-    expect(
-      v.safeParse(
-        arkHostCharactersResponseSchema,
-        mockArkHostTertiaryCharactersResponse,
-      ).success,
-    ).toBe(true);
+
+  });
+
+  it("preserves the complete supplied detail and validates nested data", () => {
+    const response = v.parse(arkHostGameDetailResponseSchema, rawDetail);
+    if (response.code !== 1) throw new Error('Expected detail');
+    expect(Object.keys(response.data.troop?.chars ?? {})).toHaveLength(426);
+    expect(response.data.troop).toEqual(rawDetail.data.troop);
+    expect(response.data.building).toEqual(rawDetail.data.building);
+    expect(response.data.config.operator_development_tasks).toEqual(rawDetail.data.config.operator_development_tasks);
+    expect(response.data.config).not.toHaveProperty('is_stopped');
+    for (const skill of [
+      { skillId: 'skill', specializeLevel: 4, unlock: true },
+      { skillId: 'skill', specializeLevel: 0, unlock: 'true' },
+    ]) {
+      const invalid = { ...rawDetail, data: { ...rawDetail.data, troop: { chars: {
+        '1': { ...rawDetail.data.troop.chars['1'], skills: [skill] },
+      } } } };
+      expect(v.safeParse(arkHostGameDetailResponseSchema, invalid).success).toBe(false);
+    }
+    expect(v.safeParse(arkHostGameDetailResponseSchema, {
+      ...rawDetail, data: { ...rawDetail.data, troop: null, building: null },
+    }).success).toBe(true);
+    expect(v.safeParse(arkHostGameDetailResponseSchema, {
+      ...rawDetail, data: { ...rawDetail.data, building: { rooms: { TRAINING: { slot_13: { completeWorkTime: 123, trainee: null } } } } },
+    }).success).toBe(false);
   });
 
   it("strips the deprecated is_stopped config field", () => {
@@ -155,27 +160,6 @@ describe("ArkHost server contracts", () => {
         keeping_ap: 12,
       }),
     ).toEqual({ keeping_ap: 12 });
-  });
-
-  it("accepts the confirmed character envelope and rejects obsolete or incomplete shapes", () => {
-    expect(
-      v.safeParse(arkHostCharactersResponseSchema, {
-        code: 1,
-        data: { chars: [], total: 0 },
-        message: "ok",
-      }).success,
-    ).toBe(true);
-    expect(
-      v.safeParse(arkHostCharactersResponseSchema, { G1: { chars: [] } })
-        .success,
-    ).toBe(false);
-    expect(
-      v.safeParse(arkHostCharactersResponseSchema, {
-        code: 1,
-        data: { chars: [{ charId: "char_3" }], total: 1 },
-        message: "ok",
-      }).success,
-    ).toBe(false);
   });
 
   it("rejects malformed trust-boundary values", () => {

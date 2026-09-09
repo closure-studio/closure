@@ -12,12 +12,9 @@ import type {
   ArkHostSseSubscription,
 } from "./arkhost-api";
 import {
-  mockArkHostCharactersResponse,
-  mockArkHostGameDetailResponse,
   mockArkHostGameListResponse,
+  mockArkHostGameDetails,
   mockArkHostGameLogsResponse,
-  mockArkHostSecondaryCharactersResponse,
-  mockArkHostTertiaryCharactersResponse,
 } from "@/mocks/arkhost";
 
 const MOCK_ARKHOST_DELAY_MS = 250;
@@ -65,17 +62,11 @@ class MockSseSubscription {
   }
 }
 
-const mockCharactersByAccount = new Map([
-  ["G18928069156", mockArkHostCharactersResponse],
-  ["G16601716973", mockArkHostSecondaryCharactersResponse],
-  ["G17107372623", mockArkHostTertiaryCharactersResponse],
-]);
-
 export class MockArkHostApi implements ArkHostApi {
   readonly #delayMs: number;
   readonly #subscriptions = new Set<MockSseSubscription>();
   #gameList: ArkHostGameListEntry[];
-  #detail: ArkHostGameDetail | null;
+  #details: Map<string, ArkHostGameDetail>;
 
   constructor(delayMs = MOCK_ARKHOST_DELAY_MS) {
     this.#delayMs = delayMs;
@@ -83,10 +74,9 @@ export class MockArkHostApi implements ArkHostApi {
       mockArkHostGameListResponse.code === 1
         ? structuredClone(mockArkHostGameListResponse.data)
         : [];
-    this.#detail =
-      mockArkHostGameDetailResponse.code === 1
-        ? structuredClone(mockArkHostGameDetailResponse.data)
-        : null;
+    this.#details = new Map(mockArkHostGameDetails.map((detail) => [
+      detail.config.account, structuredClone(detail),
+    ]));
   }
 
   get activeSubscriptionCount(): number {
@@ -123,26 +113,13 @@ export class MockArkHostApi implements ArkHostApi {
     );
     if (index === -1) return failure<void>();
     this.#gameList.splice(index, 1);
-    if (this.#detail?.config.account === account) this.#detail = null;
+    this.#details.delete(account);
     return success(undefined);
   }
 
-  async fetchCharacters(account: string) {
-    await this.#wait();
-    const response = mockCharactersByAccount.get(account);
-    const characters =
-      response?.code === 1
-        ? structuredClone(response.data)
-        : { chars: [], total: 0 };
-    return success(characters);
-  }
   async fetchGameDetail(account: string) {
     await this.#wait();
-    return success(
-      this.#detail?.config.account === account
-        ? structuredClone(this.#detail)
-        : null,
-    );
+    return success(structuredClone(this.#details.get(account) ?? null));
   }
   async fetchGameList() {
     await this.#wait();
@@ -187,9 +164,8 @@ export class MockArkHostApi implements ArkHostApi {
     if (!entry) return failure<void>();
 
     Object.assign(entry.game_config, structuredClone(patch));
-    if (this.#detail?.config.account === account) {
-      Object.assign(this.#detail.config, structuredClone(patch));
-    }
+    const detail = this.#details.get(account);
+    if (detail) Object.assign(detail.config, structuredClone(patch));
     return success(undefined);
   }
   subscribe(

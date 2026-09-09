@@ -1,10 +1,20 @@
 import * as v from "valibot";
 
 import {
+  arkHostGameDetailSchema,
   arkHostGameDetailResponseSchema,
   arkHostGameListResponseSchema,
   arkHostGameLogsResponseSchema,
 } from "@/schemas/arkhost";
+
+import rawGameDetailResponse from './game-detail.response.json';
+import secondaryTroops from './secondary-troops.json';
+
+export const mockArkHostGameDetailResponse = v.parse(
+  arkHostGameDetailResponseSchema, rawGameDetailResponse,
+);
+if (mockArkHostGameDetailResponse.code !== 1) throw new Error('Expected primary detail fixture.');
+const primaryDetail = mockArkHostGameDetailResponse.data;
 
 const userId = "492f6025-e5da-4ad0-9ced-de2a641816d7";
 const gameConfig = (
@@ -18,7 +28,6 @@ const gameConfig = (
     ? [
         currentMap,
         "main_01-07",
-        ...(account === "G18928069156" ? ["act24side_08"] : []),
       ]
     : ["main_01-07"]
   ).map((stage_id) => ({ mode: "LOOP" as const, stage_id })),
@@ -47,16 +56,16 @@ export const mockArkHostGameListResponse = v.parse(
     data: [
       {
         captcha_info: captchaInfo,
-        game_config: gameConfig("G18928069156", "act53side_08"),
+        game_config: primaryDetail.config,
         status: {
           account: "G18928069156",
-          ap: 19,
-          avatar: { id: "avatar_dyn_01", type: "ICON" },
+          ap: primaryDetail.status.ap,
+          avatar: primaryDetail.status.avatar,
           code: 2,
           created_at: 1779612955,
           is_verify: true,
-          level: 120,
-          nick_name: "欧皇大佬",
+          level: primaryDetail.status.level,
+          nick_name: primaryDetail.status.nickName,
           password: "******",
           platform: 1,
           uuid: userId,
@@ -101,97 +110,28 @@ export const mockArkHostGameListResponse = v.parse(
   },
 );
 
-export const mockArkHostGameDetailResponse = v.parse(
-  arkHostGameDetailResponseSchema,
-  {
-    code: 1,
-    data: {
-      config: gameConfig("G18928069156", "act53side_08"),
-      consumable: null,
-      inventory: {
-        "2001": 49206,
-        "2002": 43586,
-        "2003": 27032,
-        "30011": 4063,
-        "30012": 14095,
-        "30013": 816,
-        "30014": 126,
-        "30021": 2348,
-        "30022": 2164,
-        "30023": 713,
-        "3003": 23110,
-        "30031": 2404,
-        "30032": 1993,
-        "30033": 1105,
-        "30041": 2071,
-        "30042": 1646,
-        "30043": 1120,
-        "30044": 132,
-        "30051": 1912,
-        "30052": 1673,
-        "30053": 1357,
-        "30054": 148,
-        "30061": 1350,
-        "30062": 1741,
-        "30063": 1152,
-        "30073": 633,
-        "30083": 926,
-        "30084": 146,
-        "30093": 826,
-        "30094": 159,
-        "30103": 556,
-        "30104": 149,
-        "31013": 972,
-        "31014": 135,
-        "31023": 1038,
-        "31033": 848,
-        "31034": 131,
-        "31043": 611,
-        "31044": 133,
-        "31053": 612,
-        "31063": 248,
-        "31073": 110,
-        "31083": 241,
-        "31093": 231,
-        "3112": 6959,
-        "3113": 656,
-        "3141": 672,
-        "3301": 7400,
-        "3302": 4768,
-        "3303": 1081,
-        "3401": 128187,
-        "4006": 3900,
-        EPGS_COIN: 11342,
-        REP_COIN: 17980,
-        mod_unlock_token: 388,
-        mod_update_token_1: 2105,
-        mod_update_token_2: 416,
-      },
-      lastFreshTs: 0,
-      screenshot: null,
-      status: {
-        androidDiamond: 1227,
-        ap: 19,
-        avatar: { id: "avatar_dyn_01", type: "ICON" },
-        avatarId: "0",
-        diamondShard: 1065,
-        gachaTicket: 0,
-        gold: 32552629,
-        lastApAddTime: 1786429366,
-        level: 120,
-        maxAp: 210,
-        nickName: "欧皇大佬",
-        recruitLicense: 37,
-        secretary: "char_1052_kalts2",
-        secretarySkinId: "char_1052_kalts2#1",
-        socialPoint: 300,
-        tenGachaTicket: 0,
-      },
-      troop: null,
-    },
-    message: "大成功!",
-  },
-);
+// Secondary accounts are synthetic snapshots; their skill data is unavailable.
+export const mockArkHostGameDetails = mockArkHostGameListResponse.code === 1
+  ? mockArkHostGameListResponse.data.map((entry, index) => {
+      if (index === 0) return primaryDetail;
+      return v.parse(arkHostGameDetailSchema, {
+        config: entry.game_config,
+        building: null,
+        consumable: null,
+        inventory: null,
+        lastFreshTs: 0,
+        screenshot: null,
+        status: {
+          androidDiamond: 0, ap: entry.status.ap, avatar: entry.status.avatar,
+          avatarId: '', diamondShard: 0, gachaTicket: 0, gold: 0,
+          lastApAddTime: 0, level: entry.status.level, maxAp: entry.status.ap,
+          nickName: entry.status.nick_name, recruitLicense: 0, secretary: '',
+          secretarySkinId: '', socialPoint: 0, tenGachaTicket: 0,
+        },
+        troop: secondaryTroops[index - 1],
+      });
+    })
+  : [];
 
 export const mockArkHostGameLogsResponse = v.parse(
   arkHostGameLogsResponseSchema,

@@ -163,7 +163,46 @@ export const arkHostScreenshotSchema = v.object({
   uTCTime: nonNegativeIntegerSchema,
 });
 
+export const arkHostCharacterSchema = v.object({
+  charId: nonEmptyStringSchema,
+  evolvePhase: v.picklist([0, 1, 2]),
+  level: nonNegativeIntegerSchema,
+  potentialRank: v.picklist([0, 1, 2, 3, 4, 5]),
+});
+
+export const arkHostTroopSkillSchema = v.object({
+  skillId: nonEmptyStringSchema,
+  specializeLevel: v.picklist([0, 1, 2, 3]),
+  unlock: v.boolean(),
+});
+
+export const arkHostTroopCharacterSchema = v.object({
+  ...arkHostCharacterSchema.entries,
+  currentTmpl: v.optional(nonEmptyStringSchema),
+  skills: v.array(arkHostTroopSkillSchema),
+});
+
+export const arkHostTroopSchema = v.object({
+  chars: v.record(nonEmptyStringSchema, arkHostTroopCharacterSchema),
+});
+
+export const arkHostBuildingSchema = v.object({
+  rooms: v.object({
+    MANUFACTURE: v.optional(v.record(nonEmptyStringSchema, v.object({
+      formulaId: v.string(),
+    }))),
+    TRADING: v.optional(v.record(nonEmptyStringSchema, v.object({
+      strategy: v.string(),
+    }))),
+    TRAINING: v.optional(v.record(nonEmptyStringSchema, v.object({
+      completeWorkTime: v.string(),
+      trainee: v.object({ charId: v.string(), skillId: v.string() }),
+    }))),
+  }),
+});
+
 export const arkHostGameDetailSchema = v.object({
+  building: v.optional(v.nullable(arkHostBuildingSchema)),
   config: arkHostGameConfigSchema,
   consumable: v.nullable(v.unknown()),
   inventory: v.nullable(arkHostInventorySchema),
@@ -172,7 +211,7 @@ export const arkHostGameDetailSchema = v.object({
     v.union([arkHostScreenshotSchema, v.array(arkHostScreenshotSchema)]),
   ),
   status: arkHostPlayerStatusSchema,
-  troop: v.nullable(v.unknown()),
+  troop: v.nullable(arkHostTroopSchema),
 });
 
 export const arkHostGameLogEntrySchema = v.object({
@@ -186,18 +225,6 @@ export const arkHostGameLogEntrySchema = v.object({
 export const arkHostGameLogsSchema = v.object({
   hasMore: v.boolean(),
   logs: v.array(arkHostGameLogEntrySchema),
-});
-
-export const arkHostCharacterSchema = v.object({
-  charId: nonEmptyStringSchema,
-  evolvePhase: v.picklist([0, 1, 2]),
-  level: nonNegativeIntegerSchema,
-  potentialRank: v.picklist([0, 1, 2, 3, 4, 5]),
-});
-
-export const arkHostCharactersSchema = v.object({
-  chars: v.array(arkHostCharacterSchema),
-  total: nonNegativeIntegerSchema,
 });
 
 export const arkHostGachaEventSchema = v.object({
@@ -251,9 +278,6 @@ export const arkHostGameDetailResponseSchema = responseSchema(
 export const arkHostGameLogsResponseSchema = responseSchema(
   arkHostGameLogsSchema,
 );
-export const arkHostCharactersResponseSchema = responseSchema(
-  arkHostCharactersSchema,
-);
 
 export type ArkHostAvatar = v.InferOutput<typeof arkHostAvatarSchema>;
 export type ArkHostAccelerateSlot = v.InferOutput<
@@ -278,6 +302,8 @@ export type ArkHostGameLogEntry = v.InferOutput<
   typeof arkHostGameLogEntrySchema
 >;
 export type ArkHostCharacter = v.InferOutput<typeof arkHostCharacterSchema>;
-export type ArkHostCharacters = v.InferOutput<typeof arkHostCharactersSchema>;
+export type ArkHostTroop = v.InferOutput<typeof arkHostTroopSchema>;
+export type ArkHostTroopCharacter = v.InferOutput<typeof arkHostTroopCharacterSchema>;
+export type ArkHostBuilding = v.InferOutput<typeof arkHostBuildingSchema>;
 export type ArkHostGachaEvent = v.InferOutput<typeof arkHostGachaEventSchema>;
 export type ArkHostSseEvent = v.InferOutput<typeof arkHostSseEventSchema>;

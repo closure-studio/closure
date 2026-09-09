@@ -134,53 +134,29 @@
   },
   "logs": {
     "logLevel": "级别 {{level}}",
-    "subtitle": "ARKHOST 日志",
     "title": "日志"
   },
   "hostingConfig": {
-    "account": "游戏账号",
-    "allowLoginAssist": "协助登录",
+    "allowLoginAssist": "登录协助",
     "autoBattle": "自动作战",
-    "battleQueue": "作战队列",
-    "code": "GAME-CONFIG",
+    "battleQueue": "刷关优先级",
     "disabled": "不可编辑",
-    "droneAcceleration": "无人机加速",
-    "enableBuildingArrange": "自动基建",
+    "enableBuildingArrange": "自动基建换班",
     "errors": {
       "invalidResponse": "服务端返回了无效响应，请重试。",
       "operationRejected": "配置更新被服务端拒绝，请重试。",
       "unavailable": "配置服务暂时不可用，请稍后重试。"
     },
-    "keepingAp": "理智保留",
-    "recruitReserve": "招募券保留",
+    "keepingAp": "保留理智",
+    "recruitReserve": "保留招聘许可",
     "save": "递交",
-    "saved": "配置已更新。",
     "smartSwitches": "智能开关",
     "stageMap": "作战地图",
     "stageQueueDeferred": "作战队列功能暂未启用",
     "stageSearchPlaceholder": "请输入代号或名称",
-    "submitValidation": "理智保留和招募券保留必须是非负整数。",
-    "title": "托管配置",
+    "submitValidation": "保留理智和保留招聘许可必须是 0 或正整数。",
     "warning": "请在普瑞赛斯指导下使用",
-    "accelerateSlots": {
-      "bottomCenter": "底层中",
-      "bottomLeft": "底层左",
-      "bottomRight": "底层右",
-      "middleCenter": "中层中",
-      "middleLeft": "中层左",
-      "middleRight": "中层右",
-      "topCenter": "顶层中",
-      "topLeft": "顶层左",
-      "topRight": "顶层右"
-    },
-    "ignoreRobot": "忽略小车",
-    "codes": {
-      "sanity": "CONFIG · SANITY",
-      "permits": "CONFIG · PERMITS",
-      "switches": "CONFIG · SMART SWITCH",
-      "drone": "CONFIG · DRONE ACCELERATION",
-      "combat": "CONFIG · BATTLE QUEUE"
-    },
+    "ignoreRobot": "不优先招募小车",
     "sections": {
       "reserves": "资源保留",
       "switches": "自动化开关",
@@ -193,37 +169,61 @@
       "stages": "关"
     },
     "status": {
-      "enabled": "已开启",
-      "disabled": "已关闭",
+      "default": "默认",
       "notSet": "未配置",
       "maintenance": "维护中"
     },
+    "card": {
+      "defaultStage": "未设置时使用的默认关卡",
+      "firstPriority": "首选",
+      "moreStages": "还有 {{count}} 关"
+    },
+    "summaries": {
+      "keepingAp": "自动刷关时，至少为账号留下这些理智。",
+      "recruitReserve": "自动公开招募时，至少留下这些招聘许可。",
+      "enableBuildingArrange": "自动调整基建干员换班和宿舍休息；关闭后仍会处理其他基建事务。",
+      "isAutoBattle": "按“刷关优先级”自动刷关并消耗理智；关闭不会清空已设置的关卡。",
+      "recruitIgnoreRobot": "跳过可锁定 1★ 支援机械的标签组合，但仍有可能招到小车。",
+      "allowLoginAssist": "登录协助正在维护，恢复前无法修改此开关。",
+      "droneAcceleration": "当前优先使用无人机加速：{{roomType}}。",
+      "battleMaps": "自动作战优先刷第 1 关；未开放时会按顺序尝试后面的关卡。"
+    },
     "descriptions": {
-      "keepingAp": "保留指定数量理智，云端托管不会消耗该阈值以下的理智储备。",
-      "recruitReserve": "保留指定数量公开招募券，避免自动寻访耗尽库存凭证。",
-      "enableBuildingArrange": "由云端算法自动进行宿舍心情恢复与制造/贸易站排班轮换。",
-      "isAutoBattle": "按设定的作战地图队列自动消耗理智刷取材料。",
-      "recruitIgnoreRobot": "公开招募时忽略 1★ 小车词条，优先保证高星干员产出。",
-      "allowLoginAssist": "协助登录功能目前处于维护中，暂不可配置。",
-      "droneAcceleration": "选择需要无人机全力加速的基建设施房间 (3x3 布局)。",
-      "battleMaps": "配置作战地图执行队列，可随时搜索添加或移除关卡。"
+      "keepingAp": "自动作战只会使用保留数量以外的理智；可用理智不足以完成下一次作战时会暂停。设为 0 表示不额外保留。",
+      "recruitReserve": "设置需要保留的招聘许可数量。持有数量达到或低于这个值时，托管不会开始新的公开招募；设为 0 表示可以全部使用。",
+      "droneAcceleration": "选择托管优先使用无人机加速的房间类型。",
+      "battleMaps": "列表越靠上，刷关优先级越高。托管会反复刷第一处已开放的关卡；如果列表为空，或所有关卡都未开放，就会暂时刷 1-7。"
+    },
+    "roomStatuses": {
+      "power": "发电中",
+      "manufacture": "生产中",
+      "trading": "获取中"
+    },
+    "roomTypes": {
+      "manufacture": "制造站",
+      "trading": "贸易站",
+      "power": "发电站"
     },
     "dialog": {
       "edit": "修改",
       "save": "保存并应用",
       "cancel": "取消",
+      "clearSearch": "清空关卡搜索",
       "close": "关闭",
-      "currentValue": "当前配置",
-      "targetRoom": "目标加速房间",
-      "queueEmpty": "当前队列为空，请在下方搜索并添加关卡",
-      "searchStages": "搜索关卡代号 (如 1-7, CE-6) 或名称...",
+      "decrease": "减少 1",
+      "increase": "增加 1",
+      "targetRoom": "选择加速房间类型",
+      "baseTerminal": "CLOSURE / 基建设施 · 无人机调度终端",
+      "queueEmpty": "还没有设置关卡。自动作战会暂时刷 1-7，你也可以在下方添加关卡。",
+      "searchStages": "搜索关卡代号（如 1-7、CE-6）或名称",
       "searchResults": "搜索结果",
-      "currentQueue": "当前作战队列 (按执行顺序)",
-      "addStage": "加入队列",
+      "currentQueue": "刷关顺序（从上到下）",
+      "addStage": "添加关卡",
+      "added": "已添加",
       "removeStage": "移除",
-      "stageCost": "{{cost}} 理智",
+      "stageCost": "消耗 {{cost}} 理智",
       "noSearchResults": "未找到匹配的作战关卡",
-      "searchPrompt": "输入代号或关卡名称以搜索添加"
+      "searchPrompt": "输入关卡代号或名称，添加到刷关优先级"
     }
   }
 }

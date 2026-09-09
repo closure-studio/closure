@@ -6,7 +6,7 @@ import { GameHostingConfigView } from '../components/game-hosting-config-view';
 import type { ArkHostFailure } from '../api';
 import type { ArkHostGameConfigPatch } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
-import { useUpdateGameConfig } from '../queries';
+import { useGameDetailQuery, useUpdateGameConfig } from '../queries';
 
 type ConfigErrorKey =
   | 'hostingConfig.errors.invalidResponse'
@@ -39,6 +39,7 @@ export function GameHostingConfigScreen({ gameAccount }: { gameAccount: GameAcco
     status,
   } = useUpdateGameConfig();
   const account = gameAccount.account;
+  const detail = useGameDetailQuery(account).data;
 
   useEffect(() => {
     reset();
@@ -54,11 +55,10 @@ export function GameHostingConfigScreen({ gameAccount }: { gameAccount: GameAcco
     <DashboardPageFrame scroll>
       <GameHostingConfigView
         key={gameAccount.account}
-        account={gameAccount.account}
         config={gameAccount.config}
+        rooms={detail?.building?.rooms}
         isSubmitting={status === 'pending'}
         onSubmit={handleSubmit}
-        showSuccess={status === 'success'}
         submitError={errorKey ? t(errorKey) : null}
       />
     </DashboardPageFrame>

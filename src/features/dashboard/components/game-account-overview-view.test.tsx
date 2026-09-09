@@ -66,5 +66,6 @@ describe('GameAccountOverviewView', () => {
         'overview-profile-actions',
       ),
     ).toBeTruthy();
+    expect(screen.getByText('06')).toBeTruthy();
   });
 });

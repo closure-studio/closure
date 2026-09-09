@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react-native';
-import type { PropsWithChildren } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
 import { ChevronRight } from 'lucide-react-native';
 import { XStack, getTokens } from 'tamagui';
 
@@ -20,8 +20,10 @@ export type ConfigSummaryCardProps = PropsWithChildren<{
   active?: boolean;
   badge?: string;
   badgeTone?: BadgeTone;
+  compact?: boolean;
   description?: string;
   disabled?: boolean;
+  headerControl?: ReactNode;
   icon?: LucideIcon;
   onPress?: () => void;
   testID: string;
@@ -35,8 +37,10 @@ export function ConfigSummaryCard({
   badge,
   badgeTone = 'default',
   children,
+  compact = false,
   description,
   disabled = false,
+  headerControl,
   icon: Icon,
   onPress,
   testID,
@@ -46,9 +50,8 @@ export function ConfigSummaryCard({
   const colors = getTokens().color;
   const badgeStyle = BADGE_COLOR_MAP[badgeTone];
 
-  const interactiveProps = disabled
-    ? {}
-    : {
+  const interactiveProps = !disabled && onPress
+    ? {
         cursor: 'pointer' as const,
         hoverStyle: {
           bg: '$appSurfaceStrong' as const,
@@ -57,14 +60,15 @@ export function ConfigSummaryCard({
         onPress,
         pressStyle: { opacity: 0.8 },
         role: 'button' as const,
-      };
+      }
+    : {};
 
   return (
     <Frame
       testID={testID}
       selected={active}
-      p="$3.5"
-      gap="$2.5"
+      p={compact ? '$3' : '$3.5'}
+      gap={compact ? '$1.5' : '$2.5'}
       tone={active ? 'cyan' : 'default'}
       opacity={disabled ? 0.65 : 1}
       {...interactiveProps}
@@ -95,6 +99,7 @@ export function ConfigSummaryCard({
             </MonoText>
           </XStack>
         ) : null}
+        {headerControl}
       </XStack>
 
       {value ? (
