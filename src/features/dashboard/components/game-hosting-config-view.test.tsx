@@ -301,8 +301,9 @@ describe('GameHostingConfigView', () => {
       const increaseButton = screen.getByTestId('numeric-step-increase');
 
       await fireEvent(increaseButton, 'pressIn');
+      await fireEvent(increaseButton, 'longPress');
       await act(() => {
-        jest.advanceTimersByTime(600);
+        jest.advanceTimersByTime(200);
       });
       await fireEvent(increaseButton, 'pressOut');
       await fireEvent(increaseButton, 'press');

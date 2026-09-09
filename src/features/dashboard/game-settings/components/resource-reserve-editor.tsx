@@ -1,5 +1,5 @@
 import { Check, Minus, Plus } from 'lucide-react-native';
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Button,
   Dialog,
@@ -17,49 +17,41 @@ const LONG_PRESS_DELAY_MS = 400;
 const REPEAT_INTERVAL_MS = 100;
 
 function useRepeatingPress(action: () => void) {
-  const actionRef = useRef(action);
-  const delayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const didRepeatRef = useRef(false);
+  const didLongPressRef = useRef(false);
 
-  useEffect(() => {
-    actionRef.current = action;
-  }, [action]);
-
-  const stopRepeating = useCallback(() => {
-    if (delayTimerRef.current !== null) {
-      clearTimeout(delayTimerRef.current);
-      delayTimerRef.current = null;
-    }
+  const stopRepeating = () => {
     if (intervalRef.current !== null) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-  }, []);
+  };
 
-  useEffect(() => stopRepeating, [stopRepeating]);
+  useEffect(
+    () => () => {
+      if (intervalRef.current !== null) {
+        clearInterval(intervalRef.current);
+      }
+    },
+    [],
+  );
 
-  const onPressIn = useCallback(() => {
-    stopRepeating();
-    didRepeatRef.current = false;
-    delayTimerRef.current = setTimeout(() => {
-      delayTimerRef.current = null;
-      didRepeatRef.current = true;
-      actionRef.current();
-      intervalRef.current = setInterval(() => {
-        actionRef.current();
-      }, REPEAT_INTERVAL_MS);
-    }, LONG_PRESS_DELAY_MS);
-  }, [stopRepeating]);
-
-  const onPress = useCallback(() => {
-    if (didRepeatRef.current) return;
-    actionRef.current();
-  }, []);
+  const onLongPress = () => {
+    didLongPressRef.current = true;
+    action();
+    intervalRef.current = setInterval(action, REPEAT_INTERVAL_MS);
+  };
 
   return {
-    onPress,
-    onPressIn,
+    delayLongPress: LONG_PRESS_DELAY_MS,
+    onLongPress,
+    onPress: () => {
+      if (!didLongPressRef.current) action();
+    },
+    onPressIn: () => {
+      stopRepeating();
+      didLongPressRef.current = false;
+    },
     onPressOut: stopRepeating,
   };
 }
