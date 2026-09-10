@@ -1,14 +1,13 @@
 import { FlashList } from '@shopify/flash-list';
 import { PackageOpen } from 'lucide-react-native';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { XStack, YStack, getTokens, useMedia } from 'tamagui';
 
-import { ITEM_ARTWORK_LARGE_SIZE, ITEM_ARTWORK_SIZE } from '@/components/ui/item-artwork';
-import { MonoText, ResponsiveGridRow, TerminalText } from '@/components';
+import { AdaptiveDialog, ItemArtwork, MonoText, ResponsiveGridRow, TerminalText } from '@/components';
 import { getResponsiveGridLayout, useResponsiveGridRows } from '@/hooks/use-responsive-grid-rows';
 import type { ItemTable } from '@/schemas/game-data';
 import type { Inventory } from '@/schemas/game-account';
-import { InventoryPreviewArtwork } from './inventory-artwork';
+import { getItemImageUrl } from '@/utils/item-image';
 import {
   formatInventoryQuantity,
   InventoryCell,
@@ -18,10 +17,6 @@ import {
 } from './inventory-cell';
 
 const INVENTORY_GRID_GAP_TOKEN = '$2';
-const PREVIEW_ARTWORK_SIZE = 64;
-const PREVIEW_ARTWORK_LARGE_SIZE = 94;
-const PREVIEW_FALLBACK_ICON_SIZE = 28;
-const PREVIEW_FALLBACK_ICON_LARGE_SIZE = 34;
 
 export const EMPTY_INVENTORY: Inventory = {};
 
@@ -33,52 +28,27 @@ function getItemDescription(value: string | null | undefined): string | undefine
   return value ? value.split('\\n').join('\n') : undefined;
 }
 
-const InventoryPreview = memo(function InventoryPreview({
-  entry,
-}: {
-  entry: InventoryEntry;
-}) {
-  const { large } = useMedia();
+function InventoryDetails({ entry }: { entry: InventoryEntry }) {
   const description = getItemDescription(entry.item.description);
-  const artworkSize = large ? PREVIEW_ARTWORK_LARGE_SIZE : PREVIEW_ARTWORK_SIZE;
 
   return (
     <XStack
-      testID="inventory-preview-details"
+      testID="inventory-details"
       width="100%"
-      p="$2.5"
       items="center"
       gap="$2.5"
-      bg="$appSurfaceRaisedTranslucent"
-      borderBottomWidth={1}
-      borderColor="$appRule"
       $large={{ gap: '$3' }}
     >
-      <YStack
-        testID="inventory-preview-artwork"
-        width="$7"
-        height="$7"
-        shrink={0}
-        items="center"
-        justify="center"
-        overflow="hidden"
-        $large={{ width: '$10', height: '$10' }}
-      >
-        <InventoryPreviewArtwork
-          key={entry.itemId}
-          fallbackSize={large ? PREVIEW_FALLBACK_ICON_LARGE_SIZE : PREVIEW_FALLBACK_ICON_SIZE}
-          height={artworkSize}
-          icon={entry.item.icon}
-          itemId={entry.itemId}
-          label={entry.item.name}
-          testIdPrefix="inventory-preview-image"
-          width={artworkSize}
-        />
-      </YStack>
+      <ItemArtwork
+        accessibilityLabel={entry.item.name}
+        recyclingKey={entry.itemId}
+        source={getItemImageUrl(entry.item.icon)}
+        testID={`inventory-detail-image-${entry.itemId}`}
+      />
       <YStack grow={1} shrink={1} minW={0} gap="$1.5">
         <XStack items="baseline" gap="$2" minW={0}>
           <TerminalText
-            testID="inventory-preview-name"
+            testID="inventory-detail-name"
             grow={1}
             shrink={1}
             minW={0}
@@ -96,11 +66,10 @@ const InventoryPreview = memo(function InventoryPreview({
         </XStack>
         {description ? (
           <MonoText
-            testID="inventory-preview-description"
+            testID="inventory-detail-description"
             size="$1"
             lineHeight="$2.5"
             color="$appMuted"
-            numberOfLines={2}
             $large={{ size: '$2' }}
           >
             {description}
@@ -109,43 +78,7 @@ const InventoryPreview = memo(function InventoryPreview({
       </YStack>
     </XStack>
   );
-});
-
-const InventoryRow = memo(function InventoryRow({
-  isLast,
-  row,
-  gap,
-  imageOnly,
-  itemWidth,
-  selectedItemId,
-  onSelect,
-}: {
-  isLast: boolean;
-  row: InventoryEntry[];
-  gap: number;
-  imageOnly: boolean;
-  itemWidth: number | undefined;
-  selectedItemId: string | null;
-  onSelect: (itemId: string) => void;
-}) {
-  return (
-    <ResponsiveGridRow
-      isLast={isLast}
-      row={row}
-      gap={gap}
-      getItemKey={getEntryItemKey}
-      renderCell={(entry) => (
-        <InventoryCell
-          entry={entry}
-          imageOnly={imageOnly}
-          itemWidth={itemWidth}
-          onSelect={onSelect}
-          selected={entry.itemId === selectedItemId}
-        />
-      )}
-    />
-  );
-});
+}
 
 export function InventoryView({
   accountId,
@@ -185,35 +118,39 @@ export function InventoryView({
       : undefined
   ) ?? entries[0];
   const selectedItemId = selectedEntry?.itemId ?? null;
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const handleSelectItem = useCallback((itemId: string) => {
     setSelection({ accountId, itemId });
+    setDetailsOpen(true);
   }, [accountId]);
   const tokens = getTokens();
   const gridGap = tokens.space[INVENTORY_GRID_GAP_TOKEN].val;
   const minimumItemWidth = large ? INVENTORY_CELL_LARGE_MIN_WIDTH : INVENTORY_CELL_MIN_WIDTH;
-  const artworkWidth = large ? ITEM_ARTWORK_LARGE_SIZE : ITEM_ARTWORK_SIZE;
-  const { rows, listWidth, layout, handleLayout, keyExtractor } = useResponsiveGridRows(
+  const { rows, layout, handleLayout, keyExtractor } = useResponsiveGridRows(
     entries,
     (width) => getResponsiveGridLayout(width, gridGap, minimumItemWidth),
     getEntryItemKey,
   );
   const { columnCount, itemWidth } = layout;
-  const imageOnly = listWidth > 0 && listWidth < minimumItemWidth;
-  const showCells = listWidth === 0 || listWidth >= artworkWidth;
 
   const renderItem = useCallback(
     ({ item: row, index: rowIndex, extraData }: { item: InventoryEntry[]; index: number; extraData?: string | null }) => (
-      <InventoryRow
+      <ResponsiveGridRow
         isLast={rowIndex === rows.length - 1}
         row={row}
         gap={gridGap}
-        imageOnly={imageOnly}
-        itemWidth={itemWidth}
-        selectedItemId={extraData ?? null}
-        onSelect={handleSelectItem}
+        getItemKey={getEntryItemKey}
+        renderCell={(entry) => (
+          <InventoryCell
+            entry={entry}
+            itemWidth={itemWidth}
+            onSelect={handleSelectItem}
+            selected={entry.itemId === (extraData ?? null)}
+          />
+        )}
       />
     ),
-    [gridGap, handleSelectItem, imageOnly, itemWidth, rows.length],
+    [gridGap, handleSelectItem, itemWidth, rows.length],
   );
 
   if (!selectedEntry) {
@@ -226,17 +163,21 @@ export function InventoryView({
 
   return (
     <YStack testID="inventory-grid-container" width="100%" grow={1} minH={0} onLayout={handleLayout}>
-      <InventoryPreview entry={selectedEntry} />
-      {showCells ? (
-        <FlashList
-          testID={`inventory-grid-columns-${columnCount}`}
-          data={rows}
-          extraData={selectedItemId}
-          keyExtractor={keyExtractor}
-          style={{ flex: 1 }}
-          renderItem={renderItem}
-        />
-      ) : null}
+      <FlashList
+        testID={`inventory-grid-columns-${columnCount}`}
+        data={rows}
+        extraData={selectedItemId}
+        keyExtractor={keyExtractor}
+        style={{ flex: 1 }}
+        renderItem={renderItem}
+      />
+      <AdaptiveDialog
+        open={detailsOpen && selection.accountId === accountId}
+        onOpenChange={setDetailsOpen}
+        testIDPrefix="inventory-detail"
+      >
+        <InventoryDetails entry={selectedEntry} />
+      </AdaptiveDialog>
     </YStack>
   );
 }
