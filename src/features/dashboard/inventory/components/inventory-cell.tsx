@@ -41,17 +41,12 @@ const InventoryCellFrame = styled(XStack, {
     py: '$2',
   },
   variants: {
-    imageOnly: {
-      true: { justify: 'center' },
-      false: {},
-    },
     selected: {
       true: { bg: '$appAccentSubtle' },
       false: {},
     },
   } as const,
   defaultVariants: {
-    imageOnly: false,
     selected: false,
   },
 });
@@ -73,13 +68,11 @@ function SelectionCorners({ itemId }: { itemId: string }) {
 
 export const InventoryCell = memo(function InventoryCell({
   entry,
-  imageOnly,
   itemWidth,
   onSelect,
   selected,
 }: {
   entry: InventoryEntry;
-  imageOnly: boolean;
   itemWidth: number | undefined;
   onSelect: (itemId: string) => void;
   selected: boolean;
@@ -100,55 +93,52 @@ export const InventoryCell = memo(function InventoryCell({
       aria-label={`${entry.item.name}, ${entry.quantity.toLocaleString()}`}
       aria-selected={selected}
       onPress={() => onSelect(entry.itemId)}
-      imageOnly={imageOnly}
       selected={selected}
       width={itemWidth ?? '100%'}
     >
       <YStack ml="$1.5" my="$0.5" $large={{ ml: '$0', my: '$0' }}>
         {artwork}
       </YStack>
-      {imageOnly ? null : (
-        <YStack
-          testID={`inventory-item-info-${entry.itemId}`}
-          grow={1}
+      <YStack
+        testID={`inventory-item-info-${entry.itemId}`}
+        grow={1}
+        shrink={1}
+        minW={0}
+        pl="$2"
+        pr="$2.5"
+        py="$1.5"
+        items="flex-end"
+        justify="center"
+        gap="$1"
+        $large={{ pl: '$0', pr: '$0', py: '$0' }}
+      >
+        <TerminalText
+          testID={`inventory-item-name-${entry.itemId}`}
+          width="100%"
           shrink={1}
           minW={0}
-          pl="$2"
-          pr="$2.5"
-          py="$1.5"
-          items="flex-end"
-          justify="center"
-          gap="$1"
-          $large={{ pl: '$0', pr: '$0', py: '$0' }}
+          size="$2.5"
+          lineHeight="$3"
+          fontWeight="700"
+          numberOfLines={2}
+          text="right"
+          $large={{ size: '$3', lineHeight: '$4' }}
         >
-          <TerminalText
-            testID={`inventory-item-name-${entry.itemId}`}
-            width="100%"
-            shrink={1}
-            minW={0}
-            size="$2.5"
-            lineHeight="$3"
-            fontWeight="700"
-            numberOfLines={2}
-            text="right"
-            $large={{ size: '$3', lineHeight: '$4' }}
-          >
-            {entry.item.name}
-          </TerminalText>
-          <MonoText
-            testID={`inventory-item-quantity-${entry.itemId}`}
-            width="100%"
-            shrink={0}
-            size="$2"
-            lineHeight="$2.5"
-            color="$appAccent"
-            text="right"
-            $large={{ size: '$2.5', lineHeight: '$3' }}
-          >
-            {formatInventoryQuantity(entry.quantity)}
-          </MonoText>
-        </YStack>
-      )}
+          {entry.item.name}
+        </TerminalText>
+        <MonoText
+          testID={`inventory-item-quantity-${entry.itemId}`}
+          width="100%"
+          shrink={0}
+          size="$2"
+          lineHeight="$2.5"
+          color="$appAccent"
+          text="right"
+          $large={{ size: '$2.5', lineHeight: '$3' }}
+        >
+          {formatInventoryQuantity(entry.quantity)}
+        </MonoText>
+      </YStack>
       {selected ? <SelectionCorners itemId={entry.itemId} /> : null}
     </InventoryCellFrame>
   );

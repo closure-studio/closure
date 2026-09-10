@@ -13,6 +13,10 @@ import { inventorySchema } from '@/schemas/game-account';
 import { getItemImageUrl } from '@/utils/item-image';
 import { EMPTY_INVENTORY, InventoryView } from './inventory-view';
 
+jest.mock('@/hooks/use-back-dismissal', () => ({
+  useBackDismissal: jest.fn(),
+}));
+
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
   const reanimatedMock = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated/mock');
@@ -127,7 +131,7 @@ describe('InventoryView', () => {
     jest.useRealTimers();
   });
 
-  it('renders known inventory entries, selects an item, and skips unknown IDs', async () => {
+  it('renders known inventory entries, opens item details, and skips unknown IDs', async () => {
     const screen = await render(
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <InventoryView accountId="account-a" inventory={inventory} itemTable={itemTable} />
@@ -142,12 +146,10 @@ describe('InventoryView', () => {
     expect(screen.getByTestId('inventory-grid-columns-2')).toBeTruthy();
     expect(screen.getByTestId('inventory-item-31034')).toBeTruthy();
     expect(screen.getByTestId('inventory-item-EPGS_COIN')).toBeTruthy();
-    expect(screen.getByTestId('inventory-preview-details')).toBeTruthy();
-    expect(screen.getByTestId('inventory-preview-name')).toBeTruthy();
-    expect(screen.getByTestId('inventory-preview-description')).toBeTruthy();
+    expect(screen.queryByTestId('inventory-details')).toBeNull();
     expect(screen.getByTestId('inventory-item-info-31034')).toBeTruthy();
-    expect(screen.getAllByText('晶体电路')).toHaveLength(2);
-    expect(screen.getAllByText('x131')).toHaveLength(2);
+    expect(screen.getByText('晶体电路')).toBeTruthy();
+    expect(screen.getByText('x131')).toBeTruthy();
     expect(screen.getByText('x0')).toBeTruthy();
     expect(screen.queryByTestId('inventory-item-unknown_item')).toBeNull();
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-31034').props.style)).toEqual(
@@ -213,20 +215,14 @@ describe('InventoryView', () => {
     expect(screen.queryByTestId('inventory-item-image-filter-svg-31034', {
       includeHiddenElements: true,
     })).toBeNull();
-    // The single preview keeps the full SVG artwork.
-    expect(screen.getByTestId('inventory-preview-image-feather-mask-31034', {
-      includeHiddenElements: true,
-    })).toBeTruthy();
-    expect(screen.getByTestId('inventory-preview-image-feather-mask-svg-31034', {
-      includeHiddenElements: true,
-    })).toBeTruthy();
-
     expect(screen.getByTestId('inventory-item-31034').props['aria-selected']).toBe(true);
 
     await fireEvent.press(screen.getByTestId('inventory-item-EPGS_COIN'));
     expect(screen.getByTestId('inventory-item-31034').props['aria-selected']).toBe(false);
     expect(screen.getByTestId('inventory-item-EPGS_COIN').props['aria-selected']).toBe(true);
-    expect(readSvgText(screen.getByTestId('inventory-preview-name'))).toBe('寻访参数模型');
+    expect(screen.getByTestId('inventory-detail-sheet')).toBeTruthy();
+    expect(screen.queryByTestId('inventory-detail-dialog')).toBeNull();
+    expect(readSvgText(screen.getByTestId('inventory-detail-name'))).toBe('寻访参数模型');
   });
 
   it('reflows matrix columns from the measured container width', async () => {
@@ -269,20 +265,6 @@ describe('InventoryView', () => {
         width: 246.5,
       }),
     );
-    expect(StyleSheet.flatten(screen.getByTestId('inventory-preview-details').props.style)).toEqual(
-      expect.objectContaining({
-        paddingBottom: 10,
-        paddingLeft: 10,
-        paddingRight: 10,
-        paddingTop: 10,
-      }),
-    );
-    expect(StyleSheet.flatten(screen.getByTestId('inventory-preview-artwork').props.style)).toEqual(
-      expect.objectContaining({ height: 104, width: 104 }),
-    );
-    expect(StyleSheet.flatten(screen.getByTestId('inventory-preview-image-circle-31034').props.style)).toEqual(
-      expect.objectContaining({ borderRadius: 999, overflow: 'hidden' }),
-    );
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-image-31034').props.style)).toEqual(
       expect.objectContaining({
         borderBottomLeftRadius: 999,
@@ -307,7 +289,7 @@ describe('InventoryView', () => {
     );
   });
 
-  it('degrades to interactive artwork and then hides cells in an exceptionally narrow container', async () => {
+  it('keeps the same interactive cell model at narrow widths', async () => {
     const screen = await render(
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <InventoryView accountId="account-a" inventory={inventory} itemTable={itemTable} />
@@ -315,18 +297,18 @@ describe('InventoryView', () => {
     );
 
     await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(100));
-    expect(screen.queryByTestId('inventory-item-info-31034')).toBeNull();
+    expect(screen.getByTestId('inventory-item-info-31034')).toBeTruthy();
     expect(StyleSheet.flatten(screen.getByTestId('inventory-item-31034').props.style)).toEqual(
-      expect.objectContaining({ justifyContent: 'center', width: 100 }),
+      expect.objectContaining({ width: 100 }),
     );
     expect(screen.getByTestId('inventory-item-31034').props['aria-selected']).toBe(true);
     await fireEvent.press(screen.getByTestId('inventory-item-EPGS_COIN'));
     expect(screen.getByTestId('inventory-item-EPGS_COIN').props['aria-selected']).toBe(true);
+    expect(screen.getByTestId('inventory-detail-sheet')).toBeTruthy();
 
     await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(39));
-    expect(screen.queryByTestId('inventory-item-31034')).toBeNull();
-    expect(screen.getByTestId('inventory-preview-details')).toBeTruthy();
-    expect(readSvgText(screen.getByTestId('inventory-preview-name'))).toBe('寻访参数模型');
+    expect(screen.getByTestId('inventory-item-31034')).toBeTruthy();
+    expect(readSvgText(screen.getByTestId('inventory-detail-name'))).toBe('寻访参数模型');
   });
 
   it('keeps selection and loaded artwork across a width round trip', async () => {
