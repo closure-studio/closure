@@ -2,6 +2,7 @@ export { NotFoundView } from './layout/not-found-view';
 export { SectionPageHeader } from './layout/section-page-header';
 export { Avatar, type AvatarProps } from './ui/avatar';
 export { AvatarFilter, type AvatarFilterProps } from './ui/avatar-filter';
+export { AdaptiveDialog } from './ui/adaptive-dialog';
 export * from './ui/frame';
 export { ItemArtwork, type ItemArtworkProps } from './ui/item-artwork';
 export { ResponsiveGridRow, type ResponsiveGridRowProps } from './layout/responsive-grid-row';
