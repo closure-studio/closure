@@ -1,7 +1,7 @@
 import { Bot, Building2, ShieldAlert, Swords } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { XStack, YStack, getTokens } from 'tamagui';
+import { Spinner, Switch, XStack, YStack, getTokens, useMedia } from 'tamagui';
 
 import {
   DecorativeBarcode,
@@ -16,9 +16,6 @@ import type {
   ArkHostGameConfig,
   ArkHostGameConfigPatch,
 } from '@/schemas/arkhost';
-import {
-  AutomationSwitchControl,
-} from '../game-settings/components/automation-switch-control';
 import { DroneAccelerationSetting } from '../game-settings/components/base-blueprint-matrix';
 import { BattleQueueSetting } from '../game-settings/components/battle-configuration';
 import { ResourceReserveSetting } from '../game-settings/components/resource-reserve-editor';
@@ -178,6 +175,7 @@ function AutomationCard({
   onCheckedChange?: (checked: boolean) => void;
 }) {
   const colors = getTokens().color;
+  const { large } = useMedia();
 
   return (
     <YStack width="100%" $large={{ width: '49%' }}>
@@ -200,14 +198,32 @@ function AutomationCard({
                 {statusLabel}
               </MonoText>
             ) : null}
-            <AutomationSwitchControl
+            {onCheckedChange ? (
+              <YStack width="$1" height="$1" items="center" justify="center">
+                {pending ? (
+                  <Spinner
+                    testID={`hosting-config-${id}-spinner`}
+                    size="small"
+                    color="$appAccent"
+                  />
+                ) : null}
+              </YStack>
+            ) : null}
+            <Switch
               testID={`hosting-config-${id}`}
-              label={title}
+              aria-label={title}
+              aria-busy={pending}
+              aria-disabled={disabled}
               checked={checked}
               disabled={disabled}
-              pending={pending}
+              size={large ? '$3.5' : '$2'}
+              bg={checked ? '$appAccentSoft' : '$appSurface'}
+              borderWidth={1}
+              borderColor={checked ? '$appAccentBorder' : '$appBorder'}
               {...(onCheckedChange ? { onCheckedChange } : {})}
-            />
+            >
+              <Switch.Thumb bg={checked ? '$appAccent' : '$appMuted'} />
+            </Switch>
           </XStack>
         </XStack>
         <MonoText size="$2" color="$appMuted" numberOfLines={2}>

@@ -171,6 +171,29 @@ describe('GameHostingConfigView', () => {
     expect(screen.queryByTestId('hosting-config-submit')).toBeNull();
   });
 
+  it('shows a stable inline spinner and disables switches while an automation setting saves', async () => {
+    let resolveSubmit: (() => void) | undefined;
+    const onSubmit = jest.fn<Promise<void>, [SubmitPatch]>(() => new Promise((resolve) => {
+      resolveSubmit = resolve;
+    }));
+    const { screen } = await renderConfigView({ onSubmit });
+    const switchControl = screen.getByTestId('hosting-config-enable-building-arrange');
+
+    await fireEvent(switchControl, 'onCheckedChange', false);
+
+    expect(screen.getByTestId('hosting-config-enable-building-arrange-spinner')).toBeTruthy();
+    expect(switchControl).toBeDisabled();
+    expect(screen.getByTestId('hosting-config-auto-battle')).toBeDisabled();
+
+    await act(async () => {
+      resolveSubmit?.();
+      await Promise.resolve();
+    });
+
+    expect(screen.queryByTestId('hosting-config-enable-building-arrange-spinner')).toBeNull();
+    expect(switchControl).not.toBeDisabled();
+  });
+
   it('maps the supplied production rooms to exactly nine slots', async () => {
     const { screen } = await renderConfigView();
     await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
