@@ -147,6 +147,7 @@
       "unavailable": "The configuration service is temporarily unavailable. Try again later."
     },
     "keepingAp": "Reserve sanity",
+    "loading": "Loading configuration...",
     "recruitReserve": "Reserve recruitment permits",
     "warning": "Use under Presight guidance",
     "ignoreRobot": "Deprioritize robots",

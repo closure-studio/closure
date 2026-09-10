@@ -17,7 +17,6 @@ const initialGameAccounts = mockArkHostGameListResponse.code === 1
     avatar: entry.status.avatar,
     captchaInfo: entry.captcha_info,
     color: index === 1 ? 'warning' as const : 'primary' as const,
-    config: entry.game_config,
     createdAt: entry.status.created_at,
     isVerified: entry.status.is_verify,
     level: entry.status.level,

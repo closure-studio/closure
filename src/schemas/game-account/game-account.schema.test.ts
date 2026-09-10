@@ -17,7 +17,6 @@ const gameAccount = {
   avatar: firstEntry.status.avatar,
   captchaInfo: firstEntry.captcha_info,
   color: "primary",
-  config: firstEntry.game_config,
   createdAt: firstEntry.status.created_at,
   isVerified: firstEntry.status.is_verify,
   level: firstEntry.status.level,

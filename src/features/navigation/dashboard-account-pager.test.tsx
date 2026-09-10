@@ -63,7 +63,6 @@ const gameAccounts = accountEntries.map((entry) => v.parse(gameAccountSchema, {
   avatar: entry.status.avatar,
   captchaInfo: entry.captcha_info,
   color: 'primary',
-  config: entry.game_config,
   createdAt: entry.status.created_at,
   isVerified: entry.status.is_verify,
   level: entry.status.level,

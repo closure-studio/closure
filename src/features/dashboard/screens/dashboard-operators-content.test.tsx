@@ -25,7 +25,7 @@ it('reads the shared detail cache, refreshes troop data and isolates account swi
   const account: GameAccount = {
     account: detail.config.account, ap: detail.status.ap, avatar: detail.status.avatar,
     captchaInfo: { captcha_type: '', challenge: '', created: 0, geetestId: '', gt: '', riskType: '' },
-    color: 'primary', config: detail.config, createdAt: 0, isVerified: true,
+    color: 'primary', createdAt: 0, isVerified: true,
     level: detail.status.level, nickname: detail.status.nickName, platform: 1,
     statusCode: 2, userId: 'test',
   };

@@ -52,7 +52,6 @@ function mapGameAccount(entry: ArkHostGameListEntry): GameAccount {
     avatar: entry.status.avatar,
     captchaInfo: entry.captcha_info,
     color,
-    config: entry.game_config,
     createdAt: entry.status.created_at,
     isVerified: entry.status.is_verify,
     level: entry.status.level,
@@ -132,7 +131,6 @@ async function invalidateGameAccountsQuery(
 
 export function useUpdateGameConfig() {
   const queryClient = useQueryClient();
-  const userId = useAppStore((state) => state.auth.session?.principal.id);
   return useMutation<ArkHostGameConfigPatch, ArkHostFailure, UpdateGameConfigInput>({
     mutationFn: async ({ account, patch }) => {
       const parsedPatch = v.safeParse(arkHostGameConfigPatchSchema, patch);
@@ -149,10 +147,9 @@ export function useUpdateGameConfig() {
       return parsedPatch.output;
     },
     onSuccess: async (_, { account }) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: arkHostQueryKeys.detail(account) }),
-        invalidateGameAccountsQuery(queryClient, userId),
-      ]);
+      await queryClient.invalidateQueries({
+        queryKey: arkHostQueryKeys.detail(account),
+      });
     },
   });
 }

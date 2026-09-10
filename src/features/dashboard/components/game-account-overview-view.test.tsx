@@ -30,7 +30,6 @@ const gameAccount = v.parse(gameAccountSchema, {
   avatar: gameAccountEntry.status.avatar,
   captchaInfo: gameAccountEntry.captcha_info,
   color: 'primary',
-  config: gameAccountEntry.game_config,
   createdAt: gameAccountEntry.status.created_at,
   isVerified: gameAccountEntry.status.is_verify,
   level: gameAccountEntry.status.level,

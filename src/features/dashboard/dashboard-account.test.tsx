@@ -18,7 +18,6 @@ const mockFirstAccount = v.parse(gameAccountSchema, {
   avatar: firstAccountEntry.status.avatar,
   captchaInfo: firstAccountEntry.captcha_info,
   color: 'primary',
-  config: firstAccountEntry.game_config,
   createdAt: firstAccountEntry.status.created_at,
   isVerified: firstAccountEntry.status.is_verify,
   level: firstAccountEntry.status.level,

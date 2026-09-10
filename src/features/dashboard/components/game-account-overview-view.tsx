@@ -47,6 +47,7 @@ export function GameAccountOverviewView({
   const [activeSection, setActiveSection] = useState<DashboardSummarySection>('profile');
   const colors = getTokens().color;
   const status = detail?.status;
+  const config = detail?.config;
   const accountBalances = [
     { itemIcon: 'GOLD', section: 'asset-gold', label: t('overview.balances.lmd'), value: status ? formatCompactNumber(status.gold) : unavailable },
     { itemIcon: 'DIAMOND_SHD', section: 'asset-orundum', label: t('overview.balances.orundum'), value: status ? formatCompactNumber(status.diamondShard) : unavailable },
@@ -55,9 +56,9 @@ export function GameAccountOverviewView({
   ] satisfies readonly { itemIcon: Exclude<SummaryItemIcon, 'AP_GAMEPLAY'>; section: DashboardSummarySection; label: string; value: string }[];
   const operationMetrics = [
     { section: 'operation-map', label: t('overview.metrics.map'), title: stageTitle, subtitle: stageSubtitle },
-    { section: 'operation-auto-battle', label: t('overview.metrics.autoBattle'), title: gameAccount.config.is_auto_battle ? tCommon('states.enabled') : tCommon('states.disabled') },
-    { section: 'operation-base-arrange', label: t('overview.metrics.baseArrange'), title: gameAccount.config.enable_building_arrange ? tCommon('states.enabled') : tCommon('states.disabled') },
-    { section: 'operation-keeping-ap', label: t('overview.metrics.keepingAp'), title: String(gameAccount.config.keeping_ap) },
+    { section: 'operation-auto-battle', label: t('overview.metrics.autoBattle'), title: config ? (config.is_auto_battle ? tCommon('states.enabled') : tCommon('states.disabled')) : unavailable },
+    { section: 'operation-base-arrange', label: t('overview.metrics.baseArrange'), title: config ? (config.enable_building_arrange ? tCommon('states.enabled') : tCommon('states.disabled')) : unavailable },
+    { section: 'operation-keeping-ap', label: t('overview.metrics.keepingAp'), title: config ? String(config.keeping_ap) : unavailable },
   ] satisfies readonly { section: DashboardSummarySection; label: string; title: string; subtitle?: string | undefined }[];
   const maxAp = status?.maxAp ?? 0;
   const currentAp = status?.ap ?? gameAccount.ap;

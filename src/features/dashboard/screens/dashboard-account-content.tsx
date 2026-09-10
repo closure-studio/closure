@@ -30,7 +30,11 @@ export function DashboardOverviewContent({ gameAccount }: { gameAccount: GameAcc
   const detailQuery = useGameDetailQuery(gameAccount.account);
   const logsQuery = useGameLogsQuery(gameAccount.account);
   const stageTable = useStageTable();
-  const stageDisplay = getStageDisplayParts(stageTable, gameAccount.config.current_map, '—');
+  const stageDisplay = getStageDisplayParts(
+    stageTable,
+    detailQuery.data?.config.current_map ?? '',
+    '—',
+  );
 
   return (
     <DashboardPageFrame scroll>
