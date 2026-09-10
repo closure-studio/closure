@@ -3,7 +3,6 @@ import type { ReactElement, ReactNode } from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Adapt,
   Button,
   Dialog,
   Form,
@@ -41,7 +40,7 @@ export function AdaptiveEditorDialog({
     <Dialog modal open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
 
-      <Adapt when={!large} platform="touch">
+      <Dialog.Adapt when={!large}>
         <Sheet
           zIndex={200000}
           modal
@@ -53,6 +52,7 @@ export function AdaptiveEditorDialog({
           <Sheet.Overlay bg="$appScrim" />
           <Sheet.Handle bg="$appBorder" />
           <Sheet.Frame
+            testID="hosting-config-sheet"
             maxH="90%"
             bg="$appSurfaceStrong"
             borderTopWidth={1}
@@ -68,16 +68,17 @@ export function AdaptiveEditorDialog({
               showsVerticalScrollIndicator={false}
             >
               <YStack p="$4" pb="$8">
-                <Adapt.Contents />
+                <Dialog.Adapt.Contents />
               </YStack>
             </Sheet.ScrollView>
           </Sheet.Frame>
         </Sheet>
-      </Adapt>
+      </Dialog.Adapt>
 
       <Dialog.Portal>
         <Dialog.Overlay opacity={0.8} bg="$appScrim" />
         <Dialog.Content
+          testID="hosting-config-dialog"
           bordered
           elevate
           width="92%"
@@ -125,8 +126,6 @@ export function EditorActions({
 }) {
   const { t } = useTranslation('dashboard');
   const colors = getTokens().color;
-  const { large } = useMedia();
-  const textSize = large ? '$2' : '$2.5';
   const disabled = !canSave || isSubmitting;
 
   return (
@@ -139,7 +138,9 @@ export function EditorActions({
         disabled={isSubmitting}
         onPress={onCancel}
       >
-        <MonoText size={textSize}>{t('hostingConfig.dialog.cancel')}</MonoText>
+        <MonoText size="$2.5" $large={{ size: '$2' }}>
+          {t('hostingConfig.dialog.cancel')}
+        </MonoText>
       </Button>
       <Form.Trigger asChild>
         <Button
@@ -159,7 +160,8 @@ export function EditorActions({
               <Check size={14} color={solid ? colors.appBackground.val : colors.appAccent.val} />
             )}
             <MonoText
-              size={textSize}
+              size="$2.5"
+              $large={{ size: '$2' }}
               color={solid ? '$appBackground' : '$appAccent'}
               fontWeight="700"
             >

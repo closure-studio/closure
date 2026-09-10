@@ -78,7 +78,7 @@ export const tamaguiConfig = createTamagui({
   ...defaultConfig,
   animations,
   media: {
-    large: { minWidth: 768 },
+    large: defaultConfig.media.md,
   },
   fonts: {
     ...defaultConfig.fonts,

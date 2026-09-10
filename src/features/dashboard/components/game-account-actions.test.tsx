@@ -1,4 +1,5 @@
 import { fireEvent, render } from '@testing-library/react-native';
+import { setMediaState } from '@tamagui/web';
 import { I18nextProvider } from 'react-i18next';
 import { TamaguiProvider } from 'tamagui';
 
@@ -26,6 +27,10 @@ async function renderActions(overrides: Partial<GameAccountActionsProps> = {}) {
 }
 
 describe('GameAccountActions', () => {
+  beforeEach(() => {
+    setMediaState({ large: false });
+  });
+
   it('shows pause for a running game and start for a stopped game', async () => {
     const running = await renderActions();
     expect(running.screen.getByText(i18n.t('dashboard:overview.actions.pause'))).toBeTruthy();
@@ -68,6 +73,20 @@ describe('GameAccountActions', () => {
     await fireEvent.press(screen.getByTestId('overview-delete-game'));
     await fireEvent.press(screen.getByTestId('overview-cancel-delete'));
     expect(onDelete).not.toHaveBeenCalled();
+    await screen.unmount();
+  });
+
+  it.each([
+    { large: false, visibleContainer: 'overview-delete-sheet', hiddenContainer: 'overview-delete-dialog' },
+    { large: true, visibleContainer: 'overview-delete-dialog', hiddenContainer: 'overview-delete-sheet' },
+  ])('renders delete confirmation in the responsive container', async ({ hiddenContainer, large, visibleContainer }) => {
+    setMediaState({ large });
+    const { screen } = await renderActions();
+
+    await fireEvent.press(screen.getByTestId('overview-delete-game'));
+
+    expect(screen.getByTestId(visibleContainer)).toBeTruthy();
+    expect(screen.queryByTestId(hiddenContainer)).toBeNull();
     await screen.unmount();
   });
 });
