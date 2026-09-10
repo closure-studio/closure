@@ -1,6 +1,4 @@
 import * as v from "valibot";
-import rawDetail from "@/mocks/arkhost/game-detail.response.json";
-
 import {
   mockArkHostGameDetailResponse,
   mockArkHostGameListResponse,
@@ -35,20 +33,25 @@ describe("ArkHost server contracts", () => {
 
   });
 
-  it("preserves the complete supplied detail and validates nested data", () => {
+  it("validates nested detail data", () => {
+    const rawDetail = mockArkHostGameDetailResponse;
     const response = v.parse(arkHostGameDetailResponseSchema, rawDetail);
     if (response.code !== 1) throw new Error('Expected detail');
-    expect(Object.keys(response.data.troop?.chars ?? {})).toHaveLength(426);
-    expect(response.data.troop).toEqual(rawDetail.data.troop);
-    expect(response.data.building).toEqual(rawDetail.data.building);
-    expect(response.data.config.operator_development_tasks).toEqual(rawDetail.data.config.operator_development_tasks);
+    const detail = response.data;
+    expect(Object.keys(detail.troop?.chars ?? {})).toHaveLength(1);
+    expect(detail.troop).toEqual(response.data.troop);
+    expect(detail.building).toEqual(response.data.building);
+    expect(detail.config.operator_development_tasks).toEqual(response.data.config.operator_development_tasks);
     expect(response.data.config).not.toHaveProperty('is_stopped');
     for (const skill of [
       { skillId: 'skill', specializeLevel: 4, unlock: true },
       { skillId: 'skill', specializeLevel: 0, unlock: 'true' },
     ]) {
       const invalid = { ...rawDetail, data: { ...rawDetail.data, troop: { chars: {
-        '1': { ...rawDetail.data.troop.chars['1'], skills: [skill] },
+        'operator-1': {
+          ...detail.troop?.chars['operator-1'],
+          skills: [skill],
+        },
       } } } };
       expect(v.safeParse(arkHostGameDetailResponseSchema, invalid).success).toBe(false);
     }

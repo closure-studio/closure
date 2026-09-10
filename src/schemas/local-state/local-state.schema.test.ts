@@ -20,7 +20,7 @@ describe('persistedStoreStateSchema', () => {
 
   it('drops the old development-only game account selection field', () => {
     const result = v.safeParse(persistedStoreStateSchema, {
-      activeGameAccountId: 'G18928069156',
+      activeGameAccountId: 'G00000000001',
       auth: { session: mockActiveSession },
       selectedApiNodeId: 'domestic',
     });

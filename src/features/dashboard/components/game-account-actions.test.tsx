@@ -8,7 +8,7 @@ import { GameAccountActions, type GameAccountActionsProps } from './game-account
 
 async function renderActions(overrides: Partial<GameAccountActionsProps> = {}) {
   const props: GameAccountActionsProps = {
-    account: 'G18928069156',
+    account: 'G00000000001',
     nickname: 'Doctor',
     onDelete: jest.fn(),
     onToggle: jest.fn(),
@@ -53,7 +53,7 @@ describe('GameAccountActions', () => {
 
     await fireEvent.press(screen.getByTestId('overview-delete-game'));
     expect(screen.getByText('Doctor')).toBeTruthy();
-    expect(screen.getByText('G18928069156')).toBeTruthy();
+    expect(screen.getByText('G00000000001')).toBeTruthy();
     expect(onDelete).not.toHaveBeenCalled();
 
     await fireEvent.press(screen.getByTestId('overview-confirm-delete'));
