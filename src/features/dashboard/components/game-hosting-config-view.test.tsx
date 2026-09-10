@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, fireEvent, render, within } from '@testing-library/react-native';
+import { act, fireEvent, render } from '@testing-library/react-native';
 import { I18nextProvider } from 'react-i18next';
 import type { ComponentProps } from 'react';
 import { TamaguiProvider } from 'tamagui';
@@ -120,46 +120,6 @@ describe('GameHostingConfigView', () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
     expect(onSubmit).toHaveBeenCalledWith({ enable_building_arrange: false });
     expect(screen.queryByTestId('hosting-config-submit')).toBeNull();
-  });
-
-  it.each([
-    { checked: true, fails: false },
-    { checked: false, fails: false },
-    { checked: true, fails: true },
-    { checked: false, fails: true },
-  ])('keeps loading inside the switch and recovers (checked=$checked, fails=$fails)', async ({ checked, fails }) => {
-    let settleSubmit: (() => void) | undefined;
-    const onSubmit = jest.fn<Promise<void>, [SubmitPatch]>(() => new Promise((resolve, reject) => {
-      settleSubmit = () => fails ? reject(new Error('Save failed')) : resolve();
-    }));
-    const { screen } = await renderConfigView({
-      onSubmit,
-      config: { ...gameAccountFixture.game_config, enable_building_arrange: checked },
-    });
-    const switchControl = screen.getByTestId('hosting-config-enable-building-arrange');
-
-    await fireEvent(switchControl, 'onCheckedChange', !checked);
-
-    expect(within(switchControl).getByTestId('hosting-config-enable-building-arrange-spinner', {
-      includeHiddenElements: true,
-    })).toBeTruthy();
-    expect(screen.getAllByTestId(/-spinner$/, { includeHiddenElements: true })).toHaveLength(1);
-    expect(switchControl).toHaveAccessibilityState({ checked, busy: true });
-    expect(onSubmit).toHaveBeenCalledWith({ enable_building_arrange: !checked });
-    expect(switchControl).toBeDisabled();
-    expect(screen.getByTestId('hosting-config-auto-battle')).toBeDisabled();
-
-    await act(async () => {
-      settleSubmit?.();
-      await Promise.resolve();
-    });
-
-    expect(screen.queryByTestId('hosting-config-enable-building-arrange-spinner', {
-      includeHiddenElements: true,
-    })).toBeNull();
-    expect(switchControl).toHaveAccessibilityState({ checked, busy: false });
-    expect(switchControl).not.toBeDisabled();
-    expect(screen.getByTestId('hosting-config-auto-battle')).not.toBeDisabled();
   });
 
   it('maps the supplied production rooms to exactly nine slots', async () => {

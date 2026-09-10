@@ -229,7 +229,7 @@ function AutomationCard({
                     aria-hidden
                     accessibilityElementsHidden
                     importantForAccessibility="no-hide-descendants"
-                    pointerEvents="none"
+                    style={{ pointerEvents: 'none' }}
                   />
                 ) : null}
               </Switch.Thumb>
