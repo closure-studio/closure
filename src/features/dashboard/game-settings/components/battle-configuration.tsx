@@ -33,7 +33,7 @@ const SEARCH_RESULT_LIMIT = 10;
 const DEFAULT_STAGE_CODE = '1-7';
 const FIRST_PRIORITY_INDEX = '01';
 
-function BattleConfigurationCard({
+function BattleConfigurationCardContent({
   queue,
   stageTable,
 }: {
@@ -46,19 +46,7 @@ function BattleConfigurationCard({
   const countLabel = `${queue.length} ${t('hostingConfig.units.stages')}`;
 
   return (
-    <Frame
-      testID="hosting-config-card-battle-maps"
-      aria-label={`${t('hostingConfig.battleQueue')}: ${countLabel}`}
-      role="button"
-      cursor="pointer"
-      p="$3.5"
-      gap="$2.5"
-      hoverStyle={{
-        bg: '$appSurfaceStrong',
-        borderColor: '$appAccentBorder',
-      }}
-      pressStyle={{ opacity: 0.8 }}
-    >
+    <>
       <XStack items="center" justify="space-between" gap="$3" minW={0}>
         <XStack items="center" gap="$2" minW={0} shrink={1}>
           <Flame size={17} color={colors.appMuted.val} />
@@ -183,7 +171,7 @@ function BattleConfigurationCard({
           </MonoText>
         ) : null}
       </YStack>
-    </Frame>
+    </>
   );
 }
 
@@ -221,15 +209,24 @@ export function BattleQueueSetting({
   isSubmitting: boolean;
   onSubmit: (patch: ArkHostGameConfigPatch) => Promise<void>;
 }) {
+  const { t } = useTranslation('dashboard');
   const queue = tasks.filter((task) => task.mode === 'LOOP').map((task) => task.stage_id);
 
   return (
     <AdaptiveEditorDialog
       trigger={(
-        <BattleConfigurationCard
-          queue={queue}
-          stageTable={stageTable}
-        />
+        <Frame
+          testID="hosting-config-card-battle-maps"
+          aria-label={`${t('hostingConfig.battleQueue')}: ${queue.length} ${t('hostingConfig.units.stages')}`}
+          role="button"
+          cursor="pointer"
+          p="$3.5"
+          gap="$2.5"
+          hoverStyle={{ bg: '$appSurfaceStrong', borderColor: '$appAccentBorder' }}
+          pressStyle={{ opacity: 0.8 }}
+        >
+          <BattleConfigurationCardContent queue={queue} stageTable={stageTable} />
+        </Frame>
       )}
     >
       {(close) => (
@@ -505,7 +502,7 @@ function BattleQueueSettingEditor({
                   opacity={isSubmitting ? 0.4 : 1}
                   disabled={isAlreadyInQueue || isSubmitting}
                   pressStyle={{ opacity: 0.65 }}
-                  onPress={() => setQueue((current) => current.includes(id) ? current : [...current, id])}
+                  onPress={() => setQueue((current) => current.includes(id) ? current : [id, ...current])}
                 >
                   <XStack items="center" justify="center" gap="$1">
                     {isAlreadyInQueue ? (

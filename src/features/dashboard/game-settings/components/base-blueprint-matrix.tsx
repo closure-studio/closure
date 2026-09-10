@@ -41,7 +41,7 @@ function BaseRoomPreview({ selectedSlot, rooms }: { selectedSlot: ArkHostAcceler
   );
 }
 
-function BaseAccelerationCard({
+function BaseAccelerationCardContent({
   selectedLabel,
   selectedSlot,
   rooms,
@@ -54,19 +54,7 @@ function BaseAccelerationCard({
   const colors = getTokens().color;
 
   return (
-    <Frame
-      testID="hosting-config-card-drone-acceleration"
-      aria-label={`${t('hostingConfig.sections.drone')}: ${selectedLabel}`}
-      role="button"
-      cursor="pointer"
-      p="$3.5"
-      gap="$2.5"
-      hoverStyle={{
-        bg: '$appSurfaceStrong',
-        borderColor: '$appAccentBorder',
-      }}
-      pressStyle={{ opacity: 0.8 }}
-    >
+    <>
       <XStack items="center" justify="space-between" gap="$3" minW={0}>
         <XStack items="center" gap="$2" minW={0} shrink={1}>
           <Cpu size={17} color={colors.appMuted.val} />
@@ -89,7 +77,7 @@ function BaseAccelerationCard({
         </MonoText>
         <BaseRoomPreview selectedSlot={selectedSlot} rooms={rooms} />
       </XStack>
-    </Frame>
+    </>
   );
 }
 
@@ -125,11 +113,22 @@ export function DroneAccelerationSetting({
     <AdaptiveEditorDialog
       wide
       trigger={(
-        <BaseAccelerationCard
-          rooms={rooms}
-          selectedLabel={selectedLabel}
-          selectedSlot={value}
-        />
+        <Frame
+          testID="hosting-config-card-drone-acceleration"
+          aria-label={`${t('hostingConfig.sections.drone')}: ${selectedLabel}`}
+          role="button"
+          cursor="pointer"
+          p="$3.5"
+          gap="$2.5"
+          hoverStyle={{ bg: '$appSurfaceStrong', borderColor: '$appAccentBorder' }}
+          pressStyle={{ opacity: 0.8 }}
+        >
+          <BaseAccelerationCardContent
+            rooms={rooms}
+            selectedLabel={selectedLabel}
+            selectedSlot={value}
+          />
+        </Frame>
       )}
     >
       {(close) => (

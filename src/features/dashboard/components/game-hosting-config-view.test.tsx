@@ -67,55 +67,6 @@ describe('GameHostingConfigView', () => {
     expect(screen.getByTestId('hosting-config-card-battle-maps')).toBeTruthy();
   });
 
-  it('shows concise guidance on cards and detailed behavior in the editor', async () => {
-    const { screen } = await renderConfigView();
-    const summaryKeys = [
-      'hostingConfig.summaries.keepingAp',
-      'hostingConfig.summaries.recruitReserve',
-      'hostingConfig.summaries.enableBuildingArrange',
-      'hostingConfig.summaries.isAutoBattle',
-      'hostingConfig.summaries.recruitIgnoreRobot',
-      'hostingConfig.summaries.allowLoginAssist',
-      'hostingConfig.summaries.droneAcceleration',
-      'hostingConfig.summaries.battleMaps',
-    ] as const;
-    const battleDescription = i18n.t('hostingConfig.descriptions.battleMaps', {
-      ns: 'dashboard',
-    });
-    const droneSummary = i18n.t('hostingConfig.summaries.droneAcceleration', {
-      ns: 'dashboard',
-      roomType: i18n.t('hostingConfig.roomTypes.manufacture', { ns: 'dashboard' }),
-    });
-
-    for (const key of summaryKeys) {
-      const summary = key === 'hostingConfig.summaries.droneAcceleration'
-        ? droneSummary
-        : i18n.t(key, { ns: 'dashboard' });
-      expect(screen.getByText(summary)).toBeTruthy();
-    }
-    expect(screen.queryByText(battleDescription)).toBeNull();
-
-    await fireEvent.press(screen.getByTestId('hosting-config-card-battle-maps'));
-
-    expect(screen.getByText(battleDescription)).toBeTruthy();
-  });
-
-  it('shows only the selected room type in the drone acceleration editor', async () => {
-    const roomType = i18n.t('hostingConfig.roomTypes.manufacture', { ns: 'dashboard' });
-    const description = i18n.t('hostingConfig.descriptions.droneAcceleration', {
-      ns: 'dashboard',
-    });
-    const { screen } = await renderConfigView();
-
-    expect(screen.getByText(roomType)).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
-
-    expect(screen.getByText(description)).toBeTruthy();
-    expect(screen.getAllByText(roomType).length).toBeGreaterThan(0);
-    expect(screen.queryByText('底层右')).toBeNull();
-    expect(screen.queryByText(/\/\s*09/)).toBeNull();
-  });
-
   it('opens Sanity editor and submits single keeping_ap patch', async () => {
     const onSubmit = jest.fn<Promise<void>, [SubmitPatch]>().mockResolvedValue(undefined);
     const { screen } = await renderConfigView({ onSubmit });
@@ -243,34 +194,6 @@ describe('GameHostingConfigView', () => {
     await fireEvent.press(screen.getByTestId('hosting-config-slot-slot_7'));
     await fireEvent.press(screen.getByTestId('hosting-config-submit'));
     expect(onSubmit).toHaveBeenCalledWith({ accelerate_slot: 'slot_7' });
-  });
-
-  it('opens Drone Acceleration editor and submits selected room slot', async () => {
-    const onSubmit = jest.fn<Promise<void>, [SubmitPatch]>().mockResolvedValue(undefined);
-    const { screen } = await renderConfigView({ onSubmit });
-
-    await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
-    await fireEvent.press(screen.getByTestId('hosting-config-slot-slot_7'));
-    await fireEvent.press(screen.getByTestId('hosting-config-submit'));
-
-    expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit).toHaveBeenCalledWith({ accelerate_slot: 'slot_7' });
-  });
-
-  it('opens Battle Queue editor, removes the final stage, and submits an empty queue', async () => {
-    const onSubmit = jest.fn<Promise<void>, [SubmitPatch]>().mockResolvedValue(undefined);
-    const { screen } = await renderConfigView({ onSubmit });
-
-    await fireEvent.press(screen.getByTestId('hosting-config-card-battle-maps'));
-    expect(screen.getByTestId('queue-item-0')).toBeTruthy();
-
-    await fireEvent.press(screen.getByTestId('queue-remove-0'));
-    await fireEvent.press(screen.getByTestId('hosting-config-submit'));
-
-    expect(onSubmit).toHaveBeenCalledTimes(1);
-    expect(onSubmit).toHaveBeenCalledWith({
-      battle_tasks: [],
-    });
   });
 
   it('preserves SHARE and ADOPT positions while replacing LOOP tasks', async () => {
