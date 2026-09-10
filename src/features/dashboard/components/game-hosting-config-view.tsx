@@ -198,17 +198,6 @@ function AutomationCard({
                 {statusLabel}
               </MonoText>
             ) : null}
-            {onCheckedChange ? (
-              <YStack width="$1" height="$1" items="center" justify="center">
-                {pending ? (
-                  <Spinner
-                    testID={`hosting-config-${id}-spinner`}
-                    size="small"
-                    color="$appAccent"
-                  />
-                ) : null}
-              </YStack>
-            ) : null}
             <Switch
               testID={`hosting-config-${id}`}
               aria-label={title}
@@ -217,12 +206,33 @@ function AutomationCard({
               checked={checked}
               disabled={disabled}
               size={large ? '$3.5' : '$2'}
-              bg={checked ? '$appAccentSoft' : '$appSurface'}
+              bg={pending || checked ? '$appAccentSoft' : '$appSurface'}
               borderWidth={1}
-              borderColor={checked ? '$appAccentBorder' : '$appBorder'}
+              borderColor={pending ? '$appAccent' : checked ? '$appAccentBorder' : '$appBorder'}
               {...(onCheckedChange ? { onCheckedChange } : {})}
             >
-              <Switch.Thumb bg={checked ? '$appAccent' : '$appMuted'} />
+              <Switch.Thumb bg={pending || checked ? '$appAccent' : '$appMuted'}>
+                {pending ? (
+                  <Spinner
+                    testID={`hosting-config-${id}-spinner`}
+                    position="absolute"
+                    t={0}
+                    r={0}
+                    b={0}
+                    l={0}
+                    items="center"
+                    justify="center"
+                    scale={0.65}
+                    $large={{ scale: 0.85 }}
+                    size="small"
+                    color="$appBackground"
+                    aria-hidden
+                    accessibilityElementsHidden
+                    importantForAccessibility="no-hide-descendants"
+                    pointerEvents="none"
+                  />
+                ) : null}
+              </Switch.Thumb>
             </Switch>
           </XStack>
         </XStack>

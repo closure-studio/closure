@@ -139,7 +139,7 @@
   "hostingConfig": {
     "allowLoginAssist": "Login assistance",
     "autoBattle": "Auto battle",
-    "battleQueue": "Stage priority",
+    "battleQueue": "Auto Battle Stages",
     "enableBuildingArrange": "Automatic base shifts",
     "errors": {
       "invalidResponse": "The server returned an invalid response. Try again.",
@@ -159,8 +159,7 @@
     },
     "units": {
       "ap": "AP",
-      "permits": "Permits",
-      "stages": "Stages"
+      "permits": "Permits"
     },
     "status": {
       "default": "Default",
@@ -175,17 +174,17 @@
       "keepingAp": "Keeps this much sanity unused during auto battle.",
       "recruitReserve": "Keeps this many Recruitment Permits unused.",
       "enableBuildingArrange": "Rotates Operators and schedules rest. Other base jobs still run when off.",
-      "isAutoBattle": "Uses Stage priority to spend sanity. Turning it off keeps your stage list.",
+      "isAutoBattle": "Automatically runs your selected stages to spend sanity. Turning it off keeps your stage list.",
       "recruitIgnoreRobot": "Skips tags that guarantee a 1-star Robot. A Robot can still appear.",
       "allowLoginAssist": "Login assistance is under maintenance and cannot be changed yet.",
       "droneAcceleration": "Drone acceleration is currently assigned to the {{roomType}}.",
-      "battleMaps": "Auto battle starts with stage 1, then tries later stages when it is closed."
+      "battleMaps": "Runs the first open stage from the top of your list."
     },
     "descriptions": {
       "keepingAp": "Auto battle only spends sanity above this reserve. It pauses when the usable sanity cannot cover the next run. Set it to 0 to keep no extra sanity.",
       "recruitReserve": "Set how many Recruitment Permits to keep. ArkHost will not start a new recruitment when your permit count is at or below this number. Set it to 0 to allow every permit to be used.",
       "droneAcceleration": "Choose the room type ArkHost should prioritize for Drone acceleration.",
-      "battleMaps": "Stages nearer the top have higher priority. ArkHost repeats the first open stage it finds. If the list is empty or every stage is closed, it temporarily runs 1-7."
+      "battleMaps": "Put the stages you want to farm most at the top. ArkHost repeats the first open stage in the list. If the list is empty or every stage is closed, it temporarily runs 1-7."
     },
     "roomStatuses": {
       "power": "Generating",

@@ -43,7 +43,6 @@ function BattleConfigurationCardContent({
   const { t } = useTranslation('dashboard');
   const colors = getTokens().color;
   const previewQueue = queue.slice(0, CARD_PREVIEW_LIMIT);
-  const countLabel = `${queue.length} ${t('hostingConfig.units.stages')}`;
 
   return (
     <>
@@ -53,23 +52,6 @@ function BattleConfigurationCardContent({
           <TerminalText size="$3" fontWeight="700" numberOfLines={1}>
             {t('hostingConfig.battleQueue')}
           </TerminalText>
-          <XStack
-            px="$2"
-            py="$0.5"
-            borderWidth={1}
-            borderColor={queue.length > 0 ? '$appAccentBorder' : '$appBorder'}
-            bg={queue.length > 0 ? '$appAccentSoft' : '$appSurfaceRaised'}
-            shrink={0}
-          >
-            <MonoText
-              size="$1"
-              color={queue.length > 0 ? '$appAccent' : '$appMuted'}
-              fontWeight="700"
-              fontVariant={['tabular-nums']}
-            >
-              {countLabel}
-            </MonoText>
-          </XStack>
         </XStack>
 
         <XStack items="center" gap="$1" shrink={0}>
@@ -217,7 +199,7 @@ export function BattleQueueSetting({
       trigger={(
         <Frame
           testID="hosting-config-card-battle-maps"
-          aria-label={`${t('hostingConfig.battleQueue')}: ${queue.length} ${t('hostingConfig.units.stages')}`}
+          aria-label={t('hostingConfig.battleQueue')}
           role="button"
           cursor="pointer"
           p="$3.5"
@@ -395,19 +377,9 @@ function BattleQueueSettingEditor({
 
   const queueContent = (
     <YStack gap="$2">
-      <XStack items="center" justify="space-between" gap="$2">
-        <MonoText size={captionTextSize} color="$appMuted" fontWeight="700">
-          {t('hostingConfig.dialog.currentQueue')}
-        </MonoText>
-        <MonoText
-          size={captionTextSize}
-          color="$appAccent"
-          fontWeight="700"
-          fontVariant={['tabular-nums']}
-        >
-          {queue.length} {t('hostingConfig.units.stages')}
-        </MonoText>
-      </XStack>
+      <MonoText size={captionTextSize} color="$appMuted" fontWeight="700">
+        {t('hostingConfig.dialog.currentQueue')}
+      </MonoText>
 
       {queue.length === 0 ? (
         <XStack
@@ -444,8 +416,9 @@ function BattleQueueSettingEditor({
                   testID={`queue-remove-${index}`}
                   aria-label={t('hostingConfig.dialog.removeStage')}
                   unstyled
-                  width="$4"
-                  height="$4"
+                  width="$5"
+                  height="$5"
+                  $large={{ width: '$4.5', height: '$4.5' }}
                   items="center"
                   justify="center"
                   shrink={0}
@@ -455,7 +428,7 @@ function BattleQueueSettingEditor({
                   disabled={isSubmitting}
                   onPress={() => setQueue((current) => current.filter((_, itemIndex) => itemIndex !== index))}
                 >
-                  <Trash2 size={14} color={colors.appDanger.val} />
+                  <Trash2 size={large ? 18 : 24} color={colors.appDanger.val} />
                 </Button>
               )}
             />
