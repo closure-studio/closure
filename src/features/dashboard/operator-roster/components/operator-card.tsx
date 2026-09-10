@@ -191,10 +191,12 @@ function OperatorPortraitBackdrop({ charId }: { charId: string }) {
 }
 
 function SmallOperatorCard({
+  itemWidth,
   labels,
   name,
   operator,
 }: {
+  itemWidth: number | undefined;
   labels: OperatorCardLabels;
   name: string;
   operator: Operator;
@@ -202,7 +204,11 @@ function SmallOperatorCard({
   const level = formatLevel(operator.level);
 
   return (
-    <SmallOperatorCardFrame testID={`operator-card-${operator.charId}`}>
+    <SmallOperatorCardFrame
+      testID={`operator-card-${operator.charId}`}
+      width={itemWidth ?? '100%'}
+      grow={itemWidth === undefined ? 1 : 0}
+    >
       <OperatorPortraitBackdrop charId={operator.charId} />
       <Image
         testID={`operator-card-bottom-transition-${operator.charId}`}
@@ -277,10 +283,12 @@ function SmallOperatorCard({
 }
 
 export const OperatorCard = memo(function OperatorCard({
+  itemWidth,
   labels,
   name,
   operator,
 }: {
+  itemWidth?: number | undefined;
   labels: OperatorCardLabels;
   name: string;
   operator: Operator;
@@ -289,11 +297,18 @@ export const OperatorCard = memo(function OperatorCard({
   const level = operator.level;
 
   if (!large) {
-    return <SmallOperatorCard labels={labels} name={name} operator={operator} />;
+    return <SmallOperatorCard itemWidth={itemWidth} labels={labels} name={name} operator={operator} />;
   }
 
   return (
-    <Frame testID={`operator-card-${operator.charId}`} minW={OPERATOR_CARD_MIN_WIDTH} grow={1} shrink={1} p="$3">
+    <Frame
+      testID={`operator-card-${operator.charId}`}
+      minW={OPERATOR_CARD_MIN_WIDTH}
+      width={itemWidth ?? '100%'}
+      grow={itemWidth === undefined ? 1 : 0}
+      shrink={1}
+      p="$3"
+    >
       <TerminalText size="$4" fontWeight="800" numberOfLines={1}>{name}</TerminalText>
       <XStack mt="$2" justify="space-between"><MonoText size="$1">{labels.detailLevel}</MonoText><MonoText size="$1" color="$appAccent">{level}</MonoText></XStack>
       <YStack mt="$1.5"><TerminalMeterBar value={level} max={90} /></YStack>

@@ -20,11 +20,13 @@ function getOperatorKey(viewModel: OperatorViewModel): string {
 }
 
 const OperatorRow = memo(function OperatorRow({
+  itemWidth,
   isLast,
   labels,
   row,
   gap,
 }: {
+  itemWidth: number | undefined;
   isLast: boolean;
   labels: OperatorCardLabels;
   row: OperatorViewModel[];
@@ -38,6 +40,7 @@ const OperatorRow = memo(function OperatorRow({
       getItemKey={getOperatorKey}
       renderCell={(viewModel) => (
         <OperatorCard
+          itemWidth={itemWidth}
           labels={labels}
           name={viewModel.name}
           operator={viewModel.operator}
@@ -72,22 +75,24 @@ export function OperatorRosterView({
       5: t('operators.cell.potentialLabel', { rank: 6 }),
     },
   }), [t]);
-  const { rows, handleLayout, keyExtractor } = useResponsiveGridRows(
+  const { rows, layout, handleLayout, keyExtractor } = useResponsiveGridRows(
     operators,
     (width) => getResponsiveGridLayout(width, gridGap, OPERATOR_CARD_MIN_WIDTH),
     getOperatorKey,
   );
+  const { itemWidth } = layout;
 
   const renderItem = useCallback(
     ({ item: row, index: rowIndex }: { item: OperatorViewModel[]; index: number }) => (
       <OperatorRow
         isLast={rowIndex === rows.length - 1}
+        itemWidth={itemWidth}
         labels={labels}
         row={row}
         gap={gridGap}
       />
     ),
-    [gridGap, labels, rows.length],
+    [gridGap, itemWidth, labels, rows.length],
   );
 
   return (
