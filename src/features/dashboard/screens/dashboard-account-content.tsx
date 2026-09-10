@@ -10,7 +10,6 @@ import { getCharacterDisplayName, getStageDisplayParts } from '../game-data';
 import { EMPTY_INVENTORY, InventoryView } from '../inventory/components/inventory-view';
 import { OperatorRosterView } from '../operator-roster/components/operator-roster-view';
 import {
-  useCharactersQuery,
   useDeleteGame,
   useGameDetailQuery,
   useGameLogsQuery,
@@ -31,7 +30,11 @@ export function DashboardOverviewContent({ gameAccount }: { gameAccount: GameAcc
   const detailQuery = useGameDetailQuery(gameAccount.account);
   const logsQuery = useGameLogsQuery(gameAccount.account);
   const stageTable = useStageTable();
-  const stageDisplay = getStageDisplayParts(stageTable, gameAccount.config.map_id, '—');
+  const stageDisplay = getStageDisplayParts(
+    stageTable,
+    detailQuery.data?.config.current_map ?? '',
+    '—',
+  );
 
   return (
     <DashboardPageFrame scroll>
@@ -88,14 +91,14 @@ export function DashboardInventoryContent({ gameAccount }: { gameAccount: GameAc
 }
 
 export function DashboardOperatorsContent({ gameAccount }: { gameAccount: GameAccount }) {
-  const characters = useCharactersQuery(gameAccount.account).data;
+  const troop = useGameDetailQuery(gameAccount.account).data?.troop;
   const characterTable = useCharacterTable();
   const operators = useMemo(
-    () => (characters?.chars ?? []).map((operator) => ({
+    () => Object.values(troop?.chars ?? {}).map((operator) => ({
       name: getCharacterDisplayName(characterTable, operator.charId),
       operator,
     })),
-    [characterTable, characters?.chars],
+    [characterTable, troop],
   );
 
   return (

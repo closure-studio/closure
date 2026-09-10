@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export CODING_TOOLS_MCP_SERVER_URL="https://jacks-macbook-air.tail3e3cfe.ts.net"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+env_file="$repo_root/.env"
+
+if [[ -z "${CODING_TOOLS_MCP_SERVER_URL:-}" && -f "$env_file" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$env_file"
+  set +a
+fi
+
+: "${CODING_TOOLS_MCP_SERVER_URL:?Set CODING_TOOLS_MCP_SERVER_URL in .env (see .env.example)}"
 
 tailscale funnel 50990 &
 funnel_pid=$!

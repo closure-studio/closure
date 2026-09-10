@@ -30,7 +30,7 @@ export function GameLogsView({
         gap="$3.5"
       >
         <YStack width="100%" maxW={860} self="center" gap="$3.5">
-          <TerminalSectionHeading code="LOG" title={formatDashboardSummaryTitle(t('logs.title'))} />
+          <TerminalSectionHeading code="06" title={formatDashboardSummaryTitle(t('logs.title'))} />
           <YStack position="relative" gap="$2.5">
             <YStack position="absolute" t={0} b={0} l={9} width={1} bg="$appBorder" />
             {entries.map((entry) => (

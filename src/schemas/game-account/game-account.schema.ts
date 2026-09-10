@@ -3,7 +3,6 @@ import * as v from 'valibot';
 import {
   arkHostAvatarSchema,
   arkHostCaptchaInfoSchema,
-  arkHostGameConfigSchema,
 } from '@/schemas/arkhost';
 
 export const gameAccountColorSchema = v.picklist(['primary', 'warning', 'muted']);
@@ -15,7 +14,6 @@ export const gameAccountSchema = v.object({
   avatar: arkHostAvatarSchema,
   captchaInfo: arkHostCaptchaInfoSchema,
   color: gameAccountColorSchema,
-  config: arkHostGameConfigSchema,
   createdAt: v.pipe(v.number(), v.integer(), v.minValue(0)),
   isVerified: v.boolean(),
   level: v.pipe(v.number(), v.integer(), v.minValue(0)),

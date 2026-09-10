@@ -134,53 +134,23 @@
   },
   "logs": {
     "logLevel": "LV {{level}}",
-    "subtitle": "ARKHOST LOGS",
     "title": "Logs"
   },
   "hostingConfig": {
-    "account": "Game account",
     "allowLoginAssist": "Login assistance",
     "autoBattle": "Auto battle",
-    "battleQueue": "Battle queue",
-    "code": "GAME-CONFIG",
-    "disabled": "Read only",
-    "droneAcceleration": "Drone acceleration",
-    "enableBuildingArrange": "Automatic base arrangement",
+    "battleQueue": "Auto Battle Stages",
+    "enableBuildingArrange": "Automatic base shifts",
     "errors": {
       "invalidResponse": "The server returned an invalid response. Try again.",
       "operationRejected": "The server rejected the configuration update. Try again.",
       "unavailable": "The configuration service is temporarily unavailable. Try again later."
     },
-    "keepingAp": "Reserved sanity",
-    "recruitReserve": "Recruitment permits kept",
-    "save": "Submit",
-    "saved": "Configuration updated.",
-    "smartSwitches": "Smart switches",
-    "stageMap": "Combat stage",
-    "stageQueueDeferred": "Battle queue controls are not enabled yet",
-    "stageSearchPlaceholder": "Enter a stage code or name",
-    "submitValidation": "Reserved sanity and recruitment permits must be non-negative integers.",
-    "title": "Hosting configuration",
+    "keepingAp": "Reserve sanity",
+    "loading": "Loading configuration...",
+    "recruitReserve": "Reserve recruitment permits",
     "warning": "Use under Presight guidance",
-    "accelerateSlots": {
-      "bottomCenter": "Bottom center",
-      "bottomLeft": "Bottom left",
-      "bottomRight": "Bottom right",
-      "middleCenter": "Middle center",
-      "middleLeft": "Middle left",
-      "middleRight": "Middle right",
-      "topCenter": "Top center",
-      "topLeft": "Top left",
-      "topRight": "Top right"
-    },
-    "ignoreRobot": "Ignore robot",
-    "codes": {
-      "sanity": "CONFIG · SANITY",
-      "permits": "CONFIG · PERMITS",
-      "switches": "CONFIG · SMART SWITCH",
-      "drone": "CONFIG · DRONE ACCELERATION",
-      "combat": "CONFIG · BATTLE QUEUE"
-    },
+    "ignoreRobot": "Deprioritize robots",
     "sections": {
       "reserves": "Resource Reserves",
       "switches": "Automation Switches",
@@ -189,41 +159,61 @@
     },
     "units": {
       "ap": "AP",
-      "permits": "Permits",
-      "stages": "Stages"
+      "permits": "Permits"
     },
     "status": {
-      "enabled": "Active",
-      "disabled": "Disabled",
-      "notSet": "Not Set",
+      "default": "Default",
       "maintenance": "Maintenance"
     },
+    "card": {
+      "defaultStage": "Used when no stages are set",
+      "firstPriority": "First",
+      "moreStages": "{{count}} remaining"
+    },
+    "summaries": {
+      "keepingAp": "Keeps this much sanity unused during auto battle.",
+      "recruitReserve": "Keeps this many Recruitment Permits unused.",
+      "enableBuildingArrange": "Rotates Operators and schedules rest. Other base jobs still run when off.",
+      "isAutoBattle": "Automatically runs your selected stages to spend sanity. Turning it off keeps your stage list.",
+      "recruitIgnoreRobot": "Skips tags that guarantee a 1-star Robot. A Robot can still appear.",
+      "allowLoginAssist": "Login assistance is under maintenance and cannot be changed yet.",
+      "droneAcceleration": "Drone acceleration is currently assigned to the {{roomType}}.",
+      "battleMaps": "Runs the first open stage from the top of your list."
+    },
     "descriptions": {
-      "keepingAp": "Keep sanity at or above this threshold without automated consumption.",
-      "recruitReserve": "Keep recruitment permits reserved to avoid consuming all tickets.",
-      "enableBuildingArrange": "Automatically manages base dormitory rest and operator shifts.",
-      "isAutoBattle": "Automatically consumes sanity to run stages in the battle queue.",
-      "recruitIgnoreRobot": "Ignores 1-star robot tags during recruitment to prioritize higher rarity operators.",
-      "allowLoginAssist": "Login assistance is currently under maintenance and cannot be edited.",
-      "droneAcceleration": "Select the base facility room to accelerate with drones (3x3 layout).",
-      "battleMaps": "Configure the combat stage queue. Search to add or remove stages."
+      "keepingAp": "Auto battle only spends sanity above this reserve. It pauses when the usable sanity cannot cover the next run. Set it to 0 to keep no extra sanity.",
+      "recruitReserve": "Set how many Recruitment Permits to keep. ArkHost will not start a new recruitment when your permit count is at or below this number. Set it to 0 to allow every permit to be used.",
+      "droneAcceleration": "Choose the room type ArkHost should prioritize for Drone acceleration.",
+      "battleMaps": "Put the stages you want to farm most at the top. ArkHost repeats the first open stage in the list. If the list is empty or every stage is closed, it temporarily runs 1-7."
+    },
+    "roomStatuses": {
+      "power": "Generating",
+      "manufacture": "Producing",
+      "trading": "Acquiring"
+    },
+    "roomTypes": {
+      "manufacture": "Factory",
+      "trading": "Trading Post",
+      "power": "Power Plant"
     },
     "dialog": {
       "edit": "Configure",
       "save": "Save Changes",
       "cancel": "Cancel",
-      "close": "Close",
-      "currentValue": "Current Setting",
-      "targetRoom": "Target Room",
-      "queueEmpty": "No combat stages configured. Search and add stages below.",
-      "searchStages": "Search stage code (e.g. 1-7, CE-6) or name...",
+      "clearSearch": "Clear stage search",
+      "decrease": "Decrease by one",
+      "increase": "Increase by one",
+      "targetRoom": "Choose Acceleration Room Type",
+      "baseTerminal": "CLOSURE / INFRASTRUCTURE · DRONE DISPATCH",
+      "queueEmpty": "No stages are set. Auto battle will temporarily run 1-7, or you can add a stage below.",
+      "searchStages": "Search by stage code (e.g. 1-7, CE-6) or name",
       "searchResults": "Search Results",
-      "currentQueue": "Current Battle Queue (Execution Order)",
-      "addStage": "Add",
+      "currentQueue": "Stage Order (Top to Bottom)",
+      "addStage": "Add Stage",
+      "added": "Added",
       "removeStage": "Remove",
-      "stageCost": "{{cost}} AP",
-      "noSearchResults": "No matching combat stages found",
-      "searchPrompt": "Type a stage code or name to search"
+      "stageCost": "Costs {{cost}} AP",
+      "noSearchResults": "No matching combat stages found"
     }
   }
 }

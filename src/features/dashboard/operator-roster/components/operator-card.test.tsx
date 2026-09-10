@@ -76,10 +76,10 @@ const labels: OperatorCardLabels = {
   },
 };
 
-async function renderCard(cardOperator: Operator = operator) {
+async function renderCard(cardOperator: Operator = operator, itemWidth?: number) {
   return render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-      <OperatorCard labels={labels} name="阿米娅" operator={cardOperator} />
+      <OperatorCard itemWidth={itemWidth} labels={labels} name="阿米娅" operator={cardOperator} />
     </TamaguiProvider>,
   );
 }
@@ -162,6 +162,15 @@ describe('OperatorCard', () => {
     expect(potentialIcon.props.accessibilityLabel).toBe('Potential 6');
     expect(StyleSheet.flatten(potentialIcon.props.style)).toEqual(
       expect.objectContaining({ bottom: 10, height: 35, right: 10, width: 35, zIndex: 2 }),
+    );
+  });
+
+  it('uses the measured grid width without growing on small layouts', async () => {
+    const screen = await renderCard(operator, 156.5);
+    const card = screen.getByTestId('operator-card-char_001');
+
+    expect(StyleSheet.flatten(card.props.style)).toEqual(
+      expect.objectContaining({ width: 156.5, flexGrow: 0 }),
     );
   });
 

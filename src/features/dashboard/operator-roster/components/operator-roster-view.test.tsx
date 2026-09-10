@@ -14,8 +14,8 @@ jest.mock('./operator-card', () => {
 
   return {
     OPERATOR_CARD_MIN_WIDTH: 140,
-    OperatorCard: ({ name, operator }: { name: string; operator: Operator }) => (
-      <MockView testID={`operator-card-${operator.charId}`}>
+    OperatorCard: ({ itemWidth, name, operator }: { itemWidth?: number; name: string; operator: Operator }) => (
+      <MockView testID={`operator-card-${operator.charId}`} style={{ width: itemWidth }}>
         <MockText testID={`operator-card-name-${operator.charId}`}>{name}</MockText>
       </MockView>
     ),
@@ -45,11 +45,11 @@ function gridLayoutEvent(width: number) {
   };
 }
 
-async function renderRoster() {
+async function renderRoster(roster: readonly OperatorViewModel[] = operatorViewModels) {
   return render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <I18nextProvider i18n={i18n}>
-        <OperatorRosterView operators={operatorViewModels} />
+        <OperatorRosterView operators={roster} />
       </I18nextProvider>
     </TamaguiProvider>,
   );
@@ -70,5 +70,13 @@ describe('OperatorRosterView', () => {
     expect(screen.getByText('阿米娅')).toBeTruthy();
     expect(screen.getByText('德克萨斯')).toBeTruthy();
     expect(screen.getByText('能天使')).toBeTruthy();
+  });
+
+  it('keeps a single card in the last row at the grid column width', async () => {
+    const screen = await renderRoster(operatorViewModels.slice(0, 1));
+
+    await fireEvent(screen.getByTestId('operator-roster-list'), 'layout', gridLayoutEvent(320));
+
+    expect(screen.getByTestId('operator-card-char_001').props.style).toEqual({ width: 156.5 });
   });
 });

@@ -1,8 +1,13 @@
 import * as v from "valibot";
 
-import { nonEmptyStringSchema, nonNegativeIntegerSchema } from "@/schemas/primitives";
+import {
+  nonBlankStringSchema,
+  nonEmptyStringSchema,
+  nonNegativeIntegerSchema,
+} from "@/schemas/primitives";
 
 const integerSchema = v.pipe(v.number(), v.integer());
+const positiveIntegerSchema = v.pipe(integerSchema, v.minValue(1));
 
 export const ARK_HOST_GAME_STATUS_CODE = {
   loginFailed: -1,
@@ -17,29 +22,85 @@ export const arkHostAvatarSchema = v.object({
   type: v.string(),
 });
 
-export const arkHostBattleReplayActionSchema = v.object({
-  action_type: v.picklist(["SHARE", "AUTO_BATTLE"]),
-  stage_id: nonEmptyStringSchema,
-  uuid: nonEmptyStringSchema,
+const arkHostAccelerateSlotSchema = v.picklist([
+  "slot_5",
+  "slot_6",
+  "slot_7",
+  "slot_14",
+  "slot_15",
+  "slot_16",
+  "slot_24",
+  "slot_25",
+  "slot_26",
+]);
+
+const arkHostBattleTaskUuidSchema = v.pipe(
+  nonBlankStringSchema,
+  v.maxLength(64),
+);
+
+export const arkHostBattleTaskSchema = v.variant("mode", [
+  v.object({
+    mode: v.literal("LOOP"),
+    stage_id: nonBlankStringSchema,
+    uuid: v.optional(v.literal("")),
+  }),
+  v.object({
+    mode: v.literal("SHARE"),
+    stage_id: nonBlankStringSchema,
+    uuid: arkHostBattleTaskUuidSchema,
+  }),
+  v.object({
+    mode: v.literal("ADOPT"),
+    stage_id: nonBlankStringSchema,
+    uuid: arkHostBattleTaskUuidSchema,
+  }),
+]);
+
+const arkHostOperatorMasteryTargetSchema = v.object({
+  skill_id: nonBlankStringSchema,
+  target_level: v.picklist([1, 2, 3]),
+});
+
+const arkHostOperatorDevelopmentTargetSchema = v.object({
+  evolve_phase: v.picklist([0, 1, 2]),
+  level: positiveIntegerSchema,
+  masteries: v.array(arkHostOperatorMasteryTargetSchema),
+  skill_level: v.picklist([1, 2, 3, 4, 5, 6, 7]),
+});
+
+const arkHostOperatorDevelopmentTaskSchema = v.object({
+  char_id: nonBlankStringSchema,
+  target: arkHostOperatorDevelopmentTargetSchema,
 });
 
 export const arkHostGameConfigSchema = v.object({
-  accelerate_slot: v.string(),
-  accelerate_slot_cn: v.string(),
+  accelerate_slot: arkHostAccelerateSlotSchema,
   account: nonEmptyStringSchema,
   allow_login_assist: v.boolean(),
-  battle_maps: v.array(v.string()),
-  battle_replay_actions: v.nullable(v.array(arkHostBattleReplayActionSchema)),
+  battle_tasks: v.array(arkHostBattleTaskSchema),
+  current_map: v.string(),
   enable_building_arrange: v.boolean(),
   is_auto_battle: v.boolean(),
   keeping_ap: nonNegativeIntegerSchema,
-  map_id: v.string(),
+  operator_development_tasks: v.array(
+    arkHostOperatorDevelopmentTaskSchema,
+  ),
   recruit_ignore_robot: v.boolean(),
   recruit_reserve: nonNegativeIntegerSchema,
 });
 
 export const arkHostGameConfigPatchSchema = v.partial(
-  arkHostGameConfigSchema,
+  v.pick(arkHostGameConfigSchema, [
+    "accelerate_slot",
+    "battle_tasks",
+    "enable_building_arrange",
+    "is_auto_battle",
+    "keeping_ap",
+    "operator_development_tasks",
+    "recruit_ignore_robot",
+    "recruit_reserve",
+  ]),
 );
 
 export const arkHostCaptchaInfoSchema = v.object({
@@ -102,7 +163,46 @@ export const arkHostScreenshotSchema = v.object({
   uTCTime: nonNegativeIntegerSchema,
 });
 
+export const arkHostCharacterSchema = v.object({
+  charId: nonEmptyStringSchema,
+  evolvePhase: v.picklist([0, 1, 2]),
+  level: nonNegativeIntegerSchema,
+  potentialRank: v.picklist([0, 1, 2, 3, 4, 5]),
+});
+
+const arkHostTroopSkillSchema = v.object({
+  skillId: nonEmptyStringSchema,
+  specializeLevel: v.picklist([0, 1, 2, 3]),
+  unlock: v.boolean(),
+});
+
+const arkHostTroopCharacterSchema = v.object({
+  ...arkHostCharacterSchema.entries,
+  currentTmpl: v.optional(nonEmptyStringSchema),
+  skills: v.array(arkHostTroopSkillSchema),
+});
+
+const arkHostTroopSchema = v.object({
+  chars: v.record(nonEmptyStringSchema, arkHostTroopCharacterSchema),
+});
+
+const arkHostBuildingSchema = v.object({
+  rooms: v.object({
+    MANUFACTURE: v.optional(v.record(nonEmptyStringSchema, v.object({
+      formulaId: v.string(),
+    }))),
+    TRADING: v.optional(v.record(nonEmptyStringSchema, v.object({
+      strategy: v.string(),
+    }))),
+    TRAINING: v.optional(v.record(nonEmptyStringSchema, v.object({
+      completeWorkTime: v.string(),
+      trainee: v.object({ charId: v.string(), skillId: v.string() }),
+    }))),
+  }),
+});
+
 export const arkHostGameDetailSchema = v.object({
+  building: v.optional(v.nullable(arkHostBuildingSchema)),
   config: arkHostGameConfigSchema,
   consumable: v.nullable(v.unknown()),
   inventory: v.nullable(arkHostInventorySchema),
@@ -111,7 +211,7 @@ export const arkHostGameDetailSchema = v.object({
     v.union([arkHostScreenshotSchema, v.array(arkHostScreenshotSchema)]),
   ),
   status: arkHostPlayerStatusSchema,
-  troop: v.nullable(v.unknown()),
+  troop: v.nullable(arkHostTroopSchema),
 });
 
 export const arkHostGameLogEntrySchema = v.object({
@@ -125,18 +225,6 @@ export const arkHostGameLogEntrySchema = v.object({
 export const arkHostGameLogsSchema = v.object({
   hasMore: v.boolean(),
   logs: v.array(arkHostGameLogEntrySchema),
-});
-
-export const arkHostCharacterSchema = v.object({
-  charId: nonEmptyStringSchema,
-  evolvePhase: v.picklist([0, 1, 2]),
-  level: nonNegativeIntegerSchema,
-  potentialRank: v.picklist([0, 1, 2, 3, 4, 5]),
-});
-
-export const arkHostCharactersSchema = v.object({
-  chars: v.array(arkHostCharacterSchema),
-  total: nonNegativeIntegerSchema,
 });
 
 export const arkHostGachaEventSchema = v.object({
@@ -190,11 +278,14 @@ export const arkHostGameDetailResponseSchema = responseSchema(
 export const arkHostGameLogsResponseSchema = responseSchema(
   arkHostGameLogsSchema,
 );
-export const arkHostCharactersResponseSchema = responseSchema(
-  arkHostCharactersSchema,
-);
 
 export type ArkHostAvatar = v.InferOutput<typeof arkHostAvatarSchema>;
+export type ArkHostAccelerateSlot = v.InferOutput<
+  typeof arkHostAccelerateSlotSchema
+>;
+export type ArkHostBattleTask = v.InferOutput<
+  typeof arkHostBattleTaskSchema
+>;
 export type ArkHostGameConfig = v.InferOutput<typeof arkHostGameConfigSchema>;
 export type ArkHostGameListEntry = v.InferOutput<
   typeof arkHostGameListEntrySchema
@@ -208,6 +299,6 @@ export type ArkHostGameLogEntry = v.InferOutput<
   typeof arkHostGameLogEntrySchema
 >;
 export type ArkHostCharacter = v.InferOutput<typeof arkHostCharacterSchema>;
-export type ArkHostCharacters = v.InferOutput<typeof arkHostCharactersSchema>;
+export type ArkHostBuilding = v.InferOutput<typeof arkHostBuildingSchema>;
 export type ArkHostGachaEvent = v.InferOutput<typeof arkHostGachaEventSchema>;
 export type ArkHostSseEvent = v.InferOutput<typeof arkHostSseEventSchema>;

@@ -17,7 +17,6 @@ const initialGameAccounts = mockArkHostGameListResponse.code === 1
     avatar: entry.status.avatar,
     captchaInfo: entry.captcha_info,
     color: index === 1 ? 'warning' as const : 'primary' as const,
-    config: entry.game_config,
     createdAt: entry.status.created_at,
     isVerified: entry.status.is_verify,
     level: entry.status.level,
@@ -46,7 +45,7 @@ async function renderGameAccountSwitcher() {
       <I18nextProvider i18n={i18n}>
         <GameAccountSwitcher
           gameAccounts={initialGameAccounts.slice(0, 2)}
-          selectedGameAccountId="G18928069156"
+          selectedGameAccountId="G00000000001"
           onSelectGameAccount={onSelectGameAccount}
         />
       </I18nextProvider>
@@ -60,10 +59,10 @@ describe('GameAccountSwitcher', () => {
   it('uses shared selected, inactive, and neutral button scales', async () => {
     const { screen } = await renderGameAccountSwitcher();
 
-    expect(screen.getByTestId('game-account-option-G18928069156')).toHaveStyle({
+    expect(screen.getByTestId('game-account-option-G00000000001')).toHaveStyle({
       transform: [{ scale: 1 }, { scale: 1 }],
     });
-    expect(screen.getByTestId('game-account-option-G16601716973')).toHaveStyle({
+    expect(screen.getByTestId('game-account-option-G00000000002')).toHaveStyle({
       transform: [{ scale: 1 }, { scale: 0.985 }],
     });
   });
@@ -71,9 +70,9 @@ describe('GameAccountSwitcher', () => {
   it('reports account selection without exposing local account creation', async () => {
     const { onSelectGameAccount, screen } = await renderGameAccountSwitcher();
 
-    await fireEvent.press(screen.getByTestId('game-account-option-G16601716973'));
+    await fireEvent.press(screen.getByTestId('game-account-option-G00000000002'));
 
-    expect(onSelectGameAccount).toHaveBeenCalledWith('G16601716973');
+    expect(onSelectGameAccount).toHaveBeenCalledWith('G00000000002');
     expect(screen.queryByTestId('link-game-account-option')).toBeNull();
   });
 });

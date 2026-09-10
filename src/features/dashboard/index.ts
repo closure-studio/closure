@@ -7,7 +7,6 @@ export {
 } from './components/dashboard-summary-frame';
 export { GameLogsView } from './components/game-logs-view';
 export { GameAccountOverviewView } from './components/game-account-overview-view';
-export { GameHostingConfigView } from './components/game-hosting-config-view';
 export {
   getCharacterDisplayName,
   getStageDisplayLabel,
@@ -22,7 +21,6 @@ export {
   findGameAccountById,
   useAdjacentGameAccountPrefetch,
   useArkHostSync,
-  useCharactersQuery,
   useGameDetailQuery,
   useGameAccountsQuery,
   useGameLogsQuery,
@@ -31,7 +29,6 @@ export {
   useUpdateGameConfig,
   useSessionQueryCacheReset,
 } from './queries';
-export type { UpdateGameConfigInput } from './queries';
 export {
   useCharacterTable,
   useItemTable,

@@ -8,7 +8,7 @@ import { tamaguiConfig } from '../../../../tamagui.config';
 import { DashboardShell } from './dashboard-shell';
 
 const initialGameAccounts = mockArkHostGameListResponse.code === 1
-  ? mockArkHostGameListResponse.data.map((entry) => ({ account: entry.status.account, ap: entry.status.ap, avatar: entry.status.avatar, captchaInfo: entry.captcha_info, color: 'primary' as const, config: entry.game_config, createdAt: entry.status.created_at, isVerified: entry.status.is_verify, level: entry.status.level, nickname: entry.status.nick_name, platform: entry.status.platform, statusCode: entry.status.code, userId: entry.status.uuid }))
+  ? mockArkHostGameListResponse.data.map((entry) => ({ account: entry.status.account, ap: entry.status.ap, avatar: entry.status.avatar, captchaInfo: entry.captcha_info, color: 'primary' as const, createdAt: entry.status.created_at, isVerified: entry.status.is_verify, level: entry.status.level, nickname: entry.status.nick_name, platform: entry.status.platform, statusCode: entry.status.code, userId: entry.status.uuid }))
   : [];
 
 jest.mock('react-native-reanimated', () => {
@@ -20,7 +20,7 @@ jest.mock('react-native-reanimated', () => {
 function DashboardShellTestTree({
   pageId,
   onSelectGameAccount,
-  selectedGameAccountId = 'G18928069156',
+  selectedGameAccountId = 'G00000000001',
 }: {
   pageId: string;
   onSelectGameAccount: (gameAccountId: string) => void;
@@ -47,7 +47,7 @@ describe('DashboardShell', () => {
     await screen.rerender(
       <DashboardShellTestTree
         pageId="inventory"
-        selectedGameAccountId="G16601716973"
+        selectedGameAccountId="G00000000002"
         onSelectGameAccount={jest.fn()}
       />,
     );
@@ -62,7 +62,7 @@ describe('DashboardShell', () => {
     const screen = await render(<DashboardShellTestTree pageId="overview" onSelectGameAccount={onSelectGameAccount} />);
     expect(screen.getByTestId('dashboard-account-switcher', { includeHiddenElements: true })).toHaveStyle({ display: 'none' });
 
-    await fireEvent.press(screen.getByTestId('game-account-option-G16601716973', { includeHiddenElements: true }));
-    expect(onSelectGameAccount).toHaveBeenCalledWith('G16601716973');
+    await fireEvent.press(screen.getByTestId('game-account-option-G00000000002', { includeHiddenElements: true }));
+    expect(onSelectGameAccount).toHaveBeenCalledWith('G00000000002');
   });
 });

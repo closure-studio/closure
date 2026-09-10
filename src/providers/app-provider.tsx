@@ -1,5 +1,6 @@
 import '../tamagui.generated.css';
 
+import { setupGestureHandler } from '@tamagui/native/setup-gesture-handler';
 import {
   Oxanium_400Regular,
   Oxanium_500Medium,
@@ -27,6 +28,8 @@ import { TamaguiProvider } from 'tamagui';
 
 import { tamaguiConfig } from '../../tamagui.config';
 import { LocalizationProvider } from './localization-provider';
+
+setupGestureHandler({ pressEvents: false, sheet: true });
 
 SplashScreen.preventAutoHideAsync().catch((splashError: unknown) => {
   console.warn('Unable to keep the splash screen visible.', splashError);

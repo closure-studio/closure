@@ -4,10 +4,11 @@ import { I18nextProvider } from 'react-i18next';
 import { TamaguiProvider } from 'tamagui';
 
 import { i18n } from '@/i18n';
-import { mockArkHostGameListResponse } from '@/mocks/arkhost';
-import type { ArkHostGameConfigPatch } from '@/schemas/arkhost';
+import { mockArkHostGameDetails, mockArkHostGameListResponse } from '@/mocks/arkhost';
+import type { ArkHostGameConfigPatch, ArkHostGameDetail } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
 import { tamaguiConfig } from '../../../../tamagui.config';
+import { arkHostQueryKeys } from '../queries';
 import { GameHostingConfigScreen } from './game-hosting-config-screen';
 
 jest.mock('@/hooks/use-back-dismissal', () => ({
@@ -21,6 +22,11 @@ const firstGameAccountEntry = gameAccountEntries[0];
 const secondGameAccountEntry = gameAccountEntries[1];
 
 if (!firstGameAccountEntry || !secondGameAccountEntry) throw new Error('Expected two game account fixtures.');
+const matchingFirstGameDetail = mockArkHostGameDetails.find(
+  (detail) => detail.config.account === firstGameAccountEntry.status.account,
+);
+if (!matchingFirstGameDetail) throw new Error('Expected a matching Game Detail fixture.');
+const firstGameDetail: ArkHostGameDetail = matchingFirstGameDetail;
 
 const firstGameAccount: GameAccount = {
   account: firstGameAccountEntry.status.account,
@@ -28,7 +34,6 @@ const firstGameAccount: GameAccount = {
   avatar: firstGameAccountEntry.status.avatar,
   captchaInfo: firstGameAccountEntry.captcha_info,
   color: 'primary',
-  config: firstGameAccountEntry.game_config,
   createdAt: firstGameAccountEntry.status.created_at,
   isVerified: firstGameAccountEntry.status.is_verify,
   level: firstGameAccountEntry.status.level,
@@ -43,7 +48,6 @@ const secondGameAccount: GameAccount = {
   avatar: secondGameAccountEntry.status.avatar,
   captchaInfo: secondGameAccountEntry.captcha_info,
   color: 'muted',
-  config: secondGameAccountEntry.game_config,
   createdAt: secondGameAccountEntry.status.created_at,
   isVerified: secondGameAccountEntry.status.is_verify,
   level: secondGameAccountEntry.status.level,
@@ -62,6 +66,7 @@ const mockResetMutation = jest.fn();
 const mockMutateAsync = jest.fn((_input: MutationInput) => Promise.resolve(undefined));
 
 jest.mock('../queries', () => ({
+  ...jest.requireActual<typeof import('../queries')>('../queries'),
   useUpdateGameConfig: () => ({
     error: null,
     mutateAsync: mockMutateAsync,
@@ -70,12 +75,16 @@ jest.mock('../queries', () => ({
   }),
 }));
 
-function renderScreen(gameAccount: GameAccount = firstGameAccount) {
+function renderScreen(
+  gameAccount: GameAccount = firstGameAccount,
+  detail: ArkHostGameDetail | null = firstGameDetail,
+) {
   const queryClient = new QueryClient({
     defaultOptions: {
-      queries: { gcTime: 0, retry: false },
+      queries: { gcTime: 0, retry: false, staleTime: Infinity },
     },
   });
+  queryClient.setQueryData(arkHostQueryKeys.detail(gameAccount.account), detail);
   return render(
     <QueryClientProvider client={queryClient}>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
@@ -94,10 +103,13 @@ describe('GameHostingConfigScreen', () => {
   });
 
   it('connects the selected account to the existing config mutation', async () => {
-    const screen = await renderScreen();
+    const screen = await renderScreen(firstGameAccount, {
+      ...firstGameDetail,
+      config: { ...firstGameDetail.config, keeping_ap: 7 },
+    });
 
     await fireEvent.press(screen.getByTestId('hosting-config-card-keeping-ap'));
-    await fireEvent.changeText(screen.getByTestId('hosting-config-keeping-ap'), '8');
+    await fireEvent.press(screen.getByTestId('numeric-step-increase'));
     await fireEvent.press(screen.getByTestId('hosting-config-submit'));
 
     await waitFor(() => {
@@ -107,9 +119,25 @@ describe('GameHostingConfigScreen', () => {
     });
   });
 
-  it('resets the mutation when the selected account changes', async () => {
+  it('treats a missing detail as unavailable instead of falling back to list config', async () => {
+    const screen = await renderScreen(firstGameAccount, null);
+
+    expect(screen.queryByTestId('game-hosting-config-view')).toBeNull();
+    expect(screen.getByText(
+      i18n.t('hostingConfig.errors.unavailable', { ns: 'dashboard' }),
+    )).toBeTruthy();
+    expect(screen.getByText(i18n.t('actions.retry', { ns: 'common' }))).toBeTruthy();
+  });
+
+  it('resets the mutation and reads the new account building when selection changes', async () => {
     const screen = await renderScreen();
     expect(mockResetMutation).toHaveBeenCalled();
+    await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
+    await waitFor(() => {
+      expect(screen.getByTestId('hosting-config-slot-slot_5')).toHaveAccessibleName(
+        new RegExp(i18n.t('hostingConfig.roomTypes.trading', { ns: 'dashboard' })),
+      );
+    });
 
     const queryClient = new QueryClient({
       defaultOptions: {
@@ -128,6 +156,11 @@ describe('GameHostingConfigScreen', () => {
 
     await waitFor(() => {
       expect(mockResetMutation).toHaveBeenCalledTimes(2);
+      expect(screen.getByTestId('hosting-config-card-drone-acceleration')).toBeTruthy();
     });
+    await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
+    expect(screen.getByTestId('hosting-config-slot-slot_5')).toHaveAccessibleName(
+      new RegExp(i18n.t('hostingConfig.roomTypes.power', { ns: 'dashboard' })),
+    );
   });
 });

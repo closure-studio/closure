@@ -4,7 +4,6 @@ import * as v from 'valibot';
 
 import {
   ARK_HOST_GAME_STATUS_CODE,
-  arkHostCharactersSchema,
   arkHostGameDetailSchema,
   arkHostGameConfigPatchSchema,
   arkHostGameListEntrySchema,
@@ -22,7 +21,6 @@ import { FailureError, unwrapResult } from '@/utils/failure-error';
 import { arkHostApi, type ArkHostFailure, type ArkHostSseSubscription } from './api';
 
 export const arkHostQueryKeys = {
-  characters: (account: string) => ['arkhost', 'characters', account] as const,
   detail: (account: string) => ['arkhost', 'detail', account] as const,
   gameAccounts: (userId: string) => ['arkhost', 'game-accounts', userId] as const,
   logs: (account: string) => ['arkhost', 'logs', account] as const,
@@ -54,7 +52,6 @@ function mapGameAccount(entry: ArkHostGameListEntry): GameAccount {
     avatar: entry.status.avatar,
     captchaInfo: entry.captcha_info,
     color,
-    config: entry.game_config,
     createdAt: entry.status.created_at,
     isVerified: entry.status.is_verify,
     level: entry.status.level,
@@ -101,22 +98,6 @@ export function useGameDetailQuery(account: string | null) {
   });
 }
 
-export const charactersQueryOptions = (account: string) =>
-  queryOptions({
-    queryKey: arkHostQueryKeys.characters(account),
-    queryFn: async () => {
-      const result = await arkHostApi.fetchCharacters(account);
-      return parseArkHostPayload(arkHostCharactersSchema, unwrapResult(result));
-    },
-  });
-
-export function useCharactersQuery(account: string | null) {
-  return useQuery({
-    ...charactersQueryOptions(account ?? ''),
-    enabled: account !== null,
-  });
-}
-
 export const logsQueryOptions = (account: string) =>
   queryOptions({
     queryKey: arkHostQueryKeys.logs(account),
@@ -133,7 +114,7 @@ export function useGameLogsQuery(account: string | null) {
   });
 }
 
-export type UpdateGameConfigInput = {
+type UpdateGameConfigInput = {
   account: string;
   patch: ArkHostGameConfigPatch;
 };
@@ -150,7 +131,6 @@ async function invalidateGameAccountsQuery(
 
 export function useUpdateGameConfig() {
   const queryClient = useQueryClient();
-  const userId = useAppStore((state) => state.auth.session?.principal.id);
   return useMutation<ArkHostGameConfigPatch, ArkHostFailure, UpdateGameConfigInput>({
     mutationFn: async ({ account, patch }) => {
       const parsedPatch = v.safeParse(arkHostGameConfigPatchSchema, patch);
@@ -167,10 +147,9 @@ export function useUpdateGameConfig() {
       return parsedPatch.output;
     },
     onSuccess: async (_, { account }) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: arkHostQueryKeys.detail(account) }),
-        invalidateGameAccountsQuery(queryClient, userId),
-      ]);
+      await queryClient.invalidateQueries({
+        queryKey: arkHostQueryKeys.detail(account),
+      });
     },
   });
 }
@@ -206,7 +185,6 @@ export function useDeleteGame() {
     },
     onSuccess: async (_, account) => {
       queryClient.removeQueries({ queryKey: arkHostQueryKeys.detail(account) });
-      queryClient.removeQueries({ queryKey: arkHostQueryKeys.characters(account) });
       queryClient.removeQueries({ queryKey: arkHostQueryKeys.logs(account) });
       await invalidateGameAccountsQuery(queryClient, userId);
     },
@@ -222,7 +200,7 @@ export function findGameAccountById(
 }
 
 /**
- * Prefetches detail/characters/logs for the accounts adjacent to the active
+ * Prefetches detail/logs for the accounts adjacent to the active
  * selection so a swipe or tap to a neighbor renders from cache. Intentionally
  * limited to the previous and next account only.
  */
@@ -243,7 +221,6 @@ export function useAdjacentGameAccountPrefetch(
     ].filter((account): account is GameAccount => account !== undefined);
     for (const account of adjacentAccounts) {
       void queryClient.prefetchQuery(gameDetailQueryOptions(account.account));
-      void queryClient.prefetchQuery(charactersQueryOptions(account.account));
       void queryClient.prefetchQuery(logsQueryOptions(account.account));
     }
   }, [gameAccounts, gameAccountId, queryClient]);

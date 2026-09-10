@@ -10,6 +10,7 @@ import {
   useDeleteGame,
   useLoginGame,
   usePauseGame,
+  useUpdateGameConfig,
 } from './queries';
 
 function createWrapper() {
@@ -39,6 +40,30 @@ afterEach(async () => {
 });
 
 describe('game account mutations', () => {
+  it('invalidates only the config-owning detail after a config update succeeds', async () => {
+    const updateGameConfig = jest.spyOn(arkHostApi, 'updateGameConfig').mockResolvedValue({
+      data: undefined,
+      ok: true,
+    });
+    const { queryClient, wrapper } = createWrapper();
+    const account = 'G1';
+    const patch = { keeping_ap: 12 };
+    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+    const { result, unmount } = await renderHook(() => useUpdateGameConfig(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ account, patch });
+    });
+
+    expect(updateGameConfig).toHaveBeenCalledWith(account, patch);
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: arkHostQueryKeys.detail(account),
+    });
+    expect(invalidateQueries).toHaveBeenCalledTimes(1);
+    await unmount();
+    queryClient.clear();
+  });
+
   it('routes login and pause mutations to their matching API methods', async () => {
     const loginGame = jest.spyOn(arkHostApi, 'loginGame').mockResolvedValue({
       data: undefined,
@@ -117,9 +142,6 @@ describe('game account mutations', () => {
     expect(deleteGame).toHaveBeenCalledWith(account);
     expect(removeQueries).toHaveBeenCalledWith({
       queryKey: arkHostQueryKeys.detail(account),
-    });
-    expect(removeQueries).toHaveBeenCalledWith({
-      queryKey: arkHostQueryKeys.characters(account),
     });
     expect(removeQueries).toHaveBeenCalledWith({
       queryKey: arkHostQueryKeys.logs(account),

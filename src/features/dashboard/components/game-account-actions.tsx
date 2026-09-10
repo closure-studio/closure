@@ -1,7 +1,7 @@
 import { Pause, Play, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Adapt, Button, Dialog, Sheet, Spinner, Tooltip, XStack, YStack, getTokens, styled, useMedia } from 'tamagui';
+import { Button, Dialog, Sheet, Spinner, Tooltip, XStack, YStack, getTokens, styled, useMedia } from 'tamagui';
 
 import { MonoText, TerminalNotice, TerminalText } from '@/components';
 import { ARK_HOST_GAME_STATUS_CODE } from '@/schemas/arkhost';
@@ -92,18 +92,18 @@ export function GameAccountActions({ account, nickname, statusCode, actionPendin
         </Tooltip>
       </XStack>
       <Dialog modal open={confirmingDelete} onOpenChange={setConfirmingDelete}>
-        <Adapt when={!large} platform="touch">
+        <Dialog.Adapt when={!large}>
           <Sheet modal dismissOnSnapToBottom snapPointsMode="fit">
             <Sheet.Overlay bg="$appScrim" />
             <Sheet.Handle bg="$appBorder" />
-            <Sheet.Frame bg="$appSurfaceStrong" p="$4" pb="$8" gap="$4" borderTopWidth={1} borderColor="$appDangerBorder" rounded="$0">
-              <Adapt.Contents />
+            <Sheet.Frame testID="overview-delete-sheet" bg="$appSurfaceStrong" p="$4" pb="$8" gap="$4" borderTopWidth={1} borderColor="$appDangerBorder" rounded="$0">
+              <Dialog.Adapt.Contents />
             </Sheet.Frame>
           </Sheet>
-        </Adapt>
+        </Dialog.Adapt>
         <Dialog.Portal>
           <Dialog.Overlay bg="$appScrim" />
-          <Dialog.Content width="92%" maxW={420} p="$4" gap="$4" bg="$appSurfaceStrong" borderWidth={1} borderColor="$appDangerBorder" rounded="$0">
+          <Dialog.Content testID="overview-delete-dialog" width="92%" maxW={420} p="$4" gap="$4" bg="$appSurfaceStrong" borderWidth={1} borderColor="$appDangerBorder" rounded="$0">
             <Dialog.Title color="$appText" size="$5">{t('overview.actions.deleteTitle')}</Dialog.Title>
             <Dialog.Description color="$appMuted" size="$2.5">{t('overview.actions.deleteDescription')}</Dialog.Description>
             <YStack gap="$1">
