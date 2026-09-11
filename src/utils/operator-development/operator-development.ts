@@ -25,19 +25,19 @@ const LEVEL_CAPS_BY_RARITY = {
   readonly [number, number | null, number | null]
 >;
 
-const MAX_PHASE_BY_RARITY = {
-  0: 0,
-  1: 0,
-  2: 1,
-  3: 2,
-  4: 2,
-  5: 2,
-} as const satisfies Record<OperatorRarity, OperatorDevelopmentPhase>;
-
 const SKILL_LEVELS = [1, 2, 3, 4, 5, 6, 7] as const satisfies readonly OperatorDevelopmentSkillLevel[];
 
+function getMaxDevelopmentLimit(
+  rarity: OperatorRarity,
+): { phase: OperatorDevelopmentPhase; level: number } {
+  const levelCaps = LEVEL_CAPS_BY_RARITY[rarity];
+  if (levelCaps[2] !== null) return { phase: 2, level: levelCaps[2] };
+  if (levelCaps[1] !== null) return { phase: 1, level: levelCaps[1] };
+  return { phase: 0, level: levelCaps[0] };
+}
+
 export function getMaxDevelopmentPhase(rarity: OperatorRarity): OperatorDevelopmentPhase {
-  return MAX_PHASE_BY_RARITY[rarity];
+  return getMaxDevelopmentLimit(rarity).phase;
 }
 
 export function getDevelopmentLevelCap(
@@ -121,11 +121,7 @@ export function createDefaultDevelopmentTarget(
   operator: OperatorDevelopmentCharacter,
   rarity: OperatorRarity,
 ): OperatorDevelopmentTarget {
-  const evolvePhase = getMaxDevelopmentPhase(rarity);
-  const level = getDevelopmentLevelCap(rarity, evolvePhase);
-  if (level === null) {
-    throw new Error('Operator development limits are internally inconsistent.');
-  }
+  const { phase: evolvePhase, level } = getMaxDevelopmentLimit(rarity);
   const target: OperatorDevelopmentTarget = {
     evolve_phase: evolvePhase,
     level,

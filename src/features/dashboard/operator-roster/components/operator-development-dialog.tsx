@@ -37,7 +37,6 @@ type OperatorDevelopmentDialogProps = {
   isSubmitting: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (target: OperatorDevelopmentTarget | null) => Promise<void>;
-  open: boolean;
   selection: OperatorDevelopmentSelection | null;
 };
 
@@ -192,10 +191,10 @@ function OperatorDevelopmentEditor({
       const range = getDevelopmentLevelRange(operator, rarity, phase);
       if (range === null) return current;
       const skillLevelMax = getDevelopmentSkillLevelMax(operator, phase);
-      let skillLevel = current.skill_level;
-      while (skillLevel > skillLevelMax) {
-        skillLevel = stepDevelopmentSkillLevel(skillLevel, -1, skillLevelMax);
-      }
+      const skillLevel =
+        current.skill_level > skillLevelMax
+          ? skillLevelMax
+          : current.skill_level;
       const next: OperatorDevelopmentTarget = {
         ...current,
         evolve_phase: phase,
@@ -236,23 +235,6 @@ function OperatorDevelopmentEditor({
       return canDevelopMasteries(operator, rarity, next)
         ? next
         : { ...next, masteries: [] };
-    });
-  };
-
-  const setLevel = (value: number) => {
-    if (locked || rarity === null || !Number.isFinite(value)) return;
-    setDraft((current) => {
-      if (current === null) return current;
-      const range = getDevelopmentLevelRange(
-        operator,
-        rarity,
-        current.evolve_phase,
-      );
-      if (range === null) return current;
-      return {
-        ...current,
-        level: Math.max(range.min, Math.min(range.max, Math.round(value))),
-      };
     });
   };
 
@@ -420,7 +402,13 @@ function OperatorDevelopmentEditor({
                             justify="center"
                             disabled={locked || target.level === levelRange.max}
                             testID="operator-development-max-level"
-                            onPress={() => setLevel(levelRange.max)}
+                            onPress={() =>
+                              setDraft((current) =>
+                                current === null
+                                  ? current
+                                  : { ...current, level: levelRange.max },
+                              )
+                            }
                           >
                             <TerminalText
                               size="$2"
@@ -653,10 +641,8 @@ export function OperatorDevelopmentDialog({
   isSubmitting,
   onOpenChange,
   onSubmit,
-  open,
   selection,
 }: OperatorDevelopmentDialogProps) {
-  const dialogOpen = open && selection !== null;
   const editor = selection ? (
     <OperatorDevelopmentEditor
       key={`${selection.operator.charId}:${selection.task ? "planned" : "new"}`}
@@ -673,7 +659,7 @@ export function OperatorDevelopmentDialog({
 
   return (
     <AdaptiveDialog
-      open={dialogOpen}
+      open={selection !== null}
       onOpenChange={onOpenChange}
       testIDPrefix="operator-development"
     >

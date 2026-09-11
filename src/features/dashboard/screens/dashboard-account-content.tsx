@@ -124,11 +124,9 @@ export function DashboardOperatorsContent({
   const troop = detail?.troop;
   const characterTable = useCharacterTable();
   const updateGameConfig = useUpdateGameConfig();
-  const [operatorSelection, setOperatorSelection] = useState<{
-    account: string;
-    charId: string | null;
-  }>({ account: gameAccount.account, charId: null });
-  const [developmentOpen, setDevelopmentOpen] = useState(false);
+  const [selectedOperatorId, setSelectedOperatorId] = useState<string | null>(
+    null,
+  );
   const operators = useMemo(
     () =>
       Object.values(troop?.chars ?? {}).map((operator) => ({
@@ -138,14 +136,11 @@ export function DashboardOperatorsContent({
     [characterTable, troop],
   );
   const selected =
-    (operatorSelection.account === gameAccount.account &&
-    operatorSelection.charId !== null
+    (selectedOperatorId !== null
       ? operators.find(
-          ({ operator }) => operator.charId === operatorSelection.charId,
+          ({ operator }) => operator.charId === selectedOperatorId,
         )
-      : undefined) ??
-    operators[0] ??
-    null;
+      : undefined) ?? null;
   const tasks =
     detail?.config.operator_development_tasks ??
     EMPTY_OPERATOR_DEVELOPMENT_TASKS;
@@ -194,20 +189,12 @@ export function DashboardOperatorsContent({
           operators={operators}
           onSelectOperator={({ operator }) => {
             updateGameConfig.reset();
-            setOperatorSelection({
-              account: gameAccount.account,
-              charId: operator.charId,
-            });
-            setDevelopmentOpen(true);
+            setSelectedOperatorId(operator.charId);
           }}
         />
         <OperatorDevelopmentDialog
           hasError={updateGameConfig.isError}
           isSubmitting={updateGameConfig.isPending}
-          open={
-            developmentOpen &&
-            operatorSelection.account === gameAccount.account
-          }
           selection={
             selected
               ? {
@@ -219,7 +206,9 @@ export function DashboardOperatorsContent({
                 }
               : null
           }
-          onOpenChange={setDevelopmentOpen}
+          onOpenChange={(open) => {
+            if (!open) setSelectedOperatorId(null);
+          }}
           onSubmit={async (target) => {
             if (selected === null) return;
             await submitDevelopmentTarget(selected, target);
