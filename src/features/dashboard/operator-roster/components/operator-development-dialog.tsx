@@ -265,9 +265,7 @@ function OperatorDevelopmentEditor({
       !validateOperatorDevelopmentTarget(operator, rarity, nextTarget)
     )
       return;
-    void onSubmit(nextTarget)
-      .then(() => onOpenChange(false))
-      .catch(() => undefined);
+    void onSubmit(nextTarget).catch(() => undefined);
   };
 
   const phaseMax =
@@ -321,6 +319,8 @@ function OperatorDevelopmentEditor({
             testID="operator-development-close"
             $large={{ display: "none" }}
             aria-label={t("operators.closeDetails")}
+            disabled={isSubmitting}
+            opacity={isSubmitting ? 0.45 : 1}
             onPress={() => onOpenChange(false)}
             hoverStyle={{ bg: "$appSurfaceRaised" }}
             pressStyle={{ opacity: 0.7 }}
@@ -659,6 +659,7 @@ export function OperatorDevelopmentDialog({
 
   return (
     <AdaptiveDialog
+      dismissible={!isSubmitting}
       open={selection !== null}
       onOpenChange={onOpenChange}
       testIDPrefix="operator-development"

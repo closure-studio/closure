@@ -175,10 +175,14 @@ export function DashboardOperatorsContent({
       selectedOperator.operator.charId,
       target,
     );
+    const submittedOperatorId = selectedOperator.operator.charId;
     await updateGameConfig.mutateAsync({
       account: gameAccount.account,
       patch: { operator_development_tasks: nextTasks },
     });
+    setSelectedOperatorId((current) =>
+      current === submittedOperatorId ? null : current,
+    );
   };
 
   return (
@@ -188,6 +192,7 @@ export function DashboardOperatorsContent({
           developmentTaskIds={developmentTaskIds}
           operators={operators}
           onSelectOperator={({ operator }) => {
+            if (updateGameConfig.isPending) return;
             updateGameConfig.reset();
             setSelectedOperatorId(operator.charId);
           }}
@@ -207,7 +212,9 @@ export function DashboardOperatorsContent({
               : null
           }
           onOpenChange={(open) => {
-            if (!open) setSelectedOperatorId(null);
+            if (!open && !updateGameConfig.isPending) {
+              setSelectedOperatorId(null);
+            }
           }}
           onSubmit={async (target) => {
             if (selected === null) return;
