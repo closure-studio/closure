@@ -20,15 +20,30 @@
     "brandSubtitle": "云端无人托管",
     "brandTitle": "可露希尔工作室",
     "sections": {
-      "activity": { "label": "日程", "subtitle": "时间线" },
-      "inventory": { "label": "仓库" },
-      "operators": { "label": "干员", "subtitle": "干员列表" },
-      "overview": { "label": "总览", "subtitle": "概览" },
-      "settings": { "label": "设置", "subtitle": "设置" }
+      "activity": {
+        "label": "日程",
+        "subtitle": "时间线"
+      },
+      "inventory": {
+        "label": "仓库"
+      },
+      "operators": {
+        "label": "干员",
+        "subtitle": "干员列表"
+      },
+      "overview": {
+        "label": "总览",
+        "subtitle": "概览"
+      },
+      "settings": {
+        "label": "设置",
+        "subtitle": "设置"
+      }
     }
   },
   "operators": {
     "cell": {
+      "training": "训练中",
       "eliteLabel": "精英 {{rank}}",
       "levelLabel": "LV",
       "potentialLabel": "潜能 {{rank}}"
@@ -42,6 +57,41 @@
       "proficiency": "专精",
       "skill": "技能",
       "trust": "信赖"
+    },
+    "development": {
+      "masteryNoDowngrade": "目标专精不能低于当前专精。",
+      "masteryValue": "专精{{level}}",
+      "untrained": "未专精",
+      "masteryRequirement": "专精需要目标精英2且技能等级7。",
+      "masteryUnsupported": "该星级不支持技能专精。",
+      "phaseLimit": "该星级最高可培养至精英{{phase}}。",
+      "noDowngrade": "目标精英阶段不能低于当前阶段。",
+      "unknownSkillLevel": "当前技能等级暂未提供",
+      "maxLevel": "满级",
+      "atMax": "已满级",
+      "levelRange": "可选范围 {{min}}–{{max}}",
+      "title": "{{name}} · 培养目标",
+      "add": "加入培养计划",
+      "current": "当前",
+      "currentMastery": "当前：{{level}}",
+      "decreaseLevel": "降低目标等级",
+      "decreaseSkillLevel": "降低目标技能等级",
+      "description": "设置该干员的目标培养状态。",
+      "increaseLevel": "提高目标等级",
+      "increaseSkillLevel": "提高目标技能等级",
+      "level": "目标等级",
+      "levelValue": "LV.{{level}}",
+      "missingRarity": "缺少该干员的星级数据，无法创建培养任务。",
+      "noMastery": "不设置",
+      "noSkills": "暂无技能数据。",
+      "phaseShort": "精{{phase}}",
+      "phaseValue": "精英 {{phase}}",
+      "remove": "移出培养计划",
+      "saveFailed": "培养计划更新失败，请重试。",
+      "saving": "正在提交…",
+      "skill": "技能 {{index}}",
+      "skillLevel": "目标技能等级",
+      "unknown": "未知"
     },
     "accountLevel": "LV.{{level}}",
     "level": "LV {{level}}/{{maxLevel}}",

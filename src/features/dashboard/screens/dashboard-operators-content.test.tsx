@@ -22,6 +22,8 @@ jest.mock('../operator-roster/components/operator-roster-view', () => ({
 it('reads the shared detail cache, refreshes troop data and isolates account switches', async () => {
   const detail = mockArkHostGameDetails[0];
   if (!detail) throw new Error('Expected detail');
+  const initialOperator = Object.values(detail.troop?.chars ?? {})[0];
+  if (!initialOperator) throw new Error('Expected operator');
   const account: GameAccount = {
     account: detail.config.account, ap: detail.status.ap, avatar: detail.status.avatar,
     captchaInfo: { captcha_type: '', challenge: '', created: 0, geetestId: '', gt: '', riskType: '' },
@@ -41,7 +43,7 @@ it('reads the shared detail cache, refreshes troop data and isolates account swi
     <QueryClientProvider client={queryClient}><DashboardOperatorsContent gameAccount={selected} /></QueryClientProvider>
   );
   const screen = await render(content(account));
-  expect(screen.getByTestId('roster').props.children).toContain('char_002_amiya:80');
+  expect(screen.getByTestId('roster').props.children).toContain(`${initialOperator.charId}:80`);
   expect(fetchDetail).not.toHaveBeenCalled();
   await act(async () => { await queryClient.invalidateQueries({ queryKey: arkHostQueryKeys.detail(account.account) }); });
   await waitFor(() => expect(screen.getByTestId('roster').props.children).toBe('char_002_amiya:81'));

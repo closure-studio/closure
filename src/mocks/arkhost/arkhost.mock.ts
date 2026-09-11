@@ -1,5 +1,6 @@
 import * as v from 'valibot';
 
+import rawCharacterTable from '@/assets/data/character_table.json';
 import {
   arkHostGameDetailResponseSchema,
   arkHostGameDetailSchema,
@@ -9,14 +10,42 @@ import {
   type ArkHostGameConfig,
   type ArkHostGameListEntry,
 } from '@/schemas/arkhost';
+import { characterTableSchema } from '@/schemas/game-data';
 
 const MOCK_USER_ID = 'mock-user';
 const MOCK_ACCOUNTS = ['G00000000001', 'G00000000002', 'G00000000003'] as const;
-const MOCK_CHARACTER_IDS = [
-  'char_002_amiya',
-  'char_003_kalts',
-  'char_009_12fce',
-] as const;
+const MOCK_OPERATOR_COUNT = 20;
+const MOCK_SIX_STAR_CHARACTER_IDS = Object.entries(
+  v.parse(characterTableSchema, rawCharacterTable),
+)
+  .filter(([, character]) => character.rarity === 5)
+  .map(([characterId]) => characterId);
+
+if (MOCK_SIX_STAR_CHARACTER_IDS.length < MOCK_OPERATOR_COUNT * MOCK_ACCOUNTS.length) {
+  throw new Error('The bundled character table does not contain enough six-star mock operators.');
+}
+
+function createMockTroopCharacters(accountIndex: number) {
+  const start = accountIndex * MOCK_OPERATOR_COUNT;
+  return Object.fromEntries(
+    MOCK_SIX_STAR_CHARACTER_IDS
+      .slice(start, start + MOCK_OPERATOR_COUNT)
+      .map((charId, operatorIndex) => [
+        `operator-${accountIndex + 1}-${operatorIndex + 1}`,
+        {
+          charId,
+          evolvePhase: 2,
+          level: 80,
+          potentialRank: operatorIndex % 6,
+          skills: [1, 2, 3].map((skillIndex) => ({
+            skillId: `${charId}_skill_${skillIndex}`,
+            specializeLevel: 0,
+            unlock: true,
+          })),
+        },
+      ]),
+  );
+}
 
 const captchaInfo = {
   account: '',
@@ -118,17 +147,7 @@ function gameDetail(entry: ArkHostGameListEntry, index: number) {
       tenGachaTicket: 0,
     },
     troop: {
-      chars: {
-        [`operator-${index + 1}`]: {
-          charId: MOCK_CHARACTER_IDS[index] ?? MOCK_CHARACTER_IDS[0],
-          evolvePhase: index === 0 ? 2 : 0,
-          level: index === 0 ? 80 : 1,
-          potentialRank: 0,
-          skills: index === 0
-            ? [{ skillId: 'skchr_amiya_1', specializeLevel: 0, unlock: true }]
-            : [],
-        },
-      },
+      chars: createMockTroopCharacters(index),
     },
   });
 }
