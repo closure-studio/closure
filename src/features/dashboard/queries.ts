@@ -114,11 +114,6 @@ export function useGameLogsQuery(account: string | null) {
   });
 }
 
-type UpdateGameConfigInput = {
-  account: string;
-  patch: ArkHostGameConfigPatch;
-};
-
 async function invalidateGameAccountsQuery(
   queryClient: ReturnType<typeof useQueryClient>,
   userId: string | undefined,
@@ -129,10 +124,11 @@ async function invalidateGameAccountsQuery(
   });
 }
 
-export function useUpdateGameConfig() {
+export function useUpdateGameConfig(account: string) {
   const queryClient = useQueryClient();
-  return useMutation<ArkHostGameConfigPatch, ArkHostFailure, UpdateGameConfigInput>({
-    mutationFn: async ({ account, patch }) => {
+  return useMutation<void, ArkHostFailure, ArkHostGameConfigPatch>({
+    mutationKey: ['arkhost', 'update-game-config', account],
+    mutationFn: async (patch) => {
       const parsedPatch = v.safeParse(arkHostGameConfigPatchSchema, patch);
       if (!parsedPatch.success) {
         throw new FailureError({
@@ -144,9 +140,8 @@ export function useUpdateGameConfig() {
       unwrapResult(
         await arkHostApi.updateGameConfig(account, parsedPatch.output),
       );
-      return parsedPatch.output;
     },
-    onSuccess: async (_, { account }) => {
+    onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: arkHostQueryKeys.detail(account),
       });

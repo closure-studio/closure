@@ -49,10 +49,10 @@ describe('game account mutations', () => {
     const account = 'G1';
     const patch = { keeping_ap: 12 };
     const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
-    const { result, unmount } = await renderHook(() => useUpdateGameConfig(), { wrapper });
+    const { result, unmount } = await renderHook(() => useUpdateGameConfig(account), { wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ account, patch });
+      await result.current.mutateAsync(patch);
     });
 
     expect(updateGameConfig).toHaveBeenCalledWith(account, patch);

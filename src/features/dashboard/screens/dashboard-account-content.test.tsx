@@ -65,7 +65,7 @@ jest.mock('../operator-roster/components/operator-development-dialog', () => ({
     }: {
       isSubmitting: boolean;
       onOpenChange: (open: boolean) => void;
-      onSubmit: (target: OperatorDevelopmentTarget | null) => Promise<void>;
+      onSubmit: (target: OperatorDevelopmentTarget | null) => void;
       selection: { operator: OperatorViewModel['operator'] } | null;
     }) {
       return selection ? (
@@ -76,7 +76,7 @@ jest.mock('../operator-roster/components/operator-development-dialog', () => ({
           <MockPressable
             testID="submit-development"
             onPress={() => {
-              void onSubmit({
+              onSubmit({
                 evolve_phase: 2,
                 level: 90,
                 masteries: [],

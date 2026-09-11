@@ -36,7 +36,7 @@ type OperatorDevelopmentDialogProps = {
   hasError: boolean;
   isSubmitting: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (target: OperatorDevelopmentTarget | null) => Promise<void>;
+  onSubmit: (target: OperatorDevelopmentTarget | null) => void;
   selection: OperatorDevelopmentSelection | null;
 };
 
@@ -252,20 +252,6 @@ function OperatorDevelopmentEditor({
         masteries: [...masteries, { skill_id: skillId, target_level: level }],
       };
     });
-  };
-
-  const submit = () => {
-    if (isSubmitting) return;
-    const nextTarget = isAdded ? null : draft;
-    if (!isAdded && nextTarget === null) return;
-    if (
-      !isAdded &&
-      rarity !== null &&
-      nextTarget !== null &&
-      !validateOperatorDevelopmentTarget(operator, rarity, nextTarget)
-    )
-      return;
-    void onSubmit(nextTarget).catch(() => undefined);
   };
 
   const phaseMax =
@@ -600,7 +586,7 @@ function OperatorDevelopmentEditor({
             opacity={submitDisabled ? 0.45 : 1}
             hoverStyle={{ opacity: 0.84 }}
             pressStyle={{ opacity: 0.7 }}
-            onPress={submit}
+            onPress={() => onSubmit(isAdded ? null : draft)}
           >
             <XStack items="center" justify="center" gap="$2" maxW="100%">
               {isSubmitting ? (
