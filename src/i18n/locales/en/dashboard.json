@@ -20,15 +20,30 @@
     "brandSubtitle": "CLOUD AUTOMATION",
     "brandTitle": "CLOSURE STUDIO",
     "sections": {
-      "activity": { "label": "Timeline", "subtitle": "TIMELINE" },
-      "inventory": { "label": "Inventory" },
-      "operators": { "label": "Operators", "subtitle": "OPERATORS" },
-      "overview": { "label": "Overview", "subtitle": "OVERVIEW" },
-      "settings": { "label": "Settings", "subtitle": "SETTINGS" }
+      "activity": {
+        "label": "Timeline",
+        "subtitle": "TIMELINE"
+      },
+      "inventory": {
+        "label": "Inventory"
+      },
+      "operators": {
+        "label": "Operators",
+        "subtitle": "OPERATORS"
+      },
+      "overview": {
+        "label": "Overview",
+        "subtitle": "OVERVIEW"
+      },
+      "settings": {
+        "label": "Settings",
+        "subtitle": "SETTINGS"
+      }
     }
   },
   "operators": {
     "cell": {
+      "training": "Training",
       "eliteLabel": "Elite {{rank}}",
       "levelLabel": "LV",
       "potentialLabel": "Potential {{rank}}"
@@ -42,6 +57,41 @@
       "proficiency": "Mastery",
       "skill": "Skill",
       "trust": "Trust"
+    },
+    "development": {
+      "masteryNoDowngrade": "Target mastery cannot be below current mastery.",
+      "masteryValue": "M{{level}}",
+      "untrained": "No mastery",
+      "masteryRequirement": "Mastery requires target Elite 2 and skill level 7.",
+      "masteryUnsupported": "This rarity does not support skill mastery.",
+      "phaseLimit": "This rarity supports up to Elite {{phase}}.",
+      "noDowngrade": "The target elite phase cannot be below the current phase.",
+      "unknownSkillLevel": "Current skill level is not available.",
+      "maxLevel": "Max level",
+      "atMax": "Fully leveled",
+      "levelRange": "Range {{min}}–{{max}}",
+      "title": "{{name}} · Development",
+      "add": "ADD TO DEVELOPMENT PLAN",
+      "current": "Current",
+      "currentMastery": "Current: {{level}}",
+      "decreaseLevel": "Decrease target level",
+      "decreaseSkillLevel": "Decrease target skill level",
+      "description": "Set the target development state for this operator.",
+      "increaseLevel": "Increase target level",
+      "increaseSkillLevel": "Increase target skill level",
+      "level": "Target level",
+      "levelValue": "LV.{{level}}",
+      "missingRarity": "Rarity data is unavailable for this operator, so a development task cannot be created.",
+      "noMastery": "None",
+      "noSkills": "No skill data available.",
+      "phaseShort": "E{{phase}}",
+      "phaseValue": "Elite {{phase}}",
+      "remove": "REMOVE FROM DEVELOPMENT PLAN",
+      "saveFailed": "The development plan could not be updated. Please try again.",
+      "saving": "SAVING…",
+      "skill": "Skill {{index}}",
+      "skillLevel": "Target skill level",
+      "unknown": "Unknown"
     },
     "accountLevel": "LV.{{level}}",
     "level": "LV {{level}}/{{maxLevel}}",

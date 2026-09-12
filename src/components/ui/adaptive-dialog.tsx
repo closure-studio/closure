@@ -14,6 +14,7 @@ import { useBackDismissal } from '@/hooks/use-back-dismissal';
 
 export function AdaptiveDialog({
   children,
+  dismissible = true,
   open,
   onOpenChange,
   testIDPrefix,
@@ -21,6 +22,7 @@ export function AdaptiveDialog({
   wide = false,
 }: {
   children: ReactNode;
+  dismissible?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   testIDPrefix: string;
@@ -29,19 +31,23 @@ export function AdaptiveDialog({
 }) {
   const { large } = useMedia();
   const colors = getTokens().color;
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && !dismissible) return;
+    onOpenChange(nextOpen);
+  };
 
-  useBackDismissal(open, () => onOpenChange(false));
+  useBackDismissal(open, () => handleOpenChange(false));
 
   return (
-    <Dialog modal open={open} onOpenChange={onOpenChange}>
+    <Dialog modal open={open} onOpenChange={handleOpenChange}>
       {trigger ? <Dialog.Trigger asChild>{trigger}</Dialog.Trigger> : null}
 
       <Dialog.Adapt when={!large}>
         <Sheet
           zIndex={200000}
           modal
-          dismissOnSnapToBottom
-          dismissOnOverlayPress
+          dismissOnSnapToBottom={dismissible}
+          dismissOnOverlayPress={dismissible}
           moveOnKeyboardChange
           snapPointsMode="fit"
         >
@@ -96,6 +102,8 @@ export function AdaptiveDialog({
                 r="$3"
                 unstyled
                 p="$1"
+                disabled={!dismissible}
+                opacity={dismissible ? 1 : 0.45}
               >
                 <X size={16} color={colors.appMuted.val} />
               </Button>

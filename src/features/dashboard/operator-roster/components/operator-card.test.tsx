@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react-native';
+import { fireEvent, render } from '@testing-library/react-native';
 import type { ReactElement, ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 import { setMediaState } from '@tamagui/web';
@@ -10,6 +10,12 @@ import type { Operator } from '@/schemas/game-account';
 import { tamaguiConfig } from '../../../../../tamagui.config';
 import { OperatorCard, type OperatorCardLabels } from './operator-card';
 import { getOperatorPortraitUrl } from '../portrait-image';
+
+jest.mock('react-native-reanimated', () => {
+  const actual = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
+  const mock = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated/mock');
+  return { ...actual, ...mock, useReducedMotion: () => true };
+});
 
 jest.mock('expo-image', () => {
   const { View } = jest.requireActual<typeof import('react-native')>('react-native');
@@ -58,6 +64,7 @@ const operator: Operator = v.parse(operatorSchema, {
 });
 
 const labels: OperatorCardLabels = {
+  training: 'Training',
   cellLevel: 'LV',
   detailLevel: 'Level',
   detailPotential: 'Potential',
@@ -87,6 +94,36 @@ async function renderCard(cardOperator: Operator = operator, itemWidth?: number)
 describe('OperatorCard', () => {
   beforeEach(() => {
     setMediaState({ large: false });
+  });
+
+  it.each([false, true])('updates training decoration and accessibility without affecting presses (large=%s)', async (large) => {
+    setMediaState({ large });
+    const onPress = jest.fn();
+    const tree = (training: boolean, charId = operator.charId) => (
+      <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+        <OperatorCard labels={labels} name="阿米娅" operator={{ ...operator, charId }} inDevelopmentPlan={training} onPress={onPress} />
+      </TamaguiProvider>
+    );
+    const screen = await render(tree(false));
+    const originalStyle: unknown = StyleSheet.flatten(screen.getByTestId('operator-card-char_001').props.style);
+    expect(screen.queryByTestId('operator-training-effect', { includeHiddenElements: true })).toBeNull();
+
+    await screen.rerender(tree(true));
+    const card = screen.getByRole('button', { name: '阿米娅, Training' });
+    expect(StyleSheet.flatten(screen.getByTestId('operator-training-effect', { includeHiddenElements: true }).props.style)).toEqual(expect.objectContaining({ pointerEvents: 'none' }));
+    expect(screen.queryByTestId('operator-card-char_001-corner-top-left')).toBeNull();
+    expect(StyleSheet.flatten(card.props.style)).toEqual(originalStyle);
+    expect(StyleSheet.flatten(screen.getByTestId('operator-training-scan', { includeHiddenElements: true }).props.style)).toEqual(expect.objectContaining({ opacity: 0 }));
+    await fireEvent.press(card);
+    expect(onPress).toHaveBeenCalledTimes(1);
+
+    await screen.rerender(tree(true, 'char_002'));
+    expect(screen.queryByTestId('operator-card-char_001')).toBeNull();
+    expect(screen.getAllByTestId('operator-training-effect', { includeHiddenElements: true })).toHaveLength(1);
+    await screen.rerender(tree(false, 'char_002'));
+    expect(screen.queryByTestId('operator-training-effect', { includeHiddenElements: true })).toBeNull();
+    expect(screen.getByRole('button', { name: '阿米娅' })).toBeTruthy();
+    await screen.unmount();
   });
   it('keeps the two required masks and removes redundant portrait wrappers', async () => {
     const screen = await renderCard();

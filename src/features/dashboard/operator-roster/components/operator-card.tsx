@@ -21,6 +21,7 @@ import { Frame, MonoText, TerminalMeterBar, TerminalText } from '@/components';
 import type { Operator } from '@/schemas/game-account';
 import { OPERATOR_PORTRAIT_GEOMETRY } from '../operator-portrait-config';
 import { getOperatorPortraitUrl } from '../portrait-image';
+import { OperatorTrainingEffect } from './operator-training-effect';
 
 export const OPERATOR_CARD_MIN_WIDTH = 140;
 export const OPERATOR_CARD_MIN_HEIGHT = 164;
@@ -117,6 +118,7 @@ const styles = StyleSheet.create({
 });
 
 export type OperatorCardLabels = {
+  training: string;
   cellLevel: string;
   detailLevel: string;
   detailPotential: string;
@@ -191,14 +193,18 @@ function OperatorPortraitBackdrop({ charId }: { charId: string }) {
 }
 
 function SmallOperatorCard({
+  inDevelopmentPlan,
   itemWidth,
   labels,
   name,
+  onPress,
   operator,
 }: {
+  inDevelopmentPlan: boolean;
   itemWidth: number | undefined;
   labels: OperatorCardLabels;
   name: string;
+  onPress?: () => void;
   operator: Operator;
 }) {
   const level = formatLevel(operator.level);
@@ -208,8 +214,18 @@ function SmallOperatorCard({
       testID={`operator-card-${operator.charId}`}
       width={itemWidth ?? '100%'}
       grow={itemWidth === undefined ? 1 : 0}
+      aria-label={inDevelopmentPlan ? `${name}, ${labels.training}` : name}
+      accessible
+      {...(onPress ? {
+        role: 'button' as const,
+        onPress,
+        cursor: 'pointer' as const,
+        hoverStyle: { bg: '$appAccentSubtle' as const },
+        pressStyle: { opacity: 0.8 },
+      } : {})}
     >
       <OperatorPortraitBackdrop charId={operator.charId} />
+      {inDevelopmentPlan ? <OperatorTrainingEffect key={operator.charId} label={labels.training} /> : null}
       <Image
         testID={`operator-card-bottom-transition-${operator.charId}`}
         source={operatorCellBottomTransition}
@@ -283,32 +299,59 @@ function SmallOperatorCard({
 }
 
 export const OperatorCard = memo(function OperatorCard({
+  inDevelopmentPlan = false,
   itemWidth,
   labels,
   name,
+  onPress,
   operator,
 }: {
+  inDevelopmentPlan?: boolean;
   itemWidth?: number | undefined;
   labels: OperatorCardLabels;
   name: string;
+  onPress?: () => void;
   operator: Operator;
 }) {
   const { large } = useMedia();
   const level = operator.level;
 
   if (!large) {
-    return <SmallOperatorCard itemWidth={itemWidth} labels={labels} name={name} operator={operator} />;
+    return (
+      <SmallOperatorCard
+        inDevelopmentPlan={inDevelopmentPlan}
+        itemWidth={itemWidth}
+        labels={labels}
+        name={name}
+        operator={operator}
+        {...(onPress ? { onPress } : {})}
+      />
+    );
   }
 
   return (
     <Frame
       testID={`operator-card-${operator.charId}`}
+      aria-label={inDevelopmentPlan ? `${name}, ${labels.training}` : name}
+      accessible
       minW={OPERATOR_CARD_MIN_WIDTH}
       width={itemWidth ?? '100%'}
       grow={itemWidth === undefined ? 1 : 0}
       shrink={1}
       p="$3"
+      {...(onPress ? {
+        role: 'button' as const,
+        onPress,
+        cursor: 'pointer' as const,
+        hoverStyle: {
+          bg: '$appAccentSubtle' as const,
+          borderColor: '$appAccentBorder' as const,
+        },
+        pressStyle: { opacity: 0.8 },
+      } : {})}
     >
+      {inDevelopmentPlan ? <OperatorTrainingEffect key={operator.charId} label={labels.training} /> : null}
+      <YStack height={23} />
       <TerminalText size="$4" fontWeight="800" numberOfLines={1}>{name}</TerminalText>
       <XStack mt="$2" justify="space-between"><MonoText size="$1">{labels.detailLevel}</MonoText><MonoText size="$1" color="$appAccent">{level}</MonoText></XStack>
       <YStack mt="$1.5"><TerminalMeterBar value={level} max={90} /></YStack>

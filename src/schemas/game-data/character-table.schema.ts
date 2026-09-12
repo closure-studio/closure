@@ -6,7 +6,7 @@ export const characterIdSchema = nonEmptyStringSchema;
 
 export const characterTableEntrySchema = v.object({
   name: nonEmptyStringSchema,
-  rarity: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(5)),
+  rarity: v.picklist([0, 1, 2, 3, 4, 5]),
 });
 
 export const characterTableSchema = v.pipe(

@@ -225,6 +225,31 @@ describe('InventoryView', () => {
     expect(readSvgText(screen.getByTestId('inventory-detail-name'))).toBe('寻访参数模型');
   });
 
+  it('associates the large dialog with the selected item title and description', async () => {
+    setMediaState({ large: true });
+    const screen = await render(
+      <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+        <InventoryView accountId="account-a" inventory={inventory} itemTable={itemTable} />
+      </TamaguiProvider>,
+    );
+
+    await fireEvent(screen.getByTestId('inventory-grid-container'), 'layout', gridLayoutEvent(500));
+    await fireEvent.press(screen.getByTestId('inventory-item-31034'));
+
+    const dialog = screen.getByTestId('inventory-detail-dialog');
+    expect(dialog.props['aria-labelledby']).toBe(screen.getByTestId('inventory-detail-name').props.id);
+    expect(dialog.props['aria-describedby']).toBe(
+      screen.getByTestId('inventory-detail-description').props.id,
+    );
+
+    await fireEvent.press(screen.getByTestId('inventory-item-EPGS_COIN'));
+    expect(dialog.props['aria-labelledby']).toBe(screen.getByTestId('inventory-detail-name').props.id);
+    expect(dialog.props['aria-describedby']).toBe(
+      screen.getByTestId('inventory-detail-quantity').props.id,
+    );
+    expect(screen.queryByTestId('inventory-detail-description')).toBeNull();
+  });
+
   it('reflows matrix columns from the measured container width', async () => {
     const screen = await render(
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
