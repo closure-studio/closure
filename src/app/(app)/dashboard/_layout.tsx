@@ -1,5 +1,6 @@
 import { Tabs as DashboardTabs } from 'expo-router/tabs';
 import { Spinner, useMedia, YStack } from 'tamagui';
+import { useTranslation } from 'react-i18next';
 
 import { MonoText } from '@/components';
 import {
@@ -13,33 +14,31 @@ import {
   dashboardPages,
 } from '@/features/navigation';
 
-function DashboardState({ label }: { label: string }) {
+function DashboardState({ label, loading = false }: { label: string; loading?: boolean }) {
   return (
     <YStack grow={1} items="center" justify="center" gap="$3">
-      <Spinner color="$appAccent" />
+      {loading ? <Spinner color="$appAccent" /> : null}
       <MonoText size="$2">{label}</MonoText>
     </YStack>
   );
 }
 
 function DashboardContent() {
+  const { t } = useTranslation('dashboard');
   const { large } = useMedia();
   const { gameAccountsQuery } = useDashboardAccount();
   const gameAccounts = gameAccountsQuery.data ?? [];
 
-  if (gameAccountsQuery.isPending) return <DashboardState label="LOADING ARKHOST DATA" />;
-  if (gameAccountsQuery.isError) return <DashboardState label="ARKHOST DATA UNAVAILABLE" />;
-  if (gameAccounts.length === 0) return <DashboardState label="NO GAME ACCOUNTS" />;
+  if (gameAccountsQuery.isPending || gameAccountsQuery.isError || gameAccounts.length === 0) {
+    return <DashboardFrame><DashboardState loading={gameAccountsQuery.isPending} label={t(gameAccountsQuery.isPending ? 'connection.loading' : gameAccountsQuery.isError ? 'connection.error' : 'connection.empty')} /></DashboardFrame>;
+  }
 
   return (
     <DashboardFrame>
       <DashboardTabs
-        detachInactiveScreens={false}
         screenOptions={{
           animation: 'shift',
-          freezeOnBlur: false,
           headerShown: false,
-          lazy: true,
           sceneStyle: { backgroundColor: 'transparent' },
         }}
         tabBar={!large

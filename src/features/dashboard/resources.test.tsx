@@ -15,12 +15,13 @@ import {
   useStageTable,
 } from './resources';
 import { mmkvStateStorage } from '@/lib/mmkv';
+import { mockActiveSession } from '@/mocks/auth';
 import { appStore } from '@/store';
 
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
-      queries: { gcTime: 0, retry: false },
+      queries: { gcTime: Infinity, retry: false },
     },
   });
   const wrapper = ({ children }: PropsWithChildren) => (
@@ -42,13 +43,13 @@ function createGameResourcesApi(
 
 function mockGameResourcesApi(api: GameResourcesApi): void {
   jest.spyOn(gameResourcesApi, 'fetchCharacter').mockImplementation(
-    (updatedAt) => api.fetchCharacter(updatedAt),
+    (updatedAt, signal) => api.fetchCharacter(updatedAt, signal),
   );
   jest.spyOn(gameResourcesApi, 'fetchItem').mockImplementation(
-    (updatedAt) => api.fetchItem(updatedAt),
+    (updatedAt, signal) => api.fetchItem(updatedAt, signal),
   );
   jest.spyOn(gameResourcesApi, 'fetchStage').mockImplementation(
-    (updatedAt) => api.fetchStage(updatedAt),
+    (updatedAt, signal) => api.fetchStage(updatedAt, signal),
   );
 }
 
@@ -60,6 +61,7 @@ beforeEach(async () => {
   }
   await act(() => {
     appStore.getState().logout();
+    appStore.getState().selectApiNode('domestic');
   });
 });
 
@@ -129,6 +131,35 @@ describe('Game resource queries', () => {
       expect(remounted.result.current.item).toEqual(bundledItemTable);
     });
     expect(fetchItem).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets a public resource request finish across account and node changes', async () => {
+    const updatedAt = '2026-08-12T10:20:41.000Z';
+    const updatedTable = { item_alpha: { icon: 'ITEM_ALPHA', name: '测试物品甲' } };
+    let complete: (result: Awaited<ReturnType<GameResourcesApi['fetchItem']>>) => void =
+      () => { throw new Error('Resource request did not start.'); };
+    let querySignal: AbortSignal | undefined;
+    const api = createGameResourcesApi({
+      fetchItem: (_current, signal) => {
+        querySignal = signal;
+        return new Promise((resolve) => { complete = resolve; });
+      },
+    });
+    mockGameResourcesApi(api);
+    const { wrapper } = createWrapper();
+    const hook = await renderHook(() => ({ item: useItemTable() }), { wrapper });
+    await waitFor(() => expect(querySignal).toBeDefined());
+
+    await act(() => {
+      appStore.getState().setSession(mockActiveSession);
+      appStore.getState().selectApiNode('overseas');
+    });
+    await act(() => {
+      complete({ kind: 'updated', table: updatedTable, updatedAt });
+    });
+
+    await waitFor(() => expect(hook.result.current.item).toEqual(updatedTable));
+    expect(querySignal?.aborted).toBe(false);
   });
 
   it('persists an updated table and serves it on a fresh mount', async () => {

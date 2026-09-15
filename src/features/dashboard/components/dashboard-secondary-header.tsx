@@ -36,15 +36,22 @@ export function DashboardSecondaryHeader({
   return (
     <YStack testID="dashboard-secondary-header" shrink={0}>
       <TerminalMarquee items={marqueeItems} />
-      <YStack testID="dashboard-account-switcher" display="none" bg="$appSurface" $large={{ display: 'flex' }}>
-        <YStack px="$5" py="$3">
-          <GameAccountSwitcher
-            gameAccounts={gameAccounts}
-            selectedGameAccountId={selectedGameAccountId}
-            onSelectGameAccount={onSelectGameAccount}
-          />
+      {gameAccounts.length > 1 ? (
+        <YStack
+          testID="dashboard-account-switcher"
+          display="none"
+          bg="$appSurface"
+          $large={{ display: 'flex' }}
+        >
+          <YStack px="$5" py="$3">
+            <GameAccountSwitcher
+              gameAccounts={gameAccounts}
+              selectedGameAccountId={selectedGameAccountId}
+              onSelectGameAccount={onSelectGameAccount}
+            />
+          </YStack>
         </YStack>
-      </YStack>
+      ) : null}
     </YStack>
   );
 }

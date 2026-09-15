@@ -26,7 +26,7 @@
   },
   "account": {
     "code": "SET-AUTH / 02",
-    "description": "Review the User Account identity and securely rehearse the password update flow against the current mock server.",
+    "description": "Review your account identity and update your password.",
     "eyebrow": "Identity security",
     "status": "Identity available",
     "title": "Account Security",
@@ -36,6 +36,7 @@
     "registeredAt": "Registered",
     "identityStatus": "Identity status",
     "identityStatuses": {
+      "unverified": "Phone not verified",
       "active": "Active",
       "banned": "Suspended",
       "manually-verified": "Manually verified"

@@ -178,14 +178,16 @@ describe("MockArkHostApi", () => {
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
-  it("unsubscribe cancels a pending reconnect", () => {
-    jest.useFakeTimers();
+  it("removes a listener when its subscription signal is cancelled", () => {
     const api = new MockArkHostApi(0);
-    const subscription = api.subscribe("mock-token", jest.fn());
-    api.simulateTransportClose();
-    expect(jest.getTimerCount()).toBe(1);
-    subscription.unsubscribe();
-    expect(jest.getTimerCount()).toBe(0);
-    jest.useRealTimers();
+    const listener = jest.fn();
+    const controller = new AbortController();
+    api.subscribe("mock-token", listener, controller.signal);
+
+    controller.abort();
+    api.emit({ data: mockArkHostGachaEvents, type: "ssr" });
+
+    expect(api.activeSubscriptionCount).toBe(0);
+    expect(listener).not.toHaveBeenCalled();
   });
 });

@@ -26,7 +26,7 @@
   },
   "account": {
     "code": "SET-AUTH / 02",
-    "description": "查看用户账号身份，并通过当前模拟服务演练安全的密码更新流程。",
+    "description": "查看账号身份并修改密码。",
     "eyebrow": "身份安全",
     "status": "身份信息已就绪",
     "title": "账号安全",
@@ -36,6 +36,7 @@
     "registeredAt": "注册时间",
     "identityStatus": "身份状态",
     "identityStatuses": {
+      "unverified": "未验证手机",
       "active": "正常",
       "banned": "已封禁",
       "manually-verified": "人工验证"

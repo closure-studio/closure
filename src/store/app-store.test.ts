@@ -21,27 +21,55 @@ function createMemoryStorage(
 }
 
 describe('App Store client state', () => {
+  it('persists an environment selected before login', async () => {
+    const { storage } = createMemoryStorage();
+    const store = createAppStore({ storage });
+    store.getState().selectApiNode('overseas');
+    store.getState().setNextRequestMode('mock');
+
+    const restored = createAppStore({ storage });
+    await restored.persist.rehydrate();
+    expect(restored.getState()).toMatchObject({
+      requestMode: 'mock',
+      auth: { session: null },
+      selectedApiNodeId: 'overseas',
+    });
+  });
+
+  it('changes only the next-launch preference', () => {
+    const store = createAppStore({ storage: createMemoryStorage().storage });
+    store.getState().setSession(mockActiveSession);
+
+    store.getState().setNextRequestMode('mock');
+
+    expect(store.getState()).toMatchObject({
+      auth: { session: mockActiveSession },
+      requestMode: 'mock',
+    });
+  });
+
   it('restores the session and node selection', async () => {
     const { storage } = createMemoryStorage();
     const store = createAppStore({ storage });
-
     store.getState().setSession(mockActiveSession);
+
     const rememberedStore = createAppStore({ storage });
     await rememberedStore.persist.rehydrate();
     expect(rememberedStore.getState().auth.session).toEqual(mockActiveSession);
     expect(rememberedStore.getState().selectedApiNodeId).toBe('domestic');
   });
 
-  it('clears the session on logout while keeping the node selection', async () => {
+  it('clears the session on logout while keeping the environment', async () => {
     const { storage } = createMemoryStorage();
     const store = createAppStore({ storage });
-
-    store.getState().setSession(mockActiveSession);
     store.getState().selectApiNode('overseas');
+    store.getState().setNextRequestMode('mock');
+    store.getState().setSession(mockActiveSession);
     store.getState().logout();
 
     expect(store.getState().auth.session).toBeNull();
     expect(store.getState().selectedApiNodeId).toBe('overseas');
+    expect(store.getState().requestMode).toBe('mock');
 
     const rehydratedStore = createAppStore({ storage });
     await rehydratedStore.persist.rehydrate();
@@ -49,71 +77,64 @@ describe('App Store client state', () => {
     expect(rehydratedStore.getState().selectedApiNodeId).toBe('overseas');
   });
 
-  it('validates the API node selection and keeps the current one otherwise', () => {
-    const { storage } = createMemoryStorage();
-    const store = createAppStore({ storage });
-    expect(store.getState().selectedApiNodeId).toBe('domestic');
-
-    store.getState().selectApiNode('overseas');
-    expect(store.getState().selectedApiNodeId).toBe('overseas');
-
-    store.getState().selectApiNode('mars');
-    expect(store.getState().selectedApiNodeId).toBe('overseas');
-  });
-
 });
 
 describe('Persisted store format', () => {
   const emptyState = {
     auth: { session: null },
+    requestMode: 'remote' as const,
     selectedApiNodeId: 'domestic' as const,
   };
 
   it('stores client state under the single app key', () => {
     const { storage, values } = createMemoryStorage();
     const store = createAppStore({ storage });
-
     store.getState().setSession(mockActiveSession);
-
     expect([...values.keys()]).toEqual([APP_STORE_STORAGE_KEY]);
   });
 
-  it('restores valid bare state by wrapping it in the current envelope', async () => {
+  it('defaults a missing startup request mode in the existing envelope', async () => {
     const { storage } = createMemoryStorage({
       [APP_STORE_STORAGE_KEY]: JSON.stringify({
-        auth: { session: mockActiveSession },
-        selectedApiNodeId: 'overseas',
+        state: {
+          auth: { session: mockActiveSession },
+          selectedApiNodeId: 'overseas',
+        },
+        version: 0,
       }),
     });
 
     const store = createAppStore({ storage });
     await store.persist.rehydrate();
-    expect(store.getState().auth.session).toEqual(mockActiveSession);
-    expect(store.getState().selectedApiNodeId).toBe('overseas');
+    expect(store.getState()).toMatchObject({
+      auth: { session: mockActiveSession },
+      requestMode: 'remote',
+      selectedApiNodeId: 'overseas',
+    });
   });
 
-  it('drops stored data that does not match the current shape', async () => {
-    const { storage, values } = createMemoryStorage({
+  it('ignores stored state that does not match the current shape', async () => {
+    const { storage } = createMemoryStorage({
       [APP_STORE_STORAGE_KEY]: JSON.stringify({
-        auth: { session: mockActiveSession },
-        games: null,
-        network: { selectedApiNodeId: 'overseas' },
+        state: {
+          auth: { session: mockActiveSession },
+          games: null,
+          network: { selectedApiNodeId: 'overseas' },
+        },
+        version: 0,
       }),
     });
 
     const store = createAppStore({ storage });
     await store.persist.rehydrate();
-    expect(values.has(APP_STORE_STORAGE_KEY)).toBe(false);
     expect(store.getState()).toMatchObject(emptyState);
   });
 
-  it('clears the app key when the stored value is malformed', () => {
-    const { storage, values } = createMemoryStorage({
+  it('ignores malformed stored values', () => {
+    const { storage } = createMemoryStorage({
       [APP_STORE_STORAGE_KEY]: '{invalid',
     });
-
-    createAppStore({ storage });
-
-    expect(values.has(APP_STORE_STORAGE_KEY)).toBe(false);
+    const store = createAppStore({ storage });
+    expect(store.getState()).toMatchObject(emptyState);
   });
 });

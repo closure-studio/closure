@@ -19,6 +19,7 @@ const TerminalNoticeFrame = styled(XStack, {
   name: 'TerminalNotice',
   minH: '$4',
   px: '$3',
+  py: '$2',
   items: 'center',
   gap: '$2',
   borderLeftWidth: 2,
@@ -79,9 +80,15 @@ export function TerminalNotice({
   const NoticeIcon = tonePresentation.icon;
 
   return (
-    <TerminalNoticeFrame tone={tone}>
+    <TerminalNoticeFrame tone={tone} role={tone === 'danger' ? 'alert' : 'status'} aria-live="polite">
       <NoticeIcon size={14} color={tonePresentation.iconColor} strokeWidth={1.7} />
-      <MonoText size="$1" color={tonePresentation.color} selectable>
+      <MonoText
+        size="$1"
+        flex={1}
+        lineHeight="$2"
+        color={tonePresentation.color}
+        select="text"
+      >
         {children}
       </MonoText>
     </TerminalNoticeFrame>

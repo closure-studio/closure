@@ -6,7 +6,6 @@ import { Button, Dialog, Form, RadioGroup, XStack, YStack, getTokens, useMedia }
 import { Frame, MonoText, TerminalText } from '@/components';
 import type { ArkHostAccelerateSlot, ArkHostBuilding, ArkHostGameConfigPatch } from '@/schemas/arkhost';
 import { AdaptiveEditorDialog, EditorActions } from './adaptive-editor-dialog';
-import { BASE_VIEWBOX, BaseBlueprintArtwork, baseRoomBounds, type BaseArtworkLabels, type BaseRoomType } from './base-blueprint-artwork';
 
 const ACCELERATE_SLOTS = [
   'slot_24',
@@ -19,6 +18,8 @@ const ACCELERATE_SLOTS = [
   'slot_6',
   'slot_7',
 ] as const satisfies readonly ArkHostAccelerateSlot[];
+
+type BaseRoomType = 'MANUFACTURE' | 'POWER' | 'TRADING';
 
 function getRoomType(rooms: ArkHostBuilding['rooms'] | undefined, slot: ArkHostAccelerateSlot): BaseRoomType {
   if (rooms?.TRADING?.[slot]) return 'TRADING';
@@ -33,54 +34,6 @@ function isAccelerateSlotSelectable(
   return getRoomType(rooms, slot) !== 'POWER';
 }
 
-function BaseRoomPreview({ selectedSlot, rooms }: { selectedSlot: ArkHostAccelerateSlot; rooms: ArkHostBuilding['rooms'] | undefined }) {
-  return (
-    <YStack width={100} aspectRatio={BASE_VIEWBOX.width / BASE_VIEWBOX.height} aria-hidden shrink={0}>
-      <BaseBlueprintArtwork roomTypes={ACCELERATE_SLOTS.map(slot => getRoomType(rooms, slot))} selectedIndex={ACCELERATE_SLOTS.indexOf(selectedSlot)} />
-    </YStack>
-  );
-}
-
-function BaseAccelerationCardContent({
-  selectedLabel,
-  selectedSlot,
-  rooms,
-}: {
-  rooms?: ArkHostBuilding['rooms'] | undefined;
-  selectedLabel: string;
-  selectedSlot: ArkHostAccelerateSlot;
-}) {
-  const { t } = useTranslation('dashboard');
-  const colors = getTokens().color;
-
-  return (
-    <>
-      <XStack items="center" justify="space-between" gap="$3" minW={0}>
-        <XStack items="center" gap="$2" minW={0} shrink={1}>
-          <Cpu size={17} color={colors.appMuted.val} />
-          <TerminalText size="$5" fontWeight="800" numberOfLines={1}>
-            {selectedLabel}
-          </TerminalText>
-        </XStack>
-
-        <XStack items="center" gap="$1" shrink={0}>
-          <MonoText size="$2" color="$appAccent">
-            {t('hostingConfig.dialog.edit')}
-          </MonoText>
-          <ChevronRight size={13} color={colors.appAccent.val} />
-        </XStack>
-      </XStack>
-
-      <XStack items="center" justify="space-between" gap="$3" minW={0}>
-        <MonoText size="$2" color="$appMuted" numberOfLines={2} grow={1} minW={0}>
-          {t('hostingConfig.summaries.droneAcceleration', { roomType: selectedLabel })}
-        </MonoText>
-        <BaseRoomPreview selectedSlot={selectedSlot} rooms={rooms} />
-      </XStack>
-    </>
-  );
-}
-
 export function DroneAccelerationSetting({
   rooms,
   value,
@@ -93,21 +46,13 @@ export function DroneAccelerationSetting({
   onSubmit: (patch: ArkHostGameConfigPatch) => Promise<void>;
 }) {
   const { t } = useTranslation('dashboard');
-  const labels: BaseArtworkLabels = {
-    MANUFACTURE: {
-      title: t('hostingConfig.roomTypes.manufacture'),
-      status: t('hostingConfig.roomStatuses.manufacture'),
-    },
-    TRADING: {
-      title: t('hostingConfig.roomTypes.trading'),
-      status: t('hostingConfig.roomStatuses.trading'),
-    },
-    POWER: {
-      title: t('hostingConfig.roomTypes.power'),
-      status: t('hostingConfig.roomStatuses.power'),
-    },
+  const colors = getTokens().color;
+  const labels: Record<BaseRoomType, string> = {
+    MANUFACTURE: t('hostingConfig.roomTypes.manufacture'),
+    TRADING: t('hostingConfig.roomTypes.trading'),
+    POWER: t('hostingConfig.roomTypes.power'),
   };
-  const selectedLabel = labels[getRoomType(rooms, value)].title;
+  const selectedLabel = labels[getRoomType(rooms, value)];
 
   return (
     <AdaptiveEditorDialog
@@ -123,11 +68,23 @@ export function DroneAccelerationSetting({
           hoverStyle={{ bg: '$appSurfaceStrong', borderColor: '$appAccentBorder' }}
           pressStyle={{ opacity: 0.8 }}
         >
-          <BaseAccelerationCardContent
-            rooms={rooms}
-            selectedLabel={selectedLabel}
-            selectedSlot={value}
-          />
+          <XStack items="center" justify="space-between" gap="$3" minW={0}>
+            <XStack items="center" gap="$2" minW={0} shrink={1}>
+              <Cpu size={17} color={colors.appMuted.val} />
+              <TerminalText size="$5" fontWeight="800" numberOfLines={1}>
+                {selectedLabel}
+              </TerminalText>
+            </XStack>
+            <XStack items="center" gap="$1" shrink={0}>
+              <MonoText size="$2" color="$appAccent">
+                {t('hostingConfig.dialog.edit')}
+              </MonoText>
+              <ChevronRight size={13} color={colors.appAccent.val} />
+            </XStack>
+          </XStack>
+          <MonoText size="$2" color="$appMuted" numberOfLines={2}>
+            {t('hostingConfig.summaries.droneAcceleration', { roomType: selectedLabel })}
+          </MonoText>
         </Frame>
       )}
     >
@@ -155,7 +112,7 @@ function DroneAccelerationEditor({
 }: {
   rooms?: ArkHostBuilding['rooms'] | undefined;
   initialValue: ArkHostAccelerateSlot;
-  labels: BaseArtworkLabels;
+  labels: Record<BaseRoomType, string>;
   isSubmitting: boolean;
   onSubmit: (patch: ArkHostGameConfigPatch) => Promise<void>;
   onSaved: () => void;
@@ -206,7 +163,7 @@ type BaseInteractiveSelectorProps = {
   ariaLabel: string;
   disabled?: boolean;
   draftSlot: ArkHostAccelerateSlot;
-  labels: BaseArtworkLabels;
+  labels: Record<BaseRoomType, string>;
   onSelectSlot: (value: ArkHostAccelerateSlot) => void;
 };
 
@@ -219,8 +176,7 @@ function BaseInteractiveSelector({
   rooms,
 }: BaseInteractiveSelectorProps) {
   const getRoomLabel = (slot: ArkHostAccelerateSlot) =>
-    labels[getRoomType(rooms, slot)].title;
-  const selectedIndex = ACCELERATE_SLOTS.indexOf(draftSlot);
+    labels[getRoomType(rooms, slot)];
   return (
     <YStack gap="$2">
       <RadioGroup
@@ -232,47 +188,55 @@ function BaseInteractiveSelector({
         }}
         aria-label={ariaLabel}
       >
-        <YStack position="relative" width="100%" aspectRatio={BASE_VIEWBOX.width / BASE_VIEWBOX.height} opacity={disabled ? 0.45 : 1}>
-          <YStack position="absolute" t={0} l={0} r={0} b={0} aria-hidden style={{ pointerEvents: 'none' }}>
-            <BaseBlueprintArtwork
-              selectedIndex={selectedIndex}
-              roomTypes={ACCELERATE_SLOTS.map(slot => getRoomType(rooms, slot))}
-              labels={labels}
-              animated
-            />
-          </YStack>
-          {ACCELERATE_SLOTS.map((slot, index) => {
-            const room = baseRoomBounds(index);
-            const optionDisabled = disabled || !isAccelerateSlotSelectable(rooms, slot);
-            return (
-              <RadioGroup.Item
-                key={slot}
-                value={slot}
-                id={`hosting-config-slot-${slot}`}
-                aria-label={getRoomLabel(slot)}
-                disabled={optionDisabled}
-                asChild
-                unstyled
-              >
-                <Button
-                  testID={`hosting-config-slot-${slot}`}
-                  unstyled
-                  position="absolute"
-                  l={`${room.x / BASE_VIEWBOX.width * 100}%`}
-                  t={`${room.y / BASE_VIEWBOX.height * 100}%`}
-                  width={`${room.width / BASE_VIEWBOX.width * 100}%`}
-                  height={`${room.height / BASE_VIEWBOX.height * 100}%`}
-                  disabled={optionDisabled}
-                  bg="transparent"
-                  cursor={optionDisabled ? 'default' : 'pointer'}
-                  rounded="$0"
-                  hoverStyle={{ bg: '$appGrid' }}
-                  focusStyle={{ outlineColor: '$appAccent', outlineWidth: 2, borderWidth: 1, borderColor: '$appAccent' }}
-                  pressStyle={{ bg: '$appGrid' }}
-                />
-              </RadioGroup.Item>
-            );
-          })}
+        <YStack gap="$2" opacity={disabled ? 0.45 : 1}>
+          {[0, 3, 6].map((start) => (
+            <XStack key={start} gap="$2">
+              {ACCELERATE_SLOTS.slice(start, start + 3).map((slot) => {
+                const selected = slot === draftSlot;
+                const optionDisabled = disabled || !isAccelerateSlotSelectable(rooms, slot);
+                return (
+                  <RadioGroup.Item
+                    key={slot}
+                    value={slot}
+                    id={`hosting-config-slot-${slot}`}
+                    aria-label={getRoomLabel(slot)}
+                    disabled={optionDisabled}
+                    asChild
+                    unstyled
+                  >
+                    <Button
+                      testID={`hosting-config-slot-${slot}`}
+                      unstyled
+                      grow={1}
+                      minW={0}
+                      minH="$6"
+                      px="$2"
+                      items="center"
+                      justify="center"
+                      borderWidth={1}
+                      borderColor={selected ? '$appAccent' : '$appBorder'}
+                      bg={selected ? '$appAccentSoft' : '$appSurfaceRaised'}
+                      disabled={optionDisabled}
+                      cursor={optionDisabled ? 'default' : 'pointer'}
+                      opacity={optionDisabled ? 0.35 : 1}
+                      hoverStyle={{ borderColor: '$appAccentBorder' }}
+                      pressStyle={{ opacity: 0.7 }}
+                    >
+                      <TerminalText
+                        size="$2"
+                        color={selected ? '$appAccent' : '$appText'}
+                        fontWeight={selected ? '800' : '600'}
+                        text="center"
+                        numberOfLines={2}
+                      >
+                        {getRoomLabel(slot)}
+                      </TerminalText>
+                    </Button>
+                  </RadioGroup.Item>
+                );
+              })}
+            </XStack>
+          ))}
         </YStack>
       </RadioGroup>
       <XStack items="center" gap="$2" borderTopWidth={1} borderColor="$appBorder" pt="$3">

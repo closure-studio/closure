@@ -47,6 +47,7 @@ const TerminalTextFieldFrame = styled(XStack, {
 type TerminalInputProps = ComponentProps<typeof TerminalTextInput>;
 
 type TerminalTextFieldProps = {
+  disabled?: boolean;
   autoComplete?: TerminalInputProps['autoComplete'];
   enterKeyHint?: TerminalInputProps['enterKeyHint'];
   error?: string;
@@ -68,6 +69,7 @@ type TerminalTextFieldProps = {
 export type TerminalTextFieldHandle = ComponentRef<typeof Input>;
 
 export const TerminalTextField = forwardRef<TerminalTextFieldHandle, TerminalTextFieldProps>(function TerminalTextField({
+  disabled = false,
   autoComplete,
   enterKeyHint,
   error,
@@ -114,6 +116,7 @@ export const TerminalTextField = forwardRef<TerminalTextFieldHandle, TerminalTex
           ref={ref}
           id={id}
           value={value}
+          disabled={disabled}
           onChangeText={onChangeText}
           placeholder={placeholder}
           placeholderTextColor="$appMuted"
@@ -131,10 +134,8 @@ export const TerminalTextField = forwardRef<TerminalTextFieldHandle, TerminalTex
           <MonoText
             key={errorId}
             id={errorId}
-            nativeID={errorId}
             size="$2.5"
             color="$appWarning"
-            accessibilityLiveRegion="polite"
             aria-live="polite"
             transition={reducedMotion ? '0ms' : '200ms'}
             enterStyle={reducedMotion ? null : { opacity: 0, y: -2 }}

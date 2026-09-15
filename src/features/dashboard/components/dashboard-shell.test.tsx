@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react-native';
+import { render } from '@testing-library/react-native';
 import { I18nextProvider } from 'react-i18next';
 import { TamaguiProvider, YStack } from 'tamagui';
 
@@ -57,12 +57,11 @@ describe('DashboardShell', () => {
     expect(screen.queryByTestId('dashboard-page-overview')).toBeNull();
   });
 
-  it('keeps account navigation under the large-only style owner', async () => {
-    const onSelectGameAccount = jest.fn();
-    const screen = await render(<DashboardShellTestTree pageId="overview" onSelectGameAccount={onSelectGameAccount} />);
-    expect(screen.getByTestId('dashboard-account-switcher', { includeHiddenElements: true })).toHaveStyle({ display: 'none' });
+  it('hides account navigation on small screens', async () => {
+    const screen = await render(<DashboardShellTestTree pageId="overview" onSelectGameAccount={jest.fn()} />);
 
-    await fireEvent.press(screen.getByTestId('game-account-option-G00000000002', { includeHiddenElements: true }));
-    expect(onSelectGameAccount).toHaveBeenCalledWith('G00000000002');
+    expect(
+      screen.getByTestId('dashboard-account-switcher', { includeHiddenElements: true }),
+    ).toHaveStyle({ display: 'none' });
   });
 });

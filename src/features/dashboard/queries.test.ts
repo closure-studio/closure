@@ -1,37 +1,8 @@
-import * as v from 'valibot';
-
-import { gameAccountSchema, type GameAccount } from '@/schemas/game-account';
 import {
   arkHostQueryKeys,
   gameDetailQueryOptions,
   logsQueryOptions,
-  findGameAccountById,
 } from './queries';
-
-const baseAccount: GameAccount = v.parse(gameAccountSchema, {
-  account: 'BASE',
-  ap: 0,
-  avatar: { id: 'avatar_def_10', type: 'DEFAULT' },
-  captchaInfo: {
-    captcha_type: 'none',
-    challenge: '',
-    created: 0,
-    geetestId: '',
-    gt: '',
-    riskType: '',
-  },
-  color: 'primary',
-  createdAt: 0,
-  isVerified: true,
-  level: 1,
-  nickname: 'Base',
-  platform: 1,
-  statusCode: 0,
-  userId: 'user-1',
-});
-
-const accountA: GameAccount = { ...baseAccount, account: 'A' };
-const accountB: GameAccount = { ...baseAccount, account: 'B' };
 
 describe('arkHostQueryKeys', () => {
   it('scopes detail and logs queries per account', () => {
@@ -60,21 +31,5 @@ describe('account query option factories', () => {
   it('never produces a cross-account cache hit from the same factory', () => {
     expect(gameDetailQueryOptions('A').queryKey).not.toEqual(gameDetailQueryOptions('B').queryKey);
     expect(logsQueryOptions('A').queryKey).not.toEqual(logsQueryOptions('B').queryKey);
-  });
-});
-
-describe('findGameAccountById', () => {
-  it('returns null without an account id', () => {
-    expect(findGameAccountById([accountA, accountB], null)).toBeNull();
-    expect(findGameAccountById(undefined, null)).toBeNull();
-  });
-
-  it('returns null when the id is not in the account list', () => {
-    expect(findGameAccountById([accountA], 'B')).toBeNull();
-    expect(findGameAccountById(undefined, 'B')).toBeNull();
-  });
-
-  it('returns the account matching the selected id', () => {
-    expect(findGameAccountById([accountA, accountB], 'B')).toBe(accountB);
   });
 });

@@ -4,6 +4,7 @@ import type { PropsWithChildren } from 'react';
 
 import { apiNodeApi } from './api';
 import { useApiNodesQuery } from './queries';
+import { mockActiveSession } from '@/mocks/auth';
 import { appStore } from '@/store';
 
 function createWrapper() {
@@ -22,6 +23,7 @@ beforeEach(async () => {
   jest.restoreAllMocks();
   await act(() => {
     appStore.getState().logout();
+    appStore.getState().selectApiNode('domestic');
   });
 });
 
@@ -44,6 +46,33 @@ describe('API Node queries', () => {
       expect(second.result.current.data).toHaveLength(2);
     });
     expect(queryNodes).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets a public node probe finish across account and node changes', async () => {
+    let complete: (result: Awaited<ReturnType<typeof apiNodeApi.queryNodes>>) => void =
+      () => { throw new Error('Node probe did not start.'); };
+    let querySignal: AbortSignal | undefined;
+    jest.spyOn(apiNodeApi, 'queryNodes').mockImplementation((signal) => {
+      querySignal = signal;
+      return new Promise((resolve) => { complete = resolve; });
+    });
+    const { wrapper } = createWrapper();
+    const hook = await renderHook(() => useApiNodesQuery(), { wrapper });
+    await waitFor(() => expect(querySignal).toBeDefined());
+
+    await act(() => {
+      appStore.getState().setSession(mockActiveSession);
+      appStore.getState().selectApiNode('overseas');
+    });
+    await act(() => {
+      complete({
+        data: [{ id: 'domestic', description: 'Domestic', latencyMs: 20, outcome: 'reachable' }],
+        ok: true,
+      });
+    });
+
+    await waitFor(() => expect(hook.result.current.data).toHaveLength(1));
+    expect(querySignal?.aborted).toBe(false);
   });
 
   it('keeps the previous nodes when a refresh fails', async () => {

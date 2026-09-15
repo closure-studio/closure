@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, fireEvent, render } from '@testing-library/react-native';
+import { fireEvent, render } from '@testing-library/react-native';
 import { I18nextProvider } from 'react-i18next';
 import type { ComponentProps } from 'react';
 import { TamaguiProvider } from 'tamagui';
@@ -62,7 +62,7 @@ describe('GameHostingConfigView', () => {
     expect(screen.getByTestId('hosting-config-card-enable-building-arrange')).toBeTruthy();
     expect(screen.getByTestId('hosting-config-card-auto-battle')).toBeTruthy();
     expect(screen.getByTestId('hosting-config-card-ignore-robot')).toBeTruthy();
-    expect(screen.getByTestId('hosting-config-card-allow-login-assist')).toBeTruthy();
+    expect(screen.queryByTestId('hosting-config-card-allow-login-assist')).toBeNull();
     expect(screen.getByTestId('hosting-config-card-drone-acceleration')).toBeTruthy();
     expect(screen.getByTestId('hosting-config-card-battle-maps')).toBeTruthy();
   });
@@ -212,33 +212,6 @@ describe('GameHostingConfigView', () => {
     await fireEvent.press(screen.getByTestId('hosting-config-submit'));
 
     expect(onSubmit).toHaveBeenCalledWith({ keeping_ap: 1 });
-  });
-
-  it('repeats reserve changes while held and stops on release', async () => {
-    jest.useFakeTimers();
-    try {
-      const onSubmit = jest.fn<Promise<void>, [SubmitPatch]>().mockResolvedValue(undefined);
-      const { screen } = await renderConfigView({ onSubmit });
-
-      await fireEvent.press(screen.getByTestId('hosting-config-card-keeping-ap'));
-      const increaseButton = screen.getByTestId('numeric-step-increase');
-
-      await fireEvent(increaseButton, 'pressIn');
-      await fireEvent(increaseButton, 'longPress');
-      await act(() => {
-        jest.advanceTimersByTime(200);
-      });
-      await fireEvent(increaseButton, 'pressOut');
-      await fireEvent(increaseButton, 'press');
-      await act(() => {
-        jest.advanceTimersByTime(200);
-      });
-      await fireEvent.press(screen.getByTestId('hosting-config-submit'));
-
-      expect(onSubmit).toHaveBeenCalledWith({ keeping_ap: 3 });
-    } finally {
-      jest.useRealTimers();
-    }
   });
 
   it('cancels reserve changes without submitting', async () => {

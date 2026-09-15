@@ -4,6 +4,7 @@ import type {
   ArkHostGameListEntry,
   ArkHostGameLogs,
   ArkHostSseEvent,
+  GameCaptchaSubmission,
 } from '@/schemas/arkhost';
 
 export type { ArkHostSseEvent } from '@/schemas/arkhost';
@@ -21,15 +22,17 @@ export type ArkHostSseListener = (event: ArkHostSseEvent) => void;
 export type ArkHostSseSubscription = { unsubscribe: () => void };
 
 export interface ArkHostApi {
-  deleteGame(account: string): Promise<ArkHostResult<void>>;
-  fetchGameDetail(account: string): Promise<ArkHostResult<ArkHostGameDetail | null>>;
-  fetchGameList(): Promise<ArkHostResult<ArkHostGameListEntry[]>>;
-  fetchGameLogs(account: string, afterId: number): Promise<ArkHostResult<ArkHostGameLogs>>;
-  loginGame(account: string): Promise<ArkHostResult<void>>;
-  pauseGame(account: string): Promise<ArkHostResult<void>>;
-  subscribe(accessToken: string, listener: ArkHostSseListener): ArkHostSseSubscription;
+  submitGameCaptcha(account: string, input: GameCaptchaSubmission, signal?: AbortSignal): Promise<ArkHostResult<void>>;
+  deleteGame(account: string, signal?: AbortSignal): Promise<ArkHostResult<void>>;
+  fetchGameDetail(account: string, signal?: AbortSignal): Promise<ArkHostResult<ArkHostGameDetail | null>>;
+  fetchGameList(signal?: AbortSignal): Promise<ArkHostResult<ArkHostGameListEntry[]>>;
+  fetchGameLogs(account: string, afterId: number, signal?: AbortSignal): Promise<ArkHostResult<ArkHostGameLogs>>;
+  loginGame(account: string, signal?: AbortSignal): Promise<ArkHostResult<void>>;
+  pauseGame(account: string, signal?: AbortSignal): Promise<ArkHostResult<void>>;
+  subscribe(accessToken: string, listener: ArkHostSseListener, signal?: AbortSignal): ArkHostSseSubscription;
   updateGameConfig(
     account: string,
     patch: ArkHostGameConfigPatch,
+    signal?: AbortSignal,
   ): Promise<ArkHostResult<void>>;
 }

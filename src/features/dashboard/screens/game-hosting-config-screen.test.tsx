@@ -4,6 +4,8 @@ import { I18nextProvider } from 'react-i18next';
 import { TamaguiProvider } from 'tamagui';
 
 import { i18n } from '@/i18n';
+import { arkHostApi } from '../api';
+import { MockArkHostApi } from '../api/arkhost-api.mock';
 import { mockArkHostGameDetails, mockArkHostGameListResponse } from '@/mocks/arkhost';
 import type { ArkHostGameConfigPatch, ArkHostGameDetail } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
@@ -98,6 +100,8 @@ function renderScreen(
 
 describe('GameHostingConfigScreen', () => {
   beforeEach(() => {
+    const adapter = new MockArkHostApi(0);
+    jest.spyOn(arkHostApi, 'fetchGameDetail').mockImplementation((account, signal) => adapter.fetchGameDetail(account, signal));
     mockResetMutation.mockClear();
     mockMutateAsync.mockClear();
   });

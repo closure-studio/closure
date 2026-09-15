@@ -12,9 +12,11 @@
     "@tamagui/native": "2.7.7",
     "@tamagui/portal": "2.7.7",
     "@tanstack/react-query": "^5.101.4",
+    "eventsource-parser": "^4.1.0",
     "expo": "~57.0.21",
     "expo-blur": "~57.0.2",
     "expo-constants": "~57.0.8",
+    "expo-crypto": "~57.0.3",
     "expo-dev-client": "~57.0.18",
     "expo-device": "~57.0.1",
     "expo-font": "~57.0.1",
@@ -34,6 +36,7 @@
     "react-i18next": "^17.0.11",
     "react-native": "0.86.3",
     "react-native-gesture-handler": "~2.32.0",
+    "react-native-keyboard-controller": "1.21.9",
     "react-native-mmkv": "4.3.2",
     "react-native-nitro-modules": "0.36.5",
     "react-native-pager-view": "8.0.2",
@@ -43,6 +46,7 @@
     "react-native-svg": "15.15.4",
     "react-native-tab-view": "^4.3.2",
     "react-native-web": "~0.21.0",
+    "react-native-webview": "13.16.1",
     "react-native-worklets": "0.10.1",
     "tamagui": "2.7.7",
     "valibot": "^1.4.2",
@@ -96,6 +100,8 @@
       "<rootDir>/tests/mocks/flash-list.tsx"
     ],
     "moduleNameMapper": {
+      "^react-native-keyboard-controller$": "<rootDir>/tests/mocks/react-native-keyboard-controller.tsx",
+      "^react-native-webview$": "<rootDir>/tests/mocks/react-native-webview.tsx",
       "^@/assets/(.*)$": "<rootDir>/assets/$1",
       "^lucide-react-native$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js",
       "^react-native-mmkv$": "<rootDir>/tests/mocks/react-native-mmkv.ts"
@@ -103,7 +109,7 @@
     "preset": "jest-expo",
     "resolver": "<rootDir>/node_modules/react-native-worklets/jest/resolver.js",
     "transformIgnorePatterns": [
-      "/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|tamagui|@tamagui|lucide-react-native|immer))",
+      "/node_modules/(?!(.pnpm|eventsource-parser|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|tamagui|@tamagui|lucide-react-native|immer))",
       "/node_modules/react-native-reanimated/plugin/",
       "/node_modules/@react-native/babel-preset/"
     ]

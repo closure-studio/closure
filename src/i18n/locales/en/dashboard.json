@@ -1,4 +1,5 @@
 {
+  "connection": { "loading": "Loading game accounts", "error": "Unable to load game accounts", "empty": "No game accounts" },
   "account": {
     "accountIdentifierLabel": "GAME ACCOUNT / ACCOUNT",
     "accountIdentifierPlaceholder": "Phone / email / username",
@@ -137,7 +138,6 @@
     "title": "Logs"
   },
   "hostingConfig": {
-    "allowLoginAssist": "Login assistance",
     "autoBattle": "Auto battle",
     "battleQueue": "Auto Battle Stages",
     "enableBuildingArrange": "Automatic base shifts",
@@ -162,8 +162,7 @@
       "permits": "Permits"
     },
     "status": {
-      "default": "Default",
-      "maintenance": "Maintenance"
+      "default": "Default"
     },
     "card": {
       "defaultStage": "Used when no stages are set",
@@ -176,7 +175,6 @@
       "enableBuildingArrange": "Rotates Operators and schedules rest. Other base jobs still run when off.",
       "isAutoBattle": "Automatically runs your selected stages to spend sanity. Turning it off keeps your stage list.",
       "recruitIgnoreRobot": "Skips tags that guarantee a 1-star Robot. A Robot can still appear.",
-      "allowLoginAssist": "Login assistance is under maintenance and cannot be changed yet.",
       "droneAcceleration": "Drone acceleration is currently assigned to the {{roomType}}.",
       "battleMaps": "Runs the first open stage from the top of your list."
     },
@@ -185,11 +183,6 @@
       "recruitReserve": "Set how many Recruitment Permits to keep. ArkHost will not start a new recruitment when your permit count is at or below this number. Set it to 0 to allow every permit to be used.",
       "droneAcceleration": "Choose the room type ArkHost should prioritize for Drone acceleration.",
       "battleMaps": "Put the stages you want to farm most at the top. ArkHost repeats the first open stage in the list. If the list is empty or every stage is closed, it temporarily runs 1-7."
-    },
-    "roomStatuses": {
-      "power": "Generating",
-      "manufacture": "Producing",
-      "trading": "Acquiring"
     },
     "roomTypes": {
       "manufacture": "Factory",

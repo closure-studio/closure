@@ -1,48 +1,74 @@
 import { useMutation } from '@tanstack/react-query';
-import * as v from 'valibot';
 
-import {
-  loginSubmissionSchema,
-  passwordRecoveryRequestInputSchema,
-} from '@/schemas/auth';
 import type {
-  LoginSubmission,
-  PasswordRecoveryRequestInput,
+  AuthFormSubmission,
+  EmailCodeRequestInput,
+  LinuxDoLoginInput,
   UserSession,
 } from '@/schemas/auth';
 import type { PasswordChangeInput } from '@/schemas/user-account';
+import type { PostLoginDestination } from '@/routing/auth-routing';
+import { requestScope } from '@/services/request-scope';
 import { appStore } from '@/store';
 import { FailureError, unwrapResult } from '@/utils/failure-error';
 import { authApi, type AuthFailure } from './api';
 
-function invalidInputFailure(): AuthFailure {
-  return { code: 'invalid-input', kind: 'business' };
-}
+type LinuxDoSubmission = {
+  kind: 'linuxdo';
+  returnTo: PostLoginDestination;
+} & LinuxDoLoginInput;
 
-export function useLogin() {
-  return useMutation<UserSession, AuthFailure, LoginSubmission>({
-    mutationFn: async (submission) => {
-      const parsedSubmission = v.safeParse(loginSubmissionSchema, submission);
-      if (!parsedSubmission.success) throw new FailureError(invalidInputFailure());
-      return unwrapResult(
-        await authApi.login(parsedSubmission.output.credentials),
-      );
-    },
-    onSuccess: (session) => {
-      appStore.getState().setSession(session);
+type AuthSubmission = AuthFormSubmission | LinuxDoSubmission;
+type AuthSubmissionVariables = {
+  signal: AbortSignal;
+  submission: AuthSubmission;
+};
+type EmailCodeVariables = {
+  signal: AbortSignal;
+  input: EmailCodeRequestInput;
+};
+
+export type AuthSubmissionResult =
+  | { kind: 'password-reset'; email: string }
+  | { kind: 'session'; returnTo: PostLoginDestination | null; session: UserSession };
+
+export function useAuthSubmission() {
+  return useMutation<AuthSubmissionResult, Error, AuthSubmissionVariables>({
+    mutationKey: ['auth', 'submission'],
+    mutationFn: async ({ signal, submission }) => {
+      if (submission.kind === 'reset-password') {
+        unwrapResult(await authApi.resetPassword({
+          code: submission.code, email: submission.email, password: submission.password,
+        }, signal));
+        return { email: submission.email, kind: 'password-reset' };
+      }
+
+      let session: UserSession;
+      let returnTo: PostLoginDestination | null = null;
+      if (submission.kind === 'login') {
+        session = unwrapResult(await authApi.login({
+          identifier: submission.identifier, password: submission.password,
+        }, signal));
+      } else if (submission.kind === 'register') {
+        session = unwrapResult(await authApi.register({
+          code: submission.code, email: submission.email, password: submission.password,
+        }, signal));
+      } else {
+        session = unwrapResult(await authApi.loginWithLinuxDo({
+          code: submission.code, code_verifier: submission.code_verifier,
+        }, signal));
+        returnTo = submission.returnTo;
+      }
+      return { kind: 'session', returnTo, session };
     },
   });
 }
 
-export function usePasswordRecovery() {
-  return useMutation<undefined, AuthFailure, PasswordRecoveryRequestInput>({
-    mutationFn: async (input) => {
-      const parsedInput = v.safeParse(passwordRecoveryRequestInputSchema, input);
-      if (!parsedInput.success) throw new FailureError(invalidInputFailure());
-      unwrapResult(
-        await authApi.requestPasswordRecovery(parsedInput.output),
-      );
-      return undefined;
+export function useEmailCode() {
+  return useMutation<void, Error, EmailCodeVariables>({
+    mutationKey: ['auth', 'email-code'],
+    mutationFn: async ({ signal, input }) => {
+      unwrapResult(await authApi.requestEmailCode(input, signal));
     },
   });
 }
@@ -50,17 +76,16 @@ export function usePasswordRecovery() {
 export function useUpdatePassword() {
   return useMutation<boolean, AuthFailure, PasswordChangeInput>({
     mutationFn: async (input) => {
-      const session = appStore.getState().auth.session;
-      if (!session) {
-        throw new FailureError({ code: 'session-expired', kind: 'business' });
-      }
-      const result = await authApi.updatePassword({
+      const signal = requestScope();
+      const state = appStore.getState();
+      const session = state.auth.session;
+      if (!session) throw new FailureError({ code: 'session-expired', kind: 'business' });
+      unwrapResult(await authApi.updatePassword({
         accessToken: session.accessToken,
         currentPassword: input.currentPassword,
         email: session.principal.email,
         newPassword: input.newPassword,
-      });
-      unwrapResult(result);
+      }, signal));
       return true;
     },
   });

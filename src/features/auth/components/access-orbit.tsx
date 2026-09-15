@@ -20,7 +20,7 @@ export function AccessOrbit({ label, nodeId }: { label: string; nodeId: string }
   const { large } = useMedia();
   const reducedMotion = useReducedMotion();
   const rotation = useSharedValue(0);
-  const size = large ? 430 : 144;
+  const size = large ? 360 : 112;
   const center = size / 2;
 
   useEffect(() => {
@@ -48,9 +48,9 @@ export function AccessOrbit({ label, nodeId }: { label: string; nodeId: string }
       height={size}
       items="center"
       justify="center"
-      r={large ? -20 : -40}
-      t={large ? -30 : -80}
-      opacity={0.58}
+      r={large ? -10 : -20}
+      t={large ? 110 : -24}
+      opacity={large ? 0.4 : 0.18}
       style={{ pointerEvents: 'none' }}
     >
       <Animated.View style={[{ position: 'absolute', width: size, height: size }, rotationStyle]}>

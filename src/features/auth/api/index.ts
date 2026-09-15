@@ -1,5 +1,3 @@
-import { MockAuthAdapter } from './auth-adapter.mock';
-
 export type {
   AuthAdapter,
   AuthBusinessFailureCode,
@@ -7,5 +5,4 @@ export type {
   AuthResult,
 } from './auth-adapter';
 export { MockAuthAdapter } from './auth-adapter.mock';
-
-export const authApi = new MockAuthAdapter();
+export { authApi } from '@/services/api';

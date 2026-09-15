@@ -14,15 +14,18 @@ Presentational UI <- props
         ^
 Screen / Route
    ├── App Store <-> Zustand Persist <-> MMKV
-   │     client state and client workflows
+   │     cross-screen client state and transitions
+   │
+   ├── Feature Hook
+   │     local interaction and temporary operation lifecycles
    │
    └── Feature Query Layer <-> Server
          server state, cache, mutations and SSE
 ```
 
-- The App Store is the single owner of client state and client workflows; screens and routes read it through selectors and call its actions.
-- The Feature Query Layer (TanStack Query) is the single owner of server state: cache, mutations, and SSE updates.
-- Store actions own client workflows; query hooks, options, and mutations own server operations.
+- The App Store is the single owner of client state shared across screens and its state transitions; screens and routes read it through selectors and call its actions.
+- The owning feature hook manages local interaction and temporary operation lifecycles, including cancellation on view changes or unmount.
+- The Feature Query Layer (TanStack Query) is the single owner of server state: cache, mutations, and SSE updates; query hooks, options, and mutations own server operations.
 - Screens never call the API service or MMKV directly; presentational UI receives values and callbacks through props and never imports the Store, query layer, services, or MMKV.
 - Combine Store and Query state in the owning feature hook, not in every Route.
 - Never mirror state across the boundary: no Query -> Store and no Store -> Query copies.

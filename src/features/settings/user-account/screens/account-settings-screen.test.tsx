@@ -12,7 +12,6 @@ const principal = {
   id: 'user-closure-01',
   permission: 112,
   registeredAt: '2025-01-14T08:30:00.000Z',
-  slotLimit: 3,
   status: 'active',
 } satisfies SessionPrincipal;
 

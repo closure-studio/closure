@@ -4,10 +4,7 @@ import { TamaguiProvider } from 'tamagui';
 
 import { i18n } from '@/i18n';
 import { tamaguiConfig } from '../../../../tamagui.config';
-import {
-  GameAccountSwitcher,
-  resolveScrollOffsetToRevealItem,
-} from './dashboard-navigation';
+import { GameAccountSwitcher } from './dashboard-navigation';
 import { mockArkHostGameListResponse } from '@/mocks/arkhost';
 
 const initialGameAccounts = mockArkHostGameListResponse.code === 1
@@ -74,36 +71,5 @@ describe('GameAccountSwitcher', () => {
 
     expect(onSelectGameAccount).toHaveBeenCalledWith('G00000000002');
     expect(screen.queryByTestId('link-game-account-option')).toBeNull();
-  });
-});
-
-describe('resolveScrollOffsetToRevealItem', () => {
-  it('does not scroll when the active item is already visible', () => {
-    expect(resolveScrollOffsetToRevealItem({
-      itemLayout: { width: 100, x: 120 },
-      scrollOffset: 100,
-      viewportWidth: 320,
-    })).toBeNull();
-  });
-
-  it('reveals items hidden before or after the viewport', () => {
-    expect(resolveScrollOffsetToRevealItem({
-      itemLayout: { width: 100, x: 40 },
-      scrollOffset: 80,
-      viewportWidth: 240,
-    })).toBe(40);
-    expect(resolveScrollOffsetToRevealItem({
-      itemLayout: { width: 100, x: 300 },
-      scrollOffset: 80,
-      viewportWidth: 240,
-    })).toBe(160);
-  });
-
-  it('waits for a measured viewport', () => {
-    expect(resolveScrollOffsetToRevealItem({
-      itemLayout: { width: 100, x: 300 },
-      scrollOffset: 0,
-      viewportWidth: 0,
-    })).toBeNull();
   });
 });

@@ -20,9 +20,9 @@ export type GameResourceResult<T> =
   | { kind: 'unavailable' };
 
 export interface GameResourcesApi {
-  fetchCharacter(updatedAt: string | null): Promise<GameResourceResult<CharacterTable>>;
-  fetchItem(updatedAt: string | null): Promise<GameResourceResult<ItemTable>>;
-  fetchStage(updatedAt: string | null): Promise<GameResourceResult<StageTable>>;
+  fetchCharacter(updatedAt: string | null, signal?: AbortSignal): Promise<GameResourceResult<CharacterTable>>;
+  fetchItem(updatedAt: string | null, signal?: AbortSignal): Promise<GameResourceResult<ItemTable>>;
+  fetchStage(updatedAt: string | null, signal?: AbortSignal): Promise<GameResourceResult<StageTable>>;
 }
 
 export type GameResourceResponse = {
@@ -34,7 +34,7 @@ export type GameResourceResponse = {
 
 export type GameResourceFetch = (
   input: string,
-  init: { headers: Record<string, string> },
+  init: { headers: Record<string, string>; signal?: AbortSignal },
 ) => Promise<GameResourceResponse>;
 
 const GAME_RESOURCE_BASE_URL = `${ARK_RESOURCES_ORIGIN}/data`;
@@ -45,13 +45,16 @@ async function fetchTable<T>(
   updatedAt: string | null,
   schema: v.GenericSchema<unknown, T>,
   request: GameResourceFetch,
+  signal?: AbortSignal,
 ): Promise<GameResourceResult<T>> {
   try {
     const headers: Record<string, string> = {};
     if (updatedAt !== null) {
       headers['If-Modified-Since'] = new Date(updatedAt).toUTCString();
     }
-    const response = await request(`${GAME_RESOURCE_BASE_URL}/${fileName}`, { headers });
+    const response = await request(`${GAME_RESOURCE_BASE_URL}/${fileName}`, {
+      headers, ...(signal ? { signal } : {}),
+    });
     if (response.status === NOT_MODIFIED_STATUS) return { kind: 'not-modified' };
     if (!response.ok) return { kind: 'unavailable' };
 
@@ -78,15 +81,15 @@ async function fetchTable<T>(
 export class RemoteGameResourcesApi implements GameResourcesApi {
   constructor(private readonly request: GameResourceFetch = fetch) {}
 
-  fetchCharacter(updatedAt: string | null) {
-    return fetchTable('character_table.json', updatedAt, characterTableSchema, this.request);
+  fetchCharacter(updatedAt: string | null, signal?: AbortSignal) {
+    return fetchTable('character_table.json', updatedAt, characterTableSchema, this.request, signal);
   }
 
-  fetchItem(updatedAt: string | null) {
-    return fetchTable('item_table.json', updatedAt, itemTableSchema, this.request);
+  fetchItem(updatedAt: string | null, signal?: AbortSignal) {
+    return fetchTable('item_table.json', updatedAt, itemTableSchema, this.request, signal);
   }
 
-  fetchStage(updatedAt: string | null) {
-    return fetchTable('stage_table.json', updatedAt, stageTableSchema, this.request);
+  fetchStage(updatedAt: string | null, signal?: AbortSignal) {
+    return fetchTable('stage_table.json', updatedAt, stageTableSchema, this.request, signal);
   }
 }

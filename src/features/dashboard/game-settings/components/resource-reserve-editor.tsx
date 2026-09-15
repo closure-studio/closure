@@ -1,15 +1,12 @@
 import { ChevronRight, Minus, Plus, Ticket, Zap } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Dialog, Form, XStack, YStack, getTokens, useMedia } from 'tamagui';
 
 import { Frame, MonoText, TerminalText } from '@/components';
 import type { ArkHostGameConfigPatch } from '@/schemas/arkhost';
 import { AdaptiveEditorDialog, EditorActions } from './adaptive-editor-dialog';
-
-const LONG_PRESS_DELAY_MS = 400;
-const REPEAT_INTERVAL_MS = 100;
 
 type ResourceReserveField = 'keeping_ap' | 'recruit_reserve';
 
@@ -29,37 +26,6 @@ const FIELD_META = {
   testID: string;
   valueTestID: string;
 }>;
-
-function useRepeatingPress(action: () => void) {
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const didLongPressRef = useRef(false);
-
-  const stopRepeating = () => {
-    if (intervalRef.current !== null) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  };
-
-  useEffect(() => stopRepeating, []);
-
-  return {
-    delayLongPress: LONG_PRESS_DELAY_MS,
-    onLongPress: () => {
-      didLongPressRef.current = true;
-      action();
-      intervalRef.current = setInterval(action, REPEAT_INTERVAL_MS);
-    },
-    onPress: () => {
-      if (!didLongPressRef.current) action();
-    },
-    onPressIn: () => {
-      stopRepeating();
-      didLongPressRef.current = false;
-    },
-    onPressOut: stopRepeating,
-  };
-}
 
 type ResourceReserveSettingProps = {
   field: ResourceReserveField;
@@ -148,8 +114,6 @@ function ReserveEditor({
   const colors = getTokens().color;
   const { large } = useMedia();
   const [value, setValue] = useState(initialValue);
-  const decrease = useRepeatingPress(() => setValue((current) => Math.max(0, current - 1)));
-  const increase = useRepeatingPress(() => setValue((current) => current + 1));
   const hasChanges = value !== initialValue;
 
   const handleSubmit = () => {
@@ -180,7 +144,7 @@ function ReserveEditor({
           opacity={value === 0 || isSubmitting ? 0.35 : 1}
           hoverStyle={{ bg: '$appAccentSoft' }} pressStyle={{ bg: '$appAccentSoft' }}
           disabled={value === 0 || isSubmitting}
-          {...decrease}
+          onPress={() => setValue((current) => Math.max(0, current - 1))}
         ><Minus size={18} color={colors.appAccent.val} /></Button>
 
         <XStack testID={testID} grow={1} minW={0} items="center" justify="center" gap="$1.5" borderLeftWidth={1} borderRightWidth={1} borderColor="$appBorder">
@@ -193,7 +157,7 @@ function ReserveEditor({
           aria-label={t('hostingConfig.dialog.increase')}
           unstyled width={56} height={56} p="$0" items="center" justify="center" shrink={0}
           hoverStyle={{ bg: '$appAccentSoft' }} pressStyle={{ bg: '$appAccentSoft' }} disabled={isSubmitting}
-          {...increase}
+          onPress={() => setValue((current) => current + 1)}
         ><Plus size={18} color={colors.appAccent.val} /></Button>
       </XStack>
 

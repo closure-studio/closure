@@ -15,6 +15,7 @@ const sessionPrincipalStatusSchema = v.picklist([
   'banned',
   'active',
   'manually-verified',
+  'unverified',
 ]);
 
 const sessionPrincipalSchema = v.object({
@@ -22,7 +23,6 @@ const sessionPrincipalSchema = v.object({
   id: v.pipe(v.string(), v.minLength(1)),
   permission: v.pipe(v.number(), v.integer(), v.minValue(0)),
   registeredAt: v.pipe(v.string(), v.isoTimestamp()),
-  slotLimit: v.pipe(v.number(), v.integer(), v.minValue(0)),
   status: sessionPrincipalStatusSchema,
 });
 

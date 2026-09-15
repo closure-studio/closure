@@ -3,16 +3,18 @@ import type { Href } from 'expo-router';
 import { ROUTES } from '@/constants/routes';
 import type { UserSession } from '@/schemas/auth';
 
-type PostLoginDestination = Extract<Href, string>;
+export type PostLoginDestination = Extract<Href, string>;
 
 const DEFAULT_POST_LOGIN_DESTINATION = ROUTES.dashboard satisfies PostLoginDestination;
 
-function isPostLoginDestination(pathname: string): pathname is PostLoginDestination {
+export function isPostLoginDestination(pathname: string): pathname is PostLoginDestination {
   if (!pathname.startsWith('/') || pathname.startsWith('//')) return false;
 
   const [path = ''] = pathname.split(/[?#]/, 1);
   const pathWithoutTrailingSlash = path.replace(/\/+$/, '');
   return pathWithoutTrailingSlash !== ROUTES.login
+    && pathWithoutTrailingSlash !== ROUTES.linuxDoCallback
+    && pathWithoutTrailingSlash !== `/(auth)${ROUTES.linuxDoCallback}`
     && pathWithoutTrailingSlash !== ROUTES.groupedLogin;
 }
 
