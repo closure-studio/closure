@@ -2,6 +2,7 @@ import { type MutationStatus } from '@tanstack/react-query';
 import {
   CalendarClock,
   KeyRound,
+  LogOut,
   Mail,
   ShieldCheck,
   UserRound,
@@ -12,14 +13,17 @@ import { useTranslation } from 'react-i18next';
 import * as v from 'valibot';
 import {
   Button,
+  Dialog,
   Form,
   Spinner,
   XStack,
   YStack,
   getTokens,
+  useMedia,
 } from 'tamagui';
 
 import {
+  AdaptiveDialog,
   MonoText,
   SectionPageHeader,
   Frame,
@@ -43,6 +47,7 @@ type PasswordIssue = (typeof passwordChangeIssue)[keyof typeof passwordChangeIss
 type PasswordErrors = Partial<Record<PasswordField, PasswordIssue>>;
 
 export type AccountSettingsScreenProps = {
+  onLogout: () => void;
   onUpdatePassword: (input: PasswordChangeInput) => Promise<boolean>;
   passwordUpdateError: AuthFailure | null;
   passwordUpdateStatus: MutationStatus;
@@ -201,7 +206,116 @@ function AccountIdentityPanel({
   );
 }
 
+function AccountLogoutButton({ onLogout }: { onLogout: () => void }) {
+  const { t } = useTranslation('settings');
+  const { t: tCommon } = useTranslation('common');
+  const colors = getTokens().color;
+  const { large } = useMedia();
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
+
+  if (large) return null;
+
+  const handleLogout = () => {
+    setConfirmingLogout(false);
+    onLogout();
+  };
+
+  return (
+    <AdaptiveDialog
+      open={confirmingLogout}
+      onOpenChange={setConfirmingLogout}
+      testIDPrefix="account-logout"
+      trigger={(
+        <Button
+          unstyled
+          testID="account-logout-trigger"
+          width="100%"
+          minH="$4.5"
+          px="$3"
+          flexDirection="row"
+          items="center"
+          justify="center"
+          gap="$2"
+          rounded="$0"
+          borderWidth={1}
+          borderColor="$appDangerBorder"
+          bg="$appDangerSoft"
+          hoverStyle={{ borderColor: '$appDanger', bg: '$appDangerSoft' }}
+          pressStyle={{ opacity: 0.7 }}
+          focusVisibleStyle={{ borderColor: '$appDanger' }}
+          aria-label={tCommon('actions.logout')}
+        >
+          <LogOut size={16} color={colors.appDanger.val} strokeWidth={1.8} />
+          <TerminalText size="$3" color="$appDanger" fontWeight="700">
+            {tCommon('actions.logout')}
+          </TerminalText>
+        </Button>
+      )}
+    >
+      <YStack gap="$4">
+        <YStack gap="$2" pr="$5">
+          <Dialog.Title
+            size="$5"
+            color="$appText"
+            fontFamily="$heading"
+            fontWeight="800"
+          >
+            {t('account.logout.confirmTitle')}
+          </Dialog.Title>
+          <Dialog.Description size="$2.5" lineHeight="$3" color="$appMuted">
+            {t('account.logout.confirmDescription')}
+          </Dialog.Description>
+        </YStack>
+
+        <XStack gap="$2.5">
+          <Button
+            unstyled
+            testID="account-logout-cancel"
+            grow={1}
+            minH="$4.5"
+            items="center"
+            justify="center"
+            borderWidth={1}
+            borderColor="$appBorder"
+            bg="$appSurfaceRaisedTranslucent"
+            hoverStyle={{ bg: '$appSurfaceRaised' }}
+            pressStyle={{ opacity: 0.7 }}
+            onPress={() => setConfirmingLogout(false)}
+          >
+            <TerminalText size="$2.5" fontWeight="700">
+              {tCommon('actions.cancel')}
+            </TerminalText>
+          </Button>
+          <Button
+            unstyled
+            testID="account-logout-confirm"
+            grow={1}
+            minH="$4.5"
+            flexDirection="row"
+            items="center"
+            justify="center"
+            gap="$2"
+            borderWidth={1}
+            borderColor="$appDanger"
+            bg="$appDanger"
+            hoverStyle={{ opacity: 0.88 }}
+            pressStyle={{ opacity: 0.7 }}
+            focusVisibleStyle={{ borderColor: '$appText' }}
+            onPress={handleLogout}
+          >
+            <LogOut size={15} color={colors.appBackground.val} strokeWidth={2} />
+            <TerminalText size="$2.5" color="$appBackground" fontWeight="800">
+              {t('account.logout.confirm')}
+            </TerminalText>
+          </Button>
+        </XStack>
+      </YStack>
+    </AdaptiveDialog>
+  );
+}
+
 export function AccountSettingsScreen({
+  onLogout,
   onUpdatePassword,
   passwordUpdateError,
   passwordUpdateStatus,
@@ -434,8 +548,9 @@ export function AccountSettingsScreen({
             </Form>
           </YStack>
         </XStack>
-      </YStack>
 
+        <AccountLogoutButton onLogout={onLogout} />
+      </YStack>
     </SettingsPage>
   );
 }

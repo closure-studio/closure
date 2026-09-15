@@ -1,4 +1,5 @@
 import { fireEvent, render } from '@testing-library/react-native';
+import { setMediaState } from '@tamagui/web';
 import { I18nextProvider } from 'react-i18next';
 import { TamaguiProvider } from 'tamagui';
 
@@ -6,6 +7,10 @@ import { i18n } from '@/i18n';
 import { tamaguiConfig } from '../../../../../tamagui.config';
 import { AccountSettingsScreen } from './account-settings-screen';
 import type { SessionPrincipal } from '@/schemas/auth';
+
+jest.mock('@/hooks/use-back-dismissal', () => ({
+  useBackDismissal: jest.fn(),
+}));
 
 const principal = {
   email: 'doctor@rhodes.is',
@@ -28,10 +33,12 @@ jest.mock('react-native-reanimated', () => {
 });
 
 async function renderAccountSettings() {
-  return render(
+  const onLogout = jest.fn();
+  const screen = await render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <I18nextProvider i18n={i18n}>
         <AccountSettingsScreen
+          onLogout={onLogout}
           onUpdatePassword={jest.fn<Promise<boolean>, [Parameters<React.ComponentProps<typeof AccountSettingsScreen>['onUpdatePassword']>[0]]>().mockResolvedValue(true)}
           passwordUpdateError={null}
           passwordUpdateStatus="idle"
@@ -40,11 +47,16 @@ async function renderAccountSettings() {
       </I18nextProvider>
     </TamaguiProvider>,
   );
+  return { onLogout, screen };
 }
 
 describe('AccountSettingsScreen', () => {
+  beforeEach(() => {
+    setMediaState({ large: false });
+  });
+
   it('shows field-level validation and clears an issue when its field changes', async () => {
-    const screen = await renderAccountSettings();
+    const { screen } = await renderAccountSettings();
     const submitButton = screen.getByTestId('account-password-submit');
     const currentPasswordError = i18n.t('settings:account.validation.currentPasswordRequired');
 
@@ -63,7 +75,7 @@ describe('AccountSettingsScreen', () => {
   });
 
   it('reports mismatched new passwords on the confirmation field', async () => {
-    const screen = await renderAccountSettings();
+    const { screen } = await renderAccountSettings();
     const passwordInputs = screen.getAllByPlaceholderText(
       i18n.t('settings:account.passwordPlaceholder'),
     );
@@ -81,5 +93,37 @@ describe('AccountSettingsScreen', () => {
     await fireEvent.press(screen.getByTestId('account-password-submit'));
 
     expect(screen.getByText(`// ${mismatchError}`)).toBeTruthy();
+  });
+
+  it('requires confirmation before logging out', async () => {
+    const { onLogout, screen } = await renderAccountSettings();
+
+    expect(screen.queryByTestId('account-logout-panel')).toBeNull();
+    await fireEvent.press(screen.getByTestId('account-logout-trigger'));
+
+    expect(screen.getByTestId('account-logout-sheet')).toBeTruthy();
+    expect(screen.getByText(i18n.t('settings:account.logout.confirmTitle'))).toBeTruthy();
+    expect(onLogout).not.toHaveBeenCalled();
+
+    await fireEvent.press(screen.getByTestId('account-logout-confirm'));
+
+    expect(onLogout).toHaveBeenCalledTimes(1);
+  });
+
+  it('cancels logout without ending the session', async () => {
+    const { onLogout, screen } = await renderAccountSettings();
+
+    await fireEvent.press(screen.getByTestId('account-logout-trigger'));
+    await fireEvent.press(screen.getByTestId('account-logout-cancel'));
+
+    expect(onLogout).not.toHaveBeenCalled();
+  });
+
+  it('leaves logout to the sidebar on large screens', async () => {
+    setMediaState({ large: true });
+
+    const { screen } = await renderAccountSettings();
+
+    expect(screen.queryByTestId('account-logout-trigger')).toBeNull();
   });
 });
