@@ -43,7 +43,8 @@ const WEB_TARGET_BY_ORIGIN = new Map<string, LinuxDoTarget>([
   ['http://localhost:8081', 'web-local-expo'],
   ['https://closure.ltsc.vip', 'web'],
 ]);
-export const linuxDoAvailable = Boolean(process.env.EXPO_PUBLIC_LINUXDO_CLIENT_ID?.trim());
+export const linuxDoAvailable = typeof process.env.EXPO_PUBLIC_LINUXDO_CLIENT_ID === 'string'
+  && process.env.EXPO_PUBLIC_LINUXDO_CLIENT_ID.trim().length > 0;
 
 function failure(code: AuthAuthorizationFailureCode) {
   return new FailureError({ kind: 'authorization', code } satisfies AuthFailure);
@@ -139,7 +140,9 @@ export async function beginLinuxDoAuthorization(
   signal: AbortSignal,
   returnTo: PostLoginDestination,
 ): Promise<LinuxDoAuthorizationResult> {
-  const clientId = process.env.EXPO_PUBLIC_LINUXDO_CLIENT_ID?.trim();
+  const clientId = typeof process.env.EXPO_PUBLIC_LINUXDO_CLIENT_ID === 'string'
+    ? process.env.EXPO_PUBLIC_LINUXDO_CLIENT_ID.trim()
+    : undefined;
   if (!clientId) throw failure('oauth-unavailable');
   if (signal.aborted) throw failure('oauth-cancelled');
 

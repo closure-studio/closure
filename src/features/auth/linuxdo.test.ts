@@ -37,7 +37,9 @@ jest.mock('expo-web-browser', () => ({
   openAuthSessionAsync: jest.fn(),
 }));
 
-const originalClientId = process.env.EXPO_PUBLIC_LINUXDO_CLIENT_ID;
+const originalClientId = typeof process.env.EXPO_PUBLIC_LINUXDO_CLIENT_ID === 'string'
+  ? process.env.EXPO_PUBLIC_LINUXDO_CLIENT_ID
+  : undefined;
 const originalPlatform = Platform.OS;
 const verifier = Array.from({ length: 32 }, (_value, index) =>
   index.toString(16).padStart(2, '0'),
