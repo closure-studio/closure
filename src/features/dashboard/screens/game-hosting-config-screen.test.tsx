@@ -59,22 +59,16 @@ const secondGameAccount: GameAccount = {
   userId: secondGameAccountEntry.status.uuid,
 };
 
-type MutationInput = {
-  account: string;
-  patch: ArkHostGameConfigPatch;
-};
-
-const mockResetMutation = jest.fn();
-const mockMutateAsync = jest.fn((_input: MutationInput) => Promise.resolve(undefined));
+const mockMutateAsync = jest.fn((_patch: ArkHostGameConfigPatch) => Promise.resolve(undefined));
+const mockUseUpdateGameConfig = jest.fn((_account: string) => ({
+  error: null,
+  mutateAsync: mockMutateAsync,
+  status: 'idle',
+}));
 
 jest.mock('../queries', () => ({
   ...jest.requireActual<typeof import('../queries')>('../queries'),
-  useUpdateGameConfig: () => ({
-    error: null,
-    mutateAsync: mockMutateAsync,
-    reset: mockResetMutation,
-    status: 'idle',
-  }),
+  useUpdateGameConfig: (account: string) => mockUseUpdateGameConfig(account),
 }));
 
 function renderScreen(
@@ -100,10 +94,11 @@ function renderScreen(
 
 describe('GameHostingConfigScreen', () => {
   beforeEach(() => {
+    jest.restoreAllMocks();
     const adapter = new MockArkHostApi(0);
     jest.spyOn(arkHostApi, 'fetchGameDetail').mockImplementation((account, signal) => adapter.fetchGameDetail(account, signal));
-    mockResetMutation.mockClear();
     mockMutateAsync.mockClear();
+    mockUseUpdateGameConfig.mockClear();
   });
 
   it('connects the selected account to the existing config mutation', async () => {
@@ -117,9 +112,8 @@ describe('GameHostingConfigScreen', () => {
     await fireEvent.press(screen.getByTestId('hosting-config-submit'));
 
     await waitFor(() => {
-      const input = mockMutateAsync.mock.calls[0]?.[0];
-      expect(input?.account).toBe(firstGameAccount.account);
-      expect(input?.patch.keeping_ap).toBe(8);
+      expect(mockUseUpdateGameConfig).toHaveBeenCalledWith(firstGameAccount.account);
+      expect(mockMutateAsync).toHaveBeenCalledWith({ keeping_ap: 8 });
     });
   });
 
@@ -133,9 +127,9 @@ describe('GameHostingConfigScreen', () => {
     expect(screen.getByText(i18n.t('actions.retry', { ns: 'common' }))).toBeTruthy();
   });
 
-  it('resets the mutation and reads the new account building when selection changes', async () => {
+  it('binds the mutation and reads the new account building when selection changes', async () => {
     const screen = await renderScreen();
-    expect(mockResetMutation).toHaveBeenCalled();
+    expect(mockUseUpdateGameConfig).toHaveBeenCalledWith(firstGameAccount.account);
     await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));
     await waitFor(() => {
       expect(screen.getByTestId('hosting-config-slot-slot_5')).toHaveAccessibleName(
@@ -159,7 +153,7 @@ describe('GameHostingConfigScreen', () => {
     );
 
     await waitFor(() => {
-      expect(mockResetMutation).toHaveBeenCalledTimes(2);
+      expect(mockUseUpdateGameConfig).toHaveBeenCalledWith(secondGameAccount.account);
       expect(screen.getByTestId('hosting-config-card-drone-acceleration')).toBeTruthy();
     });
     await fireEvent.press(screen.getByTestId('hosting-config-card-drone-acceleration'));

@@ -4,7 +4,12 @@ import type { PropsWithChildren } from 'react';
 
 import { mockActiveSession, mockAdminSession } from '@/mocks/auth';
 import { appStore } from '@/store';
-import { arkHostQueryKeys, useSessionQueryCacheReset } from './queries';
+import { arkHostApi } from './api';
+import {
+  arkHostQueryKeys,
+  useArkHostSync,
+  useSessionQueryCacheReset,
+} from './queries';
 
 const API_NODES_QUERY_KEY = ['api-nodes'] as const;
 const GAME_RESOURCES_QUERY_KEY = ['game-resources', 'item'] as const;
@@ -22,6 +27,7 @@ function createWrapper() {
 }
 
 beforeEach(async () => {
+  jest.restoreAllMocks();
   await act(() => {
     appStore.getState().logout();
     appStore.getState().selectApiNode('domestic');
@@ -84,6 +90,29 @@ describe('useSessionQueryCacheReset', () => {
     });
     expect(queryClient.getQueryData(GAME_RESOURCES_QUERY_KEY)).toEqual({
       table: 'public-resource',
+    });
+  });
+
+  it('unsubscribes from the authenticated event stream on logout', async () => {
+    const unsubscribe = jest.fn();
+    const subscribe = jest.spyOn(arkHostApi, 'subscribe').mockReturnValue({ unsubscribe });
+    const { wrapper } = createWrapper();
+    await act(() => {
+      appStore.getState().setSession(mockActiveSession);
+    });
+    await renderHook(() => useArkHostSync(), { wrapper });
+
+    expect(subscribe).toHaveBeenCalledWith(
+      mockActiveSession.accessToken,
+      expect.any(Function),
+    );
+
+    await act(() => {
+      appStore.getState().logout();
+    });
+
+    await waitFor(() => {
+      expect(unsubscribe).toHaveBeenCalledTimes(1);
     });
   });
 

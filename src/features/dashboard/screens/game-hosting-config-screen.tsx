@@ -1,5 +1,4 @@
 import { RefreshCw } from 'lucide-react-native';
-import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Spinner, XStack, YStack, getTokens } from 'tamagui';
 
@@ -7,7 +6,6 @@ import { MonoText, TerminalNotice } from '@/components';
 import { DashboardPageFrame } from '../components/dashboard-shell';
 import { GameHostingConfigView } from '../components/game-hosting-config-view';
 import type { ArkHostFailure } from '../api';
-import type { ArkHostGameConfigPatch } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
 import { FailureError } from '@/utils/failure-error';
 import { useGameDetailQuery, useUpdateGameConfig } from '../queries';
@@ -44,23 +42,14 @@ export function GameHostingConfigScreen({ gameAccount }: { gameAccount: GameAcco
   const { t } = useTranslation('dashboard');
   const { t: tCommon } = useTranslation('common');
   const colors = getTokens().color;
+  const account = gameAccount.account;
   const {
     error,
     mutateAsync,
-    reset,
     status,
-  } = useUpdateGameConfig();
-  const account = gameAccount.account;
+  } = useUpdateGameConfig(account);
   const detailQuery = useGameDetailQuery(account);
   const detail = detailQuery.data;
-
-  useEffect(() => {
-    reset();
-  }, [account, reset]);
-
-  const handleSubmit = useCallback((patch: ArkHostGameConfigPatch) => {
-    return mutateAsync({ account, patch }).then(() => undefined);
-  }, [account, mutateAsync]);
 
   const errorKey = getConfigErrorKey(error ?? null);
 
@@ -108,7 +97,7 @@ export function GameHostingConfigScreen({ gameAccount }: { gameAccount: GameAcco
         config={detail.config}
         rooms={detail.building?.rooms}
         isSubmitting={status === 'pending'}
-        onSubmit={handleSubmit}
+        onSubmit={mutateAsync}
         submitError={errorKey ? t(errorKey) : null}
       />
     </DashboardPageFrame>

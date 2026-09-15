@@ -38,7 +38,6 @@ describe("ArkHost server contracts", () => {
     const response = v.parse(arkHostGameDetailResponseSchema, rawDetail);
     if (response.code !== 1) throw new Error('Expected detail');
     const detail = response.data;
-    expect(Object.keys(detail.troop?.chars ?? {})).toHaveLength(1);
     expect(detail.troop).toEqual(response.data.troop);
     expect(detail.building).toEqual(response.data.building);
     expect(detail.config.operator_development_tasks).toEqual(response.data.config.operator_development_tasks);

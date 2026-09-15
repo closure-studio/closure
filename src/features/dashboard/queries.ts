@@ -4,6 +4,7 @@ import * as v from 'valibot';
 
 import {
   ARK_HOST_GAME_STATUS_CODE,
+  arkHostGameConfigPatchSchema,
   gameCaptchaUpdateSchema,
 } from '@/schemas/arkhost';
 import type {
@@ -14,7 +15,7 @@ import type {
 } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
 import { appStore, useAppStore } from '@/store';
-import { unwrapResult } from '@/utils/failure-error';
+import { FailureError, unwrapResult } from '@/utils/failure-error';
 import { arkHostApi, type ArkHostFailure, type ArkHostSseSubscription } from './api';
 import { assertActive, inRequestScope, requestScope } from '@/services/request-scope';
 
@@ -106,11 +107,6 @@ export function useGameLogsQuery(account: string | null) {
   });
 }
 
-type UpdateGameConfigInput = {
-  account: string;
-  patch: ArkHostGameConfigPatch;
-};
-
 async function invalidateGameAccountsQuery(
   queryClient: ReturnType<typeof useQueryClient>,
   userId: string | undefined,
@@ -121,19 +117,27 @@ async function invalidateGameAccountsQuery(
   });
 }
 
-export function useUpdateGameConfig() {
+export function useUpdateGameConfig(account: string) {
   const scope = requestScope();
   const queryClient = useQueryClient();
-  return useMutation<ArkHostGameConfigPatch, ArkHostFailure, UpdateGameConfigInput, AbortSignal>({
+  return useMutation<void, ArkHostFailure, ArkHostGameConfigPatch, AbortSignal>({
+    mutationKey: ['arkhost', 'update-game-config', account],
     onMutate: () => scope,
-    mutationFn: async ({ account, patch }) => {
+    mutationFn: async (patch) => {
       assertActive(scope);
+      const parsedPatch = v.safeParse(arkHostGameConfigPatchSchema, patch);
+      if (!parsedPatch.success) {
+        throw new FailureError({
+          code: 'operation-rejected',
+          diagnosticMessage: 'Invalid game config patch.',
+          kind: 'business',
+        });
+      }
       unwrapResult(
-        await arkHostApi.updateGameConfig(account, patch, scope),
+        await arkHostApi.updateGameConfig(account, parsedPatch.output, scope),
       );
-      return patch;
     },
-    onSuccess: async (_, { account }, scope) => {
+    onSuccess: async (_, _patch, scope) => {
       if (!scope || scope.aborted) return;
       await queryClient.invalidateQueries({
         queryKey: arkHostQueryKeys.detail(account),

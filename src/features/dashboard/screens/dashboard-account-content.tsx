@@ -1,29 +1,36 @@
-import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
+import { YStack } from "tamagui";
 
-import { ARK_HOST_GAME_STATUS_CODE } from '@/schemas/arkhost';
-import type { GameAccount } from '@/schemas/game-account';
-import { GameAccountActions } from '../components/game-account-actions';
-import { DashboardPageFrame } from '../components/dashboard-shell';
-import { GameAccountOverviewView } from '../components/game-account-overview-view';
-import { getCharacterDisplayName, getStageDisplayParts } from '../game-data';
-import { EMPTY_INVENTORY, InventoryView } from '../inventory/components/inventory-view';
-import { OperatorRosterView } from '../operator-roster/components/operator-roster-view';
+import { ARK_HOST_GAME_STATUS_CODE } from "@/schemas/arkhost";
+import type { GameAccount } from "@/schemas/game-account";
+import { GameAccountActions } from "../components/game-account-actions";
+import { DashboardPageFrame } from "../components/dashboard-shell";
+import { GameAccountOverviewView } from "../components/game-account-overview-view";
+import { getStageDisplayParts } from "../game-data";
+import {
+  EMPTY_INVENTORY,
+  InventoryView,
+} from "../inventory/components/inventory-view";
+import { OperatorDevelopmentDialog } from "../operator-roster/components/operator-development-dialog";
+import {
+  OperatorRosterView,
+} from "../operator-roster/components/operator-roster-view";
+import { useOperatorDevelopment } from "../operator-roster/use-operator-development";
 import {
   useDeleteGame,
   useGameDetailQuery,
   useGameLogsQuery,
   useLoginGame,
   usePauseGame,
-} from '../queries';
-import {
-  useCharacterTable,
-  useItemTable,
-  useStageTable,
-} from '../resources';
+} from "../queries";
+import { useItemTable, useStageTable } from "../resources";
 
-export function DashboardOverviewContent({ gameAccount }: { gameAccount: GameAccount }) {
-  const { t } = useTranslation('dashboard');
+export function DashboardOverviewContent({
+  gameAccount,
+}: {
+  gameAccount: GameAccount;
+}) {
+  const { t } = useTranslation("dashboard");
   const deleteGame = useDeleteGame();
   const loginGame = useLoginGame();
   const pauseGame = usePauseGame();
@@ -32,8 +39,8 @@ export function DashboardOverviewContent({ gameAccount }: { gameAccount: GameAcc
   const stageTable = useStageTable();
   const stageDisplay = getStageDisplayParts(
     stageTable,
-    detailQuery.data?.config.current_map ?? '',
-    '—',
+    detailQuery.data?.config.current_map ?? "",
+    "—",
   );
 
   return (
@@ -51,12 +58,16 @@ export function DashboardOverviewContent({ gameAccount }: { gameAccount: GameAcc
           statusCode={gameAccount.statusCode}
           actionPending={loginGame.isPending || pauseGame.isPending}
           deletePending={deleteGame.isPending}
-          error={deleteGame.isError || loginGame.isError || pauseGame.isError
-            ? t('overview.actions.failed')
-            : null}
+          error={
+            deleteGame.isError || loginGame.isError || pauseGame.isError
+              ? t("overview.actions.failed")
+              : null
+          }
           onToggle={() => {
             deleteGame.reset();
-            if (gameAccount.statusCode === ARK_HOST_GAME_STATUS_CODE.notStarted) {
+            if (
+              gameAccount.statusCode === ARK_HOST_GAME_STATUS_CODE.notStarted
+            ) {
               pauseGame.reset();
               loginGame.mutate(gameAccount.account);
             } else {
@@ -75,7 +86,11 @@ export function DashboardOverviewContent({ gameAccount }: { gameAccount: GameAcc
   );
 }
 
-export function DashboardInventoryContent({ gameAccount }: { gameAccount: GameAccount }) {
+export function DashboardInventoryContent({
+  gameAccount,
+}: {
+  gameAccount: GameAccount;
+}) {
   const detail = useGameDetailQuery(gameAccount.account).data;
   const itemTable = useItemTable();
 
@@ -90,20 +105,29 @@ export function DashboardInventoryContent({ gameAccount }: { gameAccount: GameAc
   );
 }
 
-export function DashboardOperatorsContent({ gameAccount }: { gameAccount: GameAccount }) {
-  const troop = useGameDetailQuery(gameAccount.account).data?.troop;
-  const characterTable = useCharacterTable();
-  const operators = useMemo(
-    () => Object.values(troop?.chars ?? {}).map((operator) => ({
-      name: getCharacterDisplayName(characterTable, operator.charId),
-      operator,
-    })),
-    [characterTable, troop],
-  );
+export function DashboardOperatorsContent({
+  gameAccount,
+}: {
+  gameAccount: GameAccount;
+}) {
+  const operatorDevelopment = useOperatorDevelopment(gameAccount.account);
 
   return (
     <DashboardPageFrame flushBottom>
-      <OperatorRosterView operators={operators} />
+      <YStack width="100%" grow={1} minH={0}>
+        <OperatorRosterView
+          developmentTaskIds={operatorDevelopment.developmentTaskIds}
+          operators={operatorDevelopment.operators}
+          onSelectOperator={operatorDevelopment.selectOperator}
+        />
+        <OperatorDevelopmentDialog
+          hasError={operatorDevelopment.hasError}
+          isSubmitting={operatorDevelopment.isSubmitting}
+          selection={operatorDevelopment.selection}
+          onOpenChange={operatorDevelopment.setOpen}
+          onSubmit={operatorDevelopment.submitTarget}
+        />
+      </YStack>
     </DashboardPageFrame>
   );
 }

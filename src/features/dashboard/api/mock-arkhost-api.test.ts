@@ -37,7 +37,7 @@ describe("MockArkHostApi", () => {
     ]);
     expect(games.ok && games.data).toHaveLength(3);
     expect(detail.ok && detail.data?.inventory?.["31034"]).toBe(12);
-    expect(detail.ok && Object.keys(detail.data?.troop?.chars ?? {})).toHaveLength(1);
+    expect(detail.ok && Object.keys(detail.data?.troop?.chars ?? {})).toHaveLength(20);
     expect(logs.ok && logs.data.logs).toHaveLength(1);
   });
 
@@ -49,9 +49,9 @@ describe("MockArkHostApi", () => {
       api.fetchGameDetail("G00000000003"),
       api.fetchGameDetail("G99999999999"),
     ]);
-    expect(primary.ok && Object.keys(primary.data?.troop?.chars ?? {})).toHaveLength(1);
-    expect(secondary.ok && Object.keys(secondary.data?.troop?.chars ?? {})).toHaveLength(1);
-    expect(tertiary.ok && Object.keys(tertiary.data?.troop?.chars ?? {})).toHaveLength(1);
+    expect(primary.ok && Object.keys(primary.data?.troop?.chars ?? {})).toHaveLength(20);
+    expect(secondary.ok && Object.keys(secondary.data?.troop?.chars ?? {})).toHaveLength(20);
+    expect(tertiary.ok && Object.keys(tertiary.data?.troop?.chars ?? {})).toHaveLength(20);
     expect(unknown.ok && unknown.data).toBeNull();
   });
 
@@ -61,7 +61,7 @@ describe("MockArkHostApi", () => {
     if (!first.ok || !first.data?.troop) throw new Error('Expected troop');
     first.data.troop.chars = {};
     const second = await api.fetchGameDetail('G00000000001');
-    expect(second.ok && Object.keys(second.data?.troop?.chars ?? {})).toHaveLength(1);
+    expect(second.ok && Object.keys(second.data?.troop?.chars ?? {})).toHaveLength(20);
     await api.updateGameConfig('G00000000002', { keeping_ap: 42 });
     const secondary = await api.fetchGameDetail('G00000000002');
     expect(secondary.ok && secondary.data?.config.keeping_ap).toBe(42);

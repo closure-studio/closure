@@ -6,6 +6,7 @@ import * as v from 'valibot';
 import { i18n } from '@/i18n';
 import { operatorSchema } from '@/schemas/game-account';
 import type { Operator } from '@/schemas/game-account';
+import type { OperatorDevelopmentCharacter } from '@/utils/operator-development/operator-development';
 import { tamaguiConfig } from '../../../../../tamagui.config';
 import { OperatorRosterView, type OperatorViewModel } from './operator-roster-view';
 
@@ -36,7 +37,7 @@ const namesByCharId: Record<string, string> = {
 
 const operatorViewModels: OperatorViewModel[] = operators.map((operator) => ({
   name: namesByCharId[operator.charId] ?? operator.charId,
-  operator,
+  operator: { ...operator, skills: [] } satisfies OperatorDevelopmentCharacter,
 }));
 
 function gridLayoutEvent(width: number) {

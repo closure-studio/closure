@@ -1,7 +1,7 @@
 import { FlashList } from '@shopify/flash-list';
 import { PackageOpen } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
-import { XStack, YStack, getTokens, useMedia } from 'tamagui';
+import { Dialog, XStack, YStack, getTokens, useMedia } from 'tamagui';
 
 import { AdaptiveDialog, ItemArtwork, MonoText, ResponsiveGridRow, TerminalText } from '@/components';
 import { getResponsiveGridLayout, useResponsiveGridRows } from '@/hooks/use-responsive-grid-rows';
@@ -30,6 +30,17 @@ function getItemDescription(value: string | null | undefined): string | undefine
 
 function InventoryDetails({ entry }: { entry: InventoryEntry }) {
   const description = getItemDescription(entry.item.description);
+  const quantity = (
+    <MonoText
+      testID="inventory-detail-quantity"
+      shrink={0}
+      size="$2"
+      color="$appAccent"
+      $large={{ size: '$2.5' }}
+    >
+      {formatInventoryQuantity(entry.quantity)}
+    </MonoText>
+  );
 
   return (
     <XStack
@@ -47,33 +58,35 @@ function InventoryDetails({ entry }: { entry: InventoryEntry }) {
       />
       <YStack grow={1} shrink={1} minW={0} gap="$1.5">
         <XStack items="baseline" gap="$2" minW={0}>
-          <TerminalText
-            testID="inventory-detail-name"
-            grow={1}
-            shrink={1}
-            minW={0}
-            size="$4"
-            lineHeight="$5"
-            fontWeight="800"
-            numberOfLines={1}
-            $large={{ size: '$5', lineHeight: '$6' }}
-          >
-            {entry.item.name}
-          </TerminalText>
-          <MonoText shrink={0} size="$2" color="$appAccent" $large={{ size: '$2.5' }}>
-            {formatInventoryQuantity(entry.quantity)}
-          </MonoText>
+          <Dialog.Title asChild>
+            <TerminalText
+              testID="inventory-detail-name"
+              grow={1}
+              shrink={1}
+              minW={0}
+              size="$4"
+              lineHeight="$5"
+              fontWeight="800"
+              numberOfLines={1}
+              $large={{ size: '$5', lineHeight: '$6' }}
+            >
+              {entry.item.name}
+            </TerminalText>
+          </Dialog.Title>
+          {description ? quantity : <Dialog.Description asChild>{quantity}</Dialog.Description>}
         </XStack>
         {description ? (
-          <MonoText
-            testID="inventory-detail-description"
-            size="$1"
-            lineHeight="$2.5"
-            color="$appMuted"
-            $large={{ size: '$2' }}
-          >
-            {description}
-          </MonoText>
+          <Dialog.Description asChild>
+            <MonoText
+              testID="inventory-detail-description"
+              size="$1"
+              lineHeight="$2.5"
+              color="$appMuted"
+              $large={{ size: '$2' }}
+            >
+              {description}
+            </MonoText>
+          </Dialog.Description>
         ) : null}
       </YStack>
     </XStack>

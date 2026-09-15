@@ -54,6 +54,11 @@
     "passwordPlaceholder": "输入访问密钥",
     "submitPassword": "验证修改",
     "passwordUpdated": "访问密钥已更新。",
+    "logout": {
+      "confirmTitle": "确认登出？",
+      "confirmDescription": "登出后，需要重新登录才能继续使用控制台。",
+      "confirm": "确认登出"
+    },
     "errors": {
       "accountBanned": "该账号已被封禁。",
       "fallback": "访问密钥更新失败，请重试。",
