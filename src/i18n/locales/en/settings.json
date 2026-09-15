@@ -53,6 +53,11 @@
     "passwordPlaceholder": "Enter access key",
     "submitPassword": "Validate change",
     "passwordUpdated": "Access key updated.",
+    "logout": {
+      "confirmTitle": "Log out now?",
+      "confirmDescription": "You will need to sign in again to continue using the console.",
+      "confirm": "Confirm log out"
+    },
     "errors": {
       "accountBanned": "This account has been suspended.",
       "fallback": "The access key could not be updated. Try again.",

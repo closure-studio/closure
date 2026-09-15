@@ -21,6 +21,7 @@ import { FailureError, unwrapResult } from '@/utils/failure-error';
 import { arkHostApi, type ArkHostFailure, type ArkHostSseSubscription } from './api';
 
 export const arkHostQueryKeys = {
+  all: ['arkhost'] as const,
   detail: (account: string) => ['arkhost', 'detail', account] as const,
   gameAccounts: (userId: string) => ['arkhost', 'game-accounts', userId] as const,
   logs: (account: string) => ['arkhost', 'logs', account] as const,
@@ -259,10 +260,10 @@ export function useArkHostSync() {
 }
 
 /**
- * Clears the Query cache whenever the session principal identity changes or
- * the session ends, so no server data survives across users. This is bound to
- * the session transition itself (including direct `logout()` and `setSession`
- * with a different principal), not to any UI handler.
+ * Removes private ArkHost data whenever the session principal identity changes
+ * or the session ends. Public API Node probes and Game Resource queries remain
+ * reusable across users. This is bound to the session transition itself, not
+ * to any UI handler.
  */
 export function useSessionQueryCacheReset() {
   const session = useAppStore((state) => state.auth.session);
@@ -273,6 +274,6 @@ export function useSessionQueryCacheReset() {
     const principalId = session?.principal.id ?? null;
     if (previousPrincipalId.current === principalId) return;
     previousPrincipalId.current = principalId;
-    queryClient.clear();
+    queryClient.removeQueries({ queryKey: arkHostQueryKeys.all });
   }, [queryClient, session]);
 }
