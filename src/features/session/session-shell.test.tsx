@@ -76,4 +76,5 @@ describe('SessionShell backdrop ownership', () => {
       tint: '#ff9d36',
     }));
   });
+
 });

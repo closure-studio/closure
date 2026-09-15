@@ -57,7 +57,7 @@ function useGameResourceQuery<T>(
   cacheKey: string,
   schema: v.GenericSchema<unknown, T>,
   bundled: GameResourceData<T>,
-  fetchResource: (updatedAt: string | null) => Promise<GameResourceResult<T>>,
+  fetchResource: (updatedAt: string | null, signal: AbortSignal) => Promise<GameResourceResult<T>>,
 ) {
   const queryClient = useQueryClient();
   const initial = useMemo(
@@ -71,10 +71,10 @@ function useGameResourceQuery<T>(
       ? 0
       : Date.parse(initial.updatedAt),
     staleTime: GAME_RESOURCES_STALE_TIME_MS,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const current = queryClient.getQueryData<GameResourceData<T>>(queryKey)
         ?? initial;
-      const result = await fetchResource(current.updatedAt);
+      const result = await fetchResource(current.updatedAt, signal);
       if (result.kind !== 'updated') return current;
       const next = { table: result.table, updatedAt: result.updatedAt };
       saveCachedGameResource(cacheKey, next);
@@ -89,7 +89,7 @@ export function useCharacterTable(): CharacterTable {
     GAME_RESOURCE_CACHE_KEYS.character,
     characterTableSchema,
     characterBundled,
-    (updatedAt) => gameResourcesApi.fetchCharacter(updatedAt),
+    (updatedAt, signal) => gameResourcesApi.fetchCharacter(updatedAt, signal),
   ).data.table;
 }
 
@@ -99,7 +99,7 @@ export function useItemTable(): ItemTable {
     GAME_RESOURCE_CACHE_KEYS.item,
     itemTableSchema,
     itemBundled,
-    (updatedAt) => gameResourcesApi.fetchItem(updatedAt),
+    (updatedAt, signal) => gameResourcesApi.fetchItem(updatedAt, signal),
   ).data.table;
 }
 
@@ -109,6 +109,6 @@ export function useStageTable(): StageTable {
     GAME_RESOURCE_CACHE_KEYS.stage,
     stageTableSchema,
     stageBundled,
-    (updatedAt) => gameResourcesApi.fetchStage(updatedAt),
+    (updatedAt, signal) => gameResourcesApi.fetchStage(updatedAt, signal),
   ).data.table;
 }

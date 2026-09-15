@@ -1,19 +1,6 @@
-import { NetworkSettingsScreen, useApiNodesQuery } from '@/features/settings';
-import { useAppStore } from '@/store';
+import { NetworkSettingsScreen, useNetworkSettings } from '@/features/settings';
 
 export default function SettingsNetworkRoute() {
-  const apiNodesQuery = useApiNodesQuery();
-  const selectedApiNodeId = useAppStore((state) => state.selectedApiNodeId);
-  const selectApiNode = useAppStore((state) => state.selectApiNode);
-
-  return (
-    <NetworkSettingsScreen
-      nodes={apiNodesQuery.data ?? []}
-      onRefresh={() => apiNodesQuery.refetch().then(() => undefined)}
-      onSelectApiNode={selectApiNode}
-      queryError={apiNodesQuery.error ?? null}
-      queryStatus={apiNodesQuery.status}
-      selectedApiNodeId={selectedApiNodeId}
-    />
-  );
+  const screen = useNetworkSettings();
+  return <NetworkSettingsScreen {...screen} />;
 }

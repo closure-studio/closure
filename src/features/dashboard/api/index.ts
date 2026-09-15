@@ -1,6 +1,3 @@
-import { MockArkHostApi } from './arkhost-api.mock';
-import { RemoteGameResourcesApi } from './game-resources-api';
-
 export type {
   ArkHostApi,
   ArkHostFailure,
@@ -18,5 +15,4 @@ export type {
   GameResourcesApi,
 } from './game-resources-api';
 
-export const arkHostApi = new MockArkHostApi();
-export const gameResourcesApi = new RemoteGameResourcesApi();
+export { arkHostApi, gameResourcesApi } from '@/services/api';

@@ -6,9 +6,3 @@ export const loginCredentialsSchema = v.object({
 });
 
 export type LoginCredentials = v.InferOutput<typeof loginCredentialsSchema>;
-
-export const loginSubmissionSchema = v.object({
-  credentials: loginCredentialsSchema,
-});
-
-export type LoginSubmission = v.InferOutput<typeof loginSubmissionSchema>;

@@ -18,7 +18,6 @@ export {
 } from './inventory/components/inventory-view';
 export { OperatorRosterView } from './operator-roster/components/operator-roster-view';
 export {
-  findGameAccountById,
   useAdjacentGameAccountPrefetch,
   useArkHostSync,
   useGameDetailQuery,
@@ -42,3 +41,4 @@ export {
   DashboardOverviewContent,
 } from './screens/dashboard-account-content';
 export { DashboardAccountProvider, useDashboardAccount } from './dashboard-account';
+export { GameVerification } from './game-verification';

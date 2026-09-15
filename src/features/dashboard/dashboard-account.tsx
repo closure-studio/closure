@@ -6,10 +6,7 @@ import {
 } from 'react';
 
 import type { GameAccount } from '@/schemas/game-account';
-import {
-  findGameAccountById,
-  useGameAccountsQuery,
-} from './queries';
+import { useGameAccountsQuery } from './queries';
 
 type DashboardAccountContextValue = {
   selectedGameAccount: GameAccount | null;
@@ -22,18 +19,11 @@ const DashboardAccountContext = createContext<DashboardAccountContextValue | nul
 export function DashboardAccountProvider({ children }: PropsWithChildren) {
   const [selectedGameAccountId, setSelectedGameAccountId] = useState<string | null>(null);
   const gameAccountsQuery = useGameAccountsQuery();
-  const matchedGameAccount = findGameAccountById(
-    gameAccountsQuery.data,
-    selectedGameAccountId,
-  );
-
-  if (
-    selectedGameAccountId !== null
-    && gameAccountsQuery.data
-    && !matchedGameAccount
-  ) {
-    setSelectedGameAccountId(null);
-  }
+  const matchedGameAccount = selectedGameAccountId === null
+    ? null
+    : gameAccountsQuery.data?.find(
+      (account) => account.account === selectedGameAccountId,
+    ) ?? null;
 
   const selectedGameAccount = matchedGameAccount
     ?? gameAccountsQuery.data?.[0]

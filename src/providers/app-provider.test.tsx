@@ -8,6 +8,9 @@ import { AppProvider } from './app-provider';
 const mockThemeProvider = jest.fn(
   ({ children }: PropsWithChildren<{ value: unknown }>) => children,
 );
+const mockKeyboardProvider = jest.fn(
+  ({ children }: PropsWithChildren) => children,
+);
 const mockHideAsync = jest.fn(() => Promise.resolve());
 
 jest.mock('../tamagui.generated.css', () => ({}));
@@ -50,6 +53,10 @@ jest.mock('react-native-gesture-handler', () => ({
   GestureHandlerRootView: ({ children }: PropsWithChildren) => children,
 }));
 
+jest.mock('react-native-keyboard-controller', () => ({
+  KeyboardProvider: (props: PropsWithChildren) => mockKeyboardProvider(props),
+}));
+
 jest.mock('@tanstack/react-query', () => ({
   QueryClient: jest.fn(),
   QueryClientProvider: ({ children }: PropsWithChildren) => children,
@@ -70,6 +77,7 @@ jest.mock('./localization-provider', () => ({
 describe('AppProvider', () => {
   beforeEach(() => {
     mockThemeProvider.mockClear();
+    mockKeyboardProvider.mockClear();
     mockHideAsync.mockClear();
   });
 
@@ -81,6 +89,7 @@ describe('AppProvider', () => {
     );
 
     expect(mockThemeProvider).toHaveBeenCalledTimes(1);
+    expect(mockKeyboardProvider).toHaveBeenCalledTimes(1);
     const providerProps = mockThemeProvider.mock.calls.at(-1)?.[0];
     expect(providerProps?.children).toBeDefined();
     expect(providerProps?.value).toEqual({

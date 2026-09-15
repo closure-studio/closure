@@ -5,6 +5,7 @@ import { MOCK_AUTH_VALUES, mockActiveSession } from '@/mocks/auth';
 import { MockAuthAdapter } from './auth-adapter.mock';
 
 const adapter = new MockAuthAdapter(0);
+const signal = () => new AbortController().signal;
 
 function expectSuccess<T>(result: { data: T; ok: true } | { error: unknown; ok: false }): T {
   expect(result.ok).toBe(true);
@@ -17,14 +18,14 @@ describe('MockAuthAdapter', () => {
     const login = expectSuccess(await adapter.login({
       identifier: 'any-user',
       password: 'any-password',
-    }));
+    }, signal()));
     expectSuccess(await adapter.updatePassword({
       accessToken: MOCK_AUTH_VALUES.activeToken,
       currentPassword: MOCK_AUTH_VALUES.password,
       email: MOCK_AUTH_VALUES.activeEmail,
       newPassword: 'new-password',
-    }));
-    expectSuccess(await adapter.requestPasswordRecovery({ identifier: MOCK_AUTH_VALUES.activeEmail }));
+    }, signal()));
+    expectSuccess(await adapter.requestEmailCode({ email: MOCK_AUTH_VALUES.activeEmail }, signal()));
 
     expect(v.safeParse(userSessionSchema, login).success).toBe(true);
   });
@@ -33,19 +34,32 @@ describe('MockAuthAdapter', () => {
     const result = expectSuccess(await adapter.login({
       identifier: 'another-user',
       password: 'anything-at-all',
-    }));
+    }, signal()));
 
     expect(result).toEqual(mockActiveSession);
   });
 
-  it('distinguishes session and unknown-user failures', async () => {
+  it('rejects cancellation instead of returning a business failure', async () => {
+    const delayedAdapter = new MockAuthAdapter(1_000);
+    const controller = new AbortController();
+    const login = delayedAdapter.login({
+      identifier: 'any-user',
+      password: 'any-password',
+    }, controller.signal);
+
+    controller.abort();
+
+    await expect(login).rejects.toThrow('Request cancelled');
+  });
+
+  it('rejects expired sessions and allows sending a code before registration', async () => {
     await expect(adapter.updatePassword({
       accessToken: 'expired',
       currentPassword: MOCK_AUTH_VALUES.password,
       email: MOCK_AUTH_VALUES.activeEmail,
       newPassword: 'new-password',
-    })).resolves.toEqual({ error: { code: 'session-expired', kind: 'business' }, ok: false });
-    await expect(adapter.requestPasswordRecovery({ identifier: 'unknown@example.com' }))
-      .resolves.toEqual({ error: { code: 'user-not-found', kind: 'business' }, ok: false });
+    }, signal())).resolves.toEqual({ error: { code: 'session-expired', kind: 'business' }, ok: false });
+    await expect(adapter.requestEmailCode({ email: 'unknown@example.com' }, signal()))
+      .resolves.toEqual({ data: undefined, ok: true });
   });
 });

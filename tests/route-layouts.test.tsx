@@ -13,6 +13,7 @@ const mockDashboardTabs = jest.fn(({ children }: PropsWithChildren) => children)
 const mockDashboardTabScreen = jest.fn(() => null);
 const mockSelectGameAccount = jest.fn();
 const mockSessionShell = jest.fn(({ children }: PropsWithChildren) => children);
+const mockUseSessionLifetime = jest.fn();
 const mockAppScopeNavigator = jest.fn(() => null);
 const mockUseSessionQueryCacheReset = jest.fn();
 const mockUseArkHostSync = jest.fn();
@@ -40,6 +41,7 @@ jest.mock('expo-router/tabs', () => ({
 }));
 
 jest.mock('@/features/dashboard', () => ({
+  GameVerification: jest.fn(() => null),
   DashboardAccountProvider: mockDashboardAccountProvider,
   useArkHostSync: mockUseArkHostSync,
   useDashboardAccount: () => mockDashboardAccount,
@@ -63,11 +65,14 @@ jest.mock('tamagui', () => ({
 
 jest.mock('@/features/session', () => ({
   SessionShell: mockSessionShell,
+  useSessionLifetime: mockUseSessionLifetime,
 }));
 
 jest.mock('@/providers', () => ({
   AppProvider: mockAppProvider,
 }));
+
+jest.mock('@/features/verification', () => ({ VerificationHost: jest.fn(() => null) }));
 
 jest.mock('@/store', () => ({
   useAppStore: (selector: (state: { auth: { session: object | null } }) => unknown) => selector({
@@ -119,10 +124,9 @@ describe('route layouts', () => {
     expect(mockDashboardTabs).toHaveBeenCalledTimes(1);
     expect(mockSlot).not.toHaveBeenCalled();
     expect(mockDashboardTabs.mock.calls[0]?.[0]).toEqual(expect.objectContaining({
-      detachInactiveScreens: false,
       screenOptions: expect.objectContaining({
-        freezeOnBlur: false,
-        lazy: true,
+        animation: 'shift',
+        headerShown: false,
       }),
     }));
   });

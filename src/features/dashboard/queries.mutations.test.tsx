@@ -55,7 +55,7 @@ describe('game account mutations', () => {
       await result.current.mutateAsync(patch);
     });
 
-    expect(updateGameConfig).toHaveBeenCalledWith(account, patch);
+    expect(updateGameConfig).toHaveBeenCalledWith(account, patch, expect.any(AbortSignal));
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: arkHostQueryKeys.detail(account),
     });
@@ -92,9 +92,9 @@ describe('game account mutations', () => {
       expect(result.current.pause.isSuccess).toBe(true);
     });
 
-    expect(loginGame).toHaveBeenCalledWith('G1');
+    expect(loginGame).toHaveBeenCalledWith('G1', expect.any(AbortSignal));
     expect(pauseGame).toHaveBeenCalledTimes(1);
-    expect(pauseGame).toHaveBeenCalledWith('G1');
+    expect(pauseGame).toHaveBeenCalledWith('G1', expect.any(AbortSignal));
     await unmount();
     queryClient.clear();
   });
@@ -139,7 +139,7 @@ describe('game account mutations', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(deleteGame).toHaveBeenCalledWith(account);
+    expect(deleteGame).toHaveBeenCalledWith(account, expect.any(AbortSignal));
     expect(removeQueries).toHaveBeenCalledWith({
       queryKey: arkHostQueryKeys.detail(account),
     });

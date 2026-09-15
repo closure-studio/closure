@@ -1,7 +1,6 @@
-import { Bot, Building2, ShieldAlert, Swords } from 'lucide-react-native';
-import { useState } from 'react';
+import { Bot, Building2, Swords } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Spinner, Switch, XStack, YStack, getTokens, useMedia } from 'tamagui';
+import { Switch, XStack, YStack, getTokens, useMedia } from 'tamagui';
 
 import {
   DecorativeBarcode,
@@ -110,44 +109,33 @@ function AutomationSettings({
   onSubmit,
 }: Pick<GameHostingConfigViewProps, 'config' | 'isSubmitting' | 'onSubmit'>) {
   const { t } = useTranslation('dashboard');
-  const [pendingField, setPendingField] = useState<EditableAutomationField | null>(null);
   const settings = [
-    { id: 'enable-building-arrange', field: 'enable_building_arrange', icon: Building2, checked: config.enable_building_arrange, title: t('hostingConfig.enableBuildingArrange'), description: t('hostingConfig.summaries.enableBuildingArrange'), statusLabel: undefined },
-    { id: 'auto-battle', field: 'is_auto_battle', icon: Swords, checked: config.is_auto_battle, title: t('hostingConfig.autoBattle'), description: t('hostingConfig.summaries.isAutoBattle'), statusLabel: undefined },
-    { id: 'ignore-robot', field: 'recruit_ignore_robot', icon: Bot, checked: config.recruit_ignore_robot, title: t('hostingConfig.ignoreRobot'), description: t('hostingConfig.summaries.recruitIgnoreRobot'), statusLabel: undefined },
-    { id: 'allow-login-assist', field: null, icon: ShieldAlert, checked: config.allow_login_assist, title: t('hostingConfig.allowLoginAssist'), description: t('hostingConfig.summaries.allowLoginAssist'), statusLabel: t('hostingConfig.status.maintenance') },
+    { id: 'enable-building-arrange', field: 'enable_building_arrange', icon: Building2, checked: config.enable_building_arrange, title: t('hostingConfig.enableBuildingArrange'), description: t('hostingConfig.summaries.enableBuildingArrange') },
+    { id: 'auto-battle', field: 'is_auto_battle', icon: Swords, checked: config.is_auto_battle, title: t('hostingConfig.autoBattle'), description: t('hostingConfig.summaries.isAutoBattle') },
+    { id: 'ignore-robot', field: 'recruit_ignore_robot', icon: Bot, checked: config.recruit_ignore_robot, title: t('hostingConfig.ignoreRobot'), description: t('hostingConfig.summaries.recruitIgnoreRobot') },
   ] as const;
 
   const update = (field: EditableAutomationField, checked: boolean) => {
-    if (isSubmitting || pendingField !== null) return;
-    setPendingField(field);
-    onSubmit({ [field]: checked })
-      .catch(() => undefined)
-      .finally(() => setPendingField(null));
+    if (isSubmitting) return;
+    void onSubmit({ [field]: checked }).catch(() => undefined);
   };
 
   return (
     <YStack gap="$2.5">
       <TerminalSectionHeading code="02" title={t('hostingConfig.sections.switches')} />
       <XStack flexWrap="wrap" gap="$2">
-        {settings.map((setting) => {
-          const field = setting.field;
-          const editable = field !== null;
-          return (
-            <AutomationCard
-              key={setting.id}
-              id={setting.id}
-              icon={setting.icon}
-              title={setting.title}
-              description={setting.description}
-              checked={setting.checked}
-              disabled={!editable || isSubmitting || pendingField !== null}
-              pending={editable && pendingField === field}
-              {...(setting.statusLabel ? { statusLabel: setting.statusLabel } : {})}
-              {...(field ? { onCheckedChange: (checked: boolean) => update(field, checked) } : {})}
-            />
-          );
-        })}
+        {settings.map((setting) => (
+          <AutomationCard
+            key={setting.id}
+            id={setting.id}
+            icon={setting.icon}
+            title={setting.title}
+            description={setting.description}
+            checked={setting.checked}
+            disabled={isSubmitting}
+            onCheckedChange={(checked) => update(setting.field, checked)}
+          />
+        ))}
       </XStack>
     </YStack>
   );
@@ -160,8 +148,6 @@ function AutomationCard({
   description,
   checked,
   disabled,
-  pending = false,
-  statusLabel,
   onCheckedChange,
 }: {
   id: string;
@@ -170,9 +156,7 @@ function AutomationCard({
   description: string;
   checked: boolean;
   disabled: boolean;
-  pending?: boolean;
-  statusLabel?: string;
-  onCheckedChange?: (checked: boolean) => void;
+  onCheckedChange: (checked: boolean) => void;
 }) {
   const colors = getTokens().color;
   const { large } = useMedia();
@@ -183,7 +167,6 @@ function AutomationCard({
         testID={`hosting-config-card-${id}`}
         p="$3"
         gap="$1.5"
-        opacity={onCheckedChange ? 1 : 0.65}
       >
         <XStack items="center" justify="space-between" gap="$2">
           <XStack items="center" gap="$2" minW={0} shrink={1}>
@@ -193,46 +176,19 @@ function AutomationCard({
             </TerminalText>
           </XStack>
           <XStack items="center" gap="$1.5" shrink={0}>
-            {statusLabel ? (
-              <MonoText size="$1" color="$appWarning" fontWeight="700">
-                {statusLabel}
-              </MonoText>
-            ) : null}
             <Switch
               testID={`hosting-config-${id}`}
               aria-label={title}
-              aria-busy={pending}
               aria-disabled={disabled}
               checked={checked}
               disabled={disabled}
               size={large ? '$3.5' : '$2'}
-              bg={pending || checked ? '$appAccentSoft' : '$appSurface'}
+              bg={checked ? '$appAccentSoft' : '$appSurface'}
               borderWidth={1}
-              borderColor={pending ? '$appAccent' : checked ? '$appAccentBorder' : '$appBorder'}
-              {...(onCheckedChange ? { onCheckedChange } : {})}
+              borderColor={checked ? '$appAccentBorder' : '$appBorder'}
+              onCheckedChange={onCheckedChange}
             >
-              <Switch.Thumb bg={pending || checked ? '$appAccent' : '$appMuted'}>
-                {pending ? (
-                  <Spinner
-                    testID={`hosting-config-${id}-spinner`}
-                    position="absolute"
-                    t={0}
-                    r={0}
-                    b={0}
-                    l={0}
-                    items="center"
-                    justify="center"
-                    scale={0.65}
-                    $large={{ scale: 0.85 }}
-                    size="small"
-                    color="$appBackground"
-                    aria-hidden
-                    accessibilityElementsHidden
-                    importantForAccessibility="no-hide-descendants"
-                    style={{ pointerEvents: 'none' }}
-                  />
-                ) : null}
-              </Switch.Thumb>
+              <Switch.Thumb bg={checked ? '$appAccent' : '$appMuted'} />
             </Switch>
           </XStack>
         </XStack>

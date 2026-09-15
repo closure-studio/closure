@@ -1,13 +1,4 @@
-import { memo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type {
-  LayoutChangeEvent,
-  LayoutRectangle,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollView as ReactNativeScrollView,
-} from 'react-native';
-import { useReducedMotion } from 'react-native-reanimated';
 import { ScrollView, XStack, YStack } from 'tamagui';
 
 import {
@@ -20,28 +11,7 @@ import {
 import { ARK_HOST_GAME_STATUS_CODE } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
 
-const SCROLL_EVENT_THROTTLE_MS = 16;
-
-type HorizontalItemLayout = Pick<LayoutRectangle, 'width' | 'x'>;
-
-export function resolveScrollOffsetToRevealItem({
-  itemLayout,
-  scrollOffset,
-  viewportWidth,
-}: {
-  itemLayout: HorizontalItemLayout;
-  scrollOffset: number;
-  viewportWidth: number;
-}): number | null {
-  if (viewportWidth <= 0) return null;
-  if (itemLayout.x < scrollOffset) return Math.max(0, itemLayout.x);
-
-  const itemEnd = itemLayout.x + itemLayout.width;
-  const viewportEnd = scrollOffset + viewportWidth;
-  return itemEnd > viewportEnd ? Math.max(0, itemEnd - viewportWidth) : null;
-}
-
-const GameAccountButton = memo(function GameAccountButton({
+function GameAccountButton({
   gameAccount,
   isSelected,
   onSelectGameAccount,
@@ -87,63 +57,15 @@ const GameAccountButton = memo(function GameAccountButton({
       </XStack>
     </NotchedButton>
   );
-});
+}
 
 export function GameAccountSwitcher({ gameAccounts, selectedGameAccountId, onSelectGameAccount }: { gameAccounts: readonly GameAccount[]; selectedGameAccountId: string; onSelectGameAccount: (gameAccountId: string) => void }) {
-  const reducedMotion = useReducedMotion();
-  const scrollViewRef = useRef<ReactNativeScrollView>(null);
-  const accountLayouts = useRef(new Map<string, HorizontalItemLayout>());
-  const scrollOffset = useRef(0);
-  const viewportWidth = useRef(0);
-
-  const revealSelectedGameAccount = useCallback(() => {
-    const itemLayout = accountLayouts.current.get(selectedGameAccountId);
-    if (!itemLayout) return;
-
-    const nextScrollOffset = resolveScrollOffsetToRevealItem({
-      itemLayout,
-      scrollOffset: scrollOffset.current,
-      viewportWidth: viewportWidth.current,
-    });
-    if (nextScrollOffset === null) return;
-
-    scrollOffset.current = nextScrollOffset;
-    scrollViewRef.current?.scrollTo({
-      animated: !reducedMotion,
-      x: nextScrollOffset,
-      y: 0,
-    });
-  }, [selectedGameAccountId, reducedMotion]);
-
-  useEffect(() => {
-    revealSelectedGameAccount();
-  }, [revealSelectedGameAccount]);
-
-  const handleViewportLayout = (event: LayoutChangeEvent) => {
-    viewportWidth.current = event.nativeEvent.layout.width;
-    revealSelectedGameAccount();
-  };
-
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    scrollOffset.current = event.nativeEvent.contentOffset.x;
-  };
-
-  const handleAccountLayout = (gameAccountId: string, event: LayoutChangeEvent) => {
-    const { width, x } = event.nativeEvent.layout;
-    accountLayouts.current.set(gameAccountId, { width, x });
-    if (gameAccountId === selectedGameAccountId) revealSelectedGameAccount();
-  };
-
   return (
     <ScrollView
-      ref={scrollViewRef}
       mx="$-5"
       horizontal
       showsHorizontalScrollIndicator={false}
-      scrollEventThrottle={SCROLL_EVENT_THROTTLE_MS}
       contentContainerStyle={{ pb: 1 }}
-      onLayout={handleViewportLayout}
-      onScroll={handleScroll}
     >
       <SlidingSelection
         value={selectedGameAccountId}
@@ -154,7 +76,6 @@ export function GameAccountSwitcher({ gameAccounts, selectedGameAccountId, onSel
           <SlidingSelection.Item
             key={gameAccount.account}
             value={gameAccount.account}
-            onLayout={(event) => handleAccountLayout(gameAccount.account, event)}
           >
             <GameAccountButton
               gameAccount={gameAccount}

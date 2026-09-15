@@ -22,7 +22,6 @@ export const mockActiveSession = {
     id: 'user-closure-01',
     permission: USER_PERMISSION.createGame | USER_PERMISSION.queryGame | USER_PERMISSION.updateGame,
     registeredAt: '2025-01-14T08:30:00.000Z',
-    slotLimit: 3,
     status: 'active',
   },
 } satisfies UserSession;
@@ -36,7 +35,6 @@ export const mockBannedSession = {
     id: 'user-closure-banned',
     permission: 0,
     registeredAt: '2024-08-09T04:00:00.000Z',
-    slotLimit: 0,
     status: 'banned',
   },
 } satisfies UserSession;
@@ -50,7 +48,6 @@ export const mockAdminSession = {
     id: 'user-closure-admin',
     permission: Object.values(USER_PERMISSION).reduce((permission, value) => permission | value, 0),
     registeredAt: '2024-01-01T00:00:00.000Z',
-    slotLimit: 5,
     status: 'manually-verified',
   },
 } satisfies UserSession;

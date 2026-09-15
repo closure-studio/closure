@@ -1,7 +1,7 @@
 import {
   resolveAuthEntryDestination,
   resolvePostLoginDestination,
-} from '@/features/session';
+} from '@/routing/auth-routing';
 import { mockActiveSession } from '@/mocks/auth';
 
 describe('auth routing', () => {
@@ -27,5 +27,7 @@ describe('auth routing', () => {
     expect(resolvePostLoginDestination('/login/')).toBe('/dashboard');
     expect(resolvePostLoginDestination('/login?returnTo=/settings')).toBe('/dashboard');
     expect(resolvePostLoginDestination('/(auth)/login')).toBe('/dashboard');
+    expect(resolvePostLoginDestination('/auth/callback/linuxdo?code=old')).toBe('/dashboard');
+    expect(resolvePostLoginDestination('/(auth)/auth/callback/linuxdo')).toBe('/dashboard');
   });
 });

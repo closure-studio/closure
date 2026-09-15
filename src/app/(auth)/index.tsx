@@ -1,6 +1,6 @@
 import { Redirect } from 'expo-router';
 
-import { resolveAuthEntryDestination } from '@/features/session';
+import { resolveAuthEntryDestination } from '@/routing/auth-routing';
 import { useAppStore } from '@/store';
 
 export default function AuthIndexRoute() {

@@ -1,9 +1,28 @@
 import type { AuthFailure } from './api';
+import { FailureError } from '@/utils/failure-error';
 
-type AuthFailureScope = 'login' | 'recovery' | 'account';
-type AuthFailureCode = AuthFailure['code'];
+type AuthFailureScope = 'login' | 'recovery' | 'account' | 'enrollment' | 'oauth';
 
-const keyByScope: Record<AuthFailureScope, Partial<Record<AuthFailureCode, string>>> = {
+const keyByScope: Record<AuthFailureScope, Readonly<Record<string, string>>> = {
+  enrollment: {
+    'invalid-verification-code': 'form.errors.invalidCode',
+    'verification-code-expired': 'form.errors.expiredCode',
+    'email-already-registered': 'form.errors.emailRegistered',
+    'rate-limited': 'login.errors.rateLimited',
+    'network-unavailable': 'login.errors.networkUnavailable',
+    timeout: 'login.errors.networkUnavailable',
+  },
+  oauth: {
+    'oauth-unavailable': 'oauth.unavailable',
+    'oauth-cancelled': 'oauth.cancelled',
+    'oauth-expired': 'oauth.expired',
+    'oauth-invalid-callback': 'oauth.invalidCallback',
+    'oauth-window-blocked': 'oauth.windowBlocked',
+    'invalid-oauth-code': 'oauth.invalidCallback',
+    'invalid-response': 'login.errors.invalidResponse',
+    'network-unavailable': 'login.errors.networkUnavailable',
+    'rate-limited': 'login.errors.rateLimited',
+  },
   login: {
     'invalid-credentials': 'login.errors.invalidCredentials',
     'account-banned': 'login.errors.accountBanned',
@@ -33,16 +52,20 @@ const keyByScope: Record<AuthFailureScope, Partial<Record<AuthFailureCode, strin
 };
 
 const fallbackKeyByScope: Record<AuthFailureScope, string> = {
+  enrollment: 'registration.failed',
+  oauth: 'oauth.failed',
   login: 'login.errors.fallback',
   recovery: 'recovery.errors.fallback',
   account: 'account.errors.fallback',
 };
 
 export function authFailureMessage(
-  error: AuthFailure | null,
+  error: AuthFailure | Error | null,
   translate: (key: string) => string,
   scope: AuthFailureScope,
 ): string | null {
   if (!error) return null;
-  return translate(keyByScope[scope][error.code] ?? fallbackKeyByScope[scope]);
+  const code: unknown = error instanceof FailureError ? error.code : error instanceof Error ? null : error.code;
+  const key = typeof code === 'string' ? keyByScope[scope][code] : undefined;
+  return translate(key ?? fallbackKeyByScope[scope]);
 }

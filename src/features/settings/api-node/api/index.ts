@@ -1,5 +1,3 @@
-import { RemoteApiNodeAdapter } from './api-node-adapter.remote';
-
 export type {
   ApiNodeAdapter,
   ApiNodeFailure,
@@ -8,4 +6,4 @@ export type {
 export { RemoteApiNodeAdapter } from './api-node-adapter.remote';
 export type { ApiNodeProbeFetch } from './api-node-adapter.remote';
 
-export const apiNodeApi = new RemoteApiNodeAdapter();
+export { apiNodeApi } from '@/services/api';

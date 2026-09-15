@@ -34,11 +34,6 @@ let mockGameAccountsQuery = {
 };
 
 jest.mock('./queries', () => ({
-  findGameAccountById: (accounts: readonly { account: string }[] | undefined, accountId: string | null) => (
-    accountId === null
-      ? null
-      : accounts?.find((account) => account.account === accountId) ?? null
-  ),
   useGameAccountsQuery: jest.fn(() => mockGameAccountsQuery),
 }));
 
@@ -88,7 +83,7 @@ describe('DashboardAccountProvider', () => {
     expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
   });
 
-  it('clears a selection when its account leaves the Query result', async () => {
+  it('falls back while a selected account is absent from the Query result', async () => {
     const { result, rerender } = await renderHook(() => useDashboardAccount(), {
       wrapper: DashboardAccountTestWrapper,
     });
@@ -112,7 +107,7 @@ describe('DashboardAccountProvider', () => {
     };
     await rerender(undefined);
 
-    expect(result.current.selectedGameAccount?.account).toBe(mockFirstAccount.account);
+    expect(result.current.selectedGameAccount?.account).toBe(mockSecondAccount.account);
   });
 
   it('returns no selection when the account list is empty', async () => {

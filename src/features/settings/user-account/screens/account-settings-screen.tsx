@@ -535,12 +535,12 @@ export function AccountSettingsScreen({
                   </Button>
                 </Form.Trigger>
                 {translatedPasswordUpdateError ? (
-                  <MonoText size="$2.5" color="$appWarning" accessibilityLiveRegion="polite">
+                  <MonoText size="$2.5" color="$appWarning" aria-live="polite">
                     {translatedPasswordUpdateError}
                   </MonoText>
                 ) : null}
                 {showPasswordUpdateSuccess ? (
-                  <MonoText size="$2.5" color="$appSuccess" accessibilityLiveRegion="polite">
+                  <MonoText size="$2.5" color="$appSuccess" aria-live="polite">
                     {t('account.passwordUpdated')}
                   </MonoText>
                 ) : null}

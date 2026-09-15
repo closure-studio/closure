@@ -12,7 +12,7 @@ describe('userSessionSchema', () => {
     { ...mockActiveSession, accessToken: '' },
     { ...mockActiveSession, expiresAt: 'tomorrow' },
     { ...mockActiveSession, principal: { ...mockActiveSession.principal, status: 'unknown' } },
-    { ...mockActiveSession, principal: { ...mockActiveSession.principal, slotLimit: -1 } },
+    { ...mockActiveSession, availableSlots: -1 },
   ])('rejects malformed session data', (session) => {
     expect(v.safeParse(userSessionSchema, session).success).toBe(false);
   });

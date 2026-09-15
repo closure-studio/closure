@@ -62,7 +62,7 @@ describe('GameHostingConfigView', () => {
     expect(screen.getByTestId('hosting-config-card-enable-building-arrange')).toBeTruthy();
     expect(screen.getByTestId('hosting-config-card-auto-battle')).toBeTruthy();
     expect(screen.getByTestId('hosting-config-card-ignore-robot')).toBeTruthy();
-    expect(screen.getByTestId('hosting-config-card-allow-login-assist')).toBeTruthy();
+    expect(screen.queryByTestId('hosting-config-card-allow-login-assist')).toBeNull();
     expect(screen.getByTestId('hosting-config-card-drone-acceleration')).toBeTruthy();
     expect(screen.getByTestId('hosting-config-card-battle-maps')).toBeTruthy();
   });

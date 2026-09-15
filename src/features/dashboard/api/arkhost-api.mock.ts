@@ -3,7 +3,9 @@ import {
   type ArkHostGameConfigPatch,
   type ArkHostGameDetail,
   type ArkHostGameListEntry,
+  type GameCaptchaSubmission,
 } from "@/schemas/arkhost";
+import { assertActive, requestScope } from '@/services/request-scope';
 import type {
   ArkHostApi,
   ArkHostResult,
@@ -18,7 +20,6 @@ import {
 } from "@/mocks/arkhost";
 
 const MOCK_ARKHOST_DELAY_MS = 250;
-export const MOCK_ARKHOST_SSE_RECONNECT_DELAY_MS = 5000;
 
 const success = <T>(data: T): ArkHostResult<T> => ({ data, ok: true });
 const failure = <T>(): ArkHostResult<T> => ({
@@ -26,45 +27,20 @@ const failure = <T>(): ArkHostResult<T> => ({
   ok: false,
 });
 
-class MockSseSubscription {
-  readonly #listener: ArkHostSseListener;
-  #connected = true;
-  #reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-  #unsubscribed = false;
-
-  constructor(listener: ArkHostSseListener) {
-    this.#listener = listener;
-  }
-
-  dispatch(event: ArkHostSseEvent) {
-    if (!this.#connected || this.#unsubscribed) return;
-    this.#listener(event);
-  }
-
-  scheduleReconnect() {
-    if (this.#unsubscribed || this.#reconnectTimer !== null) return;
-    this.#connected = false;
-    this.#reconnectTimer = setTimeout(() => {
-      this.#reconnectTimer = null;
-      if (this.#unsubscribed) return;
-      this.#connected = true;
-    }, MOCK_ARKHOST_SSE_RECONNECT_DELAY_MS);
-  }
-
-  unsubscribe() {
-    if (this.#unsubscribed) return;
-    this.#unsubscribed = true;
-    this.#connected = false;
-    if (this.#reconnectTimer !== null) {
-      clearTimeout(this.#reconnectTimer);
-      this.#reconnectTimer = null;
-    }
-  }
-}
+type MockSseListener = { listener: ArkHostSseListener };
 
 export class MockArkHostApi implements ArkHostApi {
+  async submitGameCaptcha(account: string, _input: GameCaptchaSubmission, signal = requestScope()): Promise<ArkHostResult<void>> {
+    await this.#wait(signal);
+    assertActive(signal);
+    const entry = this.#gameList.find((game) => game.status.account === account);
+    if (!entry) return failure<void>();
+    entry.captcha_info.challenge = '';
+    entry.captcha_info.geetestId = '';
+    return success(undefined);
+  }
   readonly #delayMs: number;
-  readonly #subscriptions = new Set<MockSseSubscription>();
+  readonly #subscriptions = new Set<MockSseListener>();
   #gameList: ArkHostGameListEntry[];
   #details: Map<string, ArkHostGameDetail>;
 
@@ -83,17 +59,26 @@ export class MockArkHostApi implements ArkHostApi {
     return this.#subscriptions.size;
   }
 
-  async #wait() {
+  async #wait(signal: AbortSignal) {
+    assertActive(signal);
     if (this.#delayMs === 0) return;
-    await new Promise<void>((resolve) => setTimeout(resolve, this.#delayMs));
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        signal.removeEventListener('abort', cancel);
+        resolve();
+      }, this.#delayMs);
+      const cancel = () => {
+        clearTimeout(timer);
+        reject(new Error('Request cancelled'));
+      };
+      signal.addEventListener('abort', cancel, { once: true });
+    });
   }
 
   emit(event: ArkHostSseEvent) {
-    for (const subscription of this.#subscriptions) subscription.dispatch(event);
-  }
-
-  simulateTransportClose() {
-    for (const subscription of this.#subscriptions) subscription.scheduleReconnect();
+    for (const subscription of this.#subscriptions) {
+      subscription.listener(event);
+    }
   }
 
   #setGameStatusCode(account: string, statusCode: number): ArkHostResult<void> {
@@ -106,8 +91,9 @@ export class MockArkHostApi implements ArkHostApi {
     return success(undefined);
   }
 
-  async deleteGame(account: string) {
-    await this.#wait();
+  async deleteGame(account: string, signal = requestScope()) {
+    await this.#wait(signal);
+    assertActive(signal);
     const index = this.#gameList.findIndex(
       (entry) => entry.status.account === account,
     );
@@ -117,16 +103,19 @@ export class MockArkHostApi implements ArkHostApi {
     return success(undefined);
   }
 
-  async fetchGameDetail(account: string) {
-    await this.#wait();
+  async fetchGameDetail(account: string, signal = requestScope()) {
+    await this.#wait(signal);
+    assertActive(signal);
     return success(structuredClone(this.#details.get(account) ?? null));
   }
-  async fetchGameList() {
-    await this.#wait();
+  async fetchGameList(signal = requestScope()) {
+    await this.#wait(signal);
+    assertActive(signal);
     return success(structuredClone(this.#gameList));
   }
-  async fetchGameLogs(account: string, afterId: number) {
-    await this.#wait();
+  async fetchGameLogs(account: string, afterId: number, signal = requestScope()) {
+    await this.#wait(signal);
+    assertActive(signal);
     const logs =
       mockArkHostGameLogsResponse.code === 1
         ? mockArkHostGameLogsResponse.data.logs.filter(
@@ -142,22 +131,25 @@ export class MockArkHostApi implements ArkHostApi {
       logs: structuredClone(logs),
     });
   }
-  async loginGame(account: string) {
-    await this.#wait();
+  async loginGame(account: string, signal = requestScope()) {
+    await this.#wait(signal);
+    assertActive(signal);
     return this.#setGameStatusCode(
       account,
       ARK_HOST_GAME_STATUS_CODE.loggingIn,
     );
   }
-  async pauseGame(account: string) {
-    await this.#wait();
+  async pauseGame(account: string, signal = requestScope()) {
+    await this.#wait(signal);
+    assertActive(signal);
     return this.#setGameStatusCode(
       account,
       ARK_HOST_GAME_STATUS_CODE.notStarted,
     );
   }
-  async updateGameConfig(account: string, patch: ArkHostGameConfigPatch) {
-    await this.#wait();
+  async updateGameConfig(account: string, patch: ArkHostGameConfigPatch, signal = requestScope()) {
+    await this.#wait(signal);
+    assertActive(signal);
     const entry = this.#gameList.find(
       (game) => game.status.account === account,
     );
@@ -171,14 +163,16 @@ export class MockArkHostApi implements ArkHostApi {
   subscribe(
     _accessToken: string,
     listener: ArkHostSseListener,
+    signal = requestScope(),
   ): ArkHostSseSubscription {
-    const subscription = new MockSseSubscription(listener);
+    assertActive(signal);
+    const subscription = { listener };
     this.#subscriptions.add(subscription);
-    return {
-      unsubscribe: () => {
-        this.#subscriptions.delete(subscription);
-        subscription.unsubscribe();
-      },
+    const unsubscribe = () => {
+      signal.removeEventListener('abort', unsubscribe);
+      this.#subscriptions.delete(subscription);
     };
+    signal.addEventListener('abort', unsubscribe, { once: true });
+    return { unsubscribe };
   }
 }

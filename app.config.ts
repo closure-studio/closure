@@ -2,30 +2,12 @@ import { env } from "node:process";
 
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
+import {
+  APP_IDENTITIES,
+  DEFAULT_APP_VARIANT,
+} from "./src/constants/app-identities.ts";
+import type { AppVariant } from "./src/constants/app-identities.ts";
 import { SUPPORTED_LOCALES } from "./src/constants/locales.ts";
-
-type AppVariant = "development" | "production";
-
-type AppIdentity = {
-  applicationId: string;
-  name: string;
-  scheme: string;
-};
-
-const DEFAULT_APP_VARIANT: AppVariant = "development";
-
-const appIdentities = {
-  development: {
-    applicationId: "com.closurestudio.app.dev",
-    name: "Closure Studio Dev",
-    scheme: "closure-dev",
-  },
-  production: {
-    applicationId: "com.closurestudio.app",
-    name: "Closure Studio",
-    scheme: "closure",
-  },
-} as const satisfies Record<AppVariant, AppIdentity>;
 
 function resolveAppVariant(value: string | undefined): AppVariant {
   if (!value) return DEFAULT_APP_VARIANT;
@@ -34,7 +16,7 @@ function resolveAppVariant(value: string | undefined): AppVariant {
 }
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const identity = appIdentities[resolveAppVariant(env.APP_VARIANT)];
+  const identity = APP_IDENTITIES[resolveAppVariant(env.APP_VARIANT)];
 
   return {
     ...config,

@@ -17,5 +17,5 @@ export type ApiNodeResult<T> =
   | { error: ApiNodeFailure; ok: false };
 
 export interface ApiNodeAdapter {
-  queryNodes(): Promise<ApiNodeResult<ApiNode[]>>;
+  queryNodes(signal?: AbortSignal): Promise<ApiNodeResult<ApiNode[]>>;
 }

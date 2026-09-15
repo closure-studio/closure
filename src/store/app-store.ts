@@ -5,27 +5,25 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import type { StateStorage } from "zustand/middleware";
 
 import { mmkvStateStorage } from "@/lib/mmkv";
-import { apiNodeIdSchema } from "@/schemas/api-node";
+import type { ApiNodeId } from "@/schemas/api-node";
 import type { UserSession } from "@/schemas/auth";
 import { persistedStoreStateSchema } from "@/schemas/local-state";
-import type { PersistedStoreState } from "@/schemas/local-state";
+import type { PersistedStoreState, RequestMode } from "@/schemas/local-state";
 
 export type AppStore = PersistedStoreState & {
-  // auth
   setSession: (session: UserSession) => void;
   logout: () => void;
-  // api node
-  selectApiNode: (apiNodeId: unknown) => void;
+  setNextRequestMode: (mode: RequestMode) => void;
+  selectApiNode: (apiNodeId: ApiNodeId) => void;
 };
 
 export const APP_STORE_STORAGE_KEY = "closure.app-store";
 
-const APP_STORE_VERSION = 1;
-
-function initialState(): Pick<AppStore, "auth" | "selectedApiNodeId"> {
+function initialState(): PersistedStoreState {
   return {
     auth: { session: null },
     selectedApiNodeId: "domestic",
+    requestMode: "remote",
   };
 }
 
@@ -33,38 +31,8 @@ function persistedStateFromStore(state: AppStore): PersistedStoreState {
   return {
     auth: { session: state.auth.session },
     selectedApiNodeId: state.selectedApiNodeId,
+    requestMode: state.requestMode,
   };
-}
-
-function unwrapStoredState(parsed: unknown): unknown {
-  if (typeof parsed === "object" && parsed !== null && "state" in parsed) {
-    return parsed.state;
-  }
-  return parsed;
-}
-
-function migrateStoredFormat(storage: StateStorage): void {
-  const raw = storage.getItem(APP_STORE_STORAGE_KEY);
-  if (typeof raw !== "string") return;
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    storage.removeItem(APP_STORE_STORAGE_KEY);
-    return;
-  }
-  const candidate = unwrapStoredState(parsed);
-  const storedState = v.safeParse(persistedStoreStateSchema, candidate);
-  if (!storedState.success) {
-    storage.removeItem(APP_STORE_STORAGE_KEY);
-    return;
-  }
-  if (candidate === parsed) {
-    storage.setItem(
-      APP_STORE_STORAGE_KEY,
-      JSON.stringify({ state: storedState.output, version: APP_STORE_VERSION }),
-    );
-  }
 }
 
 export type AppStoreOptions = {
@@ -73,34 +41,24 @@ export type AppStoreOptions = {
 
 export function createAppStore(options: AppStoreOptions = {}) {
   const { storage = mmkvStateStorage } = options;
-  migrateStoredFormat(storage);
 
   return createStore<AppStore>()(
     persist(
-      (set) => ({
+      (set, get) => ({
         ...initialState(),
-        logout: () => {
-          set({ auth: { session: null } });
-        },
+        setSession: (session) => set({ auth: { session } }),
+        logout: () => set({ auth: { session: null } }),
+        setNextRequestMode: (mode) => set({ requestMode: mode }),
         selectApiNode: (apiNodeId) => {
-          const parsedApiNodeId = v.safeParse(apiNodeIdSchema, apiNodeId);
-          if (!parsedApiNodeId.success) return;
-          set({ selectedApiNodeId: parsedApiNodeId.output });
-        },
-        setSession: (session) => {
-          set({ auth: { session } });
+          if (apiNodeId !== get().selectedApiNodeId) set({ selectedApiNodeId: apiNodeId });
         },
       }),
       {
         name: APP_STORE_STORAGE_KEY,
-        version: APP_STORE_VERSION,
         partialize: persistedStateFromStore,
         storage: createJSONStorage(() => storage),
         merge: (persistedState, currentState) => {
-          const storedState = v.safeParse(
-            persistedStoreStateSchema,
-            persistedState,
-          );
+          const storedState = v.safeParse(persistedStoreStateSchema, persistedState);
           if (!storedState.success) return currentState;
           return {
             ...currentState,
