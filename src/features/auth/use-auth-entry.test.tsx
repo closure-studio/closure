@@ -13,6 +13,7 @@ import type { UserSession } from '@/schemas/auth';
 import { finishVerification, runVerification } from '@/features/verification';
 import { FailureError } from '@/utils/failure-error';
 import { requestScope } from '@/services/request-scope';
+import { toast } from '@tamagui/toast/v2';
 import {
   beginLinuxDoAuthorization,
   completeLinuxDoAuthorization,
@@ -25,6 +26,9 @@ const codeVerifier = '0123456789abcdef'.repeat(4);
 jest.mock('@/services/request-scope', () => ({
   ...jest.requireActual<typeof import('@/services/request-scope')>('@/services/request-scope'),
   requestScope: jest.fn(),
+}));
+jest.mock('@tamagui/toast/v2', () => ({
+  toast: { success: jest.fn() },
 }));
 
 jest.mock('./api', () => {
@@ -46,6 +50,7 @@ const mockedBeginLinuxDo = jest.mocked(beginLinuxDoAuthorization);
 const mockedCompleteLinuxDo = jest.mocked(completeLinuxDoAuthorization);
 const mockedTakeWebCallback = jest.mocked(takeLinuxDoWebCallback);
 const mockedWatchAbandoned = jest.mocked(watchAbandonedLinuxDoAuthorization);
+const mockedToastSuccess = jest.mocked(toast.success);
 let client: QueryClient;
 
 beforeAll(() => { notifyManager.setScheduler(queueMicrotask); });
@@ -105,6 +110,7 @@ it('deduplicates rapid main submissions and accepts a session through the Store'
   await waitFor(() => expect(hook.result.current.forms.submission.isPending).toBe(true));
   await act(() => result.resolve({ ok: true, data: mockActiveSession }));
   await waitFor(() => expect(appStore.getState().auth.session).toEqual(mockActiveSession));
+  expect(mockedToastSuccess).toHaveBeenCalledWith('Terminal access granted');
 });
 
 it('allows a new entry flow to submit while the previous flow is still pending', async () => {
@@ -129,9 +135,24 @@ it('allows a new entry flow to submit while the previous flow is still pending',
   expect(appStore.getState().auth.session).toBeNull();
   await act(() => current.resolve({ ok: true, data: mockActiveSession }));
   await waitFor(() => expect(appStore.getState().auth.session).toEqual(mockActiveSession));
+  expect(mockedToastSuccess).toHaveBeenCalledTimes(1);
+  expect(mockedToastSuccess).toHaveBeenCalledWith('Terminal access granted');
 });
 
-it('keeps code sending independent of the main submission and exposes typed errors', async () => {
+it('accepts a registration session without showing a toast', async () => {
+  jest.spyOn(authApi, 'register').mockResolvedValue({ ok: true, data: mockActiveSession });
+  const hook = await renderHook(() => useAuthEntry('/dashboard'), { wrapper: Providers });
+  await act(() => hook.result.current.forms.onViewChange('register'));
+
+  await act(() => hook.result.current.forms.onSubmit({
+    kind: 'register', email: 'doctor@example.com', password: 'password123', code: '123456',
+  }));
+
+  await waitFor(() => expect(appStore.getState().auth.session).toEqual(mockActiveSession));
+  expect(mockedToastSuccess).not.toHaveBeenCalled();
+});
+
+it('keeps code sending independent and exposes registration errors inline', async () => {
   const code = deferred<AuthResult<void>>();
   jest.spyOn(authApi, 'requestEmailCode').mockReturnValue(code.promise);
   jest.spyOn(authApi, 'register').mockResolvedValue({ ok: false, error: { kind: 'business', code: 'invalid-verification-code' } });
@@ -142,11 +163,28 @@ it('keeps code sending independent of the main submission and exposes typed erro
   expect(hook.result.current.forms.submission.isPending).toBe(false);
   await act(() => code.resolve({ ok: true, data: undefined }));
   await waitFor(() => expect(hook.result.current.forms.emailCode.sentEmail).toBe('doctor@example.com'));
+  expect(mockedToastSuccess).not.toHaveBeenCalled();
   await act(() => hook.result.current.forms.onSubmit({
     kind: 'register', email: 'doctor@example.com', password: 'password123', code: '123456',
   }));
   await waitFor(() => expect(hook.result.current.forms.submission.error).toBe(
     'The verification code is incorrect. Check it and try again.',
+  ));
+  expect(mockedToastSuccess).not.toHaveBeenCalled();
+});
+
+it('exposes code request failures inline in the recovery view', async () => {
+  jest.spyOn(authApi, 'requestEmailCode').mockResolvedValue({
+    ok: false,
+    error: { code: 'user-not-found', kind: 'business' },
+  });
+  const hook = await renderHook(() => useAuthEntry('/dashboard'), { wrapper: Providers });
+  await act(() => hook.result.current.forms.onViewChange('reset', 'missing@example.com'));
+
+  await act(() => hook.result.current.forms.onSendCode({ email: 'missing@example.com' }));
+
+  await waitFor(() => expect(hook.result.current.forms.emailCode.error).toBe(
+    'No account matches that credential or email.',
   ));
 });
 
@@ -180,9 +218,10 @@ it('replaces a cancelled OAuth error with the next password-login error', async 
     kind: 'login', identifier: 'doctor@example.com', password: 'password',
   }));
   await waitFor(() => expect(hook.result.current.forms.submission.kind).toBe('form'));
-  expect(hook.result.current.forms.submission.error).toBe(
+  await waitFor(() => expect(hook.result.current.forms.submission.error).toBe(
     i18n.t('auth:login.errors.invalidCredentials'),
-  );
+  ));
+  expect(mockedToastSuccess).not.toHaveBeenCalled();
 });
 
 it('cancels registration verification when its local auth operation ends', async () => {
@@ -233,6 +272,8 @@ it('begins native OAuth once, exchanges once, and keeps the login return target'
   expect(jest.spyOn(authApi, 'loginWithLinuxDo')).toHaveBeenCalledWith({
     code: 'one-time-code', code_verifier: codeVerifier,
   }, expect.any(AbortSignal));
+  expect(mockedToastSuccess).toHaveBeenCalledTimes(1);
+  expect(mockedToastSuccess).toHaveBeenCalledWith('Terminal access granted');
 });
 
 it('completes a Web callback once and returns its original destination', async () => {
@@ -246,6 +287,8 @@ it('completes a Web callback once and returns its original destination', async (
   expect(jest.spyOn(authApi, 'loginWithLinuxDo')).toHaveBeenCalledWith({
     code: 'callback-code', code_verifier: codeVerifier,
   }, expect.any(AbortSignal));
+  expect(mockedToastSuccess).toHaveBeenCalledTimes(1);
+  expect(mockedToastSuccess).toHaveBeenCalledWith('Terminal access granted');
 });
 
 it('does not cancel the only Web callback exchange during StrictMode effect replay', async () => {
@@ -255,6 +298,7 @@ it('does not cancel the only Web callback exchange during StrictMode effect repl
   await waitFor(() => expect(appStore.getState().auth.session).toEqual(mockActiveSession));
   expect(mockedTakeWebCallback).toHaveBeenCalledTimes(1);
   expect(jest.spyOn(authApi, 'loginWithLinuxDo')).toHaveBeenCalledTimes(1);
+  expect(mockedToastSuccess).toHaveBeenCalledTimes(1);
 });
 
 it('does not accept a Web callback session after leaving the callback route', async () => {
@@ -269,6 +313,7 @@ it('does not accept a Web callback session after leaving the callback route', as
   await waitFor(() => expect(client.isMutating()).toBe(0));
 
   expect(appStore.getState().auth.session).toBeNull();
+  expect(mockedToastSuccess).not.toHaveBeenCalled();
 });
 
 it('ignores callbacks from a form that is still finishing its exit animation', async () => {

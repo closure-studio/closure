@@ -11,7 +11,12 @@ const mockThemeProvider = jest.fn(
 const mockKeyboardProvider = jest.fn(
   ({ children }: PropsWithChildren) => children,
 );
+const mockTamaguiProvider = jest.fn(
+  ({ children }: PropsWithChildren<{ insets: typeof mockSafeAreaInsets }>) => children,
+);
+const mockAppToastHost = jest.fn(() => null);
 const mockHideAsync = jest.fn(() => Promise.resolve());
+const mockSafeAreaInsets = { bottom: 34, left: 0, right: 0, top: 47 };
 
 jest.mock('../tamagui.generated.css', () => ({}));
 
@@ -57,13 +62,23 @@ jest.mock('react-native-keyboard-controller', () => ({
   KeyboardProvider: (props: PropsWithChildren) => mockKeyboardProvider(props),
 }));
 
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => mockSafeAreaInsets,
+}));
+
 jest.mock('@tanstack/react-query', () => ({
   QueryClient: jest.fn(),
   QueryClientProvider: ({ children }: PropsWithChildren) => children,
 }));
 
 jest.mock('tamagui', () => ({
-  TamaguiProvider: ({ children }: PropsWithChildren) => children,
+  TamaguiProvider: (props: PropsWithChildren<{ insets: typeof mockSafeAreaInsets }>) => (
+    mockTamaguiProvider(props)
+  ),
+}));
+
+jest.mock('@/components/feedback/app-toast-host', () => ({
+  AppToastHost: () => mockAppToastHost(),
 }));
 
 jest.mock('../../tamagui.config', () => ({
@@ -78,6 +93,8 @@ describe('AppProvider', () => {
   beforeEach(() => {
     mockThemeProvider.mockClear();
     mockKeyboardProvider.mockClear();
+    mockTamaguiProvider.mockClear();
+    mockAppToastHost.mockClear();
     mockHideAsync.mockClear();
   });
 
@@ -90,6 +107,10 @@ describe('AppProvider', () => {
 
     expect(mockThemeProvider).toHaveBeenCalledTimes(1);
     expect(mockKeyboardProvider).toHaveBeenCalledTimes(1);
+    expect(mockTamaguiProvider).toHaveBeenCalledWith(expect.objectContaining({
+      insets: mockSafeAreaInsets,
+    }));
+    expect(mockAppToastHost).toHaveBeenCalledTimes(1);
     const providerProps = mockThemeProvider.mock.calls.at(-1)?.[0];
     expect(providerProps?.children).toBeDefined();
     expect(providerProps?.value).toEqual({

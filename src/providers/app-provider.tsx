@@ -24,9 +24,11 @@ import type { PropsWithChildren } from 'react';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TamaguiProvider } from 'tamagui';
 
+import { AppToastHost } from '@/components/feedback/app-toast-host';
 import { tamaguiConfig } from '../../tamagui.config';
 import { LocalizationProvider } from './localization-provider';
 
@@ -49,6 +51,7 @@ const appNavigationTheme = {
 };
 
 export function AppProvider({ children }: PropsWithChildren) {
+  const insets = useSafeAreaInsets();
   const [loaded, error] = useFonts({
     Oxanium_400Regular,
     Oxanium_500Medium,
@@ -75,15 +78,16 @@ export function AppProvider({ children }: PropsWithChildren) {
 
   return (
     <LocalizationProvider>
-      <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <KeyboardProvider>
-              <ThemeProvider value={appNavigationTheme}>
-                <StatusBar style="light" />
-                <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-              </ThemeProvider>
-            </KeyboardProvider>
-          </GestureHandlerRootView>
+      <TamaguiProvider config={tamaguiConfig} defaultTheme="dark" insets={insets}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <KeyboardProvider>
+            <ThemeProvider value={appNavigationTheme}>
+              <StatusBar style="light" />
+              <AppToastHost />
+              <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+            </ThemeProvider>
+          </KeyboardProvider>
+        </GestureHandlerRootView>
       </TamaguiProvider>
     </LocalizationProvider>
   );
