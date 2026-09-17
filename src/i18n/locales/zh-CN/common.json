@@ -13,6 +13,7 @@
   "accessibility": {
     "hideAccessKey": "隐藏访问密钥",
     "hidePassword": "隐藏密码",
+    "notifications": "通知",
     "showAccessKey": "显示访问密钥",
     "showPassword": "显示密码"
   },

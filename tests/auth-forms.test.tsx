@@ -74,8 +74,10 @@ it('validates and focuses required login fields before submitting', async () => 
   });
 });
 
-it('masks and reveals the password and renders request errors from props', async () => {
+it('masks and reveals the password and renders reset errors from props', async () => {
   const screen = await render(form(props({
+    view: 'reset',
+    initialEmail: 'doctor@example.com',
     submission: { error: 'Request failed', isPending: false, kind: 'form', resetCompletedEmail: null },
   })));
   expect(screen.getByPlaceholderText('Enter password').props.secureTextEntry).toBe(true);
@@ -158,6 +160,7 @@ it('resends codes and clears the old code when the destination changes', async (
     emailCode: { error: null, isPending: false, sentEmail: 'doctor@example.com' },
   });
   const screen = await render(form(value));
+  expect(screen.getByText('A verification code has been sent to doctor@example.com.')).toBeTruthy();
   await fireEvent.press(screen.getByText('Resend code'));
   expect(value.onSendCode).toHaveBeenCalledWith({ email: 'doctor@example.com' });
   await fireEvent.changeText(screen.getByPlaceholderText('Enter code'), '123456');
@@ -165,6 +168,15 @@ it('resends codes and clears the old code when the destination changes', async (
   expect(screen.getByPlaceholderText('Enter code').props.value).toBe('');
   expect(value.onClearFeedback).toHaveBeenCalled();
   expect(screen.queryByText('Resend code')).toBeNull();
+});
+
+it('renders verification code request errors beside the code controls', async () => {
+  const screen = await render(form(props({
+    view: 'register',
+    emailCode: { error: 'Code request failed', isPending: false, sentEmail: null },
+  })));
+
+  expect(screen.getByText('Code request failed')).toBeTruthy();
 });
 
 it('submits a one-page password reset and offers the completed email on return', async () => {

@@ -44,7 +44,6 @@ export function AdaptiveDialog({
 
       <Dialog.Adapt when={!large}>
         <Sheet
-          zIndex={200000}
           modal
           dismissOnSnapToBottom={dismissible}
           dismissOnOverlayPress={dismissible}

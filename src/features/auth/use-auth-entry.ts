@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@tamagui/toast/v2';
 
 import type { AuthFormSubmission } from '@/schemas/auth';
 import type { PostLoginDestination } from '@/routing/auth-routing';
@@ -72,10 +73,9 @@ export function useAuthEntry(returnTo: PostLoginDestination) {
     reset();
     return operation;
   };
-  const accept = (operation: Operation, result: AuthSubmissionResult) => {
-    if (operationRef.current !== operation || operation.controller.signal.aborted) return;
-    if (result.kind === 'session') appStore.getState().setSession(result.session);
-  };
+  const isCurrent = (operation: Operation) => (
+    operationRef.current === operation && !operation.controller.signal.aborted
+  );
 
   useEffect(() => () => {
     operationRef.current?.controller.abort();
@@ -100,8 +100,15 @@ export function useAuthEntry(returnTo: PostLoginDestination) {
     : mutationKind ? 'form' : null;
   const failureScope = submissionKind === 'linuxdo' ? 'oauth'
     : entry.view === 'login' ? 'login' : 'enrollment';
-  const settleSubmission = (operation: Operation) => ({
-    onSuccess: (result: AuthSubmissionResult) => accept(operation, result),
+  const settleSubmission = (
+    operation: Operation,
+    kind: AuthFormSubmission['kind'] | 'linuxdo',
+  ) => ({
+    onSuccess: (result: AuthSubmissionResult) => {
+      if (!isCurrent(operation)) return;
+      if (kind === 'login' || kind === 'linuxdo') toast.success(t('login.success'));
+      if (result.kind === 'session') appStore.getState().setSession(result.session);
+    },
     onSettled: () => release(operation),
   });
 
@@ -139,7 +146,7 @@ export function useAuthEntry(returnTo: PostLoginDestination) {
       const operation = start();
       if (operation) submission.mutate(
         { signal: operation.controller.signal, submission: input },
-        settleSubmission(operation),
+        settleSubmission(operation, input.kind),
       );
     },
     onSendCode: (input) => {
@@ -164,7 +171,7 @@ export function useAuthEntry(returnTo: PostLoginDestination) {
         submission.mutate({
           signal: operation.controller.signal,
           submission: { kind: 'linuxdo', ...completion.input, returnTo: completion.returnTo },
-        }, settleSubmission(operation));
+        }, settleSubmission(operation, 'linuxdo'));
       })().catch((error: unknown) => {
         if (operationRef.current !== operation) return;
         setAuthorization(error instanceof Error ? error : new Error('Authorization failed'));
@@ -209,6 +216,7 @@ export function useLinuxDoCallback() {
       if (!active || result.kind !== 'session') return;
       try {
         assertActive(current.signal);
+        toast.success(t('login.success'));
         appStore.getState().setSession(result.session);
         setDestination(result.returnTo);
       } catch { /* A stale callback cannot update the current route or session. */ }
@@ -218,7 +226,7 @@ export function useLinuxDoCallback() {
       }
     });
     return () => { active = false; };
-  }, [exchange]);
+  }, [exchange, t]);
 
   return { destination, error: authFailureMessage(callbackError ?? submission.error, t, 'oauth') };
 }

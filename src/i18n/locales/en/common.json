@@ -13,6 +13,7 @@
   "accessibility": {
     "hideAccessKey": "Hide access key",
     "hidePassword": "Hide password",
+    "notifications": "Notifications",
     "showAccessKey": "Show access key",
     "showPassword": "Show password"
   },
