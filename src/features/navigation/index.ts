@@ -10,13 +10,6 @@ export {
   dashboardDefaultPageId,
   dashboardPageHref,
   dashboardPages,
-  getSettingsPageId,
   settingsDefaultPage,
   settingsPagesList,
-} from './navigation-config';
-export type {
-  DashboardPageId,
-  NavigationScope,
-  SettingsPageId,
-  SettingsPageRoute,
 } from './navigation-config';

@@ -42,7 +42,7 @@ jest.mock('@shopify/flash-list', () => {
   });
 
   const useMappingHelper = () => ({
-    getMappingKey: (itemKey: string | number | bigint, index: number) => index,
+    getMappingKey: (_itemKey: string | number | bigint, index: number) => index,
   });
 
   return { FlashList: MockFlashList, useMappingHelper };
