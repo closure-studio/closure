@@ -1,6 +1,5 @@
 import {
   Boxes,
-  CalendarClock,
   Grid2X2,
   HeartHandshake,
   ShieldCheck,
@@ -17,7 +16,6 @@ export const dashboardPages = [
   { id: 'settings', icon: Settings2 },
   { id: 'operators', icon: UsersRound },
   { id: 'inventory', icon: Boxes },
-  { id: 'activity', icon: CalendarClock },
 ] as const;
 export const dashboardDefaultPageId: DashboardPageId = 'overview';
 
@@ -30,10 +28,8 @@ const settingsPages = {
 export const settingsPagesList = Object.values(settingsPages);
 export const settingsDefaultPage = settingsPages.network;
 
-export type DashboardPageId = (typeof dashboardPages)[number]['id'];
+type DashboardPageId = (typeof dashboardPages)[number]['id'];
 export type SettingsPageId = keyof typeof settingsPages;
-export type SettingsPageRoute =
-  (typeof settingsPages)[SettingsPageId]['route'];
 export type NavigationScope = 'dashboard' | 'settings';
 
 export function dashboardPageHref(
