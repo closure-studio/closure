@@ -7,6 +7,7 @@ import type {
   PasswordResetInput,
   LinuxDoLoginInput,
 } from '@/schemas/auth';
+import type { QQBindingState } from '@/schemas/user-account';
 import { assertActive } from '@/services/request-scope';
 import type { AuthAdapter, AuthBusinessFailureCode, AuthResult } from './auth-adapter';
 import {
@@ -32,6 +33,15 @@ function sessionForToken(accessToken: string): UserSession | null {
 }
 
 export class MockAuthAdapter implements AuthAdapter {
+  async fetchQQBindingState(accessToken: string, signal: AbortSignal): Promise<AuthResult<QQBindingState>> {
+    await this.#wait(signal);
+    const session = sessionForToken(accessToken);
+    if (!session) return failure('session-expired');
+    if (accessToken === MOCK_AUTH_VALUES.adminToken) {
+      return success({ status: 'bound', verificationCode: null });
+    }
+    return success({ status: 'unbound', verificationCode: 'verifyCode:mock-closure-link' });
+  }
   #registered: { session: UserSession; password: string } | null = null;
   async register(input: RegistrationInput, signal: AbortSignal): Promise<AuthResult<UserSession>> {
     await this.#wait(signal);

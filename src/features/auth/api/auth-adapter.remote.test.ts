@@ -80,3 +80,79 @@ it('exchanges Linux.do codes through the existing server and validates its sessi
   expect(exchangeCall?.[1]?.body).not.toHaveProperty('redirect_uri');
   expect(runVerification).not.toHaveBeenCalled();
 });
+
+
+it('maps an unbound QQ response to a validated binding command', async () => {
+  const request = jest.spyOn(http, 'requestJson').mockResolvedValue({
+    code: 1,
+    data: 'abc123',
+    message: 'ok',
+  });
+  const operation = signal();
+
+  await expect(adapter.fetchQQBindingState('access-token', operation)).resolves.toEqual({
+    ok: true,
+    data: { status: 'unbound', verificationCode: 'verifyCode:abc123' },
+  });
+  expect(request).toHaveBeenCalledWith('https://passport.ltsc.vip/api/v1/qq', {
+    accessToken: 'access-token',
+    method: 'GET',
+    signal: operation,
+  });
+});
+
+it('treats QQ response code 2 as an already linked state', async () => {
+  jest.spyOn(http, 'requestJson').mockResolvedValue({
+    code: 2,
+    data: '',
+    message: 'already bound',
+  });
+
+  await expect(adapter.fetchQQBindingState('access-token', signal())).resolves.toEqual({
+    ok: true,
+    data: { status: 'bound', verificationCode: null },
+  });
+});
+
+it('rejects QQ request cancellation instead of mapping it to a failure', async () => {
+  const controller = new AbortController();
+  jest.spyOn(http, 'requestJson').mockImplementation(() => {
+    controller.abort();
+    return Promise.reject(new Error('fetch aborted'));
+  });
+
+  await expect(adapter.fetchQQBindingState(
+    'access-token',
+    controller.signal,
+  )).rejects.toThrow('Request cancelled');
+});
+
+it('rejects malformed QQ verification codes at the response boundary', async () => {
+  jest.spyOn(http, 'requestJson').mockResolvedValue({
+    code: 1,
+    data: '',
+    message: 'ok',
+  });
+
+  await expect(adapter.fetchQQBindingState('access-token', signal())).resolves.toEqual({
+    ok: false,
+    error: { code: 'invalid-response', kind: 'invalid-response' },
+  });
+});
+
+it('keeps QQ business failures separate from binding status', async () => {
+  jest.spyOn(http, 'requestJson').mockResolvedValue({
+    code: 0,
+    data: null,
+    message: 'request failed',
+  });
+
+  await expect(adapter.fetchQQBindingState('access-token', signal())).resolves.toEqual({
+    ok: false,
+    error: {
+      code: 'unknown-business-error',
+      diagnosticMessage: 'request failed',
+      kind: 'business',
+    },
+  });
+});

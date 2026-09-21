@@ -72,6 +72,46 @@
       "newPasswordRequired": "请输入新密码",
       "repeatNewPasswordRequired": "请再次输入新密码",
       "passwordsMismatch": "两次输入的新密码不一致"
+    },
+    "qqBinding": {
+      "rowLabel": "QQ 连接",
+      "checkingStatus": "正在检查",
+      "unavailableStatus": "暂时不可用",
+      "boundStatus": "已绑定",
+      "unboundStatus": "未绑定",
+      "code": "SOCIAL LINK / QQ",
+      "title": "绑定 QQ",
+      "description": "将 QQ 连接为托管账号的指令通道。",
+      "boundDescription": "当前账号的 QQ 指令通道已经启用。",
+      "boundTitle": "QQ 已绑定",
+      "boundMessage": "绑定已经完成，现在可以通过 QQ 通道使用当前账号。",
+      "copy": "复制",
+      "copied": "已复制",
+      "retry": "重新检查状态",
+      "done": "完成",
+      "startDetecting": "我已发送，开始检测",
+      "stopDetecting": "停止检测",
+      "detecting": "正在等待绑定确认，最长约 60 秒。",
+      "timedOut": "尚未检测到确认。请检查是否发送了完整指令，然后重新检测。",
+      "steps": {
+        "copyTitle": "复制绑定指令",
+        "copyDescription": "完整复制下方指令，包括 verifyCode 前缀。",
+        "groupTitle": "选择 QQ 群",
+        "groupDescription": "打开任一群组，将绑定指令作为一条新消息发送。打开群组不会自动复制指令。",
+        "verifyTitle": "确认连接",
+        "verifyDescription": "发送指令后，从这里启动检测。检测只会在当前面板打开时运行。"
+      },
+      "groups": {
+        "primary": "主群",
+        "backup": "备用群"
+      },
+      "errors": {
+        "unavailable": "暂时无法获取 QQ 绑定状态。",
+        "invalidResponse": "身份服务返回了无效的 QQ 绑定数据。",
+        "sessionExpired": "会话已过期，请重新登录后绑定 QQ。",
+        "copyFailed": "无法复制绑定指令，请选中文本后手动复制。",
+        "openGroupFailed": "当前设备无法打开该 QQ 群。"
+      }
     }
   },
   "contributors": {

@@ -7,6 +7,7 @@ import type {
   PasswordResetInput,
   LinuxDoLoginInput,
 } from '@/schemas/auth';
+import type { QQBindingState } from '@/schemas/user-account';
 
 export type AuthBusinessFailureCode =
   | 'account-banned'
@@ -55,6 +56,7 @@ export type AuthResult<T> =
 
 /** Expected request failures return AuthResult; signal cancellation rejects. */
 export interface AuthAdapter {
+  fetchQQBindingState(accessToken: string, signal: AbortSignal): Promise<AuthResult<QQBindingState>>;
   loginWithLinuxDo(input: LinuxDoLoginInput, signal: AbortSignal): Promise<AuthResult<UserSession>>;
   register(input: RegistrationInput, signal: AbortSignal): Promise<AuthResult<UserSession>>;
   resetPassword(input: PasswordResetInput, signal: AbortSignal): Promise<AuthResult<void>>;

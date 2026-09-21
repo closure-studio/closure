@@ -72,6 +72,46 @@
       "newPasswordRequired": "Enter a new password",
       "repeatNewPasswordRequired": "Repeat the new password",
       "passwordsMismatch": "The new passwords do not match"
+    },
+    "qqBinding": {
+      "rowLabel": "QQ connection",
+      "checkingStatus": "Checking",
+      "unavailableStatus": "Unavailable",
+      "boundStatus": "Linked",
+      "unboundStatus": "Not linked",
+      "code": "SOCIAL LINK / QQ",
+      "title": "Link QQ",
+      "description": "Connect QQ as a command channel for managing hosted accounts.",
+      "boundDescription": "The QQ command channel is active for this account.",
+      "boundTitle": "QQ linked",
+      "boundMessage": "Binding is complete. You can now use the QQ channel with this account.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "retry": "Retry status check",
+      "done": "Done",
+      "startDetecting": "I sent it — start detection",
+      "stopDetecting": "Stop detection",
+      "detecting": "Listening for confirmation. This can take up to 60 seconds.",
+      "timedOut": "No confirmation was detected. Check that the complete command was sent, then try again.",
+      "steps": {
+        "copyTitle": "Copy binding command",
+        "copyDescription": "Copy the full command exactly as shown, including the verifyCode prefix.",
+        "groupTitle": "Choose a QQ group",
+        "groupDescription": "Open either group and send the command as a new message. Opening a group does not copy the command.",
+        "verifyTitle": "Confirm the connection",
+        "verifyDescription": "After sending the command, start detection here. Detection only runs while this panel is open."
+      },
+      "groups": {
+        "primary": "Primary group",
+        "backup": "Backup group"
+      },
+      "errors": {
+        "unavailable": "QQ binding status is temporarily unavailable.",
+        "invalidResponse": "The identity service returned an invalid QQ binding response.",
+        "sessionExpired": "Your session expired. Sign in again before linking QQ.",
+        "copyFailed": "The command could not be copied. Select the text and copy it manually.",
+        "openGroupFailed": "The QQ group could not be opened on this device."
+      }
     }
   },
   "contributors": {
