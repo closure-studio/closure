@@ -1,14 +1,15 @@
 import { useUpdatePassword } from '@/features/auth';
 import { useAppLogout } from '@/features/navigation';
-import { AccountSettingsScreen } from '@/features/settings';
+import { AccountSettingsScreen, useQQBindingController } from '@/features/settings';
 import { useAppStore } from '@/store';
 
 export default function SettingsAccountRoute() {
-  const principal = useAppStore((state) => state.auth.session?.principal ?? null);
+  const session = useAppStore((state) => state.auth.session);
   const logout = useAppLogout();
   const updatePassword = useUpdatePassword();
+  const qqBinding = useQQBindingController(session);
 
-  if (!principal) return null;
+  if (!session) return null;
 
   return (
     <AccountSettingsScreen
@@ -16,7 +17,8 @@ export default function SettingsAccountRoute() {
       onUpdatePassword={updatePassword.mutateAsync}
       passwordUpdateError={updatePassword.error ?? null}
       passwordUpdateStatus={updatePassword.status}
-      principal={principal}
+      principal={session.principal}
+      qqBinding={qqBinding}
     />
   );
 }

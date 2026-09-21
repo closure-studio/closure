@@ -1,6 +1,7 @@
 import * as v from 'valibot';
 import { idServerClaimsSchema, idServerLoginSchema, userSessionSchema, registrationProofSchema } from '@/schemas/auth';
 import type { LinuxDoLoginInput, LoginCredentials, EmailCodeRequestInput, PasswordUpdateInput, RegistrationInput, PasswordResetInput, UserSession } from '@/schemas/auth';
+import type { QQBindingState } from '@/schemas/user-account';
 import { requestJson, HttpFailure } from '@/services/http';
 import { assertActive } from '@/services/request-scope';
 import { runVerification } from '@/features/verification';
@@ -25,6 +26,43 @@ export function decodeSession(data: unknown): UserSession {
 }
 
 export class RemoteAuthAdapter implements AuthAdapter {
+  async fetchQQBindingState(accessToken: string, signal: AbortSignal): Promise<AuthResult<QQBindingState>> {
+    try {
+      const result = await requestJson(`${ID_SERVER_URL}/qq`, {
+        accessToken,
+        method: 'GET',
+        signal,
+      });
+      if (result.code === 2) {
+        return { ok: true, data: {
+          status: 'bound',
+          verificationCode: null,
+        } };
+      }
+      if (result.code !== 1) {
+        return { ok: false, error: {
+          kind: 'business',
+          diagnosticMessage: result.message,
+          code: 'unknown-business-error',
+        } };
+      }
+      const verificationCode = v.parse(v.pipe(v.string(), v.minLength(1)), result.data);
+      return { ok: true, data: {
+        status: 'unbound',
+        verificationCode: `verifyCode:${verificationCode}`,
+      } };
+    } catch (error) {
+      assertActive(signal);
+      if (error instanceof HttpFailure && error.code !== 'invalid-response') {
+        return { ok: false, error: {
+          kind: 'transport',
+          code: error.code,
+          ...(error.status === undefined ? {} : { httpStatus: error.status }),
+        } };
+      }
+      return { ok: false, error: { kind: 'invalid-response', code: 'invalid-response' } };
+    }
+  }
   async #call<T>(path: string, body: object, decode: (data: unknown) => T, method: 'POST' | 'PUT', signal: AbortSignal): Promise<AuthResult<T>> {
     try {
       const result = await requestJson(`${ID_SERVER_URL}${path}`, {

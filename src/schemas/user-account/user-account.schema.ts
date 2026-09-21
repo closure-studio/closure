@@ -1,5 +1,16 @@
 import * as v from 'valibot';
 
+export const qqBindingStateSchema = v.variant('status', [
+  v.object({
+    status: v.literal('unbound'),
+    verificationCode: v.pipe(v.string(), v.minLength(1)),
+  }),
+  v.object({
+    status: v.literal('bound'),
+    verificationCode: v.null(),
+  }),
+]);
+
 export const passwordChangeIssue = {
   currentPasswordRequired: 'currentPasswordRequired',
   newPasswordRequired: 'newPasswordRequired',
@@ -29,3 +40,4 @@ export const passwordChangeInputSchema = v.pipe(
 );
 
 export type PasswordChangeInput = v.InferOutput<typeof passwordChangeInputSchema>;
+export type QQBindingState = v.InferOutput<typeof qqBindingStateSchema>;

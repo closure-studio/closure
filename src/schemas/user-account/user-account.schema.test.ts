@@ -3,6 +3,7 @@ import * as v from 'valibot';
 import {
   passwordChangeInputSchema,
   passwordChangeIssue,
+  qqBindingStateSchema,
 } from './user-account.schema';
 
 describe('passwordChangeInputSchema', () => {
@@ -28,5 +29,23 @@ describe('passwordChangeInputSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) expect(result.issues[0]?.message).toBe(expectedIssue);
+  });
+});
+
+
+describe('qqBindingStateSchema', () => {
+  it.each([
+    { status: 'unbound', verificationCode: 'verifyCode:abc123' },
+    { status: 'bound', verificationCode: null },
+  ])('accepts a valid $status state', (input) => {
+    expect(v.safeParse(qqBindingStateSchema, input)).toMatchObject({ success: true });
+  });
+
+  it.each([
+    { status: 'unbound', verificationCode: '' },
+    { status: 'bound', verificationCode: 'verifyCode:abc123' },
+    { status: 'unknown', verificationCode: null },
+  ])('rejects an invalid QQ binding state', (input) => {
+    expect(v.safeParse(qqBindingStateSchema, input).success).toBe(false);
   });
 });

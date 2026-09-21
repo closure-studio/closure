@@ -26,6 +26,10 @@ describe('MockAuthAdapter', () => {
       newPassword: 'new-password',
     }, signal()));
     expectSuccess(await adapter.requestEmailCode({ email: MOCK_AUTH_VALUES.activeEmail }, signal()));
+    expect(expectSuccess(await adapter.fetchQQBindingState(
+      MOCK_AUTH_VALUES.activeToken,
+      signal(),
+    ))).toEqual({ status: 'unbound', verificationCode: 'verifyCode:mock-closure-link' });
 
     expect(v.safeParse(userSessionSchema, login).success).toBe(true);
   });
