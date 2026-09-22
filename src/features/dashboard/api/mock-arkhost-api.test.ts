@@ -72,6 +72,67 @@ describe("MockArkHostApi", () => {
     expect(second.ok && second.data?.config.keeping_ap).toBe(0);
   });
 
+  it("creates official and Bilibili accounts with server account prefixes", async () => {
+    const officialApi = new MockArkHostApi(0);
+    await officialApi.deleteGame("G00000000001");
+    expect(await officialApi.createGame({
+      account: "replacement",
+      password: "secret",
+      platform: 1,
+    })).toEqual({ data: undefined, ok: true });
+    const officialGames = await officialApi.fetchGameList();
+    expect(officialGames.ok && officialGames.data.find(
+      (entry) => entry.status.account === "Greplacement",
+    )?.status).toMatchObject({ code: 0, platform: 1 });
+
+    const bilibiliApi = new MockArkHostApi(0);
+    await bilibiliApi.deleteGame("G00000000001");
+    await bilibiliApi.createGame({
+      account: "replacement",
+      password: "secret",
+      platform: 2,
+    });
+    const bilibiliGames = await bilibiliApi.fetchGameList();
+    expect(bilibiliGames.ok && bilibiliGames.data.some(
+      (entry) => entry.status.account === "Breplacement",
+    )).toBe(true);
+  });
+
+  it("preserves cancellation while creating a game account", async () => {
+    const api = new MockArkHostApi(100);
+    const controller = new AbortController();
+    const creation = api.createGame({
+      account: "cancelled",
+      password: "secret",
+      platform: 1,
+    }, controller.signal);
+
+    controller.abort();
+
+    await expect(creation).rejects.toThrow("Request cancelled");
+  });
+
+  it("rejects duplicate game accounts and creation above the slot limit", async () => {
+    const api = new MockArkHostApi(0);
+    await expect(api.createGame({
+      account: "new-account",
+      password: "secret",
+      platform: 1,
+    })).resolves.toEqual({
+      error: { code: "operation-rejected", kind: "business" },
+      ok: false,
+    });
+    await api.deleteGame("G00000000001");
+    await expect(api.createGame({
+      account: "00000000002",
+      password: "secret",
+      platform: 1,
+    })).resolves.toEqual({
+      error: { code: "operation-rejected", kind: "business" },
+      ok: false,
+    });
+  });
+
   it("deletes a game account and keeps server reads consistent", async () => {
     const api = new MockArkHostApi(0);
     expect(await api.deleteGame("G00000000001")).toEqual({

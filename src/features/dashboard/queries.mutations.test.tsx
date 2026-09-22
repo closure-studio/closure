@@ -7,6 +7,7 @@ import { appStore } from '@/store';
 import { arkHostApi } from './api';
 import {
   arkHostQueryKeys,
+  useCreateGame,
   useDeleteGame,
   useLoginGame,
   usePauseGame,
@@ -40,6 +41,36 @@ afterEach(async () => {
 });
 
 describe('game account mutations', () => {
+  it('creates a validated game account and invalidates only the account list', async () => {
+    const createGame = jest.spyOn(arkHostApi, 'createGame').mockResolvedValue({
+      data: undefined,
+      ok: true,
+    });
+    const { queryClient, wrapper } = createWrapper();
+    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+    const { result, unmount } = await renderHook(() => useCreateGame(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        account: '  doctor@example.com  ',
+        password: ' secret ',
+        platform: 1,
+      });
+    });
+
+    expect(createGame).toHaveBeenCalledWith({
+      account: 'doctor@example.com',
+      password: ' secret ',
+      platform: 1,
+    }, expect.any(AbortSignal));
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: arkHostQueryKeys.gameAccounts(mockActiveSession.principal.id),
+    });
+    expect(invalidateQueries).toHaveBeenCalledTimes(1);
+    await unmount();
+    queryClient.clear();
+  });
+
   it('invalidates only the config-owning detail after a config update succeeds', async () => {
     const updateGameConfig = jest.spyOn(arkHostApi, 'updateGameConfig').mockResolvedValue({
       data: undefined,

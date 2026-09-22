@@ -5,6 +5,7 @@ import {
   mockArkHostGameLogsResponse,
 } from "@/mocks/arkhost";
 import {
+  arkHostCreateGameInputSchema,
   arkHostCharacterSchema,
   arkHostBattleTaskSchema,
   arkHostGameConfigPatchSchema,
@@ -15,6 +16,33 @@ import {
 } from ".";
 
 describe("ArkHost server contracts", () => {
+  it("accepts only the supported game account platforms", () => {
+    expect(v.parse(arkHostCreateGameInputSchema, {
+      account: "  doctor@example.com  ",
+      password: " secret ",
+      platform: 1,
+    })).toEqual({
+      account: "doctor@example.com",
+      password: " secret ",
+      platform: 1,
+    });
+    expect(v.safeParse(arkHostCreateGameInputSchema, {
+      account: "doctor@example.com",
+      password: "secret",
+      platform: 2,
+    }).success).toBe(true);
+    expect(v.safeParse(arkHostCreateGameInputSchema, {
+      account: "doctor@example.com",
+      password: "secret",
+      platform: 0,
+    }).success).toBe(false);
+    expect(v.safeParse(arkHostCreateGameInputSchema, {
+      account: "   ",
+      password: "secret",
+      platform: 1,
+    }).success).toBe(false);
+  });
+
   it("accepts every supplied ArkHost response fixture", () => {
     expect(
       v.safeParse(arkHostGameListResponseSchema, mockArkHostGameListResponse)

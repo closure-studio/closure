@@ -4,10 +4,12 @@ import * as v from 'valibot';
 
 import {
   ARK_HOST_GAME_STATUS_CODE,
+  arkHostCreateGameInputSchema,
   arkHostGameConfigPatchSchema,
   gameCaptchaUpdateSchema,
 } from '@/schemas/arkhost';
 import type {
+  ArkHostCreateGameInput,
   ArkHostGameConfigPatch,
   ArkHostGameListEntry,
   ArkHostGameLogs,
@@ -143,6 +145,31 @@ export function useUpdateGameConfig(account: string) {
         queryKey: arkHostQueryKeys.detail(account),
       });
     },
+  });
+}
+
+export function useCreateGame() {
+  const scope = requestScope();
+  const queryClient = useQueryClient();
+  const userId = useAppStore((state) => state.auth.session?.principal.id);
+  return useMutation<void, ArkHostFailure, ArkHostCreateGameInput, AbortSignal>({
+    mutationKey: ['arkhost', 'create-game'],
+    onMutate: () => scope,
+    mutationFn: async (input) => {
+      assertActive(scope);
+      const parsedInput = v.safeParse(arkHostCreateGameInputSchema, input);
+      if (!parsedInput.success) {
+        throw new FailureError({
+          code: 'operation-rejected',
+          diagnosticMessage: 'Invalid game account input.',
+          kind: 'business',
+        });
+      }
+      unwrapResult(await arkHostApi.createGame(parsedInput.output, scope));
+    },
+    onSuccess: (_, _input, scope) => scope && !scope.aborted
+      ? invalidateGameAccountsQuery(queryClient, userId)
+      : undefined,
   });
 }
 

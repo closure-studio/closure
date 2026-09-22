@@ -9,6 +9,22 @@ import {
 const integerSchema = v.pipe(v.number(), v.integer());
 const positiveIntegerSchema = v.pipe(integerSchema, v.minValue(1));
 
+export const ARK_HOST_GAME_PLATFORM = {
+  official: 1,
+  bilibili: 2,
+} as const;
+
+export const arkHostGamePlatformSchema = v.picklist([
+  ARK_HOST_GAME_PLATFORM.official,
+  ARK_HOST_GAME_PLATFORM.bilibili,
+]);
+
+export const arkHostCreateGameInputSchema = v.object({
+  account: v.pipe(v.string(), v.trim(), v.minLength(1)),
+  password: nonBlankStringSchema,
+  platform: arkHostGamePlatformSchema,
+});
+
 export const ARK_HOST_GAME_STATUS_CODE = {
   loginFailed: -1,
   notStarted: 0,
@@ -280,6 +296,12 @@ export const arkHostGameLogsResponseSchema = responseSchema(
 );
 
 export type ArkHostAvatar = v.InferOutput<typeof arkHostAvatarSchema>;
+export type ArkHostCreateGameInput = v.InferOutput<
+  typeof arkHostCreateGameInputSchema
+>;
+export type ArkHostGamePlatform = v.InferOutput<
+  typeof arkHostGamePlatformSchema
+>;
 export type ArkHostAccelerateSlot = v.InferOutput<
   typeof arkHostAccelerateSlotSchema
 >;
