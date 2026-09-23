@@ -1,14 +1,29 @@
 {
-  "connection": { "loading": "正在加载游戏账号", "error": "无法加载游戏账号", "empty": "暂无游戏账号" },
+  "connection": { "loading": "正在加载游戏账号", "error": "无法加载游戏账号" },
   "account": {
-    "accountIdentifierLabel": "游戏账号 / ACCOUNT",
-    "accountIdentifierPlaceholder": "手机号 / 邮箱 / 用户名",
-    "bind": "绑定账号",
-    "credentialNotice": "// 凭证仅本地加密缓存,用于终端代理登录,可露希尔不会上传你的游戏密码。",
-    "passwordLabel": "游戏密码 / PASSWORD",
-    "serverChannelLabel": "服务器渠道 / CHANNEL",
-    "subtitle": "绑定账号",
-    "required": "请填写游戏账号与密码",
+    "accountIdentifierLabel": "游戏账号",
+    "add": "添加游戏账号",
+    "channels": {
+      "bilibili": "B服",
+      "official": "官服"
+    },
+    "emptyDescription": "添加明日方舟账号后即可开始使用。",
+    "emptyTitle": "尚未添加游戏账号",
+    "errors": {
+      "accountRequired": "请输入游戏账号",
+      "invalidResponse": "出了点问题，请重试。",
+      "passwordRequired": "请输入游戏密码",
+      "rejected": "添加失败。请检查账号、密码和账号类型，或确认该账号没有重复添加。",
+      "unavailable": "暂时无法添加账号，请稍后重试。",
+      "verification": "请先完成验证，再重新提交。"
+    },
+    "passwordLabel": "游戏密码",
+    "serverChannelLabel": "账号类型",
+    "startFailed": "游戏账号已添加，但启动失败，请在概览页重试。",
+    "submit": "添加账号",
+    "submitting": "正在添加…",
+    "success": "游戏账号添加成功，游戏正在启动。",
+    "syncFailed": "游戏账号已添加，但未能切换到新账号，请选择该账号后手动启动。",
     "title": "添加游戏账号"
   },
   "navigation": {

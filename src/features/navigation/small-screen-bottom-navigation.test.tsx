@@ -19,9 +19,11 @@ const safeAreaMetrics = {
 
 jest.mock('react-native-reanimated', () => {
   const reanimated = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated');
+  const reanimatedMock = jest.requireActual<typeof import('react-native-reanimated')>('react-native-reanimated/mock');
 
   return {
     ...reanimated,
+    ...reanimatedMock,
     useReducedMotion: () => true,
   };
 });
@@ -39,7 +41,13 @@ jest.mock('tamagui', () => {
   };
 });
 
-async function renderMobileBottomNavigation(defaultPrevented = false) {
+async function renderMobileBottomNavigation({
+  canCreateGame = true,
+  defaultPrevented = false,
+}: {
+  canCreateGame?: boolean;
+  defaultPrevented?: boolean;
+} = {}) {
   const emit = jest.fn();
   emit.mockReturnValue({
     type: 'tabPress',
@@ -48,6 +56,7 @@ async function renderMobileBottomNavigation(defaultPrevented = false) {
     preventDefault: jest.fn(),
   });
   const navigate = jest.fn();
+  const onAddGameAccount = jest.fn();
   const navigation = {
     canGoBack: jest.fn(),
     dispatch: jest.fn(),
@@ -89,13 +98,15 @@ async function renderMobileBottomNavigation(defaultPrevented = false) {
             insets={safeAreaMetrics.insets}
             navigation={navigation}
             state={state}
+            canCreateGame={canCreateGame}
+            onAddGameAccount={onAddGameAccount}
           />
         </I18nextProvider>
       </TamaguiProvider>
     </SafeAreaProvider>,
   );
 
-  return { emit, navigate, screen };
+  return { emit, navigate, onAddGameAccount, screen };
 }
 
 describe('MobileBottomNavigation', () => {
@@ -103,10 +114,11 @@ describe('MobileBottomNavigation', () => {
     mockYStack.mockClear();
   });
 
-  it('keeps the active indicator static when reduced motion is enabled', async () => {
-    await renderMobileBottomNavigation();
+  it('keeps the active indicator static and renders an account halo when reduced motion is enabled', async () => {
+    const { screen } = await renderMobileBottomNavigation();
 
     expect(mockYStack).toHaveBeenCalledWith(expect.objectContaining({ transition: '0ms' }));
+    expect(screen.getByTestId('dashboard-add-game-account-halo')).toBeTruthy();
   });
 
   it('extends its background through the bottom safe area', async () => {
@@ -125,6 +137,32 @@ describe('MobileBottomNavigation', () => {
     expect(screen.getByRole('tab', { name: i18n.t('dashboard:navigation.sections.overview.label') }).props['aria-selected']).toBe(true);
   });
 
+  it('places an icon-only account creation action between Settings and Operators', async () => {
+    const { onAddGameAccount, screen } = await renderMobileBottomNavigation();
+    const actionLabel = i18n.t('dashboard:account.add');
+    const action = screen.getByRole('button', { name: actionLabel });
+
+    expect(screen.getAllByRole('tab')).toHaveLength(4);
+    expect(screen.queryByText(actionLabel)).toBeNull();
+
+    await fireEvent.press(action);
+
+    expect(onAddGameAccount).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the account creation action when all slots are occupied', async () => {
+    const { onAddGameAccount, screen } = await renderMobileBottomNavigation({
+      canCreateGame: false,
+    });
+    const action = screen.getByRole('button', {
+      name: i18n.t('dashboard:account.add'),
+    });
+
+    expect(action).toBeDisabled();
+    await fireEvent.press(action);
+    expect(onAddGameAccount).not.toHaveBeenCalled();
+  });
+
   it('navigates between static Dashboard page routes', async () => {
     const { emit, navigate, screen } = await renderMobileBottomNavigation();
 
@@ -139,7 +177,7 @@ describe('MobileBottomNavigation', () => {
   });
 
   it('honors a prevented tabPress event', async () => {
-    const { navigate, screen } = await renderMobileBottomNavigation(true);
+    const { navigate, screen } = await renderMobileBottomNavigation({ defaultPrevented: true });
 
     await fireEvent.press(screen.getByText(i18n.t('dashboard:navigation.sections.operators.label')));
 

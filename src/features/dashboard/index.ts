@@ -1,6 +1,10 @@
 export { getGameAvatarImageUrl } from './avatar-image';
 export { DashboardShell } from './components/dashboard-shell';
 export {
+  EmptyGameAccountState,
+  GameAccountCreationDialog,
+} from './components/game-account-creation';
+export {
   useAdjacentGameAccountPrefetch,
   useArkHostSync,
   useSessionQueryCacheReset,
@@ -14,3 +18,4 @@ export {
 } from './screens/dashboard-account-content';
 export { DashboardAccountProvider, useDashboardAccount } from './dashboard-account';
 export { GameVerification } from './game-verification';
+export { useGameAccountCreation } from './use-game-account-creation';

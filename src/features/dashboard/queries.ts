@@ -8,6 +8,7 @@ import {
   gameCaptchaUpdateSchema,
 } from '@/schemas/arkhost';
 import type {
+  ArkHostCreateGameInput,
   ArkHostGameConfigPatch,
   ArkHostGameListEntry,
   ArkHostGameLogs,
@@ -142,6 +143,43 @@ export function useUpdateGameConfig(account: string) {
       await queryClient.invalidateQueries({
         queryKey: arkHostQueryKeys.detail(account),
       });
+    },
+  });
+}
+
+export function useCreateGame() {
+  const scope = requestScope();
+  const queryClient = useQueryClient();
+  const userId = useAppStore((state) => state.auth.session?.principal.id);
+  return useMutation<string | null, ArkHostFailure, ArkHostCreateGameInput>({
+    mutationKey: ['arkhost', 'create-game'],
+    mutationFn: async (input) => {
+      assertActive(scope);
+
+      const queryKey = userId
+        ? arkHostQueryKeys.gameAccounts(userId)
+        : null;
+      const previousAccountIds = new Set(
+        queryKey
+          ? queryClient.getQueryData<GameAccount[]>(queryKey)?.map(
+            (account) => account.account,
+          ) ?? []
+          : [],
+      );
+
+      unwrapResult(await arkHostApi.createGame(input, scope));
+      assertActive(scope);
+      if (!queryKey) return null;
+
+      await queryClient.invalidateQueries({ queryKey });
+      assertActive(scope);
+      const addedAccounts = (
+        queryClient.getQueryData<GameAccount[]>(queryKey) ?? []
+      ).filter((account) => !previousAccountIds.has(account.account));
+
+      return addedAccounts.length === 1
+        ? addedAccounts[0]?.account ?? null
+        : null;
     },
   });
 }

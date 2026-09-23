@@ -1,4 +1,5 @@
 import type {
+  ArkHostCreateGameInput,
   ArkHostGameConfigPatch,
   ArkHostGameDetail,
   ArkHostGameListEntry,
@@ -22,6 +23,7 @@ export type ArkHostSseListener = (event: ArkHostSseEvent) => void;
 export type ArkHostSseSubscription = { unsubscribe: () => void };
 
 export interface ArkHostApi {
+  createGame(input: ArkHostCreateGameInput, signal?: AbortSignal): Promise<ArkHostResult<void>>;
   submitGameCaptcha(account: string, input: GameCaptchaSubmission, signal?: AbortSignal): Promise<ArkHostResult<void>>;
   deleteGame(account: string, signal?: AbortSignal): Promise<ArkHostResult<void>>;
   fetchGameDetail(account: string, signal?: AbortSignal): Promise<ArkHostResult<ArkHostGameDetail | null>>;

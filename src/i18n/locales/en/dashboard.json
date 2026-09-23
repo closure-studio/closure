@@ -1,14 +1,29 @@
 {
-  "connection": { "loading": "Loading game accounts", "error": "Unable to load game accounts", "empty": "No game accounts" },
+  "connection": { "loading": "Loading game accounts", "error": "Unable to load game accounts" },
   "account": {
-    "accountIdentifierLabel": "GAME ACCOUNT / ACCOUNT",
-    "accountIdentifierPlaceholder": "Phone / email / username",
-    "bind": "Link account",
-    "credentialNotice": "// Credentials are encrypted and cached locally for terminal proxy login. Closure never uploads your game password.",
-    "passwordLabel": "GAME PASSWORD / PASSWORD",
-    "serverChannelLabel": "SERVER CHANNEL / CHANNEL",
-    "subtitle": "LINK ACCOUNT",
-    "required": "Enter your game account and password",
+    "accountIdentifierLabel": "Game account",
+    "add": "Add game account",
+    "channels": {
+      "bilibili": "Bilibili",
+      "official": "Official"
+    },
+    "emptyDescription": "Add an Arknights account to get started.",
+    "emptyTitle": "No game account added",
+    "errors": {
+      "accountRequired": "Enter your game account",
+      "invalidResponse": "Something went wrong. Try again.",
+      "passwordRequired": "Enter your game password",
+      "rejected": "Could not add the account. Check the account, password, and account type, or make sure it has not already been added.",
+      "unavailable": "You cannot add an account right now. Try again later.",
+      "verification": "Complete verification, then try again."
+    },
+    "passwordLabel": "Game password",
+    "serverChannelLabel": "Account type",
+    "startFailed": "Game account added, but the game could not be started. Try again from Overview.",
+    "submit": "Add account",
+    "submitting": "Adding…",
+    "success": "Game account added. The game is starting.",
+    "syncFailed": "Game account added, but the new account could not be selected. Select it and start the game manually.",
     "title": "Add game account"
   },
   "navigation": {

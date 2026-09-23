@@ -14,14 +14,18 @@ const dashboardMarqueeMessages = [
 ] as const;
 
 export type DashboardSecondaryHeaderProps = {
+  canCreateGame: boolean;
   selectedGameAccountId: string;
   gameAccounts: readonly GameAccount[];
+  onAddGameAccount: () => void;
   onSelectGameAccount: (gameAccountId: string) => void;
 };
 
 export function DashboardSecondaryHeader({
+  canCreateGame,
   selectedGameAccountId,
   gameAccounts,
+  onAddGameAccount,
   onSelectGameAccount,
 }: DashboardSecondaryHeaderProps) {
   const { t } = useTranslation('navigation');
@@ -36,7 +40,7 @@ export function DashboardSecondaryHeader({
   return (
     <YStack testID="dashboard-secondary-header" shrink={0}>
       <TerminalMarquee items={marqueeItems} />
-      {gameAccounts.length > 1 ? (
+      {gameAccounts.length > 1 || (canCreateGame && gameAccounts.length > 0) ? (
         <YStack
           testID="dashboard-account-switcher"
           display="none"
@@ -47,6 +51,7 @@ export function DashboardSecondaryHeader({
             <GameAccountSwitcher
               gameAccounts={gameAccounts}
               selectedGameAccountId={selectedGameAccountId}
+              {...(canCreateGame ? { onAddGameAccount } : {})}
               onSelectGameAccount={onSelectGameAccount}
             />
           </YStack>

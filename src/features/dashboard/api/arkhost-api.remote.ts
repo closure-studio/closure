@@ -7,7 +7,7 @@ import { requestJson, HttpFailure } from '@/services/http';
 import { requestScope, assertActive } from '@/services/request-scope';
 import { runVerification } from '@/features/verification';
 import { arkHostGameListEntrySchema, arkHostGameDetailSchema, arkHostGameLogsSchema, arkHostSseEventSchema } from '@/schemas/arkhost';
-import type { ArkHostGameConfigPatch, GameCaptchaSubmission } from '@/schemas/arkhost';
+import type { ArkHostCreateGameInput, ArkHostGameConfigPatch, GameCaptchaSubmission } from '@/schemas/arkhost';
 import type { ArkHostApi, ArkHostResult, ArkHostSseListener } from './arkhost-api';
 
 function baseUrl() {
@@ -52,11 +52,17 @@ export class RemoteArkHostApi implements ArkHostApi {
     });
     return result.ok ? { ok: true, data: undefined } : result;
   }
-  async loginGame(account: string, scope = requestScope()) {
+  async #verifiedWrite(path: string, scope: AbortSignal, body?: object): Promise<ArkHostResult<void>> {
     assertActive(scope);
     const token = v.parse(v.pipe(v.string(), v.minLength(1)), await runVerification({ kind: 'google' }, scope));
     assertActive(scope);
-    return this.#write(`/game/login/${encodeURIComponent(account)}`, 'POST', scope, undefined, token);
+    return this.#write(path, 'POST', scope, body, token);
+  }
+  createGame(input: ArkHostCreateGameInput, scope = requestScope()) {
+    return this.#verifiedWrite('/game/', scope, input);
+  }
+  loginGame(account: string, scope = requestScope()) {
+    return this.#verifiedWrite(`/game/login/${encodeURIComponent(account)}`, scope);
   }
   pauseGame(account: string, signal?: AbortSignal) { return this.#write(`/game/pause/${encodeURIComponent(account)}`, 'POST', signal); }
   deleteGame(account: string, signal?: AbortSignal) { return this.#write(`/game/${encodeURIComponent(account)}`, 'DELETE', signal); }

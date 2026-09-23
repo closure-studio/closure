@@ -1,5 +1,8 @@
 import {
+  ARK_HOST_MAX_GAME_ACCOUNTS_PER_USER,
+  ARK_HOST_GAME_PLATFORM,
   ARK_HOST_GAME_STATUS_CODE,
+  type ArkHostCreateGameInput,
   type ArkHostGameConfigPatch,
   type ArkHostGameDetail,
   type ArkHostGameListEntry,
@@ -88,6 +91,36 @@ export class MockArkHostApi implements ArkHostApi {
     if (!entry) return failure<void>();
 
     entry.status.code = statusCode;
+    return success(undefined);
+  }
+
+  async createGame(input: ArkHostCreateGameInput, signal = requestScope()) {
+    await this.#wait(signal);
+    assertActive(signal);
+    if (this.#gameList.length >= ARK_HOST_MAX_GAME_ACCOUNTS_PER_USER) return failure<void>();
+    const account = `${input.platform === ARK_HOST_GAME_PLATFORM.official ? 'G' : 'B'}${input.account}`;
+    if (this.#gameList.some((entry) => entry.status.account === account)) return failure<void>();
+    this.#gameList.push({
+      captcha_info: {
+        account: '', captcha_type: '', challenge: '', created: 0,
+        geetestId: '', gt: '', riskType: '',
+      },
+      game_config: {
+        accelerate_slot: 'slot_14', account, allow_login_assist: false,
+        battle_tasks: [], current_map: '', enable_building_arrange: false,
+        is_auto_battle: false, keeping_ap: 0,
+        operator_development_tasks: [], recruit_ignore_robot: false,
+        recruit_reserve: 0,
+      },
+      status: {
+        account, ap: 0, avatar: { id: '', type: '' },
+        code: ARK_HOST_GAME_STATUS_CODE.notStarted,
+        created_at: 1_700_000_000 + this.#gameList.length,
+        is_verify: false, level: 0, nick_name: '', password: '******',
+        platform: input.platform,
+        uuid: this.#gameList[0]?.status.uuid ?? 'mock-user',
+      },
+    });
     return success(undefined);
   }
 

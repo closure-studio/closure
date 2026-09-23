@@ -35,7 +35,7 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-async function renderGameAccountSwitcher() {
+async function renderGameAccountSwitcher(onAddGameAccount?: () => void) {
   const onSelectGameAccount = jest.fn();
   const screen = await render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
@@ -43,6 +43,7 @@ async function renderGameAccountSwitcher() {
         <GameAccountSwitcher
           gameAccounts={initialGameAccounts.slice(0, 2)}
           selectedGameAccountId="G00000000001"
+          {...(onAddGameAccount ? { onAddGameAccount } : {})}
           onSelectGameAccount={onSelectGameAccount}
         />
       </I18nextProvider>
@@ -64,12 +65,22 @@ describe('GameAccountSwitcher', () => {
     });
   });
 
-  it('reports account selection without exposing local account creation', async () => {
+  it('reports account selection without adding an unrequested creation action', async () => {
     const { onSelectGameAccount, screen } = await renderGameAccountSwitcher();
 
     await fireEvent.press(screen.getByTestId('game-account-option-G00000000002'));
 
     expect(onSelectGameAccount).toHaveBeenCalledWith('G00000000002');
-    expect(screen.queryByTestId('link-game-account-option')).toBeNull();
+    expect(screen.queryByTestId('add-game-account-option')).toBeNull();
+  });
+
+  it('renders a labeled creation action when one is available', async () => {
+    const onAddGameAccount = jest.fn();
+    const { screen } = await renderGameAccountSwitcher(onAddGameAccount);
+
+    await fireEvent.press(screen.getByTestId('add-game-account-option'));
+
+    expect(onAddGameAccount).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Add game account')).toBeTruthy();
   });
 });

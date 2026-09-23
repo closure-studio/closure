@@ -12,6 +12,31 @@ beforeEach(() => {
   appStore.getState().setSession(mockActiveSession);
 });
 
+it('uses Google for game creation and sends only the supported platform value', async () => {
+  jest.mocked(runVerification).mockResolvedValue('google-token');
+  const request = jest.spyOn(http, 'requestJson').mockResolvedValue({ code: 1, data: null, message: 'ok' });
+  const input = { account: 'doctor@example.com', password: ' secret ', platform: 1 as const };
+
+  await expect(api.createGame(input)).resolves.toEqual({ data: undefined, ok: true });
+
+  expect(runVerification).toHaveBeenCalledWith({ kind: 'google' }, expect.any(AbortSignal));
+  expect(request).toHaveBeenCalledWith('https://api.ltsc.vip/game/', expect.objectContaining({
+    accessToken: mockActiveSession.accessToken,
+    body: input,
+    captchaToken: 'google-token',
+    method: 'POST',
+  }));
+});
+
+it('does not send game creation when Google verification fails', async () => {
+  jest.mocked(runVerification).mockRejectedValue(new Error('Verification cancelled'));
+  const request = jest.spyOn(http, 'requestJson');
+
+  await expect(api.createGame({ account: 'doctor', password: 'secret', platform: 2 })).rejects.toThrow('Verification cancelled');
+
+  expect(request).not.toHaveBeenCalled();
+});
+
 it('uses Google only for game login with the selected endpoint', async () => {
   appStore.getState().selectApiNode('overseas');
   jest.mocked(runVerification).mockResolvedValue('google-token');

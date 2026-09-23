@@ -7,6 +7,7 @@ import { appStore } from '@/store';
 import { arkHostApi } from './api';
 import {
   arkHostQueryKeys,
+  useCreateGame,
   useDeleteGame,
   useLoginGame,
   usePauseGame,
@@ -40,6 +41,45 @@ afterEach(async () => {
 });
 
 describe('game account mutations', () => {
+  it('creates a trusted game account, refreshes the list, and returns the new account ID', async () => {
+    const createGame = jest.spyOn(arkHostApi, 'createGame').mockResolvedValue({
+      data: undefined,
+      ok: true,
+    });
+    const { queryClient, wrapper } = createWrapper();
+    const queryKey = arkHostQueryKeys.gameAccounts(mockActiveSession.principal.id);
+    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries')
+      .mockImplementation(() => {
+        queryClient.setQueryData(queryKey, [
+          { account: 'G1' },
+          { account: 'Gdoctor@example.com' },
+        ]);
+        return Promise.resolve();
+      });
+    const { result, unmount } = await renderHook(() => useCreateGame(), { wrapper });
+    queryClient.setQueryData(queryKey, [{ account: 'G1' }]);
+    let createdAccountId: string | null = null;
+
+    await act(async () => {
+      createdAccountId = await result.current.mutateAsync({
+        account: 'doctor@example.com',
+        password: ' secret ',
+        platform: 1,
+      });
+    });
+
+    expect(createGame).toHaveBeenCalledWith({
+      account: 'doctor@example.com',
+      password: ' secret ',
+      platform: 1,
+    }, expect.any(AbortSignal));
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey });
+    expect(invalidateQueries).toHaveBeenCalledTimes(1);
+    expect(createdAccountId).toBe('Gdoctor@example.com');
+    await unmount();
+    queryClient.clear();
+  });
+
   it('invalidates only the config-owning detail after a config update succeeds', async () => {
     const updateGameConfig = jest.spyOn(arkHostApi, 'updateGameConfig').mockResolvedValue({
       data: undefined,
