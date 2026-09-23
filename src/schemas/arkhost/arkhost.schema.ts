@@ -9,6 +9,9 @@ import {
 const integerSchema = v.pipe(v.number(), v.integer());
 const positiveIntegerSchema = v.pipe(integerSchema, v.minValue(1));
 
+/** ArkHost allows each user to own at most three game accounts. */
+export const ARK_HOST_MAX_GAME_ACCOUNTS_PER_USER = 3;
+
 export const ARK_HOST_GAME_PLATFORM = {
   official: 1,
   bilibili: 2,

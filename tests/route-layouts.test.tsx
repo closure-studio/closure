@@ -18,6 +18,21 @@ const mockAppScopeNavigator = jest.fn(() => null);
 const mockUseSessionQueryCacheReset = jest.fn();
 const mockUseArkHostSync = jest.fn();
 const mockUsePathname = jest.fn(() => '/dashboard/overview');
+const mockRouterReplace = jest.fn();
+const mockUseGameAccountCreation = jest.fn((_options: {
+  onGameAccountSelected: () => void;
+}) => ({
+  canCreateGame: false,
+  dialog: {
+    error: null,
+    isPending: false,
+    onClearError: jest.fn(),
+    onOpenChange: jest.fn(),
+    onSubmit: jest.fn(),
+    open: false,
+  },
+  openDialog: jest.fn(),
+}));
 
 let mockSession: object | null = { principal: 'doctor' };
 let mockDashboardAccount = {
@@ -30,10 +45,15 @@ let mockDashboardAccount = {
   selectGameAccount: mockSelectGameAccount,
 };
 
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
 jest.mock('expo-router', () => ({
   Redirect: mockRedirect,
   Slot: mockSlot,
   usePathname: mockUsePathname,
+  useRouter: () => ({ replace: mockRouterReplace }),
 }));
 
 jest.mock('expo-router/tabs', () => ({
@@ -41,10 +61,13 @@ jest.mock('expo-router/tabs', () => ({
 }));
 
 jest.mock('@/features/dashboard', () => ({
+  EmptyGameAccountState: jest.fn(() => null),
+  GameAccountCreationDialog: jest.fn(() => null),
   GameVerification: jest.fn(() => null),
   DashboardAccountProvider: mockDashboardAccountProvider,
   useArkHostSync: mockUseArkHostSync,
   useDashboardAccount: () => mockDashboardAccount,
+  useGameAccountCreation: mockUseGameAccountCreation,
   useSessionQueryCacheReset: mockUseSessionQueryCacheReset,
 }));
 
@@ -129,6 +152,16 @@ describe('route layouts', () => {
         headerShown: false,
       }),
     }));
+  });
+
+  it('returns to Overview after the creation workflow selects its new account', async () => {
+    await render(<DashboardLayout />);
+
+    const creationOptions = mockUseGameAccountCreation.mock.calls[0]?.[0];
+    expect(creationOptions).toBeDefined();
+    creationOptions?.onGameAccountSelected();
+
+    expect(mockRouterReplace).toHaveBeenCalledWith('/dashboard/overview');
   });
 
   it('does not gate the Dashboard navigator on an explicit Store selection', async () => {

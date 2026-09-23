@@ -4,7 +4,6 @@ import * as v from 'valibot';
 
 import {
   ARK_HOST_GAME_STATUS_CODE,
-  arkHostCreateGameInputSchema,
   arkHostGameConfigPatchSchema,
   gameCaptchaUpdateSchema,
 } from '@/schemas/arkhost';
@@ -152,24 +151,36 @@ export function useCreateGame() {
   const scope = requestScope();
   const queryClient = useQueryClient();
   const userId = useAppStore((state) => state.auth.session?.principal.id);
-  return useMutation<void, ArkHostFailure, ArkHostCreateGameInput, AbortSignal>({
+  return useMutation<string | null, ArkHostFailure, ArkHostCreateGameInput>({
     mutationKey: ['arkhost', 'create-game'],
-    onMutate: () => scope,
     mutationFn: async (input) => {
       assertActive(scope);
-      const parsedInput = v.safeParse(arkHostCreateGameInputSchema, input);
-      if (!parsedInput.success) {
-        throw new FailureError({
-          code: 'operation-rejected',
-          diagnosticMessage: 'Invalid game account input.',
-          kind: 'business',
-        });
-      }
-      unwrapResult(await arkHostApi.createGame(parsedInput.output, scope));
+
+      const queryKey = userId
+        ? arkHostQueryKeys.gameAccounts(userId)
+        : null;
+      const previousAccountIds = new Set(
+        queryKey
+          ? queryClient.getQueryData<GameAccount[]>(queryKey)?.map(
+            (account) => account.account,
+          ) ?? []
+          : [],
+      );
+
+      unwrapResult(await arkHostApi.createGame(input, scope));
+      assertActive(scope);
+      if (!queryKey) return null;
+
+      await queryClient.invalidateQueries({ queryKey });
+      assertActive(scope);
+      const addedAccounts = (
+        queryClient.getQueryData<GameAccount[]>(queryKey) ?? []
+      ).filter((account) => !previousAccountIds.has(account.account));
+
+      return addedAccounts.length === 1
+        ? addedAccounts[0]?.account ?? null
+        : null;
     },
-    onSuccess: (_, _input, scope) => scope && !scope.aborted
-      ? invalidateGameAccountsQuery(queryClient, userId)
-      : undefined,
   });
 }
 

@@ -1,5 +1,6 @@
+import { Plus } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, XStack, YStack } from 'tamagui';
+import { ScrollView, XStack, YStack, getTokens } from 'tamagui';
 
 import {
   MonoText,
@@ -59,7 +60,20 @@ function GameAccountButton({
   );
 }
 
-export function GameAccountSwitcher({ gameAccounts, selectedGameAccountId, onSelectGameAccount }: { gameAccounts: readonly GameAccount[]; selectedGameAccountId: string; onSelectGameAccount: (gameAccountId: string) => void }) {
+export function GameAccountSwitcher({
+  gameAccounts,
+  onAddGameAccount,
+  selectedGameAccountId,
+  onSelectGameAccount,
+}: {
+  gameAccounts: readonly GameAccount[];
+  onAddGameAccount?: () => void;
+  selectedGameAccountId: string;
+  onSelectGameAccount: (gameAccountId: string) => void;
+}) {
+  const { t } = useTranslation('dashboard');
+  const colors = getTokens().color;
+
   return (
     <ScrollView
       mx="$-5"
@@ -67,24 +81,44 @@ export function GameAccountSwitcher({ gameAccounts, selectedGameAccountId, onSel
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ pb: 1 }}
     >
-      <SlidingSelection
-        value={selectedGameAccountId}
-        indicator={<NotchedSelectionIndicator />}
-        px="$5"
-      >
-        {gameAccounts.map((gameAccount) => (
-          <SlidingSelection.Item
-            key={gameAccount.account}
-            value={gameAccount.account}
+      <XStack px="$5" gap="$2">
+        <SlidingSelection
+          value={selectedGameAccountId}
+          indicator={<NotchedSelectionIndicator />}
+        >
+          {gameAccounts.map((gameAccount) => (
+            <SlidingSelection.Item
+              key={gameAccount.account}
+              value={gameAccount.account}
+            >
+              <GameAccountButton
+                gameAccount={gameAccount}
+                isSelected={gameAccount.account === selectedGameAccountId}
+                onSelectGameAccount={onSelectGameAccount}
+              />
+            </SlidingSelection.Item>
+          ))}
+        </SlidingSelection>
+        {onAddGameAccount ? (
+          <NotchedButton
+            testID="add-game-account-option"
+            height={50}
+            px="$3"
+            flexDirection="row"
+            items="center"
+            justify="center"
+            gap="$2"
+            onPress={onAddGameAccount}
           >
-            <GameAccountButton
-              gameAccount={gameAccount}
-              isSelected={gameAccount.account === selectedGameAccountId}
-              onSelectGameAccount={onSelectGameAccount}
-            />
-          </SlidingSelection.Item>
-        ))}
-      </SlidingSelection>
+            <XStack position="relative" z="$1" items="center" gap="$2">
+              <Plus size={17} color={colors.appAccent.val} />
+              <TerminalText size="$2.5" color="$appAccent" fontWeight="700">
+                {t('account.add')}
+              </TerminalText>
+            </XStack>
+          </NotchedButton>
+        ) : null}
+      </XStack>
     </ScrollView>
   );
 }

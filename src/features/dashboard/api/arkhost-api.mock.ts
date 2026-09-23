@@ -1,4 +1,5 @@
 import {
+  ARK_HOST_MAX_GAME_ACCOUNTS_PER_USER,
   ARK_HOST_GAME_PLATFORM,
   ARK_HOST_GAME_STATUS_CODE,
   type ArkHostCreateGameInput,
@@ -22,7 +23,6 @@ import {
 } from "@/mocks/arkhost";
 
 const MOCK_ARKHOST_DELAY_MS = 250;
-const MOCK_GAME_ACCOUNT_LIMIT = 3;
 
 const success = <T>(data: T): ArkHostResult<T> => ({ data, ok: true });
 const failure = <T>(): ArkHostResult<T> => ({
@@ -97,7 +97,7 @@ export class MockArkHostApi implements ArkHostApi {
   async createGame(input: ArkHostCreateGameInput, signal = requestScope()) {
     await this.#wait(signal);
     assertActive(signal);
-    if (this.#gameList.length >= MOCK_GAME_ACCOUNT_LIMIT) return failure<void>();
+    if (this.#gameList.length >= ARK_HOST_MAX_GAME_ACCOUNTS_PER_USER) return failure<void>();
     const account = `${input.platform === ARK_HOST_GAME_PLATFORM.official ? 'G' : 'B'}${input.account}`;
     if (this.#gameList.some((entry) => entry.status.account === account)) return failure<void>();
     this.#gameList.push({

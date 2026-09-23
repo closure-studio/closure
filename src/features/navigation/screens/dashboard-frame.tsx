@@ -20,7 +20,14 @@ import {
 } from '../navigation-config';
 import { useAppLogout } from '../navigation-actions';
 
-export function DashboardFrame({ children }: PropsWithChildren) {
+export function DashboardFrame({
+  canCreateGame,
+  children,
+  onAddGameAccount,
+}: PropsWithChildren<{
+  canCreateGame: boolean;
+  onAddGameAccount: () => void;
+}>) {
   const colors = getTokens().color;
   const { t } = useTranslation('navigation');
   const { t: tDashboard } = useTranslation('dashboard');
@@ -85,7 +92,9 @@ export function DashboardFrame({ children }: PropsWithChildren) {
       smallScreenEdges={[]}
     >
       <DashboardShell
+        canCreateGame={canCreateGame}
         gameAccounts={gameAccounts}
+        onAddGameAccount={onAddGameAccount}
         onSelectGameAccount={selectGameAccount}
         selectedGameAccountId={selectedGameAccount?.account ?? ''}
       >

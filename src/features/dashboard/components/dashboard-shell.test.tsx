@@ -18,10 +18,14 @@ jest.mock('react-native-reanimated', () => {
 });
 
 function DashboardShellTestTree({
+  canCreateGame = false,
+  onAddGameAccount = jest.fn(),
   pageId,
   onSelectGameAccount,
   selectedGameAccountId = 'G00000000001',
 }: {
+  canCreateGame?: boolean;
+  onAddGameAccount?: () => void;
   pageId: string;
   onSelectGameAccount: (gameAccountId: string) => void;
   selectedGameAccountId?: string;
@@ -29,7 +33,13 @@ function DashboardShellTestTree({
   return (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
       <I18nextProvider i18n={i18n}>
-        <DashboardShell selectedGameAccountId={selectedGameAccountId} gameAccounts={initialGameAccounts} onSelectGameAccount={onSelectGameAccount}>
+        <DashboardShell
+          canCreateGame={canCreateGame}
+          selectedGameAccountId={selectedGameAccountId}
+          gameAccounts={initialGameAccounts}
+          onAddGameAccount={onAddGameAccount}
+          onSelectGameAccount={onSelectGameAccount}
+        >
           <YStack testID={`dashboard-page-${pageId}`} />
         </DashboardShell>
       </I18nextProvider>

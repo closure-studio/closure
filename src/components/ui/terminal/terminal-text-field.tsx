@@ -58,7 +58,7 @@ type TerminalTextFieldProps = {
   onChangeText: (value: string) => void;
   onFocus?: TerminalInputProps['onFocus'];
   onSubmitEditing?: TerminalInputProps['onSubmitEditing'];
-  placeholder: string;
+  placeholder?: string;
   returnKeyType?: TerminalInputProps['returnKeyType'];
   secureTextEntry?: boolean;
   submitBehavior?: TerminalInputProps['submitBehavior'];
@@ -118,7 +118,7 @@ export const TerminalTextField = forwardRef<TerminalTextFieldHandle, TerminalTex
           value={value}
           disabled={disabled}
           onChangeText={onChangeText}
-          placeholder={placeholder}
+          {...(placeholder === undefined ? {} : { placeholder })}
           placeholderTextColor="$appMuted"
           autoCapitalize="none"
           autoCorrect={false}

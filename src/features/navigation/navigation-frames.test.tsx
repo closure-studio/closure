@@ -36,6 +36,7 @@ const mockRouterNavigate = jest.fn();
 const mockSelectGameAccount = jest.fn();
 const mockReturnToDashboard = jest.fn();
 const mockLogout = jest.fn();
+const mockAddGameAccount = jest.fn();
 const mockSetBackdropTint = jest.fn();
 let mockPathname = '/dashboard/overview';
 let mockLarge = false;
@@ -125,7 +126,11 @@ describe('navigation scope frames', () => {
   });
 
   it('pushes the complete Settings screen from Dashboard', async () => {
-    const screen = await renderFrame(<DashboardFrame><Text>content</Text></DashboardFrame>);
+    const screen = await renderFrame(
+      <DashboardFrame canCreateGame={false} onAddGameAccount={mockAddGameAccount}>
+        <Text>content</Text>
+      </DashboardFrame>,
+    );
     const frame = readLastFrameProps();
 
     frame.onToggleScope();
@@ -136,7 +141,9 @@ describe('navigation scope frames', () => {
   });
 
   it('uses the active Dashboard tab when selecting a sidebar page', async () => {
-    await renderFrame(<DashboardFrame />);
+    await renderFrame(
+      <DashboardFrame canCreateGame={false} onAddGameAccount={mockAddGameAccount} />,
+    );
     const frame = readLastFrameProps();
 
     frame.onSelect('operators');
@@ -146,7 +153,11 @@ describe('navigation scope frames', () => {
   });
 
   it('updates account selection without navigating to another route', async () => {
-    await renderFrame(<DashboardFrame><Text>pager content</Text></DashboardFrame>);
+    await renderFrame(
+      <DashboardFrame canCreateGame={false} onAddGameAccount={mockAddGameAccount}>
+        <Text>pager content</Text>
+      </DashboardFrame>,
+    );
 
     const shellCall = mockDashboardShell.mock.calls.at(-1);
     if (!shellCall) throw new Error('Expected DashboardShell props.');
@@ -160,7 +171,9 @@ describe('navigation scope frames', () => {
   });
 
   it('updates the Header from the selected Game Account', async () => {
-    const screen = await renderFrame(<DashboardFrame />);
+    const screen = await renderFrame(
+      <DashboardFrame canCreateGame={false} onAddGameAccount={mockAddGameAccount} />,
+    );
     expect(mockNavigationHeader.mock.calls.at(-1)?.[0].title).toBe('Doctor One');
 
     mockSelectedGameAccount = {
@@ -170,7 +183,7 @@ describe('navigation scope frames', () => {
     };
     await screen.rerender(
       <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
-        <DashboardFrame />
+        <DashboardFrame canCreateGame={false} onAddGameAccount={mockAddGameAccount} />
       </TamaguiProvider>,
     );
 
