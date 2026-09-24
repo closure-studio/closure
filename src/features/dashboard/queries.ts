@@ -1,5 +1,6 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { AppState } from 'react-native';
 import * as v from 'valibot';
 
 import {
@@ -12,6 +13,7 @@ import type {
   ArkHostGameConfigPatch,
   ArkHostGameListEntry,
   ArkHostGameLogs,
+  ArkHostSseEvent,
   GameCaptchaUpdate,
 } from '@/schemas/arkhost';
 import type { GameAccount } from '@/schemas/game-account';
@@ -20,13 +22,16 @@ import { FailureError, unwrapResult } from '@/utils/failure-error';
 import { arkHostApi, type ArkHostFailure, type ArkHostSseSubscription } from './api';
 import { assertActive, inRequestScope, requestScope } from '@/services/request-scope';
 
+const ARK_HOST_FALLBACK_POLL_INTERVAL_MS = 30_000;
+
 function endpointKey() {
   return [appStore.getState().selectedApiNodeId] as const;
 }
 
 export const arkHostQueryKeys = {
   all: ['arkhost'] as const,
-  detail: (account: string) => ['arkhost', ...endpointKey(), 'detail', account] as const,
+  details: () => ['arkhost', ...endpointKey(), 'detail'] as const,
+  detail: (account: string) => [...arkHostQueryKeys.details(), account] as const,
   gameAccounts: (userId: string) => ['arkhost', ...endpointKey(), 'game-accounts', userId] as const,
   logs: (account: string) => ['arkhost', ...endpointKey(), 'logs', account] as const,
 };
@@ -276,32 +281,88 @@ export function useArkHostSync() {
   const queryClient = useQueryClient();
   useEffect(() => {
     if (!session) return;
+    const scope = requestScope();
     const userId = session.principal.id;
-    const subscription: ArkHostSseSubscription = arkHostApi.subscribe(
-      session.accessToken,
-      (event) => {
-        const validated = event;
-        if (validated.type === 'game') {
-          queryClient.setQueryData<GameAccount[]>(
-            arkHostQueryKeys.gameAccounts(userId),
-            validated.data.map(mapGameAccount),
-          );
-        } else if (validated.type === 'log') {
-          queryClient.setQueryData<ArkHostGameLogs>(
-            arkHostQueryKeys.logs(validated.data.name),
-            (previous) => {
-              const page = previous ?? { hasMore: true, logs: [] };
-              const exists = page.logs.some((log) => log.id === validated.data.id);
-              return exists
-                ? page
-                : { ...page, logs: [validated.data, ...page.logs] };
-            },
-          );
-        }
-      },
+    let serverClosed = false;
+    let pollTimer: ReturnType<typeof setInterval> | undefined;
+    let subscription: ArkHostSseSubscription | undefined;
+
+    const refetchActiveDetails = () => queryClient.refetchQueries(
+      { queryKey: arkHostQueryKeys.details(), type: 'active' },
+      { cancelRefetch: false },
     );
+    const refetchActiveState = () => Promise.all([
+      queryClient.refetchQueries(
+        { queryKey: arkHostQueryKeys.gameAccounts(userId), type: 'active' },
+        { cancelRefetch: false },
+      ),
+      refetchActiveDetails(),
+    ]);
+    const poll = () => {
+      void refetchActiveState();
+    };
+    const stopPolling = () => {
+      clearInterval(pollTimer);
+      pollTimer = undefined;
+    };
+    const startPolling = () => {
+      if (pollTimer !== undefined || serverClosed || scope.aborted) return;
+      pollTimer = setInterval(poll, ARK_HOST_FALLBACK_POLL_INTERVAL_MS);
+      poll();
+    };
+    const handleEvent = (event: ArkHostSseEvent) => {
+      if (event.type === 'game') {
+        queryClient.setQueryData<GameAccount[]>(
+          arkHostQueryKeys.gameAccounts(userId),
+          event.data.map(mapGameAccount),
+        );
+        void refetchActiveDetails();
+      } else if (event.type === 'log') {
+        queryClient.setQueryData<ArkHostGameLogs>(
+          arkHostQueryKeys.logs(event.data.name),
+          (previous) => {
+            const page = previous ?? { hasMore: true, logs: [] };
+            const exists = page.logs.some((log) => log.id === event.data.id);
+            return exists
+              ? page
+              : { ...page, logs: [event.data, ...page.logs] };
+          },
+        );
+      }
+    };
+    const startSubscription = () => {
+      if (subscription || serverClosed || scope.aborted) return;
+      subscription = arkHostApi.subscribe(session.accessToken, {
+        onConnected: stopPolling,
+        onDisconnected: startPolling,
+        onEvent: handleEvent,
+        onServerClose: () => {
+          serverClosed = true;
+          stopPolling();
+        },
+      }, scope);
+    };
+    const stopSync = () => {
+      subscription?.unsubscribe();
+      subscription = undefined;
+      stopPolling();
+    };
+    const appStateSubscription = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') {
+        stopSync();
+        return;
+      }
+      if (serverClosed) return;
+      void refetchActiveState();
+      startSubscription();
+    });
+
+    if (AppState.currentState === null || AppState.currentState === 'active') {
+      startSubscription();
+    }
     return () => {
-      subscription.unsubscribe();
+      appStateSubscription.remove();
+      stopSync();
     };
   }, [queryClient, session, node]);
 }

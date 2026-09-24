@@ -3,7 +3,6 @@ export type {
   ArkHostFailure,
   ArkHostResult,
   ArkHostSseEvent,
-  ArkHostSseListener,
   ArkHostSseSubscription,
 } from './arkhost-api';
 export { MockArkHostApi } from './arkhost-api.mock';
