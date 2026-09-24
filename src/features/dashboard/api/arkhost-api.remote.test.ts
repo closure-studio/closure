@@ -2,6 +2,7 @@ import { RemoteArkHostApi } from './arkhost-api.remote';
 import * as http from '@/services/http';
 import { appStore } from '@/store';
 import { mockActiveSession } from '@/mocks/auth';
+import { mockArkHostGameListResponse } from '@/mocks/arkhost';
 import { runVerification } from '@/features/verification';
 
 jest.mock('@/features/verification', () => ({ runVerification: jest.fn() }));
@@ -61,6 +62,34 @@ it('submits game challenges under captcha_info without Google', async () => {
   expect(request).toHaveBeenCalledWith(expect.stringContaining('/game/config/account'), expect.objectContaining({ body: { captcha_info: captcha } }));
   await api.pauseGame('account'); await api.deleteGame('account');
   expect(runVerification).not.toHaveBeenCalled();
+});
+
+it('accepts game lists without inactive captcha challenge fields', async () => {
+  if (mockArkHostGameListResponse.code !== 1) throw new Error('Expected game list fixture');
+  const entry = mockArkHostGameListResponse.data[0];
+  if (!entry) throw new Error('Expected game account fixture');
+  const captchaInfo = {
+    captcha_type: entry.captcha_info.captcha_type,
+    created: entry.captcha_info.created,
+  };
+  jest.spyOn(http, 'requestJson').mockResolvedValue({
+    code: 1,
+    data: [{ ...entry, captcha_info: captchaInfo }],
+    message: 'ok',
+  });
+
+  await expect(api.fetchGameList()).resolves.toMatchObject({
+    ok: true,
+    data: [{
+      captcha_info: {
+        ...captchaInfo,
+        challenge: '',
+        geetestId: '',
+        gt: '',
+        riskType: '',
+      },
+    }],
+  });
 });
 
 it('distinguishes uninitialized detail from business errors and malformed payloads', async () => {

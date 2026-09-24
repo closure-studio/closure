@@ -125,11 +125,11 @@ export const arkHostGameConfigPatchSchema = v.partial(
 export const arkHostCaptchaInfoSchema = v.object({
   account: v.optional(v.string()),
   captcha_type: v.string(),
-  challenge: v.string(),
+  challenge: v.optional(v.string(), ''),
   created: nonNegativeIntegerSchema,
-  geetestId: v.string(),
-  gt: v.string(),
-  riskType: v.string(),
+  geetestId: v.optional(v.string(), ''),
+  gt: v.optional(v.string(), ''),
+  riskType: v.optional(v.string(), ''),
 });
 
 export const arkHostGameListEntrySchema = v.object({

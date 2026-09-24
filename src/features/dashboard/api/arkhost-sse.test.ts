@@ -50,6 +50,45 @@ it('parses split SSE frames and treats an explicit close as terminal', async () 
   subscription.unsubscribe();
 });
 
+it('normalizes omitted captcha fields in game events', async () => {
+  if (mockArkHostGameListResponse.code !== 1) throw new Error('Expected game list fixture');
+  const entry = mockArkHostGameListResponse.data[0];
+  if (!entry) throw new Error('Expected game account fixture');
+  const captchaInfo = {
+    captcha_type: entry.captcha_info.captcha_type,
+    created: entry.captcha_info.created,
+  };
+  const data = [{ ...entry, captcha_info: captchaInfo }];
+  const stream = `event: game\ndata: ${JSON.stringify(data)}\n\nevent: close\ndata: close\n\n`;
+  let sent = false;
+  const request = jest.fn(() => Promise.resolve({ ok: true, status: 200, body: { getReader: () => ({
+    read: (): Promise<ReadableStreamReadResult<Uint8Array>> => {
+      if (sent) return Promise.resolve({ done: true, value: undefined });
+      sent = true;
+      return Promise.resolve({ done: false, value: new TextEncoder().encode(stream) });
+    },
+    releaseLock: jest.fn(),
+  }) } }));
+  const handlers = createHandlers();
+  const subscription = new RemoteArkHostApi(request).subscribe('test-token', handlers);
+
+  await flush();
+
+  expect(handlers.onEvent).toHaveBeenCalledWith({
+    type: 'game',
+    data: [expect.objectContaining({
+      captcha_info: {
+        ...captchaInfo,
+        challenge: '',
+        geetestId: '',
+        gt: '',
+        riskType: '',
+      },
+    })],
+  });
+  subscription.unsubscribe();
+});
+
 it('aborts a silent connection and reconnects after reporting disconnection', async () => {
   const signals: AbortSignal[] = [];
   const request = jest.fn((_url: string, init: { signal: AbortSignal }) => {
