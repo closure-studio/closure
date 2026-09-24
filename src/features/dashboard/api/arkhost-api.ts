@@ -19,7 +19,12 @@ export type ArkHostResult<T> =
   | { data: T; ok: true }
   | { error: ArkHostFailure; ok: false };
 
-export type ArkHostSseListener = (event: ArkHostSseEvent) => void;
+export type ArkHostSseHandlers = {
+  onConnected: () => void;
+  onDisconnected: () => void;
+  onEvent: (event: ArkHostSseEvent) => void;
+  onServerClose: () => void;
+};
 export type ArkHostSseSubscription = { unsubscribe: () => void };
 
 export interface ArkHostApi {
@@ -31,7 +36,7 @@ export interface ArkHostApi {
   fetchGameLogs(account: string, afterId: number, signal?: AbortSignal): Promise<ArkHostResult<ArkHostGameLogs>>;
   loginGame(account: string, signal?: AbortSignal): Promise<ArkHostResult<void>>;
   pauseGame(account: string, signal?: AbortSignal): Promise<ArkHostResult<void>>;
-  subscribe(accessToken: string, listener: ArkHostSseListener, signal?: AbortSignal): ArkHostSseSubscription;
+  subscribe(accessToken: string, handlers: ArkHostSseHandlers, signal?: AbortSignal): ArkHostSseSubscription;
   updateGameConfig(
     account: string,
     patch: ArkHostGameConfigPatch,

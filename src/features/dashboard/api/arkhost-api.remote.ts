@@ -8,7 +8,10 @@ import { requestScope, assertActive } from '@/services/request-scope';
 import { runVerification } from '@/features/verification';
 import { arkHostGameListEntrySchema, arkHostGameDetailSchema, arkHostGameLogsSchema, arkHostSseEventSchema } from '@/schemas/arkhost';
 import type { ArkHostCreateGameInput, ArkHostGameConfigPatch, GameCaptchaSubmission } from '@/schemas/arkhost';
-import type { ArkHostApi, ArkHostResult, ArkHostSseListener } from './arkhost-api';
+import type { ArkHostApi, ArkHostResult, ArkHostSseHandlers } from './arkhost-api';
+
+const SSE_RECONNECT_DELAY_MS = 5_000;
+const SSE_SILENCE_TIMEOUT_MS = 60_000;
 
 function baseUrl() {
   return (API_NODE_HOSTS.find((host) => host.id === appStore.getState().selectedApiNodeId) ?? API_NODE_HOSTS[0]).baseURL;
@@ -70,39 +73,77 @@ export class RemoteArkHostApi implements ArkHostApi {
   submitGameCaptcha(account: string, input: GameCaptchaSubmission, signal?: AbortSignal) {
     return this.#write(`/game/config/${encodeURIComponent(account)}`, 'POST', signal, { captcha_info: input });
   }
-  subscribe(accessToken: string, listener: ArkHostSseListener, scope = requestScope()) {
-    const controller = new AbortController();
+  subscribe(accessToken: string, handlers: ArkHostSseHandlers, scope = requestScope()) {
+    assertActive(scope);
     const url = `${baseUrl()}/sse/games?token=${encodeURIComponent(accessToken)}`;
+    let stopped = false;
+    let attemptController: AbortController | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const stop = () => { controller.abort(); clearTimeout(timer); scope.removeEventListener('abort', stop); };
-    scope.addEventListener('abort', stop, { once: true });
+
+    const clearTimer = () => {
+      clearTimeout(timer);
+      timer = undefined;
+    };
+    const stop = () => {
+      if (stopped) return;
+      stopped = true;
+      attemptController?.abort();
+      clearTimer();
+      scope.removeEventListener('abort', stop);
+    };
+    const resetSilenceTimer = (controller: AbortController) => {
+      clearTimer();
+      timer = setTimeout(() => controller.abort(), SSE_SILENCE_TIMEOUT_MS);
+    };
+    const reconnect = () => {
+      if (stopped) return;
+      handlers.onDisconnected();
+      timer = setTimeout(() => { void connect(); }, SSE_RECONNECT_DELAY_MS);
+    };
     const connect = async () => {
+      if (stopped) return;
+      const controller = new AbortController();
+      attemptController = controller;
+      resetSilenceTimer(controller);
       try {
-        if (scope.aborted || controller.signal.aborted) return;
         const response = await this.streamRequest(url, { signal: controller.signal });
-        if (response.status === 401) { if (!scope.aborted && !controller.signal.aborted) appStore.getState().logout(); stop(); return; }
+        if (response.status === 401) {
+          if (!stopped) appStore.getState().logout();
+          stop();
+          return;
+        }
         if (!response.ok || !response.body) throw new Error('SSE unavailable');
+        handlers.onConnected();
         const parser = createParser({ onEvent: (event) => {
-          if (scope.aborted || controller.signal.aborted) return;
-          if (event.event === 'close') { stop(); return; }
+          if (stopped || controller.signal.aborted) return;
+          if (event.event === 'close') {
+            handlers.onServerClose();
+            stop();
+            return;
+          }
           try {
             const data: unknown = JSON.parse(event.data);
             const result = v.safeParse(arkHostSseEventSchema, { type: event.event, data });
-            if (result.success) listener(result.output);
+            if (result.success) handlers.onEvent(result.output);
           } catch { /* A malformed frame must not terminate subsequent valid frames. */ }
         } });
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         try {
-          while (!controller.signal.aborted) {
+          while (!stopped && !controller.signal.aborted) {
             const chunk = await reader.read();
             if (chunk.done) break;
+            resetSilenceTimer(controller);
             parser.feed(decoder.decode(chunk.value, { stream: true }));
           }
         } finally { reader.releaseLock(); }
       } catch { /* Reconnect only while this subscription still owns its session. */ }
-      if (!controller.signal.aborted && !scope.aborted) timer = setTimeout(() => { void connect(); }, 5000);
+      clearTimer();
+      attemptController = undefined;
+      reconnect();
     };
+
+    scope.addEventListener('abort', stop, { once: true });
     void connect();
     return { unsubscribe: stop };
   }

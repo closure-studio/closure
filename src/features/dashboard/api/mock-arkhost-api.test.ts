@@ -229,7 +229,14 @@ describe("MockArkHostApi", () => {
   it("provides a controllable SSE subscription that stops after unsubscribe", () => {
     const api = new MockArkHostApi(0);
     const listener = jest.fn();
-    const subscription = api.subscribe("mock-token", listener);
+    const handlers = {
+      onConnected: jest.fn(),
+      onDisconnected: jest.fn(),
+      onEvent: listener,
+      onServerClose: jest.fn(),
+    };
+    const subscription = api.subscribe("mock-token", handlers);
+    expect(handlers.onConnected).toHaveBeenCalledTimes(1);
     expect(api.activeSubscriptionCount).toBe(1);
     api.emit({ data: mockArkHostGachaEvents, type: "ssr" });
     expect(listener).toHaveBeenCalledTimes(1);
@@ -243,7 +250,12 @@ describe("MockArkHostApi", () => {
     const api = new MockArkHostApi(0);
     const listener = jest.fn();
     const controller = new AbortController();
-    api.subscribe("mock-token", listener, controller.signal);
+    api.subscribe("mock-token", {
+      onConnected: jest.fn(),
+      onDisconnected: jest.fn(),
+      onEvent: listener,
+      onServerClose: jest.fn(),
+    }, controller.signal);
 
     controller.abort();
     api.emit({ data: mockArkHostGachaEvents, type: "ssr" });

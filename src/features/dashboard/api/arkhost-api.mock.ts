@@ -13,7 +13,7 @@ import type {
   ArkHostApi,
   ArkHostResult,
   ArkHostSseEvent,
-  ArkHostSseListener,
+  ArkHostSseHandlers,
   ArkHostSseSubscription,
 } from "./arkhost-api";
 import {
@@ -30,7 +30,7 @@ const failure = <T>(): ArkHostResult<T> => ({
   ok: false,
 });
 
-type MockSseListener = { listener: ArkHostSseListener };
+type MockSseSubscription = { handlers: ArkHostSseHandlers };
 
 export class MockArkHostApi implements ArkHostApi {
   async submitGameCaptcha(account: string, _input: GameCaptchaSubmission, signal = requestScope()): Promise<ArkHostResult<void>> {
@@ -43,7 +43,7 @@ export class MockArkHostApi implements ArkHostApi {
     return success(undefined);
   }
   readonly #delayMs: number;
-  readonly #subscriptions = new Set<MockSseListener>();
+  readonly #subscriptions = new Set<MockSseSubscription>();
   #gameList: ArkHostGameListEntry[];
   #details: Map<string, ArkHostGameDetail>;
 
@@ -80,7 +80,7 @@ export class MockArkHostApi implements ArkHostApi {
 
   emit(event: ArkHostSseEvent) {
     for (const subscription of this.#subscriptions) {
-      subscription.listener(event);
+      subscription.handlers.onEvent(event);
     }
   }
 
@@ -195,12 +195,13 @@ export class MockArkHostApi implements ArkHostApi {
   }
   subscribe(
     _accessToken: string,
-    listener: ArkHostSseListener,
+    handlers: ArkHostSseHandlers,
     signal = requestScope(),
   ): ArkHostSseSubscription {
     assertActive(signal);
-    const subscription = { listener };
+    const subscription = { handlers };
     this.#subscriptions.add(subscription);
+    handlers.onConnected();
     const unsubscribe = () => {
       signal.removeEventListener('abort', unsubscribe);
       this.#subscriptions.delete(subscription);
