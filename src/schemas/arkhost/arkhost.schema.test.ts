@@ -8,6 +8,7 @@ import {
   arkHostCreateGameInputSchema,
   arkHostCharacterSchema,
   arkHostBattleTaskSchema,
+  arkHostCaptchaInfoSchema,
   arkHostGameConfigPatchSchema,
   arkHostGameConfigSchema,
   arkHostGameDetailResponseSchema,
@@ -41,6 +42,20 @@ describe("ArkHost server contracts", () => {
       password: "secret",
       platform: 1,
     }).success).toBe(false);
+  });
+
+  it("normalizes omitted optional captcha fields", () => {
+    expect(v.parse(arkHostCaptchaInfoSchema, {
+      captcha_type: "",
+      created: 0,
+    })).toEqual({
+      captcha_type: "",
+      challenge: "",
+      created: 0,
+      geetestId: "",
+      gt: "",
+      riskType: "",
+    });
   });
 
   it("accepts every supplied ArkHost response fixture", () => {
