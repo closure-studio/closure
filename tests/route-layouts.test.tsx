@@ -67,6 +67,7 @@ jest.mock('@/features/dashboard', () => ({
   DashboardAccountProvider: mockDashboardAccountProvider,
   useArkHostSync: mockUseArkHostSync,
   useDashboardAccount: () => mockDashboardAccount,
+  useDashboardLiveLogToast: jest.fn(),
   useGameAccountCreation: mockUseGameAccountCreation,
   useSessionQueryCacheReset: mockUseSessionQueryCacheReset,
 }));

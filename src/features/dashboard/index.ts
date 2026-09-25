@@ -16,6 +16,6 @@ export {
   DashboardOperatorsContent,
   DashboardOverviewContent,
 } from './screens/dashboard-account-content';
-export { DashboardAccountProvider, useDashboardAccount } from './dashboard-account';
+export { DashboardAccountProvider, useDashboardAccount, useDashboardLiveLogToast } from './dashboard-account';
 export { GameVerification } from './game-verification';
 export { useGameAccountCreation } from './use-game-account-creation';
