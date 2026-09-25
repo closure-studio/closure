@@ -9,6 +9,7 @@ import {
   EmptyGameAccountState,
   GameAccountCreationDialog,
   useDashboardAccount,
+  useDashboardLiveLogToast,
   useGameAccountCreation,
 } from '@/features/dashboard';
 import {
@@ -34,6 +35,7 @@ function DashboardContent() {
   const { large } = useMedia();
   const router = useRouter();
   const { gameAccountsQuery } = useDashboardAccount();
+  useDashboardLiveLogToast();
   const gameAccounts = gameAccountsQuery.data ?? [];
   const {
     canCreateGame,

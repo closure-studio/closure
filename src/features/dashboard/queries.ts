@@ -12,6 +12,7 @@ import type {
   ArkHostCreateGameInput,
   ArkHostGameConfigPatch,
   ArkHostGameListEntry,
+  ArkHostGameLogEntry,
   ArkHostGameLogs,
   ArkHostSseEvent,
   GameCaptchaUpdate,
@@ -23,6 +24,15 @@ import { arkHostApi, type ArkHostFailure, type ArkHostSseSubscription } from './
 import { assertActive, inRequestScope, requestScope } from '@/services/request-scope';
 
 const ARK_HOST_FALLBACK_POLL_INTERVAL_MS = 30_000;
+
+let liveLogListener: ((log: ArkHostGameLogEntry) => void) | undefined;
+
+export function subscribeToLiveGameLogs(listener: (log: ArkHostGameLogEntry) => void) {
+  liveLogListener = listener;
+  return () => {
+    if (liveLogListener === listener) liveLogListener = undefined;
+  };
+}
 
 function endpointKey() {
   return [appStore.getState().selectedApiNodeId] as const;
@@ -318,16 +328,14 @@ export function useArkHostSync() {
         );
         void refetchActiveDetails();
       } else if (event.type === 'log') {
-        queryClient.setQueryData<ArkHostGameLogs>(
-          arkHostQueryKeys.logs(event.data.name),
-          (previous) => {
-            const page = previous ?? { hasMore: true, logs: [] };
-            const exists = page.logs.some((log) => log.id === event.data.id);
-            return exists
-              ? page
-              : { ...page, logs: [event.data, ...page.logs] };
-          },
-        );
+        const key = arkHostQueryKeys.logs(event.data.name);
+        const previous = queryClient.getQueryData<ArkHostGameLogs>(key);
+        if (previous?.logs.some((log) => log.id === event.data.id)) return;
+        queryClient.setQueryData<ArkHostGameLogs>(key, {
+          hasMore: previous?.hasMore ?? true,
+          logs: [event.data, ...(previous?.logs ?? [])],
+        });
+        liveLogListener?.(event.data);
       }
     };
     const startSubscription = () => {

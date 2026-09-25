@@ -9,6 +9,7 @@ import { appStore } from '@/store';
 import { arkHostApi } from './api';
 import {
   arkHostQueryKeys,
+  subscribeToLiveGameLogs,
   useArkHostSync,
   useSessionQueryCacheReset,
 } from './queries';
@@ -170,6 +171,32 @@ describe('useSessionQueryCacheReset', () => {
       { queryKey: arkHostQueryKeys.details(), type: 'active' },
       { cancelRefetch: false },
     );
+  });
+
+  it('caches SSE logs by account, notifies once for new entries, and stops notifying after unsubscribe', async () => {
+    const subscribe = jest.spyOn(arkHostApi, 'subscribe').mockReturnValue({ unsubscribe: jest.fn() });
+    const { queryClient, wrapper } = createWrapper();
+    await act(() => appStore.getState().setSession(mockActiveSession));
+    const hook = await renderHook(() => useArkHostSync(), { wrapper });
+    const handlers = subscribe.mock.calls[0]?.[1];
+    if (!handlers) throw new Error('Expected SSE handlers');
+    const onLog = jest.fn();
+    const stopListening = subscribeToLiveGameLogs(onLog);
+    const log = { content: 'Live log', id: 10, logLevel: 1, name: 'G1', ts: 100 };
+
+    await act(() => {
+      handlers.onEvent({ data: log, type: 'log' });
+      handlers.onEvent({ data: log, type: 'log' });
+    });
+    expect(queryClient.getQueryData(arkHostQueryKeys.logs('G1'))).toEqual({
+      hasMore: true, logs: [log],
+    });
+    expect(onLog).toHaveBeenCalledTimes(1);
+    stopListening();
+    await act(() => handlers.onEvent({ data: { ...log, id: 11 }, type: 'log' }));
+    expect(queryClient.getQueryData<{ logs: typeof log[] }>(arkHostQueryKeys.logs('G1'))?.logs).toHaveLength(2);
+    expect(onLog).toHaveBeenCalledTimes(1);
+    await hook.unmount();
   });
 
   it('polls active ArkHost state only while the stream is disconnected', async () => {
