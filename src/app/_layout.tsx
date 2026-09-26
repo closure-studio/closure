@@ -1,3 +1,5 @@
+import '@/lib/clarity';
+
 import { Slot } from 'expo-router';
 
 import { SessionShell, useSessionLifetime } from '@/features/session';

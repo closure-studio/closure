@@ -6,6 +6,7 @@
     "@expo-google-fonts/geist-mono": "^0.4.3",
     "@expo-google-fonts/oxanium": "^0.4.2",
     "@expo/ui": "~57.0.19",
+    "@microsoft/react-native-clarity": "^4.9.1",
     "@shopify/flash-list": "2.0.2",
     "@shopify/react-native-skia": "2.6.2",
     "@tamagui/config": "2.7.7",
