@@ -45,6 +45,8 @@ let mockDashboardAccount = {
   selectGameAccount: mockSelectGameAccount,
 };
 
+jest.mock('@microsoft/react-native-clarity', () => ({ initialize: jest.fn() }));
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
