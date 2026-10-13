@@ -16,7 +16,12 @@ function resolveAppVariant(value: string | undefined): AppVariant {
 }
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const identity = APP_IDENTITIES[resolveAppVariant(env.APP_VARIANT)];
+  const variant = resolveAppVariant(env.APP_VARIANT);
+  // Inlined at bundle time; without it production silently hides Linux.do login.
+  if (variant === "production" && !env.EXPO_PUBLIC_LINUXDO_CLIENT_ID?.trim()) {
+    throw new Error("Missing production environment variable: EXPO_PUBLIC_LINUXDO_CLIENT_ID");
+  }
+  const identity = APP_IDENTITIES[variant];
 
   return {
     ...config,

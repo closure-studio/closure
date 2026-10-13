@@ -1,67 +1,35 @@
-# Welcome to your Expo app 👋
+# Closure Studio
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Expo (SDK 57) app for iOS, Android, and Web. Node.js version is pinned in `.nvmrc` and is used by local tooling, GitHub Actions, and EAS Build.
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-## Build variants
-
-Local commands use the development application identity by default:
-
-- iOS: `npm run ios` builds `com.closurestudio.app.dev` and lets Expo CLI handle development signing through the Apple account configured in Xcode.
-- Android: `npm run android` builds `com.closurestudio.app.dev`.
-- Production: `npx eas-cli@latest build --profile production` builds `com.closurestudio.app` and produces an Android App Bundle for Google Play.
-- Direct-install APK: `npx eas-cli@latest build --platform android --profile production-apk` builds a signed production APK.
-
-Signing certificates, release keystores, service-account files, and their passwords are private build credentials. Keep them outside Git and manage them with EAS credentials or ignored local files.
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Development
 
 ```bash
-npm run reset-project
+npm install
+cp .env.example .env   # fill in EXPO_PUBLIC_LINUXDO_CLIENT_ID
+npm run android        # or: npm run ios / npm run web
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Local commands build the development identity `com.closurestudio.app.dev`. Run `npm run quality` before opening a pull request; CI runs the same gate plus `expo-doctor` and a bundle export.
 
-### Other setup steps
+## Build variants and environments
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+`APP_VARIANT` selects the app identity in `app.config.ts`. EAS builds and updates read it, together with all other variables, from the EAS environment named by the build profile:
 
-## Learn more
+| EAS environment | Variables |
+|---|---|
+| `production` | `APP_VARIANT=production`, `EXPO_PUBLIC_LINUXDO_CLIENT_ID` |
+| `development` | `APP_VARIANT=development`, `EXPO_PUBLIC_LINUXDO_CLIENT_ID` |
 
-To learn more about developing your project with Expo, look at the following resources:
+Resolving the production config fails when `EXPO_PUBLIC_LINUXDO_CLIENT_ID` is missing. Manage them with `npx eas-cli env:set`.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Release
 
-## Join the community
+Production Android builds are signed APKs distributed through GitHub Releases (no store submission).
 
-Join our community of developers creating universal apps.
+- **Native release:** bump `expo.version` in `app.json`, merge to `master`, then push tag `v<version>`. `.github/workflows/release-native.yml` runs the quality gate, builds on EAS, and attaches the APK to a GitHub Release. Build numbers are incremented remotely by EAS.
+- **OTA update (manual, not in CI/CD):** `npx eas-cli update --channel production --environment production --platform android --message "<message>"`. `runtimeVersion` uses the fingerprint policy, so an update only reaches builds with identical native code; native changes require a new tag.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+GitHub repository secrets: `EXPO_TOKEN` (EAS access token).
+
+The Android release keystore is stored in EAS credentials (`npx eas-cli credentials -p android`). Keep an offline backup: losing it prevents existing installs from upgrading.
